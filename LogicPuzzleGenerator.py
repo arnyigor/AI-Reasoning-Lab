@@ -2,7 +2,7 @@ import random
 import pandas as pd
 from typing import Dict, List, Tuple, TextIO, Optional, Any
 
-# --- Умный Решатель (Версия 7.0 - с обработкой сложных транзитивных связей) ---
+# --- Умный Решатель (Версия 7.1 - без изменений) ---
 class ConstraintSatisfactionSolver:
     """
     Финальная, отлаженная версия решателя.
@@ -26,7 +26,6 @@ class ConstraintSatisfactionSolver:
 
     def _propagate(self) -> bool:
         made_change = False
-        # 1. Уникальность (основной механизм вывода)
         for i in range(self.num_items):
             for cat in self.cat_keys:
                 if len(self.possibilities[cat][i]) == 1:
@@ -37,9 +36,7 @@ class ConstraintSatisfactionSolver:
                             self.possibilities[cat][j].remove(val)
                             made_change = True
 
-        # 2. Применение всех подсказок
         for clue_type, params in self.clues:
-            # Простые бинарные связи
             if clue_type == 'direct_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items):
@@ -50,22 +47,14 @@ class ConstraintSatisfactionSolver:
                 for i in range(self.num_items):
                     if self.possibilities[cat1][i] == [val1] and val2 in self.possibilities[cat2][i]: self.possibilities[cat2][i].remove(val2); made_change = True
                     if self.possibilities[cat2][i] == [val2] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
-
-            # Условные подсказки
             elif clue_type == 'conditional_link':
                 cond_cat, cond_val, then_cat, then_val = params
                 for i in range(self.num_items):
-                    # Прямое правило: Если условие выполнено, применяем следствие.
                     if self.possibilities[cond_cat][i] == [cond_val] and self.possibilities[then_cat][i] != [then_val]:
                         if then_val in self.possibilities[then_cat][i]:
-                            self._log(f"Clue 'Conditional': '{cond_val}' is true at pos {i+1}, so '{then_val}' must be true.")
                             self.possibilities[then_cat][i] = [then_val]; made_change = True
-                    # Контрапозиция: Если следствие ложно, то и условие ложно.
                     if then_val not in self.possibilities[then_cat][i] and cond_val in self.possibilities[cond_cat][i]:
-                        self._log(f"Clue 'Conditional': Consequence '{then_val}' is false at pos {i+1}, so condition '{cond_val}' must be false.")
                         self.possibilities[cond_cat][i].remove(cond_val); made_change = True
-
-            # Пространственные подсказки
             elif clue_type in ['relative_pos', 'opposite_link']:
                 made_change = self._propagate_spatial(clue_type, params) or made_change
         return made_change
@@ -77,45 +66,35 @@ class ConstraintSatisfactionSolver:
                 cat1, val1, cat2, val2 = params
                 next_i = (i + 1) % self.num_items
                 if not self.is_circular and i == self.num_items - 1: continue
-                # Если val1 не может быть слева, то val2 не может быть справа
                 if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][next_i]: self.possibilities[cat2][next_i].remove(val2); made_change = True
-                # Если val2 не может быть справа, то val1 не может быть слева
                 if val2 not in self.possibilities[cat2][next_i] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
 
             elif clue_type == 'opposite_link':
-                if not self.is_circular or self.num_items % 2 == 0: continue
+                if not self.is_circular: continue
                 opposite_i = (i + self.num_items // 2) % self.num_items
                 cat1, val1, cat2, val2 = params
-                # Если val1 точно здесь, то val2 должен быть напротив
                 if self.possibilities[cat1][i] == [val1] and self.possibilities[cat2][opposite_i] != [val2]:
                     if val2 in self.possibilities[cat2][opposite_i]: self.possibilities[cat2][opposite_i] = [val2]; made_change = True
-                # И наоборот (симметрия)
                 if self.possibilities[cat2][opposite_i] == [val2] and self.possibilities[cat1][i] != [val1]:
                     if val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i] = [val1]; made_change = True
         return made_change
 
     def solve(self, clues: List[Tuple[str, Any]]):
-        # --- ИЗМЕНЕНИЕ: Элегантная распаковка сложных подсказок ---
-        # Мы не усложняем основной цикл, а превращаем сложные подсказки в простые
         unpacked_clues = []
         for clue_type, params in clues:
             if clue_type == 'transitive_spatial_link':
-                # (A) -> (B) -> (C)
                 p_left, p_middle, p_right = params
-                # Распаковываем в две простые относительные подсказки
                 unpacked_clues.append(('relative_pos', (p_left[0], p_left[1], p_middle[0], p_middle[1])))
                 unpacked_clues.append(('relative_pos', (p_middle[0], p_middle[1], p_right[0], p_right[1])))
             else:
                 unpacked_clues.append((clue_type, params))
         self.clues = unpacked_clues
 
-        # Применяем "якорные" подсказки один раз
         for clue_type, params in self.clues:
             if clue_type == 'positional':
                 pos_idx, cat, val = params[0] - 1, params[1], params[2]
                 if val in self.possibilities[cat][pos_idx]: self.possibilities[cat][pos_idx] = [val]
 
-        # Запускаем цикл распространения ограничений до схождения
         while self._propagate(): pass
 
     def get_status(self) -> str:
@@ -126,7 +105,7 @@ class ConstraintSatisfactionSolver:
                 if len(self.possibilities[cat][i]) > 1: is_solved = False
         return "solved" if is_solved else "unsolved"
 
-# --- Генератор Элегантных Головоломок (Финальная Архитектура v4.0) ---
+# --- Генератор Элегантных Головоломок (Архитектура v5.0 - Принуждение к сложной логике) ---
 class ElegantLogicPuzzleGenerator:
     def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
         self.themes = themes
@@ -144,7 +123,6 @@ class ElegantLogicPuzzleGenerator:
 
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories_for_theme = self.themes[selected_theme_name]
-        # --- ИЗМЕНЕНИЕ: Убираем явное упоминание геометрии ---
         self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
 
         print(f"\n[Генератор]: Выбрана тема: '{selected_theme_name}'.")
@@ -163,67 +141,64 @@ class ElegantLogicPuzzleGenerator:
         self.solution = pd.DataFrame(solution_data)
         self.solution.index = range(1, self.num_items + 1)
 
-    def _generate_clue_pool(self) -> List[Tuple[str, Any]]:
-        pool: List[Tuple[str, Any]] = []
+    def _generate_clue_pool(self) -> Dict[str, List[Tuple[str, Any]]]:
+        # --- ИЗМЕНЕНИЕ: Возвращаем словарь, разделенный по типам, для приоритетного построения ---
+        pool: Dict[str, List[Tuple[str, Any]]] = {
+            'positional': [], 'direct_link': [], 'negative_direct_link': [], 'conditional_link': [],
+            'relative_pos': [], 'opposite_link': [], 'transitive_spatial_link': []
+        }
         cat_keys = list(self.categories.keys())
         cat_pairs = [(cat_keys[i], cat_keys[j]) for i in range(len(cat_keys)) for j in range(i + 1, len(cat_keys))]
+        assert self.solution is not None
 
         for i_pos in range(1, self.num_items + 1):
             i_idx = i_pos - 1
             row = self.solution.loc[i_pos]
 
-            # Генерация простых связей
-            for cat1, cat2 in cat_pairs: pool.append(('direct_link', (cat1, row[cat1], cat2, row[cat2])))
+            for cat1, cat2 in cat_pairs: pool['direct_link'].append(('direct_link', (cat1, row[cat1], cat2, row[cat2])))
             for j_pos in range(1, self.num_items + 1):
                 if i_pos == j_pos: continue
                 other_row = self.solution.loc[j_pos]
-                for cat1, cat2 in cat_pairs: pool.append(('negative_direct_link', (cat1, row[cat1], cat2, other_row[cat2])))
+                for cat1, cat2 in cat_pairs: pool['negative_direct_link'].append(('negative_direct_link', (cat1, row[cat1], cat2, other_row[cat2])))
 
-            # Генерация "якоря" и условных подсказок
-            pool.append(('positional', (i_pos, random.choice(cat_keys), row[random.choice(cat_keys)])))
+            pool['positional'].append(('positional', (i_pos, random.choice(cat_keys), row[random.choice(cat_keys)])))
             cond_cat, then_cat = random.sample(cat_keys, 2)
-            pool.append(('conditional_link', (cond_cat, row[cond_cat], then_cat, row[then_cat])))
+            pool['conditional_link'].append(('conditional_link', (cond_cat, row[cond_cat], then_cat, row[then_cat])))
 
-            # Генерация пространственных подсказок
             next_i_pos = (i_idx + 1) % self.num_items + 1
             next_row = self.solution.loc[next_i_pos]
             if self.is_circular or i_idx < self.num_items - 1:
-                # Относительная позиция: "А слева от Б"
                 cat1, cat2 = random.sample(cat_keys, 2)
-                pool.append(('relative_pos', (cat1, row[cat1], cat2, next_row[cat2])))
+                pool['relative_pos'].append(('relative_pos', (cat1, row[cat1], cat2, next_row[cat2])))
 
-            if self.is_circular and self.num_items % 2 != 0:
-                # Позиция "напротив"
+            if self.is_circular:
                 opposite_i_pos = (i_idx + self.num_items // 2) % self.num_items + 1
                 opposite_row = self.solution.loc[opposite_i_pos]
                 cat1, cat2 = random.sample(cat_keys, 2)
-                pool.append(('opposite_link', (cat1, row[cat1], cat2, opposite_row[cat2])))
+                pool['opposite_link'].append(('opposite_link', (cat1, row[cat1], cat2, opposite_row[cat2])))
 
-        # --- ИЗМЕНЕНИЕ: Генерация сложных транзитивных пространственных подсказок ---
-        if self.is_circular or self.num_items >= 3:
+        if (self.is_circular or self.num_items >= 3) and len(cat_keys) >= 3:
             for i in range(1, self.num_items - 1):
-                # Берем три последовательные позиции
                 p_left_row = self.solution.loc[i]
                 p_mid_row = self.solution.loc[i+1]
                 p_right_row = self.solution.loc[i+2]
-                # Берем три разные категории
                 c1, c2, c3 = random.sample(cat_keys, 3)
-                # Создаем подсказку: (сущность из c2 в позиции i+1) находится между (сущностью из c1 в поз. i) и (сущностью из c3 в поз. i+2)
                 p_left = (c1, p_left_row[c1])
                 p_middle = (c2, p_mid_row[c2])
                 p_right = (c3, p_right_row[c3])
-                pool.append(('transitive_spatial_link', (p_left, p_middle, p_right)))
+                pool['transitive_spatial_link'].append(('transitive_spatial_link', (p_left, p_middle, p_right)))
 
-        random.shuffle(pool)
+        for clue_list in pool.values():
+            random.shuffle(clue_list)
         return pool
 
     def _format_clue(self, clue: Tuple[str, Any]) -> str:
         clue_type, params = clue
         s = self.story_elements
-        if clue_type == 'direct_link': return f"{s[params[0]].capitalize()} {params[1]} как-то связан с {s[params[2]]} {params[3]}."
-        if clue_type == 'negative_direct_link': return f"{s[params[0]].capitalize()} {params[1]} НЕ связан с {s[params[2]]} {params[3]}."
+        # --- ИЗМЕНЕНИЕ: Более конкретная формулировка для direct_link ---
+        if clue_type == 'direct_link': return f"Характеристикой {s[params[0]]} {params[1]} является {s[params[2]]} {params[3]}."
+        if clue_type == 'negative_direct_link': return f"{s[params[0]].capitalize()} {params[1]} НЕ находится в одной локации с {s[params[2]]} {params[3]}."
         if clue_type == 'positional': return f"В {s['position']} №{params[0]} находится {s[params[1]]} {params[2]}."
-        # --- ИЗМЕНЕНИЕ: Формулировки без явных указаний на геометрию ---
         if clue_type == 'relative_pos': return f"{s[params[0]].capitalize()} {params[1]} находится в локации непосредственно слева от локации, где {s[params[2]]} {params[3]}."
         if clue_type == 'opposite_link': return f"{s[params[0]].capitalize()} {params[1]} и {s[params[2]]} {params[3]} находятся в локациях друг напротив друга."
         if clue_type == 'conditional_link': return f"**Если** в локации находится {s[params[0]]} {params[1]}, **то** там же находится и {s[params[2]]} {params[3]}."
@@ -239,53 +214,68 @@ class ElegantLogicPuzzleGenerator:
             try:
                 if self._try_generate(difficulty, verbose_solver, log_file_path):
                     return
-            except ValueError as e:
-                print(f"[ОШИБКА КОНФИГУРАЦИИ]: {e}")
+            except (ValueError, IndexError) as e:
+                print(f"[ОШИБКА ГЕНЕРАЦИИ]: {e}")
                 return
         print(f"\n[Генератор]: НЕ УДАЛОСЬ сгенерировать корректную головоломку за {max_attempts} попыток.")
 
     def _try_generate(self, difficulty: int, verbose_solver: bool, log_file_path: Optional[str]):
         self._select_data_for_difficulty(difficulty)
         self._generate_solution()
-        assert self.solution is not None
 
         primary_subject_category = list(self.categories.keys())[0]
         id_item = random.choice(self.categories[primary_subject_category])
         attribute_category = random.choice([c for c in self.categories.keys() if c != primary_subject_category])
+        assert self.solution is not None
         solution_row = self.solution[self.solution[primary_subject_category] == id_item]
         answer_item = solution_row[attribute_category].values[0]
         forbidden_clue_params = (primary_subject_category, id_item, attribute_category, answer_item)
-        clue_pool = self._generate_clue_pool()
-        clue_pool = [c for c in clue_pool if not (c[0] == 'direct_link' and c[1] == forbidden_clue_params)]
+
+        clue_pool_by_type = self._generate_clue_pool()
+        # Удаляем подсказку, которая напрямую дает ответ
+        clue_pool_by_type['direct_link'] = [c for c in clue_pool_by_type['direct_link'] if c[1] != forbidden_clue_params]
 
         log_file = open(log_file_path, 'w', encoding='utf-8') if verbose_solver and log_file_path else None
 
         try:
             print("[Генератор]: Этап 1: Архитектурное построение...")
             final_clues = []
-            if difficulty >= 9:
+            # --- ИЗМЕНЕНИЕ: Новые, более строгие "рецепты" ---
+            if difficulty >= 9: # Levels 9-10. Без прямых ссылок, упор на логику.
                 target_counts = {'positional': 1, 'transitive_spatial_link': 2, 'conditional_link': 2, 'opposite_link': 2, 'negative_direct_link': self.num_items}
-            elif difficulty >= 7:
-                target_counts = {'positional': 1, 'relative_pos': self.num_items, 'conditional_link': 1, 'negative_direct_link': self.num_items - 1}
-            elif difficulty >= 4:
-                target_counts = {'positional': 1, 'relative_pos': self.num_items -1, 'direct_link': self.num_items - 1}
-            else:
-                target_counts = {'positional': 2, 'direct_link': self.num_items - 1}
+            elif difficulty >= 7: # Levels 7-8. Круговые, но проще.
+                target_counts = {'positional': 1, 'opposite_link': 1, 'relative_pos': self.num_items, 'conditional_link': 1, 'negative_direct_link': self.num_items - 1}
+            elif difficulty >= 4: # Levels 4-6. Линейные, с пространственными связями.
+                target_counts = {'positional': 1, 'relative_pos': self.num_items - 1, 'direct_link': self.num_items - 1}
+            else: # Levels 1-3. Простые прямые связи.
+                target_counts = {'positional': 1, 'direct_link': self.num_items}
 
-            temp_pool = list(clue_pool)
+            # Собираем "скелет" головоломки
             for clue_type, count in target_counts.items():
-                found = 0
-                for i in range(len(temp_pool) - 1, -1, -1):
-                    if temp_pool[i][0] == clue_type: final_clues.append(temp_pool.pop(i)); found += 1
-                    if found >= count: break
+                clues_to_add = clue_pool_by_type[clue_type][:count]
+                if len(clues_to_add) < count:
+                    print(f"[ПРЕДУПРЕЖДЕНИЕ]: Недостаточно подсказок типа '{clue_type}'. Найдено {len(clues_to_add)}, требуется {count}.")
+                final_clues.extend(clues_to_add)
+                clue_pool_by_type[clue_type] = clue_pool_by_type[clue_type][count:]
 
-            random.shuffle(temp_pool)
+            # --- ИЗМЕНЕНИЕ: Приоритетное добавление подсказок для достижения решения ---
+            priority_order = ['negative_direct_link', 'relative_pos', 'conditional_link', 'opposite_link', 'transitive_spatial_link', 'direct_link', 'positional']
+
             while True:
                 solver = ConstraintSatisfactionSolver(self.categories, self.is_circular, verbose_solver, log_file)
                 solver.solve(final_clues)
                 if solver.get_status() == "solved": break
-                if not temp_pool: print("\n[Генератор]: Не удалось найти решение на этапе построения. Попытка не удалась."); return False
-                final_clues.append(temp_pool.pop())
+
+                # Ищем подсказку для добавления согласно приоритету
+                added_clue = False
+                for clue_type in priority_order:
+                    if clue_pool_by_type[clue_type]:
+                        final_clues.append(clue_pool_by_type[clue_type].pop(0))
+                        added_clue = True
+                        break
+                if not added_clue:
+                    print("\n[Генератор]: Не удалось найти решение: закончились все типы подсказок. Попытка не удалась.")
+                    return False
 
             print(f"[Генератор]: Этап 1 завершен. Найдено решаемое решение с {len(final_clues)} подсказками.")
 
@@ -335,5 +325,8 @@ if __name__ == '__main__':
 
     generator = ElegantLogicPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
-    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ С НОВЫМИ ПРАВИЛАМИ ---")
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v5.0) ---")
     generator.generate(difficulty=1, verbose_solver=False)
+    generator.generate(difficulty=5, verbose_solver=False)
+    generator.generate(difficulty=7, verbose_solver=False)
+    generator.generate(difficulty=10, verbose_solver=False)
