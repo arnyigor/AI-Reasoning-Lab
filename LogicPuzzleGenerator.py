@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Dict, List, Tuple, TextIO, Optional, Any
 
 # --- Умный Решатель (Версия 7.1 - без изменений) ---
+# Класс Solver остается таким же, он работает корректно.
 class ConstraintSatisfactionSolver:
     """
     Финальная, отлаженная версия решателя.
@@ -32,7 +33,6 @@ class ConstraintSatisfactionSolver:
                     val = self.possibilities[cat][i][0]
                     for j in range(self.num_items):
                         if i != j and val in self.possibilities[cat][j]:
-                            self._log(f"Propagate Unary: '{val}' is in pos {i+1}, removing from pos {j+1}.")
                             self.possibilities[cat][j].remove(val)
                             made_change = True
 
@@ -105,7 +105,7 @@ class ConstraintSatisfactionSolver:
                 if len(self.possibilities[cat][i]) > 1: is_solved = False
         return "solved" if is_solved else "unsolved"
 
-# --- Генератор Элегантных Головоломок (Архитектура v5.0 - Принуждение к сложной логике) ---
+# --- Генератор Элегантных Головоломок (Архитектура v6.0 - Алгоритм "Карусель") ---
 class ElegantLogicPuzzleGenerator:
     def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
         self.themes = themes
@@ -142,7 +142,6 @@ class ElegantLogicPuzzleGenerator:
         self.solution.index = range(1, self.num_items + 1)
 
     def _generate_clue_pool(self) -> Dict[str, List[Tuple[str, Any]]]:
-        # --- ИЗМЕНЕНИЕ: Возвращаем словарь, разделенный по типам, для приоритетного построения ---
         pool: Dict[str, List[Tuple[str, Any]]] = {
             'positional': [], 'direct_link': [], 'negative_direct_link': [], 'conditional_link': [],
             'relative_pos': [], 'opposite_link': [], 'transitive_spatial_link': []
@@ -195,7 +194,6 @@ class ElegantLogicPuzzleGenerator:
     def _format_clue(self, clue: Tuple[str, Any]) -> str:
         clue_type, params = clue
         s = self.story_elements
-        # --- ИЗМЕНЕНИЕ: Более конкретная формулировка для direct_link ---
         if clue_type == 'direct_link': return f"Характеристикой {s[params[0]]} {params[1]} является {s[params[2]]} {params[3]}."
         if clue_type == 'negative_direct_link': return f"{s[params[0]].capitalize()} {params[1]} НЕ находится в одной локации с {s[params[2]]} {params[3]}."
         if clue_type == 'positional': return f"В {s['position']} №{params[0]} находится {s[params[1]]} {params[2]}."
@@ -232,7 +230,6 @@ class ElegantLogicPuzzleGenerator:
         forbidden_clue_params = (primary_subject_category, id_item, attribute_category, answer_item)
 
         clue_pool_by_type = self._generate_clue_pool()
-        # Удаляем подсказку, которая напрямую дает ответ
         clue_pool_by_type['direct_link'] = [c for c in clue_pool_by_type['direct_link'] if c[1] != forbidden_clue_params]
 
         log_file = open(log_file_path, 'w', encoding='utf-8') if verbose_solver and log_file_path else None
@@ -240,25 +237,23 @@ class ElegantLogicPuzzleGenerator:
         try:
             print("[Генератор]: Этап 1: Архитектурное построение...")
             final_clues = []
-            # --- ИЗМЕНЕНИЕ: Новые, более строгие "рецепты" ---
-            if difficulty >= 9: # Levels 9-10. Без прямых ссылок, упор на логику.
+            if difficulty >= 9:
                 target_counts = {'positional': 1, 'transitive_spatial_link': 2, 'conditional_link': 2, 'opposite_link': 2, 'negative_direct_link': self.num_items}
-            elif difficulty >= 7: # Levels 7-8. Круговые, но проще.
+            elif difficulty >= 7:
                 target_counts = {'positional': 1, 'opposite_link': 1, 'relative_pos': self.num_items, 'conditional_link': 1, 'negative_direct_link': self.num_items - 1}
-            elif difficulty >= 4: # Levels 4-6. Линейные, с пространственными связями.
+            elif difficulty >= 4:
                 target_counts = {'positional': 1, 'relative_pos': self.num_items - 1, 'direct_link': self.num_items - 1}
-            else: # Levels 1-3. Простые прямые связи.
+            else:
                 target_counts = {'positional': 1, 'direct_link': self.num_items}
 
-            # Собираем "скелет" головоломки
             for clue_type, count in target_counts.items():
                 clues_to_add = clue_pool_by_type[clue_type][:count]
                 if len(clues_to_add) < count:
-                    print(f"[ПРЕДУПРЕЖДЕНИЕ]: Недостаточно подсказок типа '{clue_type}'. Найдено {len(clues_to_add)}, требуется {count}.")
+                    print(f"[ПРЕДУПРЕЖДЕНИЕ]: Недостаточно подсказок типа '{clue_type}'. Найдено {len(to_add)}, требуется {count}.")
                 final_clues.extend(clues_to_add)
                 clue_pool_by_type[clue_type] = clue_pool_by_type[clue_type][count:]
 
-            # --- ИЗМЕНЕНИЕ: Приоритетное добавление подсказок для достижения решения ---
+            # --- ИЗМЕНЕНИЕ: Алгоритм "Карусель" ---
             priority_order = ['negative_direct_link', 'relative_pos', 'conditional_link', 'opposite_link', 'transitive_spatial_link', 'direct_link', 'positional']
 
             while True:
@@ -266,14 +261,13 @@ class ElegantLogicPuzzleGenerator:
                 solver.solve(final_clues)
                 if solver.get_status() == "solved": break
 
-                # Ищем подсказку для добавления согласно приоритету
-                added_clue = False
+                added_clue_in_cycle = False
                 for clue_type in priority_order:
                     if clue_pool_by_type[clue_type]:
                         final_clues.append(clue_pool_by_type[clue_type].pop(0))
-                        added_clue = True
-                        break
-                if not added_clue:
+                        added_clue_in_cycle = True
+
+                if not added_clue_in_cycle:
                     print("\n[Генератор]: Не удалось найти решение: закончились все типы подсказок. Попытка не удалась.")
                     return False
 
@@ -310,10 +304,10 @@ class ElegantLogicPuzzleGenerator:
 
 if __name__ == '__main__':
     THEMES = {
-        "Офисная Тайна": { "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев", "Орлов"], "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Безопасность", "Аналитика"], "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр", "Импульс"], "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо", "Сок"], "Этаж": ["3-й", "4-й", "5-й", "6-й", "7-й", "8-й", "9-й", "10-й"] },
-        "Загадка Тихого Квартала": { "Житель": ["Белов", "Чернов", "Рыжов", "Зеленин", "Серов", "Сидоров", "Поляков", "Морозов"], "Профессия": ["Врач", "Инженер", "Художник", "Программист", "Учитель", "Юрист", "Архитектор", "Писатель"], "Улица": ["Кленовая", "Цветочная", "Солнечная", "Вишневая", "Парковая", "Речная", "Лесная", "Озерная"], "Хобби": ["Рыбалка", "Садоводство", "Фотография", "Шахматы", "Коллекционирование", "Музыка", "Спорт", "Кулинария"], "Питомец": ["Собака", "Кошка", "Попугай", "Хомяк", "Рыбки", "Черепаха", "Кролик", "Шиншилла"] },
-        "Киберпанк-Нуар": { "Детектив": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"], "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"], "Имплант": ["Kiroshi Optics", "Mantis Blades", "Synth-Lungs", "Grit-Weave", "Chrono-Core", "Neural-Port", "Echo-Dampers", "Reflex-Booster"], "Напиток": ["Synth-Caff", "N-Kola", "Slurm", "Chromantica", "Glycerin-Tea", "De-Tox", "Synth-Ale", "Glitter-Stim"], "Район": ["Neon-Sprawl", "The Core", "Iron-District", "Aetheria", "The Undercity", "Zenith-Heights", "The Shambles", "Port-Kailash"] },
-        "Стимпанк-Алхимия": { "Изобретатель": ["Alastair", "Isadora", "Bartholomew", "Genevieve", "Percival", "Seraphina", "Thaddeus", "Odette"], "Гильдия": ["Artificers", "Clockwork", "Alchemists", "Aethernauts", "Iron-Wrights", "Illuminators", "Cartographers", "Innovators"], "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"], "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"], "Материал": ["Aetherium-Crystal", "Orichalcum-Gear", "Voltaic-Coil", "Soul-Bronze", "Quicksilver-Core", "Obsidian-Lens", "Dragon-Scale-Hide", "Glimmer-Weave"] }
+        "Офисная Тайна": { "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев", "Орлов"], "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Безопасность", "Аналитика"], "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр", "Импульс"], "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо", "Сок"]},
+        "Загадка Тихого Квартала": { "Житель": ["Белов", "Чернов", "Рыжов", "Зеленин", "Серов", "Сидоров", "Поляков", "Морозов"], "Профессия": ["Врач", "Инженер", "Художник", "Программист", "Учитель", "Юрист", "Архитектор", "Писатель"], "Улица": ["Кленовая", "Цветочная", "Солнечная", "Вишневая", "Парковая", "Речная", "Лесная", "Озерная"], "Хобби": ["Рыбалка", "Садоводство", "Фотография", "Шахматы", "Коллекционирование", "Музыка", "Спорт", "Кулинария"]},
+        "Киберпанк-Нуар": { "Детектив": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"], "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"], "Имплант": ["Kiroshi Optics", "Mantis Blades", "Synth-Lungs", "Grit-Weave", "Chrono-Core", "Neural-Port", "Echo-Dampers", "Reflex-Booster"], "Напиток": ["Synth-Caff", "N-Kola", "Slurm", "Chromantica", "Glycerin-Tea", "De-Tox", "Synth-Ale", "Glitter-Stim"]},
+        "Стимпанк-Алхимия": { "Изобретатель": ["Alastair", "Isadora", "Bartholomew", "Genevieve", "Percival", "Seraphina", "Thaddeus", "Odette"], "Гильдия": ["Artificers", "Clockwork", "Alchemists", "Aethernauts", "Iron-Wrights", "Illuminators", "Cartographers", "Innovators"], "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"], "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"]},
     }
     puzzle_story_elements = {
         "scenario": "", "position": "локация",
@@ -325,8 +319,5 @@ if __name__ == '__main__':
 
     generator = ElegantLogicPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
-    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v5.0) ---")
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v6.0) ---")
     generator.generate(difficulty=1, verbose_solver=False)
-    generator.generate(difficulty=5, verbose_solver=False)
-    generator.generate(difficulty=7, verbose_solver=False)
-    generator.generate(difficulty=10, verbose_solver=False)
