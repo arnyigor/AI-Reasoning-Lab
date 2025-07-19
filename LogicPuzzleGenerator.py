@@ -1,15 +1,10 @@
 import random
 import pandas as pd
 from typing import Dict, List, Tuple, TextIO, Optional
-import copy
 
 # --- Умный Решатель (Версия 5.2 - без изменений) ---
 class ConstraintSatisfactionSolver:
-    """
-    Финальная версия решателя. Полностью переписан для корректной обработки
-    всех типов ограничений, включая сложные косвенные связи между категориями.
-    Работает в цикле, пока не перестанут происходить изменения.
-    """
+    """Финальная версия решателя. Корректно обрабатывает все типы ограничений."""
     def __init__(self, categories: Dict[str, List[str]], verbose: bool = False, log_file_handle: Optional[TextIO] = None):
         self.num_items = len(next(iter(categories.values())))
         self.cat_keys = list(categories.keys())
@@ -21,25 +16,18 @@ class ConstraintSatisfactionSolver:
     def _log(self, message: str):
         if self.verbose:
             log_message = f"[SOLVER LOG] {message}\n"
-            if self.log_file_handle:
-                self.log_file_handle.write(log_message)
-            else:
-                print(log_message.strip())
+            if self.log_file_handle: self.log_file_handle.write(log_message)
+            else: print(log_message.strip())
 
     def _propagate(self) -> bool:
         made_change = False
-        # 1. Уникальность: если значение найдено, его больше нигде нет
         for i in range(self.num_items):
             for cat in self.cat_keys:
                 if len(self.possibilities[cat][i]) == 1:
                     val = self.possibilities[cat][i][0]
                     for j in range(self.num_items):
-                        if i != j and val in self.possibilities[cat][j]:
-                            self._log(f"Propagate Unary: '{val}' is in pos {i+1}, removing from pos {j+1} in cat '{cat}'.")
-                            self.possibilities[cat][j].remove(val)
-                            made_change = True
+                        if i != j and val in self.possibilities[cat][j]: self._log(f"Propagate Unary: '{val}' is in pos {i+1}, removing from pos {j+1} in cat '{cat}'."); self.possibilities[cat][j].remove(val); made_change = True
 
-        # 2. Применяем все типы подсказок на основе текущего состояния
         for clue_type, params in self.clues:
             if clue_type == 'direct_link':
                 cat1, val1, cat2, val2 = params
@@ -56,34 +44,20 @@ class ConstraintSatisfactionSolver:
                 for i in range(self.num_items - 1):
                     if left not in self.possibilities[cat][i] and right in self.possibilities[cat][i+1]: self._log(f"Clue '{clue_type}': '{left}' cannot be at pos {i+1}, so '{right}' cannot be at pos {i+2}."); self.possibilities[cat][i+1].remove(right); made_change = True
                     if right not in self.possibilities[cat][i+1] and left in self.possibilities[cat][i]: self._log(f"Clue '{clue_type}': '{right}' cannot be at pos {i+2}, so '{left}' cannot be at pos {i+1}."); self.possibilities[cat][i].remove(left); made_change = True
-
-            # --- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ЛОГИКИ ---
             elif clue_type == 'indirect_relative_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items - 1):
-                    # Если val1 не может быть слева, то val2 не может быть справа
-                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i+1]:
-                        self._log(f"Clue '{clue_type}': '{val1}'({cat1}) cannot be at pos {i+1}, so '{val2}'({cat2}) cannot be at pos {i+2}.")
-                        self.possibilities[cat2][i+1].remove(val2); made_change = True
-                    # Если val2 не может быть справа, то val1 не может быть слева
-                    if val2 not in self.possibilities[cat2][i+1] and val1 in self.possibilities[cat1][i]:
-                        self._log(f"Clue '{clue_type}': '{val2}'({cat2}) cannot be at pos {i+2}, so '{val1}'({cat1}) cannot be at pos {i+1}.")
-                        self.possibilities[cat1][i].remove(val1); made_change = True
+                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i+1]: self._log(f"Clue '{clue_type}': '{val1}'({cat1}) cannot be at pos {i+1}, so '{val2}'({cat2}) cannot be at pos {i+2}."); self.possibilities[cat2][i+1].remove(val2); made_change = True
+                    if val2 not in self.possibilities[cat2][i+1] and val1 in self.possibilities[cat1][i]: self._log(f"Clue '{clue_type}': '{val2}'({cat2}) cannot be at pos {i+2}, so '{val1}'({cat1}) cannot be at pos {i+1}."); self.possibilities[cat1][i].remove(val1); made_change = True
         return made_change
 
     def solve(self, clues: List[Tuple]):
         self.clues = clues
-        # Применяем позиционные подсказки один раз для установки "якорей"
         for clue_type, params in clues:
             if clue_type == 'positional':
                 pos_idx, cat, val = params[0] - 1, params[1], params[2]
-                if val in self.possibilities[cat][pos_idx]:
-                    self._log(f"Applying positional clue: Pos {pos_idx+1} in '{cat}' is set to '{val}'.")
-                    self.possibilities[cat][pos_idx] = [val]
-
-        # Запускаем основной цикл распространения до полной стабилизации
-        while self._propagate():
-            pass
+                if val in self.possibilities[cat][pos_idx]: self._log(f"Applying positional clue: Pos {pos_idx+1} in '{cat}' is set to '{val}'."); self.possibilities[cat][pos_idx] = [val]
+        while self._propagate(): pass
 
     def get_status(self) -> str:
         is_solved = True
@@ -95,9 +69,9 @@ class ConstraintSatisfactionSolver:
 
 # --- Генератор Элегантных Головоломок (Финальная Архитектура) ---
 class ElegantLogicPuzzleGenerator:
-    def __init__(self, themes: Dict[str, Dict[str, List[str]]]):
+    def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
         self.themes = themes
-        self.story_elements = {}
+        self.story_elements = story_elements
         self.categories = {}
         self.solution = None
         self.num_items = 0
@@ -108,14 +82,11 @@ class ElegantLogicPuzzleGenerator:
         elif 7 <= difficulty <= 8: self.num_items = 6
         else: self.num_items = 7 # Экспертный уровень
 
-        # --- УЛУЧШЕНИЕ: Выбор темы и автоматическое создание story_elements ---
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories_for_theme = self.themes[selected_theme_name]
 
-        # Автоматически создаем словарь для описания истории
-        self.story_elements = {"scenario": f"Тайна в сеттинге: {selected_theme_name}", "position": "локация"}
-        for key in base_categories_for_theme.keys():
-            self.story_elements[key] = key.lower() # Просто используем ключ в нижнем регистре
+        # Обновляем сценарий в story_elements
+        self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
 
         print(f"\n[Генератор]: Выбрана тема: '{selected_theme_name}'.")
         print(f"[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(base_categories_for_theme)}.")
@@ -213,7 +184,6 @@ class ElegantLogicPuzzleGenerator:
             random.shuffle(minimal_clues)
             for i in range(len(minimal_clues) - 1, -1, -1):
                 temp_clues = minimal_clues[:i] + minimal_clues[i+1:]
-                # Для минимизации создаем новый решатель без логирования, чтобы не засорять лог
                 solver = ConstraintSatisfactionSolver(self.categories)
                 solver.solve(temp_clues)
                 if solver.get_status() == 'solved':
@@ -242,8 +212,29 @@ class ElegantLogicPuzzleGenerator:
                 print(f"\n[Генератор]: Лог работы решателя сохранен в файл '{log_file_path}'.")
 
 if __name__ == '__main__':
-    # --- УЛУЧШЕНИЕ: Большой пул разнообразных тем ---
+    # --- УЛУЧШЕНИЕ: Большой и разнообразный пул тем ---
     THEMES = {
+        "Офисная Тайна": {
+            "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев", "Орлов"],
+            "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Безопасность", "Аналитика"],
+            "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр", "Импульс"],
+            "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо", "Сок"],
+            "Этаж": ["3-й", "4-й", "5-й", "6-й", "7-й", "8-й", "9-й", "10-й"]
+        },
+        "Загадка Тихого Квартала": {
+            "Житель": ["Белов", "Чернов", "Рыжов", "Зеленин", "Серов", "Сидоров", "Поляков", "Морозов"],
+            "Профессия": ["Врач", "Инженер", "Художник", "Программист", "Учитель", "Юрист", "Архитектор", "Писатель"],
+            "Улица": ["Кленовая", "Цветочная", "Солнечная", "Вишневая", "Парковая", "Речная", "Лесная", "Озерная"],
+            "Хобби": ["Рыбалка", "Садоводство", "Фотография", "Шахматы", "Коллекционирование", "Музыка", "Спорт", "Кулинария"],
+            "Питомец": ["Собака", "Кошка", "Попугай", "Хомяк", "Рыбки", "Черепаха", "Кролик", "Шиншилла"]
+        },
+        "Университетский Переполох": {
+            "Профессор": ["Тихомиров", "Павлов", "Виноградов", "Богданов", "Козлов", "Федоров", "Максимов", "Никитин"],
+            "Факультет": ["Исторический", "Физический", "Химический", "Биологический", "Философский", "Юридический", "Экономический", "Математический"],
+            "Предмет": ["Квантовая механика", "Средневековая история", "Органическая химия", "Теория вероятностей", "Этика", "Римское право", "Макроэкономика", "Молекулярная биология"],
+            "Аудитория": ["101-я", "202-я", "303-я", "404-я", "505-я", '601-я', "711-я", "812-я"],
+            "Книга": ["'Начала' Евклида", "'Левиафан' Гоббса", "'Капитал' Маркса", "'Опыты' Монтеня", "'Государь' Макиавелли", "'Происхождение видов'", "'Структура научных революций'", "'Война и мир'"]
+        },
         "Киберпанк-Нуар": {
             "Детектив": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"],
             "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"],
@@ -257,25 +248,26 @@ if __name__ == '__main__':
             "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"],
             "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"],
             "Материал": ["Aetherium-Crystal", "Orichalcum-Gear", "Voltaic-Coil", "Soul-Bronze", "Quicksilver-Core", "Obsidian-Lens", "Dragon-Scale-Hide", "Glimmer-Weave"]
-        },
-        "Космическая Опера": {
-            "Капитан": ["Jax", "Zara", "Kaelen", "Riona", "Nero", "Lyra", "Orion", "Vesper"],
-            "Фракция": ["Galactic Concord", "Star-Nomads", "Crimson Fleet", "Cy-Borg Collective", "Celestial Empire", "The Void-Traders", "The Syndicate", "The Sovereignty"],
-            "Корабль": ["The Firehawk", "The Void-Chaser", "The Leviathan", "The Stardust", "The Nebula-Runner", "The Orion's Belt", "The Quasar", "The Pulsar"],
-            "Груз": ["Kyber-Crystals", "Bio-Gel", "Star-Maps", "Xen-Artifacts", "Helium-3", "Graviton-Cores", "Psionic-Relics", "Cryo-Pods"],
-            "Планета": ["Xylos", "Cygnus X-1", "Kepler-186f", "Astraeus", "Eridanus Prime", "Solara", "Triton", "Rhea"]
-        },
-        "Фэнтези-Расследование": {
-            "Герой": ["Eldrin", "Lyra", "Kael", "Seraphina", "Roric", "Faelan", "Gwen", "Darian"],
-            "Королевство": ["Aethelgard", "Glimmerwood", "Iron-Hold", "The Shadow-Fells", "Sunstone-Empire", "The Crystal-Spires", "The Azure-Coast", "The Northern-Reach"],
-            "Артефакт": ["The Dragon-Orb", "The Shadow-Veil", "The Sun-Stone", "The Moon-Blade", "The Chronos-Key", "The Soul-Gem", "The Iron-Treaty", "The Star-Chart"],
-            "Существо": ["Gryphon", "Dragon", "Hydra", "Manticore", "Phoenix", "Basilisk", "Wyvern", "Kraken"],
-            "Локация": ["The Mystic Forest", "The Sunken City", "The Dragon's Peak", "The Shadow-Keep", "The Crystal-Caves", "The Sun-Temple", "The Whispering-Plains", "The Iron-Fortress"]
         }
     }
 
-    # Генератор теперь принимает только словарь тем
-    generator = ElegantLogicPuzzleGenerator(themes=THEMES)
+    # --- УЛУЧШЕНИЕ: story_elements теперь содержит ВСЕ возможные ключи из ВСЕХ тем ---
+    # При добавлении новой темы с новыми названиями категорий, их нужно добавить сюда.
+    puzzle_story_elements = {
+        "scenario": "", "position": "локация",
+        # Офис
+        "Сотрудник": "сотрудник", "Отдел": "отдел", "Проект": "проект", "Напиток": "напиток", "Этаж": "этаж",
+        # Квартал
+        "Житель": "житель", "Профессия": "профессия", "Улица": "улица", "Хобби": "хобби", "Питомец": "питомец",
+        # Университет
+        "Профессор": "профессор", "Факультет": "факультет", "Предмет": "предмет", "Аудитория": "аудитория", "Книга": "книга",
+        # Киберпанк
+        "Детектив": "детектив", "Корпорация": "корпорация", "Имплант": "имплант", "Район": "район",
+        # Стимпанк
+        "Изобретатель": "изобретатель", "Гильдия": "гильдия", "Автоматон": "автоматон", "Эликсир": "эликсир", "Материал": "материал",
+    }
+
+    generator = ElegantLogicPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
     print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (ФИНАЛЬНАЯ АРХИТЕКТУРА) ---")
-    generator.generate(difficulty=1, verbose_solver=False, log_file_path="solver_debug_log.log")
+    generator.generate(difficulty=10, verbose_solver=True, log_file_path="solver_debug_log.log")
