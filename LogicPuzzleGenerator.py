@@ -1,9 +1,8 @@
 import random
 import pandas as pd
 from typing import Dict, List, Tuple
-import copy
 
-# --- Умный Решатель (Версия 4.0 - Финальная) ---
+# --- Умный Решатель (Версия 5.0 - Финальная) ---
 class ConstraintSatisfactionSolver:
     def __init__(self, categories: Dict[str, List[str]]):
         self.num_items = len(next(iter(categories.values())))
@@ -40,10 +39,8 @@ class ConstraintSatisfactionSolver:
             elif clue_type == 'indirect_relative_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items - 1):
-                    # Если в позиции i ТОЧНО val1, то в i+1 должен быть val2
                     if self.possibilities[cat1][i] == [val1] and self.possibilities[cat2][i+1] != [val2]:
                         if val2 in self.possibilities[cat2][i+1]: self.possibilities[cat2][i+1] = [val2]; made_change = True
-                    # Если в позиции i+1 ТОЧНО val2, то в i должен быть val1
                     if self.possibilities[cat2][i+1] == [val2] and self.possibilities[cat1][i] != [val1]:
                         if val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i] = [val1]; made_change = True
         return made_change
@@ -64,10 +61,7 @@ class ConstraintSatisfactionSolver:
                 if len(self.possibilities[cat][i]) > 1: is_solved = False
         return "solved" if is_solved else "unsolved"
 
-    def count_possibilities(self) -> int:
-        return sum(len(p) for cat_poss in self.possibilities.values() for p in cat_poss)
-
-# --- Генератор Элегантных Головоломок ---
+# --- Генератор Элегантных Головоломок (Финальная Архитектура) ---
 class ElegantLogicPuzzleGenerator:
     def __init__(self, base_categories: Dict[str, List[str]], story_elements: Dict[str, str]):
         self.base_categories = base_categories
@@ -80,7 +74,11 @@ class ElegantLogicPuzzleGenerator:
         if 1 <= difficulty <= 3: self.num_items = 4
         elif 4 <= difficulty <= 6: self.num_items = 5
         elif 7 <= difficulty <= 8: self.num_items = 6
-        else: self.num_items = 7 # Экспертный уровень
+        else: self.num_items = 8
+
+        for cat_name, cat_values in self.base_categories.items():
+            if len(cat_values) < self.num_items:
+                raise ValueError(f"Недостаточно элементов в категории '{cat_name}' для сложности {difficulty} (нужно {self.num_items}, доступно {len(cat_values)})")
 
         self.categories = {key: random.sample(values, self.num_items) for key, values in self.base_categories.items()}
         print(f"\n[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(self.categories)}.")
@@ -120,7 +118,12 @@ class ElegantLogicPuzzleGenerator:
 
     def generate(self, difficulty: int = 5):
         if not 1 <= difficulty <= 10: raise ValueError("Сложность должна быть между 1 и 10.")
-        self._select_data_for_difficulty(difficulty)
+
+        try:
+            self._select_data_for_difficulty(difficulty)
+        except ValueError as e:
+            print(f"[ОШИБКА ГЕНЕРАЦИИ]: {e}"); return
+
         self._generate_solution()
 
         primary_subject_category = list(self.categories.keys())[0]
@@ -132,40 +135,48 @@ class ElegantLogicPuzzleGenerator:
         clue_pool = self._generate_clue_pool()
         clue_pool = [c for c in clue_pool if not (c[0] == 'direct_link' and c[1] == forbidden_clue_params)]
 
-        # --- "Жадный" алгоритм построения головоломки ---
+        # --- Этап 1: Архитектурное построение ---
+        print("[Генератор]: Этап 1: Построение по архитектурному плану 'Цепочки и Мосты'...")
         final_clues = []
-        print("[Генератор]: Начинаю построение головоломки по принципу максимального влияния...")
+        if difficulty >= 9: # Эксперт
+            target_counts = {'positional': 1, 'indirect_relative_link': self.num_items, 'relative_pos': self.num_items * 2, 'negative_direct_link': self.num_items - 2, 'direct_link': 1}
+        elif difficulty >= 7: # Сложный
+            target_counts = {'positional': 1, 'relative_pos': self.num_items * 2, 'negative_direct_link': 2, 'direct_link': self.num_items - 2}
+        elif difficulty >= 4: # Средний
+            target_counts = {'positional': 1, 'relative_pos': self.num_items, 'direct_link': self.num_items - 1}
+        else: # Простой
+            target_counts = {'positional': 2, 'relative_pos': self.num_items - 2, 'direct_link': self.num_items}
 
+        temp_pool = list(clue_pool)
+        for clue_type, count in target_counts.items():
+            found = 0
+            for i in range(len(temp_pool) - 1, -1, -1):
+                if temp_pool[i][0] == clue_type:
+                    final_clues.append(temp_pool.pop(i)); found += 1
+                    if found >= count: break
+
+        # Добираем случайные, если архитектурного плана не хватило
         while True:
             solver = ConstraintSatisfactionSolver(self.categories)
             solver.solve(final_clues)
-            status = solver.get_status()
-            if status == "solved": break
-            if not clue_pool: print("\n[Генератор]: Пул исчерпан. Перезапуск..."); self.generate(difficulty); return
+            if solver.get_status() == "solved": break
+            if not temp_pool: print("\n[Генератор]: Не удалось найти решение. Перезапуск..."); self.generate(difficulty); return
+            final_clues.append(temp_pool.pop())
 
-            initial_possibilities = solver.count_possibilities()
-            best_clue, max_impact = None, -1
+        print(f"[Генератор]: Этап 1 завершен. Найдено решаемое решение с {len(final_clues)} подсказками.")
 
-            # Пробуем N случайных подсказок и выбираем лучшую
-            sample_size = min(len(clue_pool), 75)
-            for candidate_clue in random.sample(clue_pool, sample_size):
-                temp_solver = ConstraintSatisfactionSolver(self.categories)
-                temp_solver.solve(final_clues + [candidate_clue])
+        # --- Этап 2: Финальная Минимизация ---
+        print("[Генератор]: Этап 2: Финальная очистка для максимальной элегантности...")
+        minimal_clues = list(final_clues)
+        random.shuffle(minimal_clues)
+        for i in range(len(minimal_clues) - 1, -1, -1):
+            temp_clues = minimal_clues[:i] + minimal_clues[i+1:]
+            solver = ConstraintSatisfactionSolver(self.categories)
+            solver.solve(temp_clues)
+            if solver.get_status() == 'solved': minimal_clues.pop(i)
 
-                if temp_solver.get_status() == 'contradiction': continue
-
-                impact = initial_possibilities - temp_solver.count_possibilities()
-                if impact > max_impact:
-                    max_impact = impact
-                    best_clue = candidate_clue
-
-            if best_clue:
-                final_clues.append(best_clue)
-                clue_pool.remove(best_clue)
-            else: # Если застряли, добавляем случайную подсказку, чтобы сдвинуться с места
-                final_clues.append(clue_pool.pop())
-
-        print(f"[Генератор]: Построение завершено. Финальное количество подсказок: {len(final_clues)}")
+        final_clues = minimal_clues
+        print(f"[Генератор]: Очистка завершена. Финальное количество подсказок: {len(final_clues)}")
 
         question = f"Какой {self.story_elements[attribute_category]} у {self.story_elements[primary_subject_category]} по имени {id_item}?"
         answer_for_check = f"Ответ для проверки: {answer_item}"
@@ -191,5 +202,5 @@ if __name__ == '__main__':
 
     generator = ElegantLogicPuzzleGenerator(base_categories=base_puzzle_categories, story_elements=puzzle_story)
 
-    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (ФИНАЛЬНАЯ ВЕРСИЯ) ---")
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (ФИНАЛЬНАЯ АРХИТЕКТУРА) ---")
     generator.generate(difficulty=10)
