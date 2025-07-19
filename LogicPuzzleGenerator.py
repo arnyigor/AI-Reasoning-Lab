@@ -1,10 +1,8 @@
 import random
 import pandas as pd
 from typing import Dict, List, Tuple, TextIO, Optional, Any
-import itertools
 
 # --- Умный Решатель (Версия 7.1 - без изменений) ---
-# Класс Solver остается таким же, он работает корректно.
 class ConstraintSatisfactionSolver:
     def __init__(self, categories: Dict[str, List[str]], is_circular: bool = False, verbose: bool = False, log_file_handle: Optional[TextIO] = None):
         self.num_items = len(next(iter(categories.values())))
@@ -14,12 +12,6 @@ class ConstraintSatisfactionSolver:
         self.is_circular = is_circular
         self.verbose = verbose
         self.log_file_handle = log_file_handle
-
-    def _log(self, message: str):
-        if self.verbose:
-            log_message = f"[SOLVER LOG] {message}\n"
-            if self.log_file_handle: self.log_file_handle.write(log_message)
-            else: print(log_message.strip())
 
     def _propagate(self) -> bool:
         made_change = False
@@ -101,7 +93,7 @@ class ConstraintSatisfactionSolver:
                 if len(self.possibilities[cat][i]) > 1: is_solved = False
         return "solved" if is_solved else "unsolved"
 
-# --- Генератор Элегантных Головоломок (Архитектура v6.1 - Эвристика Защиты Ответа) ---
+# --- Генератор Элегантных Головоломок (Архитектура v6.4 - "Последний Штрих") ---
 class ElegantLogicPuzzleGenerator:
     def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
         self.themes = themes
@@ -122,14 +114,12 @@ class ElegantLogicPuzzleGenerator:
         self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
 
         print(f"\n[Генератор]: Выбрана тема: '{selected_theme_name}'.")
-        print(f"[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(base_categories_for_theme)}. Геометрия: {'Круговая' if self.is_circular else 'Линейная'}.")
+        print(f"[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(list(base_categories_for_theme.keys()))}. Геометрия: {'Круговая' if self.is_circular else 'Линейная'}.")
 
         cat_keys = list(base_categories_for_theme.keys())
         if len(cat_keys) < 3 and difficulty >= 9:
             raise ValueError("Для сложности 9+ требуется как минимум 3 категории для генерации сложных транзитивных подсказок.")
 
-        for cat_name, cat_values in base_categories_for_theme.items():
-            if len(cat_values) < self.num_items: raise ValueError(f"Недостаточно элементов в '{cat_name}' для сложности {difficulty}")
         self.categories = {key: random.sample(values, self.num_items) for key, values in base_categories_for_theme.items()}
 
     def _generate_solution(self):
@@ -201,11 +191,8 @@ class ElegantLogicPuzzleGenerator:
             return f"{s[p_middle[0]].capitalize()} {p_middle[1]} находится в локации между той, где {s[p_left[0]]} {p_left[1]}, и той, где {s[p_right[0]]} {p_right[1]}."
         return ""
 
-    # --- ИЗМЕНЕНИЕ: Новая вспомогательная функция для эвристики ---
     def _clue_mentions_entity(self, clue: Tuple[str, Any], entities: List[str]) -> bool:
-        """Проверяет, упоминает ли подсказка одну из ключевых сущностей."""
         clue_type, params = clue
-        # Рекурсивно "разворачиваем" вложенные кортежи в плоский список
         flat_params = []
         def flatten(p):
             for item in p:
@@ -214,7 +201,6 @@ class ElegantLogicPuzzleGenerator:
                 else:
                     flat_params.append(item)
         flatten(params)
-
         return any(entity in flat_params for entity in entities)
 
     def generate(self, difficulty: int = 5, verbose_solver: bool = False, log_file_path: Optional[str] = None):
@@ -239,16 +225,15 @@ class ElegantLogicPuzzleGenerator:
         assert self.solution is not None
         solution_row = self.solution[self.solution[primary_subject_category] == id_item]
         answer_item = solution_row[attribute_category].values[0]
-        forbidden_clue_params = (primary_subject_category, id_item, attribute_category, answer_item)
 
         clue_pool_by_type = self._generate_clue_pool()
-        clue_pool_by_type['direct_link'] = [c for c in clue_pool_by_type['direct_link'] if c[1] != forbidden_clue_params]
 
         log_file = open(log_file_path, 'w', encoding='utf-8') if verbose_solver and log_file_path else None
 
         try:
             print("[Генератор]: Этап 1: Архитектурное построение...")
             final_clues = []
+
             if difficulty >= 9:
                 target_counts = {'positional': 1, 'transitive_spatial_link': 2, 'conditional_link': 2, 'opposite_link': 2, 'negative_direct_link': self.num_items}
             elif difficulty >= 7:
@@ -282,26 +267,48 @@ class ElegantLogicPuzzleGenerator:
 
             print(f"[Генератор]: Этап 1 завершен. Найдено решаемое решение с {len(final_clues)} подсказками.")
 
-            print("[Генератор]: Этап 2: Финальная очистка с эвристикой защиты ответа...")
+            print("[Генератор]: Этап 2: Финальная очистка...")
             minimal_clues = list(final_clues)
-            protected_entities = [id_item, answer_item]
-
             random.shuffle(minimal_clues)
             for i in range(len(minimal_clues) - 1, -1, -1):
-                clue_to_check = minimal_clues[i]
-
-                # --- ИЗМЕНЕНИЕ: Применяем эвристику ---
-                if self._clue_mentions_entity(clue_to_check, protected_entities):
-                    continue # Эту подсказку нельзя удалять, она защищена
-
                 temp_clues = minimal_clues[:i] + minimal_clues[i+1:]
                 solver = ConstraintSatisfactionSolver(self.categories, self.is_circular)
                 solver.solve(temp_clues)
                 if solver.get_status() == 'solved':
                     minimal_clues.pop(i)
 
+            # --- ИЗМЕНЕНИЕ: Эвристика "Последний Штрих" ---
+            print("[Генератор]: Этап 3: Проверка на честность и добавление 'Золотой Улики' при необходимости...")
+            is_answer_mentioned = any(self._clue_mentions_entity(clue, [answer_item]) for clue in minimal_clues)
+
+            if not is_answer_mentioned:
+                print("[Генератор]: Ответ не упоминается! Добавляем 'Золотую Улику' для честности...")
+                golden_clue_params1 = (primary_subject_category, id_item, attribute_category, answer_item)
+                golden_clue_params2 = (attribute_category, answer_item, primary_subject_category, id_item)
+
+                # Ищем "Золотую Улику" в исходном, полном пуле
+                full_pool = self._generate_clue_pool()
+                golden_clue = None
+                for clue in full_pool['direct_link']:
+                    if clue[1] == golden_clue_params1 or clue[1] == golden_clue_params2:
+                        golden_clue = clue
+                        break
+
+                if golden_clue:
+                    # Ищем "жертву" для замены - подсказку, не упоминающую субъект вопроса
+                    victim_idx = -1
+                    for idx, clue in enumerate(minimal_clues):
+                        if not self._clue_mentions_entity(clue, [id_item]):
+                            victim_idx = idx
+                            break
+
+                    if victim_idx != -1:
+                        minimal_clues[victim_idx] = golden_clue
+                    else: # Если все подсказки важны для субъекта, просто добавляем
+                        minimal_clues.append(golden_clue)
+
             final_clues = minimal_clues
-            print(f"[Генератор]: Очистка завершена. Финальное количество подсказок: {len(final_clues)}")
+            print(f"[Генератор]: Финальная корректировка завершена. Итоговое количество подсказок: {len(final_clues)}")
 
             question = f"Какой {self.story_elements[attribute_category]} у {self.story_elements[primary_subject_category]} по имени {id_item}?"
             answer_for_check = f"Ответ для проверки: {answer_item}"
@@ -324,20 +331,18 @@ if __name__ == '__main__':
     THEMES = {
         "Офисная Тайна": { "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев", "Орлов"], "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Безопасность", "Аналитика"], "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр", "Импульс"], "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо", "Сок"]},
         "Загадка Тихого Квартала": { "Житель": ["Белов", "Чернов", "Рыжов", "Зеленин", "Серов", "Сидоров", "Поляков", "Морозов"], "Профессия": ["Врач", "Инженер", "Художник", "Программист", "Учитель", "Юрист", "Архитектор", "Писатель"], "Улица": ["Кленовая", "Цветочная", "Солнечная", "Вишневая", "Парковая", "Речная", "Лесная", "Озерная"], "Хобби": ["Рыбалка", "Садоводство", "Фотография", "Шахматы", "Коллекционирование", "Музыка", "Спорт", "Кулинария"]},
-        "Киберпанк-Нуар": { "Детектив": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"], "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"], "Имплант": ["Kiroshi Optics", "Mantis Blades", "Synth-Lungs", "Grit-Weave", "Chrono-Core", "Neural-Port", "Echo-Dampers", "Reflex-Booster"], "Напиток": ["Synth-Caff", "N-Kola", "Slurm", "Chromantica", "Glycerin-Tea", "De-Tox", "Synth-Ale", "Glitter-Stim"]},
         "Стимпанк-Алхимия": { "Изобретатель": ["Alastair", "Isadora", "Bartholomew", "Genevieve", "Percival", "Seraphina", "Thaddeus", "Odette"], "Гильдия": ["Artificers", "Clockwork", "Alchemists", "Aethernauts", "Iron-Wrights", "Illuminators", "Cartographers", "Innovators"], "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"], "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"]},
     }
     puzzle_story_elements = {
         "scenario": "", "position": "локация",
-        "Сотрудник": "сотрудник", "Отдел": "отдел", "Проект": "проект", "Напиток": "напиток", "Этаж": "этаж",
-        "Житель": "житель", "Профессия": "профессия", "Улица": "улица", "Хобби": "хобби", "Питомец": "питомец",
-        "Детектив": "детектив", "Корпорация": "корпорация", "Имплант": "имплант", "Район": "район",
-        "Изобретатель": "изобретатель", "Гильдия": "гильдия", "Автоматон": "автоматон", "Эликсир": "эликсир", "Материал": "материал",
+        "Сотрудник": "сотрудник", "Отдел": "отдел", "Проект": "проект", "Напиток": "напиток",
+        "Житель": "житель", "Профессия": "профессия", "Улица": "улица", "Хобби": "хобби",
+        "Изобретатель": "изобретатель", "Гильдия": "гильдия", "Автоматон": "автоматон", "Эликсир": "эликсир",
     }
 
     generator = ElegantLogicPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
-    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v6.1) ---")
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v6.4) ---")
     generator.generate(difficulty=1, verbose_solver=False)
     generator.generate(difficulty=5, verbose_solver=False)
     generator.generate(difficulty=7, verbose_solver=False)
