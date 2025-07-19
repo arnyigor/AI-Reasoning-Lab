@@ -1,18 +1,30 @@
 import random
 import pandas as pd
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, TextIO, Optional
+import copy
 
-# --- Умный Решатель (Версия 5.0 - Финальная) ---
+# --- Умный Решатель (Версия 5.2 - Отлаженная, с логированием) ---
 class ConstraintSatisfactionSolver:
     """
     Финальная версия решателя. Полностью переписан для корректной обработки
     всех типов ограничений, включая сложные косвенные связи между категориями.
+    Работает в цикле, пока не перестанут происходить изменения.
     """
-    def __init__(self, categories: Dict[str, List[str]]):
+    def __init__(self, categories: Dict[str, List[str]], verbose: bool = False, log_file_handle: Optional[TextIO] = None):
         self.num_items = len(next(iter(categories.values())))
         self.cat_keys = list(categories.keys())
         self.possibilities = {cat: [list(items) for _ in range(self.num_items)] for cat, items in categories.items()}
         self.clues = []
+        self.verbose = verbose
+        self.log_file_handle = log_file_handle
+
+    def _log(self, message: str):
+        if self.verbose:
+            log_message = f"[SOLVER LOG] {message}\n"
+            if self.log_file_handle:
+                self.log_file_handle.write(log_message)
+            else:
+                print(log_message.strip())
 
     def _propagate(self) -> bool:
         made_change = False
@@ -23,38 +35,40 @@ class ConstraintSatisfactionSolver:
                     val = self.possibilities[cat][i][0]
                     for j in range(self.num_items):
                         if i != j and val in self.possibilities[cat][j]:
-                            self.possibilities[cat][j].remove(val); made_change = True
+                            self._log(f"Propagate Unary: '{val}' is in pos {i+1}, removing from pos {j+1} in cat '{cat}'.")
+                            self.possibilities[cat][j].remove(val)
+                            made_change = True
 
         # 2. Применяем все типы подсказок на основе текущего состояния
         for clue_type, params in self.clues:
-            # Прямая связь: X связан с Y
             if clue_type == 'direct_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items):
-                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i]: self.possibilities[cat2][i].remove(val2); made_change = True
-                    if val2 not in self.possibilities[cat2][i] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
-            # Отрицательная связь: X НЕ связан с Y
+                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i]: self._log(f"Clue '{clue_type}': Since '{val1}' cannot be at pos {i+1}, removing '{val2}'."); self.possibilities[cat2][i].remove(val2); made_change = True
+                    if val2 not in self.possibilities[cat2][i] and val1 in self.possibilities[cat1][i]: self._log(f"Clue '{clue_type}': Since '{val2}' cannot be at pos {i+1}, removing '{val1}'."); self.possibilities[cat1][i].remove(val1); made_change = True
             elif clue_type == 'negative_direct_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items):
-                    if self.possibilities[cat1][i] == [val1] and val2 in self.possibilities[cat2][i]: self.possibilities[cat2][i].remove(val2); made_change = True
-                    if self.possibilities[cat2][i] == [val2] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
-            # Прямая пространственная связь: X слева от Y (в одной категории)
+                    if self.possibilities[cat1][i] == [val1] and val2 in self.possibilities[cat2][i]: self._log(f"Clue '{clue_type}': Pos {i+1} is '{val1}', so removing '{val2}'."); self.possibilities[cat2][i].remove(val2); made_change = True
+                    if self.possibilities[cat2][i] == [val2] and val1 in self.possibilities[cat1][i]: self._log(f"Clue '{clue_type}': Pos {i+1} is '{val2}', so removing '{val1}'."); self.possibilities[cat1][i].remove(val1); made_change = True
             elif clue_type == 'relative_pos':
                 cat, left, right = params
                 for i in range(self.num_items - 1):
-                    if left not in self.possibilities[cat][i] and right in self.possibilities[cat][i+1]: self.possibilities[cat][i+1].remove(right); made_change = True
-                    if right not in self.possibilities[cat][i+1] and left in self.possibilities[cat][i]: self.possibilities[cat][i].remove(left); made_change = True
-            # Косвенная пространственная связь: X (кат1) слева от Y (кат2)
+                    if left not in self.possibilities[cat][i] and right in self.possibilities[cat][i+1]: self._log(f"Clue '{clue_type}': '{left}' cannot be at pos {i+1}, so '{right}' cannot be at pos {i+2}."); self.possibilities[cat][i+1].remove(right); made_change = True
+                    if right not in self.possibilities[cat][i+1] and left in self.possibilities[cat][i]: self._log(f"Clue '{clue_type}': '{right}' cannot be at pos {i+2}, so '{left}' cannot be at pos {i+1}."); self.possibilities[cat][i].remove(left); made_change = True
+
+            # --- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ЛОГИКИ ---
             elif clue_type == 'indirect_relative_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items - 1):
-                    # Если в позиции i ТОЧНО val1, то в i+1 должен быть val2
-                    if self.possibilities[cat1][i] == [val1] and self.possibilities[cat2][i+1] != [val2]:
-                        if val2 in self.possibilities[cat2][i+1]: self.possibilities[cat2][i+1] = [val2]; made_change = True
-                    # Если в позиции i+1 ТОЧНО val2, то в i должен быть val1
-                    if self.possibilities[cat2][i+1] == [val2] and self.possibilities[cat1][i] != [val1]:
-                        if val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i] = [val1]; made_change = True
+                    # Если val1 не может быть слева, то val2 не может быть справа
+                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i+1]:
+                        self._log(f"Clue '{clue_type}': '{val1}'({cat1}) cannot be at pos {i+1}, so '{val2}'({cat2}) cannot be at pos {i+2}.")
+                        self.possibilities[cat2][i+1].remove(val2); made_change = True
+                    # Если val2 не может быть справа, то val1 не может быть слева
+                    if val2 not in self.possibilities[cat2][i+1] and val1 in self.possibilities[cat1][i]:
+                        self._log(f"Clue '{clue_type}': '{val2}'({cat2}) cannot be at pos {i+2}, so '{val1}'({cat1}) cannot be at pos {i+1}.")
+                        self.possibilities[cat1][i].remove(val1); made_change = True
         return made_change
 
     def solve(self, clues: List[Tuple]):
@@ -64,6 +78,7 @@ class ConstraintSatisfactionSolver:
             if clue_type == 'positional':
                 pos_idx, cat, val = params[0] - 1, params[1], params[2]
                 if val in self.possibilities[cat][pos_idx]:
+                    self._log(f"Applying positional clue: Pos {pos_idx+1} in '{cat}' is set to '{val}'.")
                     self.possibilities[cat][pos_idx] = [val]
 
         # Запускаем основной цикл распространения до полной стабилизации
@@ -80,8 +95,8 @@ class ConstraintSatisfactionSolver:
 
 # --- Генератор Элегантных Головоломок (Финальная Архитектура) ---
 class ElegantLogicPuzzleGenerator:
-    def __init__(self, base_categories: Dict[str, List[str]], story_elements: Dict[str, str]):
-        self.base_categories = base_categories
+    def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
+        self.themes = themes
         self.story_elements = story_elements
         self.categories = {}
         self.solution = None
@@ -91,14 +106,17 @@ class ElegantLogicPuzzleGenerator:
         if 1 <= difficulty <= 3: self.num_items = 4
         elif 4 <= difficulty <= 6: self.num_items = 5
         elif 7 <= difficulty <= 8: self.num_items = 6
-        else: self.num_items = 7 # Экспертный уровень 7x5
+        else: self.num_items = 7 # Экспертный уровень
 
-        for cat_name, cat_values in self.base_categories.items():
+        selected_theme_name = random.choice(list(self.themes.keys()))
+        base_categories_for_theme = self.themes[selected_theme_name]
+        print(f"\n[Генератор]: Выбрана тема: '{selected_theme_name}'.")
+        print(f"[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(base_categories_for_theme)}.")
+
+        for cat_name, cat_values in base_categories_for_theme.items():
             if len(cat_values) < self.num_items:
                 raise ValueError(f"Недостаточно элементов в категории '{cat_name}' для сложности {difficulty} (нужно {self.num_items}, доступно {len(cat_values)})")
-
-        self.categories = {key: random.sample(values, self.num_items) for key, values in self.base_categories.items()}
-        print(f"\n[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(self.categories)}.")
+        self.categories = {key: random.sample(values, self.num_items) for key, values in base_categories_for_theme.items()}
 
     def _generate_solution(self):
         solution_data = {cat: random.sample(items, self.num_items) for cat, items in self.categories.items()}
@@ -130,10 +148,10 @@ class ElegantLogicPuzzleGenerator:
         if clue_type == 'negative_direct_link': return f"{s[params[0]].capitalize()} {params[1]} НЕ связан с {s[params[2]]} {params[3]}."
         if clue_type == 'positional': return f"В {s['position']} №{params[0]} находится {s[params[1]]} {params[2]}."
         if clue_type == 'relative_pos': return f"{s[params[0]].capitalize()} {params[1]} находится непосредственно слева от {s[params[0]]} {params[2]}."
-        if clue_type == 'indirect_relative_link': return f"{s[params[0]].capitalize()} {params[1]} находится в лаборатории слева от той, где {s[params[2]]} {params[3]}."
+        if clue_type == 'indirect_relative_link': return f"{s[params[0]].capitalize()} {params[1]} находится в {s['position']} слева от той, где {s[params[2]]} {params[3]}."
         return ""
 
-    def generate(self, difficulty: int = 5):
+    def generate(self, difficulty: int = 5, verbose_solver: bool = False, log_file_path: Optional[str] = None):
         if not 1 <= difficulty <= 10: raise ValueError("Сложность должна быть между 1 и 10.")
 
         try:
@@ -152,77 +170,94 @@ class ElegantLogicPuzzleGenerator:
         clue_pool = self._generate_clue_pool()
         clue_pool = [c for c in clue_pool if not (c[0] == 'direct_link' and c[1] == forbidden_clue_params)]
 
-        # --- Этап 1: Архитектурное построение ---
-        print("[Генератор]: Этап 1: Построение по архитектурному плану 'Цепочки и Мосты'...")
-        final_clues = []
-        if difficulty >= 9: # Эксперт (7x5)
-            target_counts = {'positional': 1, 'indirect_relative_link': self.num_items, 'relative_pos': self.num_items * 2, 'negative_direct_link': self.num_items - 2, 'direct_link': 1}
-        elif difficulty >= 7: # Сложный (6x5)
-            target_counts = {'positional': 1, 'indirect_relative_link': self.num_items - 2, 'relative_pos': self.num_items * 2, 'negative_direct_link': 2, 'direct_link': 2}
-        elif difficulty >= 4: # Средний (5x5)
-            target_counts = {'positional': 1, 'relative_pos': self.num_items, 'direct_link': self.num_items - 1}
-        else: # Простой (4x4)
-            target_counts = {'positional': 2, 'relative_pos': self.num_items - 2, 'direct_link': self.num_items}
+        log_file = open(log_file_path, 'w', encoding='utf-8') if verbose_solver and log_file_path else None
 
-        temp_pool = list(clue_pool)
-        for clue_type, count in target_counts.items():
-            found = 0
-            for i in range(len(temp_pool) - 1, -1, -1):
-                if temp_pool[i][0] == clue_type:
-                    final_clues.append(temp_pool.pop(i)); found += 1
-                    if found >= count: break
+        try:
+            print("[Генератор]: Этап 1: Архитектурное построение...")
+            final_clues = []
+            if difficulty >= 9:
+                target_counts = {'positional': 1, 'indirect_relative_link': self.num_items -1, 'relative_pos': self.num_items * 2, 'negative_direct_link': self.num_items - 2}
+            elif difficulty >= 7:
+                target_counts = {'positional': 1, 'indirect_relative_link': 2, 'relative_pos': self.num_items * 2, 'direct_link': 2}
+            elif difficulty >= 4:
+                target_counts = {'positional': 1, 'relative_pos': self.num_items, 'direct_link': self.num_items - 1}
+            else:
+                target_counts = {'positional': self.num_items - 2, 'direct_link': self.num_items}
 
-        # Добираем случайные, если архитектурного плана не хватило
-        while True:
-            solver = ConstraintSatisfactionSolver(self.categories)
-            solver.solve(final_clues)
-            if solver.get_status() == "solved": break
-            if not temp_pool: print("\n[Генератор]: Не удалось найти решение. Перезапуск..."); self.generate(difficulty); return
-            final_clues.append(temp_pool.pop())
+            temp_pool = list(clue_pool)
+            for clue_type, count in target_counts.items():
+                found = 0
+                for i in range(len(temp_pool) - 1, -1, -1):
+                    if temp_pool[i][0] == clue_type:
+                        final_clues.append(temp_pool.pop(i)); found += 1
+                        if found >= count: break
 
-        print(f"[Генератор]: Этап 1 завершен. Найдено решаемое решение с {len(final_clues)} подсказками.")
+            while True:
+                solver = ConstraintSatisfactionSolver(self.categories, verbose=verbose_solver, log_file_handle=log_file)
+                solver.solve(final_clues)
+                if solver.get_status() == "solved": break
+                if not temp_pool: print("\n[Генератор]: Не удалось найти решение. Перезапуск..."); self.generate(difficulty, verbose_solver, log_file_path); return
+                final_clues.append(temp_pool.pop())
 
-        # --- Этап 2: Финальная Минимизация ---
-        print("[Генератор]: Этап 2: Финальная очистка для максимальной элегантности...")
-        minimal_clues = list(final_clues)
-        random.shuffle(minimal_clues)
-        for i in range(len(minimal_clues) - 1, -1, -1):
-            temp_clues = minimal_clues[:i] + minimal_clues[i+1:]
-            solver = ConstraintSatisfactionSolver(self.categories)
-            solver.solve(temp_clues)
-            if solver.get_status() == 'solved': minimal_clues.pop(i)
+            print(f"[Генератор]: Этап 1 завершен. Найдено решаемое решение с {len(final_clues)} подсказками.")
 
-        final_clues = minimal_clues
-        print(f"[Генератор]: Очистка завершена. Финальное количество подсказок: {len(final_clues)}")
+            print("[Генератор]: Этап 2: Финальная очистка...")
+            minimal_clues = list(final_clues)
+            random.shuffle(minimal_clues)
+            for i in range(len(minimal_clues) - 1, -1, -1):
+                temp_clues = minimal_clues[:i] + minimal_clues[i+1:]
+                # Для минимизации создаем новый решатель без логирования, чтобы не засорять лог
+                solver = ConstraintSatisfactionSolver(self.categories)
+                solver.solve(temp_clues)
+                if solver.get_status() == 'solved':
+                    minimal_clues.pop(i)
 
-        question = f"Какой {self.story_elements[attribute_category]} у {self.story_elements[primary_subject_category]} по имени {id_item}?"
-        answer_for_check = f"Ответ для проверки: {answer_item}"
+            final_clues = minimal_clues
+            print(f"[Генератор]: Очистка завершена. Финальное количество подсказок: {len(final_clues)}")
 
-        print(f"\n**Сценарий: {self.story_elements['scenario']} (Сложность: {difficulty}/10)**\n")
-        print("Условия:\n")
-        final_clues_text = sorted([self._format_clue(c) for c in final_clues])
-        for i, clue_text in enumerate(final_clues_text, 1): print(f"{i}. {clue_text}")
-        print("\n" + "="*40 + "\n")
-        print(f"Вопрос: {question}")
-        print("\n" + "="*40 + "\n")
-        print(answer_for_check)
+            question = f"Какой {self.story_elements[attribute_category]} у {self.story_elements[primary_subject_category]} по имени {id_item}?"
+            answer_for_check = f"Ответ для проверки: {answer_item}"
+
+            print(f"\n**Сценарий: {self.story_elements['scenario']} (Сложность: {difficulty}/10)**\n")
+            print("Условия:\n")
+            final_clues_text = sorted([self._format_clue(c) for c in final_clues])
+            for i, clue_text in enumerate(final_clues_text, 1): print(f"{i}. {clue_text}")
+            print("\n" + "="*40 + "\n")
+            print(f"Вопрос: {question}")
+            print("\n" + "="*40 + "\n")
+            print(answer_for_check)
+            if verbose_solver:
+                print("\n--- Скрытое Решение для самопроверки ---\n", self.solution)
+
+        finally:
+            if log_file:
+                log_file.close()
+                print(f"\n[Генератор]: Лог работы решателя сохранен в файл '{log_file_path}'.")
 
 if __name__ == '__main__':
-    base_puzzle_categories = {
-        "Ученый": ["Орлов", "Лебедев", "Соколов", "Воробьев", "Ястребов", "Сидоров", "Петров", "Иванов"],
-        "Область": ["Биоинженерия", "Физика", "Нейробиология", "Астрофизика", "Химия", "Кибернетика", "Геология", "Экология"],
-        "Суперкомпьютер": ["Титан", "Фугаку", "Секвойя", "Ломоносов", "Тяньхэ-2", "Summit", "Sierra", "Piz Daint"],
-        "Напиток": ["Чай", "Кофе", "Молоко", "Вода", "Сок", "Лимонад", "Кефир", "Морс"],
-        "Музыка": ["Классика", "Джаз", "Эмбиент", "Рок", "Электроника", "Хип-хоп", "Фолк", "Блюз"]
+    THEMES = {
+        "Киберпанк-Нуар": {
+            "Персонаж": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"],
+            "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"],
+            "Имплант": ["Kiroshi Optics", "Mantis Blades", "Synth-Lungs", "Grit-Weave", "Chrono-Core", "Neural-Port", "Echo-Dampers", "Reflex-Booster"],
+            "Напиток": ["Synth-Caff", "N-Kola", "Slurm", "Chromantica", "Glycerin-Tea", "De-Tox", "Synth-Ale", "Glitter-Stim"],
+            "Район Города": ["Neon-Sprawl", "The Core", "Iron-District", "Aetheria", "The Undercity", "Zenith-Heights", "The Shambles", "Port-Kailash"]
+        },
+        "Стимпанк-Алхимия": {
+            "Изобретатель": ["Alastair", "Isadora", "Bartholomew", "Genevieve", "Percival", "Seraphina", "Thaddeus", "Odette"],
+            "Гильдия": ["Artificers", "Clockwork", "Alchemists", "Aethernauts", "Iron-Wrights", "Illuminators", "Cartographers", "Innovators"],
+            "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"],
+            "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"],
+            "Материал": ["Aetherium-Crystal", "Orichalcum-Gear", "Voltaic-Coil", "Soul-Bronze", "Quicksilver-Core", "Obsidian-Lens", "Dragon-Scale-Hide", "Glimmer-Weave"]
+        }
     }
-    puzzle_story = { "scenario": "Тайна исследовательского центра", "position": "лаборатория", "Ученый": "ученый", "Область": "специалист", "Суперкомпьютер": "суперкомпьютер", "Напиток": "напиток", "Музыка": "музыкальный жанр" }
+    puzzle_story_elements = {
+        "scenario": "Тайна исследовательского центра", "position": "локация",
+        "Персонаж": "персонаж", "Корпорация": "корпорация", "Имплант": "имплант", "Напиток": "напиток", "Район Города": "район",
+        "Изобретатель": "изобретатель", "Гильдия": "гильдия", "Автоматон": "автоматон", "Эликсир": "эликсир", "Материал": "материал"
+    }
 
-    generator = ElegantLogicPuzzleGenerator(base_categories=base_puzzle_categories, story_elements=puzzle_story)
-
-    print("--- ГЕНЕРАЦИЯ ПРОСТОЙ ЗАДАЧИ ---")
-    generator.generate(difficulty=1)
-
-    print("\n\n" + "#"*50 + "\n\n")
+    generator = ElegantLogicPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
     print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (ФИНАЛЬНАЯ АРХИТЕКТУРА) ---")
-    generator.generate(difficulty=10)
+    generator.generate(difficulty=5, verbose_solver=False, log_file_path="solver_debug_log.log")
