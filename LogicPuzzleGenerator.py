@@ -3,7 +3,7 @@ import pandas as pd
 from typing import Dict, List, Tuple, TextIO, Optional
 import copy
 
-# --- Умный Решатель (Версия 5.2 - Отлаженная, с логированием) ---
+# --- Умный Решатель (Версия 5.2 - без изменений) ---
 class ConstraintSatisfactionSolver:
     """
     Финальная версия решателя. Полностью переписан для корректной обработки
@@ -95,9 +95,9 @@ class ConstraintSatisfactionSolver:
 
 # --- Генератор Элегантных Головоломок (Финальная Архитектура) ---
 class ElegantLogicPuzzleGenerator:
-    def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
+    def __init__(self, themes: Dict[str, Dict[str, List[str]]]):
         self.themes = themes
-        self.story_elements = story_elements
+        self.story_elements = {}
         self.categories = {}
         self.solution = None
         self.num_items = 0
@@ -108,8 +108,15 @@ class ElegantLogicPuzzleGenerator:
         elif 7 <= difficulty <= 8: self.num_items = 6
         else: self.num_items = 7 # Экспертный уровень
 
+        # --- УЛУЧШЕНИЕ: Выбор темы и автоматическое создание story_elements ---
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories_for_theme = self.themes[selected_theme_name]
+
+        # Автоматически создаем словарь для описания истории
+        self.story_elements = {"scenario": f"Тайна в сеттинге: {selected_theme_name}", "position": "локация"}
+        for key in base_categories_for_theme.keys():
+            self.story_elements[key] = key.lower() # Просто используем ключ в нижнем регистре
+
         print(f"\n[Генератор]: Выбрана тема: '{selected_theme_name}'.")
         print(f"[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(base_categories_for_theme)}.")
 
@@ -235,13 +242,14 @@ class ElegantLogicPuzzleGenerator:
                 print(f"\n[Генератор]: Лог работы решателя сохранен в файл '{log_file_path}'.")
 
 if __name__ == '__main__':
+    # --- УЛУЧШЕНИЕ: Большой пул разнообразных тем ---
     THEMES = {
         "Киберпанк-Нуар": {
-            "Персонаж": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"],
+            "Детектив": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"],
             "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"],
             "Имплант": ["Kiroshi Optics", "Mantis Blades", "Synth-Lungs", "Grit-Weave", "Chrono-Core", "Neural-Port", "Echo-Dampers", "Reflex-Booster"],
             "Напиток": ["Synth-Caff", "N-Kola", "Slurm", "Chromantica", "Glycerin-Tea", "De-Tox", "Synth-Ale", "Glitter-Stim"],
-            "Район Города": ["Neon-Sprawl", "The Core", "Iron-District", "Aetheria", "The Undercity", "Zenith-Heights", "The Shambles", "Port-Kailash"]
+            "Район": ["Neon-Sprawl", "The Core", "Iron-District", "Aetheria", "The Undercity", "Zenith-Heights", "The Shambles", "Port-Kailash"]
         },
         "Стимпанк-Алхимия": {
             "Изобретатель": ["Alastair", "Isadora", "Bartholomew", "Genevieve", "Percival", "Seraphina", "Thaddeus", "Odette"],
@@ -249,15 +257,25 @@ if __name__ == '__main__':
             "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"],
             "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"],
             "Материал": ["Aetherium-Crystal", "Orichalcum-Gear", "Voltaic-Coil", "Soul-Bronze", "Quicksilver-Core", "Obsidian-Lens", "Dragon-Scale-Hide", "Glimmer-Weave"]
+        },
+        "Космическая Опера": {
+            "Капитан": ["Jax", "Zara", "Kaelen", "Riona", "Nero", "Lyra", "Orion", "Vesper"],
+            "Фракция": ["Galactic Concord", "Star-Nomads", "Crimson Fleet", "Cy-Borg Collective", "Celestial Empire", "The Void-Traders", "The Syndicate", "The Sovereignty"],
+            "Корабль": ["The Firehawk", "The Void-Chaser", "The Leviathan", "The Stardust", "The Nebula-Runner", "The Orion's Belt", "The Quasar", "The Pulsar"],
+            "Груз": ["Kyber-Crystals", "Bio-Gel", "Star-Maps", "Xen-Artifacts", "Helium-3", "Graviton-Cores", "Psionic-Relics", "Cryo-Pods"],
+            "Планета": ["Xylos", "Cygnus X-1", "Kepler-186f", "Astraeus", "Eridanus Prime", "Solara", "Triton", "Rhea"]
+        },
+        "Фэнтези-Расследование": {
+            "Герой": ["Eldrin", "Lyra", "Kael", "Seraphina", "Roric", "Faelan", "Gwen", "Darian"],
+            "Королевство": ["Aethelgard", "Glimmerwood", "Iron-Hold", "The Shadow-Fells", "Sunstone-Empire", "The Crystal-Spires", "The Azure-Coast", "The Northern-Reach"],
+            "Артефакт": ["The Dragon-Orb", "The Shadow-Veil", "The Sun-Stone", "The Moon-Blade", "The Chronos-Key", "The Soul-Gem", "The Iron-Treaty", "The Star-Chart"],
+            "Существо": ["Gryphon", "Dragon", "Hydra", "Manticore", "Phoenix", "Basilisk", "Wyvern", "Kraken"],
+            "Локация": ["The Mystic Forest", "The Sunken City", "The Dragon's Peak", "The Shadow-Keep", "The Crystal-Caves", "The Sun-Temple", "The Whispering-Plains", "The Iron-Fortress"]
         }
     }
-    puzzle_story_elements = {
-        "scenario": "Тайна исследовательского центра", "position": "локация",
-        "Персонаж": "персонаж", "Корпорация": "корпорация", "Имплант": "имплант", "Напиток": "напиток", "Район Города": "район",
-        "Изобретатель": "изобретатель", "Гильдия": "гильдия", "Автоматон": "автоматон", "Эликсир": "эликсир", "Материал": "материал"
-    }
 
-    generator = ElegantLogicPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
+    # Генератор теперь принимает только словарь тем
+    generator = ElegantLogicPuzzleGenerator(themes=THEMES)
 
     print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (ФИНАЛЬНАЯ АРХИТЕКТУРА) ---")
-    generator.generate(difficulty=5, verbose_solver=False, log_file_path="solver_debug_log.log")
+    generator.generate(difficulty=1, verbose_solver=False, log_file_path="solver_debug_log.log")
