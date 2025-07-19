@@ -4,6 +4,10 @@ from typing import Dict, List, Tuple
 
 # --- Умный Решатель (Версия 5.0 - Финальная) ---
 class ConstraintSatisfactionSolver:
+    """
+    Финальная версия решателя. Полностью переписан для корректной обработки
+    всех типов ограничений, включая сложные косвенные связи между категориями.
+    """
     def __init__(self, categories: Dict[str, List[str]]):
         self.num_items = len(next(iter(categories.values())))
         self.cat_keys = list(categories.keys())
@@ -12,6 +16,7 @@ class ConstraintSatisfactionSolver:
 
     def _propagate(self) -> bool:
         made_change = False
+        # 1. Уникальность: если значение найдено, его больше нигде нет
         for i in range(self.num_items):
             for cat in self.cat_keys:
                 if len(self.possibilities[cat][i]) == 1:
@@ -20,38 +25,50 @@ class ConstraintSatisfactionSolver:
                         if i != j and val in self.possibilities[cat][j]:
                             self.possibilities[cat][j].remove(val); made_change = True
 
+        # 2. Применяем все типы подсказок на основе текущего состояния
         for clue_type, params in self.clues:
+            # Прямая связь: X связан с Y
             if clue_type == 'direct_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items):
                     if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i]: self.possibilities[cat2][i].remove(val2); made_change = True
                     if val2 not in self.possibilities[cat2][i] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
+            # Отрицательная связь: X НЕ связан с Y
             elif clue_type == 'negative_direct_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items):
                     if self.possibilities[cat1][i] == [val1] and val2 in self.possibilities[cat2][i]: self.possibilities[cat2][i].remove(val2); made_change = True
                     if self.possibilities[cat2][i] == [val2] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
+            # Прямая пространственная связь: X слева от Y (в одной категории)
             elif clue_type == 'relative_pos':
                 cat, left, right = params
                 for i in range(self.num_items - 1):
                     if left not in self.possibilities[cat][i] and right in self.possibilities[cat][i+1]: self.possibilities[cat][i+1].remove(right); made_change = True
                     if right not in self.possibilities[cat][i+1] and left in self.possibilities[cat][i]: self.possibilities[cat][i].remove(left); made_change = True
+            # Косвенная пространственная связь: X (кат1) слева от Y (кат2)
             elif clue_type == 'indirect_relative_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items - 1):
+                    # Если в позиции i ТОЧНО val1, то в i+1 должен быть val2
                     if self.possibilities[cat1][i] == [val1] and self.possibilities[cat2][i+1] != [val2]:
                         if val2 in self.possibilities[cat2][i+1]: self.possibilities[cat2][i+1] = [val2]; made_change = True
+                    # Если в позиции i+1 ТОЧНО val2, то в i должен быть val1
                     if self.possibilities[cat2][i+1] == [val2] and self.possibilities[cat1][i] != [val1]:
                         if val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i] = [val1]; made_change = True
         return made_change
 
     def solve(self, clues: List[Tuple]):
         self.clues = clues
+        # Применяем позиционные подсказки один раз для установки "якорей"
         for clue_type, params in clues:
             if clue_type == 'positional':
                 pos_idx, cat, val = params[0] - 1, params[1], params[2]
-                if val in self.possibilities[cat][pos_idx]: self.possibilities[cat][pos_idx] = [val]
-        while self._propagate(): pass
+                if val in self.possibilities[cat][pos_idx]:
+                    self.possibilities[cat][pos_idx] = [val]
+
+        # Запускаем основной цикл распространения до полной стабилизации
+        while self._propagate():
+            pass
 
     def get_status(self) -> str:
         is_solved = True
@@ -74,7 +91,7 @@ class ElegantLogicPuzzleGenerator:
         if 1 <= difficulty <= 3: self.num_items = 4
         elif 4 <= difficulty <= 6: self.num_items = 5
         elif 7 <= difficulty <= 8: self.num_items = 6
-        else: self.num_items = 8
+        else: self.num_items = 7 # Экспертный уровень 7x5
 
         for cat_name, cat_values in self.base_categories.items():
             if len(cat_values) < self.num_items:
@@ -138,13 +155,13 @@ class ElegantLogicPuzzleGenerator:
         # --- Этап 1: Архитектурное построение ---
         print("[Генератор]: Этап 1: Построение по архитектурному плану 'Цепочки и Мосты'...")
         final_clues = []
-        if difficulty >= 9: # Эксперт
+        if difficulty >= 9: # Эксперт (7x5)
             target_counts = {'positional': 1, 'indirect_relative_link': self.num_items, 'relative_pos': self.num_items * 2, 'negative_direct_link': self.num_items - 2, 'direct_link': 1}
-        elif difficulty >= 7: # Сложный
-            target_counts = {'positional': 1, 'relative_pos': self.num_items * 2, 'negative_direct_link': 2, 'direct_link': self.num_items - 2}
-        elif difficulty >= 4: # Средний
+        elif difficulty >= 7: # Сложный (6x5)
+            target_counts = {'positional': 1, 'indirect_relative_link': self.num_items - 2, 'relative_pos': self.num_items * 2, 'negative_direct_link': 2, 'direct_link': 2}
+        elif difficulty >= 4: # Средний (5x5)
             target_counts = {'positional': 1, 'relative_pos': self.num_items, 'direct_link': self.num_items - 1}
-        else: # Простой
+        else: # Простой (4x4)
             target_counts = {'positional': 2, 'relative_pos': self.num_items - 2, 'direct_link': self.num_items}
 
         temp_pool = list(clue_pool)
@@ -201,6 +218,11 @@ if __name__ == '__main__':
     puzzle_story = { "scenario": "Тайна исследовательского центра", "position": "лаборатория", "Ученый": "ученый", "Область": "специалист", "Суперкомпьютер": "суперкомпьютер", "Напиток": "напиток", "Музыка": "музыкальный жанр" }
 
     generator = ElegantLogicPuzzleGenerator(base_categories=base_puzzle_categories, story_elements=puzzle_story)
+
+    print("--- ГЕНЕРАЦИЯ ПРОСТОЙ ЗАДАЧИ ---")
+    generator.generate(difficulty=1)
+
+    print("\n\n" + "#"*50 + "\n\n")
 
     print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (ФИНАЛЬНАЯ АРХИТЕКТУРА) ---")
     generator.generate(difficulty=10)
