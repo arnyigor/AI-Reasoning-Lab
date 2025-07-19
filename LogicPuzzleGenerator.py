@@ -1,14 +1,10 @@
 import random
 import pandas as pd
 from typing import Dict, List, Tuple
+import copy
 
-# --- Умный Решатель (Версия 3.0) ---
+# --- Умный Решатель (Версия 4.0 - Финальная) ---
 class ConstraintSatisfactionSolver:
-    """
-    Полностью переписанный, мощный решатель.
-    Работает в цикле, активно распространяя все типы ограничений,
-    пока не будет сделано ни одного нового вывода.
-    """
     def __init__(self, categories: Dict[str, List[str]]):
         self.num_items = len(next(iter(categories.values())))
         self.cat_keys = list(categories.keys())
@@ -16,65 +12,49 @@ class ConstraintSatisfactionSolver:
         self.clues = []
 
     def _propagate(self) -> bool:
-        """Основной цикл, который применяет все правила. Возвращает True, если было сделано хоть одно изменение."""
         made_change = False
         for i in range(self.num_items):
             for cat in self.cat_keys:
-                # 1. Если значение уникально, удаляем его из других позиций
                 if len(self.possibilities[cat][i]) == 1:
                     val = self.possibilities[cat][i][0]
                     for j in range(self.num_items):
                         if i != j and val in self.possibilities[cat][j]:
-                            self.possibilities[cat][j].remove(val)
-                            made_change = True
+                            self.possibilities[cat][j].remove(val); made_change = True
 
-        # 2. Применяем все типы подсказок на основе текущего состояния
         for clue_type, params in self.clues:
             if clue_type == 'direct_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items):
-                    # Если X не может быть здесь, то и Y не может
-                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i]:
-                        self.possibilities[cat2][i].remove(val2)
-                        made_change = True
-                    if val2 not in self.possibilities[cat2][i] and val1 in self.possibilities[cat1][i]:
-                        self.possibilities[cat1][i].remove(val1)
-                        made_change = True
-
+                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i]: self.possibilities[cat2][i].remove(val2); made_change = True
+                    if val2 not in self.possibilities[cat2][i] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
             elif clue_type == 'negative_direct_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items):
-                    # Если здесь ТОЧНО X, то Y здесь быть не может
-                    if self.possibilities[cat1][i] == [val1] and val2 in self.possibilities[cat2][i]:
-                        self.possibilities[cat2][i].remove(val2)
-                        made_change = True
-                    if self.possibilities[cat2][i] == [val2] and val1 in self.possibilities[cat1][i]:
-                        self.possibilities[cat1][i].remove(val1)
-                        made_change = True
-
+                    if self.possibilities[cat1][i] == [val1] and val2 in self.possibilities[cat2][i]: self.possibilities[cat2][i].remove(val2); made_change = True
+                    if self.possibilities[cat2][i] == [val2] and val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i].remove(val1); made_change = True
             elif clue_type == 'relative_pos':
                 cat, left, right = params
                 for i in range(self.num_items - 1):
-                    if left not in self.possibilities[cat][i] and right in self.possibilities[cat][i+1]:
-                        self.possibilities[cat][i+1].remove(right)
-                        made_change = True
-                    if right not in self.possibilities[cat][i+1] and left in self.possibilities[cat][i]:
-                        self.possibilities[cat][i].remove(left)
-                        made_change = True
+                    if left not in self.possibilities[cat][i] and right in self.possibilities[cat][i+1]: self.possibilities[cat][i+1].remove(right); made_change = True
+                    if right not in self.possibilities[cat][i+1] and left in self.possibilities[cat][i]: self.possibilities[cat][i].remove(left); made_change = True
+            elif clue_type == 'indirect_relative_link':
+                cat1, val1, cat2, val2 = params
+                for i in range(self.num_items - 1):
+                    # Если в позиции i ТОЧНО val1, то в i+1 должен быть val2
+                    if self.possibilities[cat1][i] == [val1] and self.possibilities[cat2][i+1] != [val2]:
+                        if val2 in self.possibilities[cat2][i+1]: self.possibilities[cat2][i+1] = [val2]; made_change = True
+                    # Если в позиции i+1 ТОЧНО val2, то в i должен быть val1
+                    if self.possibilities[cat2][i+1] == [val2] and self.possibilities[cat1][i] != [val1]:
+                        if val1 in self.possibilities[cat1][i]: self.possibilities[cat1][i] = [val1]; made_change = True
         return made_change
 
     def solve(self, clues: List[Tuple]):
         self.clues = clues
-        # Применяем позиционные подсказки один раз для установки "якорей"
         for clue_type, params in clues:
             if clue_type == 'positional':
                 pos_idx, cat, val = params[0] - 1, params[1], params[2]
-                if val in self.possibilities[cat][pos_idx]:
-                    self.possibilities[cat][pos_idx] = [val]
-
-        # Запускаем основной цикл распространения до полной стабилизации
-        while self._propagate():
-            pass
+                if val in self.possibilities[cat][pos_idx]: self.possibilities[cat][pos_idx] = [val]
+        while self._propagate(): pass
 
     def get_status(self) -> str:
         is_solved = True
@@ -84,8 +64,11 @@ class ConstraintSatisfactionSolver:
                 if len(self.possibilities[cat][i]) > 1: is_solved = False
         return "solved" if is_solved else "unsolved"
 
-# --- Генератор с Масштабируемой Сложностью ---
-class ScalableLogicPuzzleGenerator:
+    def count_possibilities(self) -> int:
+        return sum(len(p) for cat_poss in self.possibilities.values() for p in cat_poss)
+
+# --- Генератор Элегантных Головоломок ---
+class ElegantLogicPuzzleGenerator:
     def __init__(self, base_categories: Dict[str, List[str]], story_elements: Dict[str, str]):
         self.base_categories = base_categories
         self.story_elements = story_elements
@@ -95,8 +78,10 @@ class ScalableLogicPuzzleGenerator:
 
     def _select_data_for_difficulty(self, difficulty: int):
         if 1 <= difficulty <= 3: self.num_items = 4
-        elif 4 <= difficulty <= 7: self.num_items = 5
-        else: self.num_items = 6
+        elif 4 <= difficulty <= 6: self.num_items = 5
+        elif 7 <= difficulty <= 8: self.num_items = 6
+        else: self.num_items = 7 # Экспертный уровень
+
         self.categories = {key: random.sample(values, self.num_items) for key, values in self.base_categories.items()}
         print(f"\n[Генератор]: Уровень сложности {difficulty}/10. Размер сетки: {self.num_items}x{len(self.categories)}.")
 
@@ -106,8 +91,7 @@ class ScalableLogicPuzzleGenerator:
         self.solution.index = range(1, self.num_items + 1)
 
     def _generate_clue_pool(self) -> List[Tuple]:
-        pool = []
-        cat_keys = list(self.categories.keys())
+        pool, cat_keys = [], list(self.categories.keys())
         cat_pairs = [(cat_keys[i], cat_keys[j]) for i in range(len(cat_keys)) for j in range(i + 1, len(cat_keys))]
         for i in range(1, self.num_items + 1):
             row = self.solution.loc[i]
@@ -120,6 +104,7 @@ class ScalableLogicPuzzleGenerator:
             for cat in cat_keys: pool.append(('positional', (pos, cat, row[cat])))
         for i in range(1, self.num_items):
             for cat in cat_keys: pool.append(('relative_pos', (cat, self.solution.loc[i, cat], self.solution.loc[i + 1, cat])))
+            for cat1, cat2 in cat_pairs: pool.append(('indirect_relative_link', (cat1, self.solution.loc[i, cat1], cat2, self.solution.loc[i+1, cat2])))
         random.shuffle(pool)
         return pool
 
@@ -130,6 +115,7 @@ class ScalableLogicPuzzleGenerator:
         if clue_type == 'negative_direct_link': return f"{s[params[0]].capitalize()} {params[1]} НЕ связан с {s[params[2]]} {params[3]}."
         if clue_type == 'positional': return f"В {s['position']} №{params[0]} находится {s[params[1]]} {params[2]}."
         if clue_type == 'relative_pos': return f"{s[params[0]].capitalize()} {params[1]} находится непосредственно слева от {s[params[0]]} {params[2]}."
+        if clue_type == 'indirect_relative_link': return f"{s[params[0]].capitalize()} {params[1]} находится в лаборатории слева от той, где {s[params[2]]} {params[3]}."
         return ""
 
     def generate(self, difficulty: int = 5):
@@ -146,42 +132,40 @@ class ScalableLogicPuzzleGenerator:
         clue_pool = self._generate_clue_pool()
         clue_pool = [c for c in clue_pool if not (c[0] == 'direct_link' and c[1] == forbidden_clue_params)]
 
-        if difficulty >= 8: target_counts = {'positional': 1, 'negative_direct_link': self.num_items - 2, 'relative_pos': self.num_items * 2, 'direct_link': 2}
-        elif difficulty >= 4: target_counts = {'positional': 1, 'negative_direct_link': 1, 'relative_pos': self.num_items, 'direct_link': self.num_items - 1}
-        else: target_counts = {'positional': 2, 'relative_pos': self.num_items - 2, 'direct_link': self.num_items}
-
-        solvable_clues = []
-        temp_pool = list(clue_pool)
-        for clue_type, count in target_counts.items():
-            found = 0
-            for i in range(len(temp_pool) - 1, -1, -1):
-                if temp_pool[i][0] == clue_type:
-                    solvable_clues.append(temp_pool.pop(i))
-                    found += 1
-                    if found == count: break
+        # --- "Жадный" алгоритм построения головоломки ---
+        final_clues = []
+        print("[Генератор]: Начинаю построение головоломки по принципу максимального влияния...")
 
         while True:
             solver = ConstraintSatisfactionSolver(self.categories)
-            solver.solve(solvable_clues)
-            if solver.get_status() == "solved": break
-            if not temp_pool:
-                print("\n[Генератор]: Не удалось найти решение с текущим набором. Перезапускаем попытку...")
-                self.generate(difficulty) # Рекурсивный перезапуск в случае редкой неудачи
-                return
-            solvable_clues.append(temp_pool.pop())
+            solver.solve(final_clues)
+            status = solver.get_status()
+            if status == "solved": break
+            if not clue_pool: print("\n[Генератор]: Пул исчерпан. Перезапуск..."); self.generate(difficulty); return
 
-        print(f"[Генератор]: Найдено избыточное решение с {len(solvable_clues)} подсказками. Начинаю минимизацию...")
+            initial_possibilities = solver.count_possibilities()
+            best_clue, max_impact = None, -1
 
-        minimal_clues = list(solvable_clues)
-        random.shuffle(minimal_clues)
-        for i in range(len(minimal_clues) - 1, -1, -1):
-            temp_clues = minimal_clues[:i] + minimal_clues[i+1:]
-            solver = ConstraintSatisfactionSolver(self.categories)
-            solver.solve(temp_clues)
-            if solver.get_status() == 'solved': minimal_clues.pop(i)
+            # Пробуем N случайных подсказок и выбираем лучшую
+            sample_size = min(len(clue_pool), 75)
+            for candidate_clue in random.sample(clue_pool, sample_size):
+                temp_solver = ConstraintSatisfactionSolver(self.categories)
+                temp_solver.solve(final_clues + [candidate_clue])
 
-        final_clues = minimal_clues
-        print(f"[Генератор]: Минимизация завершена. Финальное количество подсказок: {len(final_clues)}")
+                if temp_solver.get_status() == 'contradiction': continue
+
+                impact = initial_possibilities - temp_solver.count_possibilities()
+                if impact > max_impact:
+                    max_impact = impact
+                    best_clue = candidate_clue
+
+            if best_clue:
+                final_clues.append(best_clue)
+                clue_pool.remove(best_clue)
+            else: # Если застряли, добавляем случайную подсказку, чтобы сдвинуться с места
+                final_clues.append(clue_pool.pop())
+
+        print(f"[Генератор]: Построение завершено. Финальное количество подсказок: {len(final_clues)}")
 
         question = f"Какой {self.story_elements[attribute_category]} у {self.story_elements[primary_subject_category]} по имени {id_item}?"
         answer_for_check = f"Ответ для проверки: {answer_item}"
@@ -203,23 +187,9 @@ if __name__ == '__main__':
         "Напиток": ["Чай", "Кофе", "Молоко", "Вода", "Сок", "Лимонад", "Кефир", "Морс"],
         "Музыка": ["Классика", "Джаз", "Эмбиент", "Рок", "Электроника", "Хип-хоп", "Фолк", "Блюз"]
     }
-    puzzle_story = {
-        "scenario": "Тайна исследовательского центра", "position": "лаборатория", "Ученый": "ученый",
-        "Область": "специалист", "Суперкомпьютер": "суперкомпьютер", "Напиток": "напиток",
-        "Музыка": "музыкальный жанр"
-    }
+    puzzle_story = { "scenario": "Тайна исследовательского центра", "position": "лаборатория", "Ученый": "ученый", "Область": "специалист", "Суперкомпьютер": "суперкомпьютер", "Напиток": "напиток", "Музыка": "музыкальный жанр" }
 
-    generator = ScalableLogicPuzzleGenerator(base_categories=base_puzzle_categories, story_elements=puzzle_story)
+    generator = ElegantLogicPuzzleGenerator(base_categories=base_puzzle_categories, story_elements=puzzle_story)
 
-    print("--- ГЕНЕРАЦИЯ ПРОСТОЙ ЗАДАЧИ ---")
-    generator.generate(difficulty=2)
-
-    print("\n\n" + "#"*50 + "\n\n")
-
-    print("--- ГЕНЕРАЦИЯ СРЕДНЕЙ ЗАДАЧИ ---")
-    generator.generate(difficulty=5)
-
-    print("\n\n" + "#"*50 + "\n\n")
-
-    print("--- ГЕНЕРАЦИЯ СЛОЖНОЙ ЗАДАЧИ ---")
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (ФИНАЛЬНАЯ ВЕРСИЯ) ---")
     generator.generate(difficulty=10)
