@@ -1,15 +1,11 @@
 import random
 import pandas as pd
 from typing import Dict, List, Tuple, TextIO, Optional, Any
+import itertools
 
 # --- Умный Решатель (Версия 7.1 - без изменений) ---
 # Класс Solver остается таким же, он работает корректно.
 class ConstraintSatisfactionSolver:
-    """
-    Финальная, отлаженная версия решателя.
-    Корректно обрабатывает все типы ограничений, включая сложные
-    транзитивные пространственные связи.
-    """
     def __init__(self, categories: Dict[str, List[str]], is_circular: bool = False, verbose: bool = False, log_file_handle: Optional[TextIO] = None):
         self.num_items = len(next(iter(categories.values())))
         self.cat_keys = list(categories.keys())
@@ -105,7 +101,7 @@ class ConstraintSatisfactionSolver:
                 if len(self.possibilities[cat][i]) > 1: is_solved = False
         return "solved" if is_solved else "unsolved"
 
-# --- Генератор Элегантных Головоломок (Архитектура v6.0 - Алгоритм "Карусель") ---
+# --- Генератор Элегантных Головоломок (Архитектура v6.1 - Эвристика Защиты Ответа) ---
 class ElegantLogicPuzzleGenerator:
     def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
         self.themes = themes
@@ -205,6 +201,22 @@ class ElegantLogicPuzzleGenerator:
             return f"{s[p_middle[0]].capitalize()} {p_middle[1]} находится в локации между той, где {s[p_left[0]]} {p_left[1]}, и той, где {s[p_right[0]]} {p_right[1]}."
         return ""
 
+    # --- ИЗМЕНЕНИЕ: Новая вспомогательная функция для эвристики ---
+    def _clue_mentions_entity(self, clue: Tuple[str, Any], entities: List[str]) -> bool:
+        """Проверяет, упоминает ли подсказка одну из ключевых сущностей."""
+        clue_type, params = clue
+        # Рекурсивно "разворачиваем" вложенные кортежи в плоский список
+        flat_params = []
+        def flatten(p):
+            for item in p:
+                if isinstance(item, (list, tuple)):
+                    flatten(item)
+                else:
+                    flat_params.append(item)
+        flatten(params)
+
+        return any(entity in flat_params for entity in entities)
+
     def generate(self, difficulty: int = 5, verbose_solver: bool = False, log_file_path: Optional[str] = None):
         max_attempts = 10
         for attempt in range(max_attempts):
@@ -248,12 +260,9 @@ class ElegantLogicPuzzleGenerator:
 
             for clue_type, count in target_counts.items():
                 clues_to_add = clue_pool_by_type[clue_type][:count]
-                if len(clues_to_add) < count:
-                    print(f"[ПРЕДУПРЕЖДЕНИЕ]: Недостаточно подсказок типа '{clue_type}'. Найдено {len(to_add)}, требуется {count}.")
                 final_clues.extend(clues_to_add)
                 clue_pool_by_type[clue_type] = clue_pool_by_type[clue_type][count:]
 
-            # --- ИЗМЕНЕНИЕ: Алгоритм "Карусель" ---
             priority_order = ['negative_direct_link', 'relative_pos', 'conditional_link', 'opposite_link', 'transitive_spatial_link', 'direct_link', 'positional']
 
             while True:
@@ -273,14 +282,23 @@ class ElegantLogicPuzzleGenerator:
 
             print(f"[Генератор]: Этап 1 завершен. Найдено решаемое решение с {len(final_clues)} подсказками.")
 
-            print("[Генератор]: Этап 2: Финальная очистка...")
+            print("[Генератор]: Этап 2: Финальная очистка с эвристикой защиты ответа...")
             minimal_clues = list(final_clues)
+            protected_entities = [id_item, answer_item]
+
             random.shuffle(minimal_clues)
             for i in range(len(minimal_clues) - 1, -1, -1):
+                clue_to_check = minimal_clues[i]
+
+                # --- ИЗМЕНЕНИЕ: Применяем эвристику ---
+                if self._clue_mentions_entity(clue_to_check, protected_entities):
+                    continue # Эту подсказку нельзя удалять, она защищена
+
                 temp_clues = minimal_clues[:i] + minimal_clues[i+1:]
                 solver = ConstraintSatisfactionSolver(self.categories, self.is_circular)
                 solver.solve(temp_clues)
-                if solver.get_status() == 'solved': minimal_clues.pop(i)
+                if solver.get_status() == 'solved':
+                    minimal_clues.pop(i)
 
             final_clues = minimal_clues
             print(f"[Генератор]: Очистка завершена. Финальное количество подсказок: {len(final_clues)}")
@@ -319,5 +337,8 @@ if __name__ == '__main__':
 
     generator = ElegantLogicPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
-    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v6.0) ---")
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v6.1) ---")
     generator.generate(difficulty=1, verbose_solver=False)
+    generator.generate(difficulty=5, verbose_solver=False)
+    generator.generate(difficulty=7, verbose_solver=False)
+    generator.generate(difficulty=10, verbose_solver=False)
