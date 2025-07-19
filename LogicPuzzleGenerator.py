@@ -2,9 +2,12 @@ import random
 import pandas as pd
 from typing import Dict, List, Tuple, TextIO, Optional
 
-# --- Умный Решатель (Версия 5.2 - без изменений) ---
+# --- Умный Решатель (Версия 5.3 - Отлаженная) ---
 class ConstraintSatisfactionSolver:
-    """Финальная версия решателя. Корректно обрабатывает все типы ограничений."""
+    """
+    Финальная, отлаженная версия решателя. Корректно обрабатывает все типы
+    ограничений, включая сложные косвенные связи между категориями.
+    """
     def __init__(self, categories: Dict[str, List[str]], verbose: bool = False, log_file_handle: Optional[TextIO] = None):
         self.num_items = len(next(iter(categories.values())))
         self.cat_keys = list(categories.keys())
@@ -16,18 +19,25 @@ class ConstraintSatisfactionSolver:
     def _log(self, message: str):
         if self.verbose:
             log_message = f"[SOLVER LOG] {message}\n"
-            if self.log_file_handle: self.log_file_handle.write(log_message)
-            else: print(log_message.strip())
+            if self.log_file_handle:
+                self.log_file_handle.write(log_message)
+            else:
+                print(log_message.strip())
 
     def _propagate(self) -> bool:
         made_change = False
+        # 1. Уникальность: если значение найдено, его больше нигде нет
         for i in range(self.num_items):
             for cat in self.cat_keys:
                 if len(self.possibilities[cat][i]) == 1:
                     val = self.possibilities[cat][i][0]
                     for j in range(self.num_items):
-                        if i != j and val in self.possibilities[cat][j]: self._log(f"Propagate Unary: '{val}' is in pos {i+1}, removing from pos {j+1} in cat '{cat}'."); self.possibilities[cat][j].remove(val); made_change = True
+                        if i != j and val in self.possibilities[cat][j]:
+                            self._log(f"Propagate Unary: '{val}' is in pos {i+1}, removing from pos {j+1} in cat '{cat}'.")
+                            self.possibilities[cat][j].remove(val)
+                            made_change = True
 
+        # 2. Применяем все типы подсказок на основе текущего состояния
         for clue_type, params in self.clues:
             if clue_type == 'direct_link':
                 cat1, val1, cat2, val2 = params
@@ -44,20 +54,45 @@ class ConstraintSatisfactionSolver:
                 for i in range(self.num_items - 1):
                     if left not in self.possibilities[cat][i] and right in self.possibilities[cat][i+1]: self._log(f"Clue '{clue_type}': '{left}' cannot be at pos {i+1}, so '{right}' cannot be at pos {i+2}."); self.possibilities[cat][i+1].remove(right); made_change = True
                     if right not in self.possibilities[cat][i+1] and left in self.possibilities[cat][i]: self._log(f"Clue '{clue_type}': '{right}' cannot be at pos {i+2}, so '{left}' cannot be at pos {i+1}."); self.possibilities[cat][i].remove(left); made_change = True
+
+            # --- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ ЛОГИКИ ---
             elif clue_type == 'indirect_relative_link':
                 cat1, val1, cat2, val2 = params
                 for i in range(self.num_items - 1):
-                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i+1]: self._log(f"Clue '{clue_type}': '{val1}'({cat1}) cannot be at pos {i+1}, so '{val2}'({cat2}) cannot be at pos {i+2}."); self.possibilities[cat2][i+1].remove(val2); made_change = True
-                    if val2 not in self.possibilities[cat2][i+1] and val1 in self.possibilities[cat1][i]: self._log(f"Clue '{clue_type}': '{val2}'({cat2}) cannot be at pos {i+2}, so '{val1}'({cat1}) cannot be at pos {i+1}."); self.possibilities[cat1][i].remove(val1); made_change = True
+                    # Отрицательное распространение
+                    if val1 not in self.possibilities[cat1][i] and val2 in self.possibilities[cat2][i+1]:
+                        self._log(f"Clue '{clue_type}': '{val1}'({cat1}) cannot be at pos {i+1}, so '{val2}'({cat2}) cannot be at pos {i+2}.")
+                        self.possibilities[cat2][i+1].remove(val2); made_change = True
+                    if val2 not in self.possibilities[cat2][i+1] and val1 in self.possibilities[cat1][i]:
+                        self._log(f"Clue '{clue_type}': '{val2}'({cat2}) cannot be at pos {i+2}, so '{val1}'({cat1}) cannot be at pos {i+1}.")
+                        self.possibilities[cat1][i].remove(val1); made_change = True
+
+                    # Позитивное распространение (ЭТО БЫЛО СЛОМАНО)
+                    if self.possibilities[cat1][i] == [val1] and self.possibilities[cat2][i+1] != [val2]:
+                        if val2 in self.possibilities[cat2][i+1]:
+                            self._log(f"Clue '{clue_type}': Pos {i+1} is confirmed as '{val1}', so pos {i+2} must be '{val2}'.")
+                            self.possibilities[cat2][i+1] = [val2]
+                            made_change = True
+                    if self.possibilities[cat2][i+1] == [val2] and self.possibilities[cat1][i] != [val1]:
+                        if val1 in self.possibilities[cat1][i]:
+                            self._log(f"Clue '{clue_type}': Pos {i+2} is confirmed as '{val2}', so pos {i+1} must be '{val1}'.")
+                            self.possibilities[cat1][i] = [val1]
+                            made_change = True
         return made_change
 
     def solve(self, clues: List[Tuple]):
         self.clues = clues
+        # Применяем позиционные подсказки один раз для установки "якорей"
         for clue_type, params in clues:
             if clue_type == 'positional':
                 pos_idx, cat, val = params[0] - 1, params[1], params[2]
-                if val in self.possibilities[cat][pos_idx]: self._log(f"Applying positional clue: Pos {pos_idx+1} in '{cat}' is set to '{val}'."); self.possibilities[cat][pos_idx] = [val]
-        while self._propagate(): pass
+                if val in self.possibilities[cat][pos_idx]:
+                    self._log(f"Applying positional clue: Pos {pos_idx+1} in '{cat}' is set to '{val}'.")
+                    self.possibilities[cat][pos_idx] = [val]
+
+        # Запускаем основной цикл распространения до полной стабилизации
+        while self._propagate():
+            pass
 
     def get_status(self) -> str:
         is_solved = True
@@ -85,7 +120,6 @@ class ElegantLogicPuzzleGenerator:
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories_for_theme = self.themes[selected_theme_name]
 
-        # Обновляем сценарий в story_elements
         self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
 
         print(f"\n[Генератор]: Выбрана тема: '{selected_theme_name}'.")
@@ -130,12 +164,20 @@ class ElegantLogicPuzzleGenerator:
         return ""
 
     def generate(self, difficulty: int = 5, verbose_solver: bool = False, log_file_path: Optional[str] = None):
+        max_attempts = 10
+        for attempt in range(max_attempts):
+            print(f"\n--- Попытка генерации #{attempt + 1}/{max_attempts} ---")
+            if self._try_generate(difficulty, verbose_solver, log_file_path):
+                return
+        print(f"\n[Генератор]: НЕ УДАЛОСЬ сгенерировать корректную головоломку за {max_attempts} попыток.")
+
+    def _try_generate(self, difficulty: int, verbose_solver: bool, log_file_path: Optional[str]):
         if not 1 <= difficulty <= 10: raise ValueError("Сложность должна быть между 1 и 10.")
 
         try:
             self._select_data_for_difficulty(difficulty)
         except ValueError as e:
-            print(f"[ОШИБКА ГЕНЕРАЦИИ]: {e}"); return
+            print(f"[ОШИБКА ГЕНЕРАЦИИ]: {e}"); return False
 
         self._generate_solution()
 
@@ -174,7 +216,9 @@ class ElegantLogicPuzzleGenerator:
                 solver = ConstraintSatisfactionSolver(self.categories, verbose=verbose_solver, log_file_handle=log_file)
                 solver.solve(final_clues)
                 if solver.get_status() == "solved": break
-                if not temp_pool: print("\n[Генератор]: Не удалось найти решение. Перезапуск..."); self.generate(difficulty, verbose_solver, log_file_path); return
+                if not temp_pool:
+                    print("\n[Генератор]: Не удалось найти решение на этапе построения. Попытка не удалась.")
+                    return False
                 final_clues.append(temp_pool.pop())
 
             print(f"[Генератор]: Этап 1 завершен. Найдено решаемое решение с {len(final_clues)} подсказками.")
@@ -206,64 +250,28 @@ class ElegantLogicPuzzleGenerator:
             if verbose_solver:
                 print("\n--- Скрытое Решение для самопроверки ---\n", self.solution)
 
+            return True
+
         finally:
             if log_file:
                 log_file.close()
                 print(f"\n[Генератор]: Лог работы решателя сохранен в файл '{log_file_path}'.")
 
 if __name__ == '__main__':
-    # --- УЛУЧШЕНИЕ: Большой и разнообразный пул тем ---
     THEMES = {
-        "Офисная Тайна": {
-            "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев", "Орлов"],
-            "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Безопасность", "Аналитика"],
-            "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр", "Импульс"],
-            "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо", "Сок"],
-            "Этаж": ["3-й", "4-й", "5-й", "6-й", "7-й", "8-й", "9-й", "10-й"]
-        },
-        "Загадка Тихого Квартала": {
-            "Житель": ["Белов", "Чернов", "Рыжов", "Зеленин", "Серов", "Сидоров", "Поляков", "Морозов"],
-            "Профессия": ["Врач", "Инженер", "Художник", "Программист", "Учитель", "Юрист", "Архитектор", "Писатель"],
-            "Улица": ["Кленовая", "Цветочная", "Солнечная", "Вишневая", "Парковая", "Речная", "Лесная", "Озерная"],
-            "Хобби": ["Рыбалка", "Садоводство", "Фотография", "Шахматы", "Коллекционирование", "Музыка", "Спорт", "Кулинария"],
-            "Питомец": ["Собака", "Кошка", "Попугай", "Хомяк", "Рыбки", "Черепаха", "Кролик", "Шиншилла"]
-        },
-        "Университетский Переполох": {
-            "Профессор": ["Тихомиров", "Павлов", "Виноградов", "Богданов", "Козлов", "Федоров", "Максимов", "Никитин"],
-            "Факультет": ["Исторический", "Физический", "Химический", "Биологический", "Философский", "Юридический", "Экономический", "Математический"],
-            "Предмет": ["Квантовая механика", "Средневековая история", "Органическая химия", "Теория вероятностей", "Этика", "Римское право", "Макроэкономика", "Молекулярная биология"],
-            "Аудитория": ["101-я", "202-я", "303-я", "404-я", "505-я", '601-я', "711-я", "812-я"],
-            "Книга": ["'Начала' Евклида", "'Левиафан' Гоббса", "'Капитал' Маркса", "'Опыты' Монтеня", "'Государь' Макиавелли", "'Происхождение видов'", "'Структура научных революций'", "'Война и мир'"]
-        },
-        "Киберпанк-Нуар": {
-            "Детектив": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"],
-            "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"],
-            "Имплант": ["Kiroshi Optics", "Mantis Blades", "Synth-Lungs", "Grit-Weave", "Chrono-Core", "Neural-Port", "Echo-Dampers", "Reflex-Booster"],
-            "Напиток": ["Synth-Caff", "N-Kola", "Slurm", "Chromantica", "Glycerin-Tea", "De-Tox", "Synth-Ale", "Glitter-Stim"],
-            "Район": ["Neon-Sprawl", "The Core", "Iron-District", "Aetheria", "The Undercity", "Zenith-Heights", "The Shambles", "Port-Kailash"]
-        },
-        "Стимпанк-Алхимия": {
-            "Изобретатель": ["Alastair", "Isadora", "Bartholomew", "Genevieve", "Percival", "Seraphina", "Thaddeus", "Odette"],
-            "Гильдия": ["Artificers", "Clockwork", "Alchemists", "Aethernauts", "Iron-Wrights", "Illuminators", "Cartographers", "Innovators"],
-            "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"],
-            "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"],
-            "Материал": ["Aetherium-Crystal", "Orichalcum-Gear", "Voltaic-Coil", "Soul-Bronze", "Quicksilver-Core", "Obsidian-Lens", "Dragon-Scale-Hide", "Glimmer-Weave"]
-        }
+        "Офисная Тайна": { "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев", "Орлов"], "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Безопасность", "Аналитика"], "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр", "Импульс"], "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо", "Сок"], "Этаж": ["3-й", "4-й", "5-й", "6-й", "7-й", "8-й", "9-й", "10-й"] },
+        "Загадка Тихого Квартала": { "Житель": ["Белов", "Чернов", "Рыжов", "Зеленин", "Серов", "Сидоров", "Поляков", "Морозов"], "Профессия": ["Врач", "Инженер", "Художник", "Программист", "Учитель", "Юрист", "Архитектор", "Писатель"], "Улица": ["Кленовая", "Цветочная", "Солнечная", "Вишневая", "Парковая", "Речная", "Лесная", "Озерная"], "Хобби": ["Рыбалка", "Садоводство", "Фотография", "Шахматы", "Коллекционирование", "Музыка", "Спорт", "Кулинария"], "Питомец": ["Собака", "Кошка", "Попугай", "Хомяк", "Рыбки", "Черепаха", "Кролик", "Шиншилла"] },
+        "Университетский Переполох": { "Профессор": ["Тихомиров", "Павлов", "Виноградов", "Богданов", "Козлов", "Федоров", "Максимов", "Никитин"], "Факультет": ["Исторический", "Физический", "Химический", "Биологический", "Философский", "Юридический", "Экономический", "Математический"], "Предмет": ["Квантовая механика", "Средневековая история", "Органическая химия", "Теория вероятностей", "Этика", "Римское право", "Макроэкономика", "Молекулярная биология"], "Аудитория": ["101-я", "202-я", "303-я", "404-я", "505-я", '601-я', "711-я", "812-я"], "Книга": ["'Начала' Евклида", "'Левиафан' Гоббса", "'Капитал' Маркса", "'Опыты' Монтеня", "'Государь' Макиавелли", "'Происхождение видов'", "'Структура научных революций'", "'Война и мир'"] },
+        "Киберпанк-Нуар": { "Детектив": ["Kaito", "Jyn", "Silas", "Nyx", "Roric", "Anya", "Vex", "Lira"], "Корпорация": ["OmniCorp", "Cygnus", "Stellarix", "Neuro-Link", "Aether-Dyne", "Volkov", "Helios", "Rift-Tech"], "Имплант": ["Kiroshi Optics", "Mantis Blades", "Synth-Lungs", "Grit-Weave", "Chrono-Core", "Neural-Port", "Echo-Dampers", "Reflex-Booster"], "Напиток": ["Synth-Caff", "N-Kola", "Slurm", "Chromantica", "Glycerin-Tea", "De-Tox", "Synth-Ale", "Glitter-Stim"], "Район": ["Neon-Sprawl", "The Core", "Iron-District", "Aetheria", "The Undercity", "Zenith-Heights", "The Shambles", "Port-Kailash"] },
+        "Стимпанк-Алхимия": { "Изобретатель": ["Alastair", "Isadora", "Bartholomew", "Genevieve", "Percival", "Seraphina", "Thaddeus", "Odette"], "Гильдия": ["Artificers", "Clockwork", "Alchemists", "Aethernauts", "Iron-Wrights", "Illuminators", "Cartographers", "Innovators"], "Автоматон": ["Cogsworth", "Steam-Golem", "Brass-Scarab", "Chrono-Spider", "Aether-Wisp", "The Oraculum", "The Geographer", "The Archivist"], "Эликсир": ["Philosopher's Dew", "Liquid-Luck", "Elixir of Vigor", "Draught of Genius", "Quicksilver-Tonic", "Sun-Stone-Solution", "Aether-in-a-Bottle", "Glimmer-Mist"], "Материал": ["Aetherium-Crystal", "Orichalcum-Gear", "Voltaic-Coil", "Soul-Bronze", "Quicksilver-Core", "Obsidian-Lens", "Dragon-Scale-Hide", "Glimmer-Weave"] }
     }
 
-    # --- УЛУЧШЕНИЕ: story_elements теперь содержит ВСЕ возможные ключи из ВСЕХ тем ---
-    # При добавлении новой темы с новыми названиями категорий, их нужно добавить сюда.
     puzzle_story_elements = {
         "scenario": "", "position": "локация",
-        # Офис
         "Сотрудник": "сотрудник", "Отдел": "отдел", "Проект": "проект", "Напиток": "напиток", "Этаж": "этаж",
-        # Квартал
         "Житель": "житель", "Профессия": "профессия", "Улица": "улица", "Хобби": "хобби", "Питомец": "питомец",
-        # Университет
         "Профессор": "профессор", "Факультет": "факультет", "Предмет": "предмет", "Аудитория": "аудитория", "Книга": "книга",
-        # Киберпанк
         "Детектив": "детектив", "Корпорация": "корпорация", "Имплант": "имплант", "Район": "район",
-        # Стимпанк
         "Изобретатель": "изобретатель", "Гильдия": "гильдия", "Автоматон": "автоматон", "Эликсир": "эликсир", "Материал": "материал",
     }
 
