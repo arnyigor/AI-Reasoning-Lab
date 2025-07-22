@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-import random
-import pandas as pd
-from typing import Dict, List, Tuple, Any, Optional, Set
-from ortools.sat.python import cp_model
 import collections
+import random
+from typing import Dict, List, Tuple, Any, Optional, Set
+
+import pandas as pd
+from ortools.sat.python import cp_model
+
 
 class ORToolsPuzzleGenerator:
     """
@@ -14,6 +16,7 @@ class ORToolsPuzzleGenerator:
     с полным набором из 15+ типов косвенных и прямых подсказок для
     создания по-настоящему разнообразных и интересных задач.
     """
+
     def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
         self.themes = themes
         self.story_elements = story_elements
@@ -52,11 +55,11 @@ class ORToolsPuzzleGenerator:
                 print("  - УСПЕХ: Найдена интересная головоломка!")
                 _, final_branches = self._count_solutions_and_measure_complexity(final_puzzle)
 
-                print("\n" + "="*60)
+                print("\n" + "=" * 60)
                 print("ГЕНЕРАЦИЯ УСПЕШНО ЗАВЕРШЕНА.")
                 print(f"Итоговое число подсказок: {len(final_puzzle)}")
                 print(f"Финальная сложность (ветвлений): {final_branches}")
-                print("="*60)
+                print("=" * 60)
                 self._print_puzzle(final_puzzle, question_data)
                 return
             else:
@@ -71,7 +74,9 @@ class ORToolsPuzzleGenerator:
         self.anchors = {('positional', (1, self.cat_keys[0], self.solution.loc[1, self.cat_keys[0]]))}
         if self.is_circular:
             # Используем якорь, который точно есть в _format_clue
-            self.anchors.add(('relative_pos', (self.cat_keys[0], self.solution.loc[1, self.cat_keys[0]], self.cat_keys[1], self.solution.loc[2, self.cat_keys[1]])))
+            self.anchors.add(('relative_pos', (
+                self.cat_keys[0], self.solution.loc[1, self.cat_keys[0]], self.cat_keys[1],
+                self.solution.loc[2, self.cat_keys[1]])))
 
         current_clues = list(self.anchors)
 
@@ -110,10 +115,13 @@ class ORToolsPuzzleGenerator:
 
         for clue_type, params in puzzle:
             clue_items = set()
+
             def extract_items(p):
                 if isinstance(p, (list, tuple)):
                     for item in p: extract_items(item)
-                elif isinstance(p, str) and p in all_items: clue_items.add(p)
+                elif isinstance(p, str) and p in all_items:
+                    clue_items.add(p)
+
             extract_items(params)
 
             clue_items_list = list(clue_items)
@@ -143,8 +151,9 @@ class ORToolsPuzzleGenerator:
                     path_len = len(path) - 1
                     if path_len > max_path_len:
                         max_path_len = path_len
-                        best_question = {"question": f"Какой {self.story_elements.get(attribute_cat, attribute_cat)} у {self.story_elements.get(subject_cat, subject_cat)} по имени {subject_item}?",
-                                         "answer": f"Ответ для проверки: {answer_item}"}
+                        best_question = {
+                            "question": f"Какой {self.story_elements.get(attribute_cat, attribute_cat)} у {self.story_elements.get(subject_cat, subject_cat)} по имени {subject_item}?",
+                            "answer": f"Ответ для проверки: {answer_item}"}
                     break
                 for neighbor in graph.get(curr_node, []):
                     if neighbor not in visited:
@@ -159,17 +168,26 @@ class ORToolsPuzzleGenerator:
 
     def _select_data_for_difficulty(self, difficulty: int):
         self.difficulty = difficulty
-        if 1 <= difficulty <= 3: self.num_items = 4; self.is_circular = False
-        elif 4 <= difficulty <= 6: self.num_items = 5; self.is_circular = False
-        elif 7 <= difficulty <= 8: self.num_items = 6; self.is_circular = True
-        else: self.num_items = 7; self.is_circular = True
+        if 1 <= difficulty <= 3:
+            self.num_items = 4;
+            self.is_circular = False
+        elif 4 <= difficulty <= 6:
+            self.num_items = 5;
+            self.is_circular = False
+        elif 7 <= difficulty <= 8:
+            self.num_items = 6;
+            self.is_circular = True
+        else:
+            self.num_items = 7;
+            self.is_circular = True
 
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories = self.themes[selected_theme_name]
         self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
         self.cat_keys = list(base_categories.keys())
         self.categories = {key: random.sample(values, self.num_items) for key, values in base_categories.items()}
-        print(f"\n[Генератор]: Тема: '{selected_theme_name}', Сложность: {difficulty}/10, Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: {'Круговая' if self.is_circular else 'Линейная'}.")
+        print(
+            f"\n[Генератор]: Тема: '{selected_theme_name}', Сложность: {difficulty}/10, Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: {'Круговая' if self.is_circular else 'Линейная'}.")
 
     def _generate_solution(self):
         solution_data = {cat: random.sample(items, self.num_items) for cat, items in self.categories.items()}
@@ -187,10 +205,12 @@ class ORToolsPuzzleGenerator:
             super().__init__()
             self._solution_count = 0
             self._limit = limit
+
         def on_solution_callback(self):
             self._solution_count += 1
             if self._solution_count >= self._limit:
                 self.StopSearch()
+
         @property
         def solution_count(self):
             return self._solution_count
@@ -218,21 +238,28 @@ class ORToolsPuzzleGenerator:
 
             unique_clues['positional'].add(('positional', (pos1, cat1, item1)))
             if pos1 == 1 or pos1 == self.num_items: unique_clues['at_edge'].add(('at_edge', (cat1, item1)))
-            if pos1 % 2 == 0: unique_clues['is_even'].add(('is_even', (cat1, item1, True)))
-            else: unique_clues['is_even'].add(('is_even', (cat1, item1, False)))
+            if pos1 % 2 == 0:
+                unique_clues['is_even'].add(('is_even', (cat1, item1, True)))
+            else:
+                unique_clues['is_even'].add(('is_even', (cat1, item1, False)))
 
             for j in range(i + 1, len(all_items_flat)):
                 cat2, item2 = all_items_flat[j]
                 if cat1 == cat2: continue
                 pos2 = self.solution[self.solution[cat2] == item2].index[0]
 
-                if pos1 == pos2: unique_clues['direct_link'].add(('direct_link', (cat1, item1, cat2, item2)))
-                else: unique_clues['negative_direct_link'].add(('negative_direct_link', (cat1, item1, cat2, item2)))
+                if pos1 == pos2:
+                    unique_clues['direct_link'].add(('direct_link', (cat1, item1, cat2, item2)))
+                else:
+                    unique_clues['negative_direct_link'].add(('negative_direct_link', (cat1, item1, cat2, item2)))
 
                 if abs(pos1 - pos2) == 1: unique_clues['relative_pos'].add(('relative_pos', (cat1, item1, cat2, item2)))
-                if self.is_circular and self.num_items % 2 == 0 and abs(pos1-pos2) == self.num_items//2: unique_clues['opposite_link'].add(('opposite_link', (cat1,item1,cat2,item2)))
-                if abs(pos1 - pos2) > 1: unique_clues['distance_greater_than'].add(('distance_greater_than', (cat1, item1, cat2, item2, 1)))
-                if pos1 + pos2 == self.num_items + 1: unique_clues['sum_equals'].add(('sum_equals', (cat1, item1, cat2, item2, self.num_items + 1)))
+                if self.is_circular and self.num_items % 2 == 0 and abs(pos1 - pos2) == self.num_items // 2:
+                    unique_clues['opposite_link'].add(('opposite_link', (cat1, item1, cat2, item2)))
+                if abs(pos1 - pos2) > 1: unique_clues['distance_greater_than'].add(
+                    ('distance_greater_than', (cat1, item1, cat2, item2, 1)))
+                if pos1 + pos2 == self.num_items + 1: unique_clues['sum_equals'].add(
+                    ('sum_equals', (cat1, item1, cat2, item2, self.num_items + 1)))
 
         if len(cat_keys) >= 3:
             for _ in range(self.num_items * 5):
@@ -273,40 +300,43 @@ class ORToolsPuzzleGenerator:
         elif clue_type == 'relative_pos':
             _, val1, _, val2 = params
             p1, p2 = get_var(val1), get_var(val2)
-            if p1 is not None and p2 is not None: model.AddAbsEquality(1, p1-p2)
+            if p1 is not None and p2 is not None: model.AddAbsEquality(1, p1 - p2)
         elif clue_type == 'opposite_link':
             if self.is_circular:
                 _, val1, _, val2 = params
                 p1, p2 = get_var(val1), get_var(val2)
-                if p1 is not None and p2 is not None: model.AddAbsEquality(self.num_items // 2, p1-p2)
+                if p1 is not None and p2 is not None: model.AddAbsEquality(self.num_items // 2, p1 - p2)
         elif clue_type in ['three_in_a_row', 'ordered_chain']:
-            (c1,v1),(c2,v2),(c3,v3) = params
-            p1,p2,p3 = get_var(v1),get_var(v2),get_var(v3)
+            (c1, v1), (c2, v2), (c3, v3) = params
+            p1, p2, p3 = get_var(v1), get_var(v2), get_var(v3)
             if p1 is not None and p2 is not None and p3 is not None:
                 if clue_type == 'three_in_a_row':
                     max_var, min_var = model.NewIntVar(1, self.num_items, ''), model.NewIntVar(1, self.num_items, '')
-                    model.AddMaxEquality(max_var, [p1,p2,p3]); model.AddMinEquality(min_var, [p1,p2,p3])
+                    model.AddMaxEquality(max_var, [p1, p2, p3]);
+                    model.AddMinEquality(min_var, [p1, p2, p3])
                     model.Add(max_var - min_var == 2)
                 elif clue_type == 'ordered_chain':
-                    model.Add(p1 < p2); model.Add(p2 < p3)
+                    model.Add(p1 < p2);
+                    model.Add(p2 < p3)
         elif clue_type == 'at_edge':
             _, val = params
             p = get_var(val)
             if p is not None:
                 b1, b2 = model.NewBoolVar(''), model.NewBoolVar('')
-                model.Add(p==1).OnlyEnforceIf(b1); model.Add(p==self.num_items).OnlyEnforceIf(b2)
-                model.AddBoolOr([b1,b2])
+                model.Add(p == 1).OnlyEnforceIf(b1);
+                model.Add(p == self.num_items).OnlyEnforceIf(b2)
+                model.AddBoolOr([b1, b2])
         elif clue_type == 'is_even':
             _, val, is_even = params
             p = get_var(val)
             if p is not None: model.AddModuloEquality(0 if is_even else 1, p, 2)
         elif clue_type == 'sum_equals':
             _, val1, _, val2, total = params
-            p1,p2 = get_var(val1), get_var(val2)
-            if p1 is not None and p2 is not None: model.Add(p1+p2==total)
+            p1, p2 = get_var(val1), get_var(val2)
+            if p1 is not None and p2 is not None: model.Add(p1 + p2 == total)
         elif clue_type == 'distance_greater_than':
             _, val1, _, val2, dist = params
-            p1,p2 = get_var(val1), get_var(val2)
+            p1, p2 = get_var(val1), get_var(val2)
             if p1 is not None and p2 is not None:
                 abs_diff = model.NewIntVar(0, self.num_items, '')
                 model.AddAbsEquality(abs_diff, p1 - p2)
@@ -319,9 +349,9 @@ class ORToolsPuzzleGenerator:
         print(f"Условия ({len(final_clues)} подсказок):\n")
         final_clues_text = sorted([self._format_clue(c) for c in final_clues])
         for i, clue_text in enumerate(final_clues_text, 1): print(f"{i}. {clue_text}")
-        print("\n" + "="*40 + "\n")
+        print("\n" + "=" * 40 + "\n")
         print(f"Вопрос: {question}")
-        print("\n" + "="*40 + "\n")
+        print("\n" + "=" * 40 + "\n")
         print(answer_for_check)
         print("\n--- Скрытое Решение для самопроверки ---\n", self.solution)
 
@@ -332,7 +362,7 @@ class ORToolsPuzzleGenerator:
         g = lambda c, v: f"{s.get(c, c)} '{v}'"
 
         try:
-            if clue_type == 'positional': return f"В {s.get('position','локация')} №{params[0]} находится {g(params[1], params[2])}."
+            if clue_type == 'positional': return f"В {s.get('position', 'локация')} №{params[0]} находится {g(params[1], params[2])}."
             if clue_type == 'direct_link': return f"Характеристикой {g(params[0], params[1])} является {g(params[2], params[3])}."
             if clue_type == 'negative_direct_link': return f"{g(params[0], params[1]).capitalize()} НЕ находится в одной локации с {g(params[2], params[3])}."
             if clue_type == 'relative_pos': return f"{g(params[0], params[1]).capitalize()} и {g(params[2], params[3])} находятся в соседних локациях."
@@ -340,11 +370,11 @@ class ORToolsPuzzleGenerator:
             if clue_type == 'at_edge': return f"{g(params[0], params[1]).capitalize()} находится в одной из крайних локаций."
             if clue_type == 'is_even': return f"Номер локации, где {g(params[0], params[1])}, — {'чётный' if params[2] else 'нечётный'}."
             if clue_type == 'three_in_a_row':
-                p1,p2,p3 = params
-                return f"Объекты {g(p1[0],p1[1])}, {g(p2[0],p2[1])} и {g(p3[0],p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
+                p1, p2, p3 = params
+                return f"Объекты {g(p1[0], p1[1])}, {g(p2[0], p2[1])} и {g(p3[0], p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
             if clue_type == 'ordered_chain':
-                p1,p2,p3 = params
-                return f"Локация, где {g(p1[0],p1[1])}, находится где-то левее локации, где {g(p2[0],p2[1])}, которая в свою очередь левее локации, где {g(p3[0],p3[1])}."
+                p1, p2, p3 = params
+                return f"Локация, где {g(p1[0], p1[1])}, находится где-то левее локации, где {g(p2[0], p2[1])}, которая в свою очередь левее локации, где {g(p3[0], p3[1])}."
             if clue_type == 'sum_equals':
                 return f"Сумма номеров локаций, где {g(params[0], params[1])} и где {g(params[2], params[3])}, равна {params[4]}."
             if clue_type == 'distance_greater_than':
@@ -355,8 +385,33 @@ class ORToolsPuzzleGenerator:
 
 
 if __name__ == '__main__':
-    THEMES = { "Офисная Тайна": { "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев"], "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Аналитика"], "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр"], "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо"] }, "Космическая Одиссея": { "Капитан": ["Рейнольдс", "Шепард", "Адама", "Старбак", "Пикар", "Соло", "Акбар"], "Корабль": ["Серенити", "Нормандия", "Галактика", "Звёздный Крейсер", "Энтерпрайз", "Сокол", "Прометей"], "Сектор": ["Орион", "Андромеда", "Плеяды", "Центавра", "Гидра", "Войд", "Квазар"], "Аномалия": ["Червоточина", "Грави-колодец", "Темпоральный сдвиг", "Нейтронная буря", "Пси-поле", "Ксено-артефакт", "Сингулярность"] } }
-    puzzle_story_elements = { "scenario": "", "position": "локация", "Сотрудник": "сотрудник", "Отдел": "отдел", "Проект": "проект", "Напиток": "напиток", "Капитан": "капитан", "Корабль": "корабль", "Сектор": "сектор", "Аномалия": "аномалия" }
+    THEMES = {
+        "Офисная Тайна": {
+            "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев"],
+            "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Аналитика"],
+            "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр"],
+            "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо"]
+        },
+        "Космическая Одиссея": {
+            "Капитан": ["Рейнольдс", "Шепард", "Адама", "Старбак", "Пикар", "Соло", "Акбар"],
+            "Корабль": ["Серенити", "Нормандия", "Галактика", "Звёздный Крейсер", "Энтерпрайз",
+                        "Сокол", "Прометей"],
+            "Сектор": ["Орион", "Андромеда", "Плеяды", "Центавра", "Гидра", "Войд", "Квазар"],
+            "Аномалия": ["Червоточина", "Грави-колодец", "Темпоральный сдвиг", "Нейтронная буря",
+                         "Пси-поле", "Ксено-артефакт", "Сингулярность"]},
+        "Тайна в Школе на Холме": {
+            "Ученик": ["Алексей", "Виктория", "Даниил", "Елизавета", "Матвей", "София", "Никита", "Анастасия"],
+            "Кружок": ["Шахматы", "Робототехника", "Литературный", "Театральный", "Астрономия", "Дебаты", "Фотография", "Кулинария"],
+            "Предмет": ["Алгебра", "Биология", "История", "Музыка", "Физкультура", "География", "ИЗО", "Информатика"],
+            "Обед": ["Борщ", "Плов", "Салат Оливье", "Макароны с сыром", "Котлета с пюре", "Суп с лапшой", "Запеканка", "Сэндвич с ветчиной"]
+        }
+    }
+    puzzle_story_elements = {"scenario": "", "position": "локация", "Сотрудник": "сотрудник", "Отдел": "отдел",
+                             "Проект": "проект", "Напиток": "напиток", "Капитан": "капитан", "Корабль": "корабль",
+                             "Сектор": "сектор", "Аномалия": "аномалия",
+                             "Ученик": "ученик", "Кружок": "кружок",
+                             "Предмет": "предмет", "Обед": "обед"
+                             }
 
     generator = ORToolsPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
