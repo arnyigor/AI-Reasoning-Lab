@@ -365,5 +365,5 @@ if __name__ == '__main__':
 
     generator = ORToolsPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
-    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v9.5) ---")
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v9.6) ---")
     generator.generate_with_retries(difficulty=10, max_attempts=20)
