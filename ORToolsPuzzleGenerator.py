@@ -6,12 +6,12 @@ from ortools.sat.python import cp_model
 class ORToolsPuzzleGenerator:
     """
     Генератор логических головоломок на движке Google OR-Tools.
-    Архитектура v9.4 "Устойчивость".
+    Архитектура v9.5 "Детерминист".
 
     Финальная версия, решающая проблему нестабильности генерации.
+    - Детерминированно создает полный пул сложных подсказок, устраняя зависимость от удачи.
     - Создает "скелет" сложности, проверяя каждую подсказку на непротиворечивость.
-    - Гарантирует логическую состоятельность ядра головоломки.
-    - Значительно повышает процент успешных генераций с первой попытки.
+    - Гарантирует максимальную надежность и процент успеха генерации.
     """
 
     def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
@@ -41,19 +41,19 @@ class ORToolsPuzzleGenerator:
         print("="*50)
 
     def _try_generate(self, difficulty: int) -> bool:
-        """Одна попытка сгенерировать головоломку с устойчивым созданием скелета."""
+        """Финальная версия с приоритетным добавлением подсказок."""
         self._select_data_for_difficulty(difficulty)
         self._generate_solution()
         assert self.solution is not None
 
         full_clue_pool_by_type = self._generate_clue_pool()
 
-        # --- Этап 1: УСТОЙЧИВОЕ Создание "Скелета Сложности" ---
+        # --- Этап 1: Устойчивое создание "Скелета Сложности" ---
         print("[Архитектор]: Этап 1: Устойчивое создание 'Скелета Сложности'...")
         SKELETON_RECIPES = {
-            10: {'transitive_spatial_link': 1, 'arithmetic_link': 2, 'opposite_link': 1, 'conditional_link': 1},
-            9:  {'transitive_spatial_link': 1, 'opposite_link': 1, 'arithmetic_link': 1, 'conditional_link': 1},
-            8:  {'opposite_link': 1, 'relative_pos': 2, 'arithmetic_link': 1},
+            10: {'arithmetic_link': 2, 'transitive_spatial_link': 1, 'opposite_link': 1, 'conditional_link': 1},
+            9:  {'arithmetic_link': 1, 'transitive_spatial_link': 1, 'opposite_link': 1, 'conditional_link': 1},
+            8:  {'arithmetic_link': 1, 'opposite_link': 1, 'relative_pos': 2},
             7:  {'opposite_link': 1, 'relative_pos': 3},
             6:  {'relative_pos': 2, 'direct_link': 2},
             5:  {'relative_pos': 1, 'direct_link': 3},
@@ -64,15 +64,11 @@ class ORToolsPuzzleGenerator:
 
         for clue_type, target_count in recipe.items():
             added_count = 0
-            # Пытаемся добавить нужное количество подсказок данного типа
             candidate_clues = full_clue_pool_by_type.get(clue_type, [])
             random.shuffle(candidate_clues)
 
             for candidate_clue in candidate_clues:
-                if added_count >= target_count:
-                    break
-
-                # Проверяем, не противоречит ли новая подсказка уже существующему скелету
+                if added_count >= target_count: break
                 if self._check_solvability(skeleton_clues + [candidate_clue]) > 0:
                     skeleton_clues.append(candidate_clue)
                     added_count += 1
@@ -82,20 +78,32 @@ class ORToolsPuzzleGenerator:
             else:
                 print(f"  - Успешно добавлен в скелет: {added_count} x '{clue_type}'")
 
-        # --- Этапы 2 и 3 остаются без изменений ---
-        print("[Архитектор]: Этап 2: Добавление подсказок до достижения уникального решения...")
-        # ... (код без изменений) ...
-        CLUE_PRIORITY = ['positional', 'relative_pos', 'negative_direct_link', 'conditional_link', 'direct_link', 'opposite_link', 'transitive_spatial_link', 'arithmetic_link']
+        # --- Этап 2 (ИЗМЕНЕН): Стратегическое добавление подсказок ---
+        print("[Стратег]: Этап 2: Добавление подсказок по приоритету до достижения уникального решения...")
 
-        # Собираем все подсказки, которые не вошли в скелет
-        flat_pool = [clue for clues in full_clue_pool_by_type.values() for clue in clues]
-        remaining_clues_flat = [clue for clue in flat_pool if clue not in skeleton_clues]
-        random.shuffle(remaining_clues_flat)
+        # Задаем приоритет от самых "сильных" к самым "слабым"
+        CLUE_PRIORITY = [
+            'positional',
+            'arithmetic_link',
+            'transitive_spatial_link',
+            'opposite_link',
+            'relative_pos',
+            'conditional_link',
+            'direct_link',
+            'negative_direct_link'
+        ]
+
+        flat_pool = {clue for clues in full_clue_pool_by_type.values() for clue in clues}
+        skeleton_set = set(skeleton_clues)
+
+        # Собираем оставшиеся подсказки и сортируем их по приоритету
+        remaining_clues = [clue for clue in flat_pool if clue not in skeleton_set]
+        remaining_clues.sort(key=lambda c: CLUE_PRIORITY.index(c[0]))
 
         current_clues = list(skeleton_clues)
 
         solution_found = False
-        for clue_to_add in remaining_clues_flat:
+        for clue_to_add in remaining_clues:
             current_clues.append(clue_to_add)
             if self._check_solvability(current_clues) == 1:
                 print(f"  - Уникальное решение найдено с {len(current_clues)} подсказками.")
@@ -103,11 +111,11 @@ class ORToolsPuzzleGenerator:
                 break
 
         if not solution_found:
-            print("[Архитектор]: [ОШИБКА] Не удалось достичь уникального решения. Попытка не удалась.")
+            print("[Стратег]: [ОШИБКА] Не удалось достичь уникального решения. Попытка не удалась.")
             return False
 
-        print("[Архитектор]: Этап 3: Минимизация вспомогательных подсказок...")
-        # ... (код без изменений) ...
+        # --- Этап 3: Финальная "Шлифовка" ---
+        print("[Стратег]: Этап 3: Минимизация вспомогательных подсказок...")
         auxiliary_clues = [c for c in current_clues if c not in skeleton_clues]
         random.shuffle(auxiliary_clues)
 
@@ -121,9 +129,6 @@ class ORToolsPuzzleGenerator:
 
         self._print_puzzle(final_clues)
         return True
-
-    # --- Все остальные методы (_select_data, _generate_solution, _generate_clue_pool, _create_or_tools_model, etc.)
-    # --- остаются такими же, как в версии 9.3 "Точность". Я привожу их ниже для полноты. ---
 
     def _select_data_for_difficulty(self, difficulty: int):
         self.difficulty = difficulty
@@ -145,6 +150,7 @@ class ORToolsPuzzleGenerator:
         self.solution = pd.DataFrame(solution_data, index=range(1, self.num_items + 1))
 
     def _generate_clue_pool(self) -> Dict[str, List[Tuple[str, Any]]]:
+        """ИЗМЕНЕНО: Детерминированная генерация 'transitive_spatial_link'."""
         pool: Dict[str, List[Any]] = {
             'positional': [], 'direct_link': [], 'negative_direct_link': [], 'conditional_link': [],
             'relative_pos': [], 'opposite_link': [], 'transitive_spatial_link': [],
@@ -165,39 +171,52 @@ class ORToolsPuzzleGenerator:
                     unique_clues['conditional_link'].add(('conditional_link', (cat1, row[cat1], cat2, row[cat2])))
                 else:
                     unique_clues['negative_direct_link'].add(('negative_direct_link', (cat1, row[cat1], cat2, other_row[cat2])))
-
-        for i_pos in range(1, self.num_items + 1):
-            row = self.solution.loc[i_pos]
-            cat1, cat2 = random.sample(cat_keys, 2)
             if self.is_circular or i_pos < self.num_items:
                 next_i_pos = (i_pos % self.num_items) + 1
                 next_row = self.solution.loc[next_i_pos]
+                cat1, cat2 = random.sample(cat_keys, 2)
                 unique_clues['relative_pos'].add(('relative_pos', (cat1, row[cat1], cat2, next_row[cat2])))
             if self.is_circular:
                 opposite_i_idx = (i_pos - 1 + self.num_items // 2) % self.num_items
                 opposite_i_pos = opposite_i_idx + 1
                 opposite_row = self.solution.loc[opposite_i_pos]
+                cat1, cat2 = random.sample(cat_keys, 2)
                 unique_clues['opposite_link'].add(('opposite_link', (cat1, row[cat1], cat2, opposite_row[cat2])))
 
-        all_items_flat = [(cat, item) for cat, items in self.categories.items() for item in items]
-        for _ in range(self.num_items * 3):
-            if len(cat_keys) >= 3:
-                c1, c2, c3 = random.sample(cat_keys, 3)
-                i1, i2, i3 = random.sample(range(1, self.num_items + 1), 3)
-                if abs(i1 - i2) == 1 and abs(i2 - i3) == 1 and i1 != i3:
-                    p_left_row, p_mid_row, p_right_row = self.solution.loc[i1], self.solution.loc[i2], self.solution.loc[i3]
-                    p_left, p_mid, p_right = (c1, p_left_row[c1]), (c2, p_mid_row[c2]), (c3, p_right_row[c3])
+        # НОВЫЙ ДЕТЕРМИНИРОВАННЫЙ ПОДХОД для 'transitive_spatial_link'
+        if len(cat_keys) >= 3:
+            if self.is_circular:
+                for pos_mid in range(1, self.num_items + 1):
+                    pos_left = (pos_mid - 2 + self.num_items) % self.num_items + 1
+                    pos_right = (pos_mid % self.num_items) + 1
+                    c1, c2, c3 = random.sample(cat_keys, 3)
+                    p_left = (c1, self.solution.loc[pos_left, c1])
+                    p_mid = (c2, self.solution.loc[pos_mid, c2])
+                    p_right = (c3, self.solution.loc[pos_right, c3])
+                    unique_clues['transitive_spatial_link'].add(('transitive_spatial_link', (p_left, p_mid, p_right)))
+            else: # Линейный случай
+                for pos_mid in range(2, self.num_items):
+                    pos_left, pos_right = pos_mid - 1, pos_mid + 1
+                    c1, c2, c3 = random.sample(cat_keys, 3)
+                    p_left = (c1, self.solution.loc[pos_left, c1])
+                    p_mid = (c2, self.solution.loc[pos_mid, c2])
+                    p_right = (c3, self.solution.loc[pos_right, c3])
                     unique_clues['transitive_spatial_link'].add(('transitive_spatial_link', (p_left, p_mid, p_right)))
 
-            (cat1, item1), (cat2, item2) = random.sample(all_items_flat, 2)
-            pos1 = self.solution[self.solution[cat1] == item1].index[0]
-            pos2 = self.solution[self.solution[cat2] == item2].index[0]
-            if pos1 == pos2 * 2:
-                unique_clues['arithmetic_link'].add(('arithmetic_link', (cat1, item1, cat2, item2, 'twice')))
-            elif pos2 == pos1 * 2:
-                unique_clues['arithmetic_link'].add(('arithmetic_link', (cat2, item2, cat1, item1, 'twice')))
-            if abs(pos1 - pos2) == 2:
-                unique_clues['arithmetic_link'].add(('arithmetic_link', (cat1, item1, cat2, item2, 'diff_2')))
+        all_items_flat = [(cat, item) for cat, items in self.categories.items() for item in items]
+        random.shuffle(all_items_flat)
+        for i in range(len(all_items_flat)):
+            for j in range(i + 1, len(all_items_flat)):
+                (cat1, item1) = all_items_flat[i]
+                (cat2, item2) = all_items_flat[j]
+                pos1 = self.solution[self.solution[cat1] == item1].index[0]
+                pos2 = self.solution[self.solution[cat2] == item2].index[0]
+                if pos1 == pos2 * 2:
+                    unique_clues['arithmetic_link'].add(('arithmetic_link', (cat1, item1, cat2, item2, 'twice')))
+                elif pos2 == pos1 * 2:
+                    unique_clues['arithmetic_link'].add(('arithmetic_link', (cat2, item2, cat1, item1, 'twice')))
+                if abs(pos1 - pos2) == 2:
+                    unique_clues['arithmetic_link'].add(('arithmetic_link', (cat1, item1, cat2, item2, 'diff_2')))
 
         for key in pool:
             pool[key] = list(unique_clues[key])
@@ -317,7 +336,7 @@ class ORToolsPuzzleGenerator:
             if clue_type == 'positional': return f"В {s['position']} №{params[0]} находится {s[params[1]]} {params[2]}."
             if clue_type == 'relative_pos': return f"{s[params[0]].capitalize()} {params[1]} находится в локации непосредственно слева от локации, где {s[params[2]]} {params[3]}."
             if clue_type == 'opposite_link': return f"{s[params[0]].capitalize()} {params[1]} и {s[params[2]]} {params[3]} находятся в локациях друг напротив друга."
-            if clue_type == 'conditional_link': return f"Если в локации находится {s[params[0]]} {params[1]}, то там же находится и {s[params[2]]} {params[3]}."
+            if clue_type == 'conditional_link': return f"**Если** в локации находится {s[params[0]]} {params[1]}, **то** там же находится и {s[params[2]]} {params[3]}."
             if clue_type == 'transitive_spatial_link':
                 p_left, p_middle, p_right = params
                 return f"{s[p_middle[0]].capitalize()} {p_middle[1]} находится в локации между той, где {s[p_left[0]]} {p_left[1]}, и той, где {s[p_right[0]]} {p_right[1]}."
@@ -346,5 +365,5 @@ if __name__ == '__main__':
 
     generator = ORToolsPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
-    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v9.4) ---")
-    generator.generate_with_retries(difficulty=10, max_attempts=5)
+    print("--- ГЕНЕРАЦИЯ ЭКСПЕРТНОЙ ЗАДАЧИ (АРХИТЕКТУРА v9.5) ---")
+    generator.generate_with_retries(difficulty=10, max_attempts=20)
