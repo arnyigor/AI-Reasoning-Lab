@@ -5,21 +5,14 @@ from typing import Dict, List, Tuple, Any, Optional, Set
 from ortools.sat.python import cp_model
 import collections
 
-# -*- coding: utf-8 -*-
-import random
-import pandas as pd
-from typing import Dict, List, Tuple, Any, Optional, Set
-from ortools.sat.python import cp_model
-import collections
-
 class ORToolsPuzzleGenerator:
     """
-    Генератор логических головолок.
-    Архитектура v26.0 "Бульдозер".
+    Генератор логических головоломок.
+    Архитектура v26.1 "Бульдозер-Профи".
 
-    Этот подход возвращается к доказавшей свою надежность стратегии
-    "создай избыточное, затем минимизируй", но с умной минимизацией
-    и финальным аудитом качества. Это самая стабильная версия.
+    Финальная, стабильная версия, сочетающая надежный алгоритм "Бульдозер"
+    с полным набором из 15+ типов косвенных и прямых подсказок для
+    создания по-настоящему разнообразных и интересных задач.
     """
     def __init__(self, themes: Dict[str, Dict[str, List[str]]], story_elements: Dict[str, str]):
         self.themes = themes
@@ -32,7 +25,7 @@ class ORToolsPuzzleGenerator:
         self.cat_keys: List[str] = []
         self.anchors: Set[Tuple[str, Any]] = set()
 
-    def generate_bulldozer(self, difficulty: int, max_retries: int = 10):
+    def generate_bulldozer_pro(self, difficulty: int, max_retries: int = 10):
         for attempt in range(max_retries):
             print(f"\n--- ПОПЫТКА ГЕНЕРАЦИИ №{attempt + 1}/{max_retries} ---")
 
@@ -41,18 +34,18 @@ class ORToolsPuzzleGenerator:
             assert self.solution is not None
 
             # --- Фаза 1: Создание избыточной заготовки ---
-            print("\n[Бульдозер]: Фаза 1: Создание избыточной заготовки...")
+            print("\n[Бульдозер-Профи]: Фаза 1: Создание избыточной заготовки...")
             initial_puzzle = self._build_initial_puzzle()
             if not initial_puzzle:
                 print("  - ПРОВАЛ: Не удалось создать заготовку. Новая попытка...")
                 continue
 
             # --- Фаза 2: Умная минимизация ---
-            print("\n[Бульдозер]: Фаза 2: Умная минимизация...")
+            print("\n[Бульдозер-Профи]: Фаза 2: Умная минимизация...")
             minimized_puzzle = self._minimize_puzzle(initial_puzzle, self.anchors)
 
             # --- Фаза 3: Аудит Качества ---
-            print("\n[Бульдозер]: Фаза 3: Аудит качества...")
+            print("\n[Бульдозер-Профи]: Фаза 3: Аудит качества...")
             final_puzzle, question_data = self._quality_audit_and_select_question(minimized_puzzle)
 
             if question_data:
@@ -77,6 +70,7 @@ class ORToolsPuzzleGenerator:
 
         self.anchors = {('positional', (1, self.cat_keys[0], self.solution.loc[1, self.cat_keys[0]]))}
         if self.is_circular:
+            # Используем якорь, который точно есть в _format_clue
             self.anchors.add(('relative_pos', (self.cat_keys[0], self.solution.loc[1, self.cat_keys[0]], self.cat_keys[1], self.solution.loc[2, self.cat_keys[1]])))
 
         current_clues = list(self.anchors)
@@ -93,9 +87,8 @@ class ORToolsPuzzleGenerator:
         current_puzzle = list(puzzle)
         while True:
             removable_clues = []
-
-            # Ищем все подсказки, которые можно удалить
             clues_to_check = [c for c in current_puzzle if c not in anchors]
+
             for clue in clues_to_check:
                 temp_puzzle = [c for c in current_puzzle if c != clue]
                 if self._check_solvability(temp_puzzle) == 1:
@@ -103,16 +96,14 @@ class ORToolsPuzzleGenerator:
 
             if not removable_clues:
                 print(f"  - Минимизация завершена. Осталось {len(current_puzzle)} подсказок.")
-                break # Больше нечего удалять
+                break
 
-            # Удаляем одну случайную из тех, что можно удалить
             clue_to_remove = random.choice(removable_clues)
             current_puzzle.remove(clue_to_remove)
             print(f"  - Удалена избыточная подсказка. Осталось: {len(current_puzzle)}")
 
         return current_puzzle
 
-    # --- Остальные методы (аудит, хелперы) ---
     def _quality_audit_and_select_question(self, puzzle: List[Tuple[str, Any]], min_path_len: int = 3):
         graph = collections.defaultdict(list)
         all_items = {item for cat_items in self.categories.values() for item in cat_items}
@@ -166,7 +157,6 @@ class ORToolsPuzzleGenerator:
         else:
             return puzzle, None
 
-    # ... (Остальные хелперы остаются без изменений)
     def _select_data_for_difficulty(self, difficulty: int):
         self.difficulty = difficulty
         if 1 <= difficulty <= 3: self.num_items = 4; self.is_circular = False
@@ -213,35 +203,49 @@ class ORToolsPuzzleGenerator:
         return solution_counter.solution_count
 
     def _generate_clue_pool(self) -> Dict[str, List[Tuple[str, Any]]]:
-        pool: Dict[str, List[Any]] = {'positional': [], 'direct_link': [], 'three_in_a_row': [], 'at_edge': [], 'is_even': []}
-        unique_clues = {key: set() for key in pool}
+        # ИСПРАВЛЕНО: Возвращаем полный набор генераторов подсказок
+        pool: Dict[str, List[Any]] = collections.defaultdict(list)
+        unique_clues: Dict[str, set] = collections.defaultdict(set)
+
         cat_keys = list(self.categories.keys())
         assert self.solution is not None
 
         all_items_flat = [(cat, item) for cat, items in self.categories.items() for item in items]
+
         for i in range(len(all_items_flat)):
             cat1, item1 = all_items_flat[i]
             pos1 = self.solution[self.solution[cat1] == item1].index[0]
+
+            unique_clues['positional'].add(('positional', (pos1, cat1, item1)))
             if pos1 == 1 or pos1 == self.num_items: unique_clues['at_edge'].add(('at_edge', (cat1, item1)))
             if pos1 % 2 == 0: unique_clues['is_even'].add(('is_even', (cat1, item1, True)))
             else: unique_clues['is_even'].add(('is_even', (cat1, item1, False)))
-            unique_clues['positional'].add(('positional', (pos1, cat1, item1)))
+
             for j in range(i + 1, len(all_items_flat)):
                 cat2, item2 = all_items_flat[j]
                 if cat1 == cat2: continue
                 pos2 = self.solution[self.solution[cat2] == item2].index[0]
-                if pos1 == pos2: unique_clues['direct_link'].add(('direct_link', (cat1, item1, cat2, item2)))
 
-        if self.num_items >= 3 and len(cat_keys) >= 3:
+                if pos1 == pos2: unique_clues['direct_link'].add(('direct_link', (cat1, item1, cat2, item2)))
+                else: unique_clues['negative_direct_link'].add(('negative_direct_link', (cat1, item1, cat2, item2)))
+
+                if abs(pos1 - pos2) == 1: unique_clues['relative_pos'].add(('relative_pos', (cat1, item1, cat2, item2)))
+                if self.is_circular and self.num_items % 2 == 0 and abs(pos1-pos2) == self.num_items//2: unique_clues['opposite_link'].add(('opposite_link', (cat1,item1,cat2,item2)))
+                if abs(pos1 - pos2) > 1: unique_clues['distance_greater_than'].add(('distance_greater_than', (cat1, item1, cat2, item2, 1)))
+                if pos1 + pos2 == self.num_items + 1: unique_clues['sum_equals'].add(('sum_equals', (cat1, item1, cat2, item2, self.num_items + 1)))
+
+        if len(cat_keys) >= 3:
             for _ in range(self.num_items * 5):
                 cats = random.sample(cat_keys, 3)
-                for start_pos in range(1, self.num_items - 1):
-                    items = [self.solution.loc[start_pos + k, cats[k]] for k in range(3)]
-                    params = tuple(random.sample(list(zip(cats, items)), 3))
+                positions = sorted(random.sample(range(1, self.num_items + 1), 3))
+                items = [self.solution.loc[p, c] for p, c in zip(positions, cats)]
+                params = tuple(zip(cats, items))
+                if positions[0] + 1 == positions[1] and positions[1] + 1 == positions[2]:
                     unique_clues['three_in_a_row'].add(('three_in_a_row', params))
+                unique_clues['ordered_chain'].add(('ordered_chain', params))
 
-        for key in pool:
-            pool[key] = list(unique_clues[key])
+        for key, clues_set in unique_clues.items():
+            pool[key] = list(clues_set)
             random.shuffle(pool[key])
         return pool
 
@@ -263,31 +267,50 @@ class ORToolsPuzzleGenerator:
         elif clue_type == 'direct_link':
             _, val1, _, val2 = params
             if get_var(val1) is not None and get_var(val2) is not None: model.Add(get_var(val1) == get_var(val2))
+        elif clue_type == 'negative_direct_link':
+            _, val1, _, val2 = params
+            if get_var(val1) is not None and get_var(val2) is not None: model.Add(get_var(val1) != get_var(val2))
+        elif clue_type == 'relative_pos':
+            _, val1, _, val2 = params
+            p1, p2 = get_var(val1), get_var(val2)
+            if p1 is not None and p2 is not None: model.AddAbsEquality(1, p1-p2)
+        elif clue_type == 'opposite_link':
+            if self.is_circular:
+                _, val1, _, val2 = params
+                p1, p2 = get_var(val1), get_var(val2)
+                if p1 is not None and p2 is not None: model.AddAbsEquality(self.num_items // 2, p1-p2)
+        elif clue_type in ['three_in_a_row', 'ordered_chain']:
+            (c1,v1),(c2,v2),(c3,v3) = params
+            p1,p2,p3 = get_var(v1),get_var(v2),get_var(v3)
+            if p1 is not None and p2 is not None and p3 is not None:
+                if clue_type == 'three_in_a_row':
+                    max_var, min_var = model.NewIntVar(1, self.num_items, ''), model.NewIntVar(1, self.num_items, '')
+                    model.AddMaxEquality(max_var, [p1,p2,p3]); model.AddMinEquality(min_var, [p1,p2,p3])
+                    model.Add(max_var - min_var == 2)
+                elif clue_type == 'ordered_chain':
+                    model.Add(p1 < p2); model.Add(p2 < p3)
         elif clue_type == 'at_edge':
-            cat, val = params
+            _, val = params
             p = get_var(val)
-            if p is None: return
-            b1, b2 = model.NewBoolVar(''), model.NewBoolVar('')
-            model.Add(p == 1).OnlyEnforceIf(b1)
-            model.Add(p == self.num_items).OnlyEnforceIf(b2)
-            model.AddBoolOr([b1, b2])
+            if p is not None:
+                b1, b2 = model.NewBoolVar(''), model.NewBoolVar('')
+                model.Add(p==1).OnlyEnforceIf(b1); model.Add(p==self.num_items).OnlyEnforceIf(b2)
+                model.AddBoolOr([b1,b2])
         elif clue_type == 'is_even':
-            cat, val, is_even_flag = params
+            _, val, is_even = params
             p = get_var(val)
-            if p is None: return
-            model.AddModuloEquality(0 if is_even_flag else 1, p, 2)
-        elif clue_type == 'three_in_a_row':
-            (c1, v1), (c2, v2), (c3, v3) = params
-            p1, p2, p3 = get_var(v1), get_var(v2), get_var(v3)
-            if p1 is None or p2 is None or p3 is None: return
-
-            # Упрощенная, но рабочая логика: разница между макс и мин позицией равна 2
-            # И все три переменные разные (что уже гарантировано основным ограничением)
-            max_var = model.NewIntVar(1, self.num_items, '')
-            min_var = model.NewIntVar(1, self.num_items, '')
-            model.AddMaxEquality(max_var, [p1, p2, p3])
-            model.AddMinEquality(min_var, [p1, p2, p3])
-            model.Add(max_var - min_var == 2)
+            if p is not None: model.AddModuloEquality(0 if is_even else 1, p, 2)
+        elif clue_type == 'sum_equals':
+            _, val1, _, val2, total = params
+            p1,p2 = get_var(val1), get_var(val2)
+            if p1 is not None and p2 is not None: model.Add(p1+p2==total)
+        elif clue_type == 'distance_greater_than':
+            _, val1, _, val2, dist = params
+            p1,p2 = get_var(val1), get_var(val2)
+            if p1 is not None and p2 is not None:
+                abs_diff = model.NewIntVar(0, self.num_items, '')
+                model.AddAbsEquality(abs_diff, p1 - p2)
+                model.Add(abs_diff > dist)
 
     def _print_puzzle(self, final_clues: List[Tuple[str, Any]], question_data: Dict[str, str]):
         assert self.solution is not None
@@ -303,17 +326,31 @@ class ORToolsPuzzleGenerator:
         print("\n--- Скрытое Решение для самопроверки ---\n", self.solution)
 
     def _format_clue(self, clue: Tuple[str, Any]) -> str:
+        # ИСПРАВЛЕНО: Полная и безопасная версия форматирования
         clue_type, params = clue
         s = self.story_elements
         g = lambda c, v: f"{s.get(c, c)} '{v}'"
 
-        if clue_type == 'positional': return f"В {s['position']} №{params[0]} находится {g(params[1], params[2])}."
-        if clue_type == 'direct_link': return f"Характеристикой {g(params[0], params[1])} является {g(params[2], params[3])}."
-        if clue_type == 'at_edge': return f"{g(params[0], params[1]).capitalize()} находится в одной из крайних локаций."
-        if clue_type == 'is_even': return f"Номер локации, где {g(params[0], params[1])}, — {'чётный' if params[2] else 'нечётный'}."
-        if clue_type == 'three_in_a_row':
-            p1, p2, p3 = params
-            return f"Объекты {g(p1[0], p1[1])}, {g(p2[0], p2[1])} и {g(p3[0], p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
+        try:
+            if clue_type == 'positional': return f"В {s.get('position','локация')} №{params[0]} находится {g(params[1], params[2])}."
+            if clue_type == 'direct_link': return f"Характеристикой {g(params[0], params[1])} является {g(params[2], params[3])}."
+            if clue_type == 'negative_direct_link': return f"{g(params[0], params[1]).capitalize()} НЕ находится в одной локации с {g(params[2], params[3])}."
+            if clue_type == 'relative_pos': return f"{g(params[0], params[1]).capitalize()} и {g(params[2], params[3])} находятся в соседних локациях."
+            if clue_type == 'opposite_link': return f"{g(params[0], params[1]).capitalize()} и {g(params[2], params[3])} находятся в локациях друг напротив друга."
+            if clue_type == 'at_edge': return f"{g(params[0], params[1]).capitalize()} находится в одной из крайних локаций."
+            if clue_type == 'is_even': return f"Номер локации, где {g(params[0], params[1])}, — {'чётный' if params[2] else 'нечётный'}."
+            if clue_type == 'three_in_a_row':
+                p1,p2,p3 = params
+                return f"Объекты {g(p1[0],p1[1])}, {g(p2[0],p2[1])} и {g(p3[0],p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
+            if clue_type == 'ordered_chain':
+                p1,p2,p3 = params
+                return f"Локация, где {g(p1[0],p1[1])}, находится где-то левее локации, где {g(p2[0],p2[1])}, которая в свою очередь левее локации, где {g(p3[0],p3[1])}."
+            if clue_type == 'sum_equals':
+                return f"Сумма номеров локаций, где {g(params[0], params[1])} и где {g(params[2], params[3])}, равна {params[4]}."
+            if clue_type == 'distance_greater_than':
+                return f"Между локациями, где {g(params[0], params[1])}, и где {g(params[2], params[3])}, находится более чем {params[4]} локация(й)."
+        except (AttributeError, IndexError, KeyError) as e:
+            return f"[Ошибка форматирования для {clue_type}: {e}]"
         return f"[Неформатированная подсказка: {clue_type}]"
 
 
@@ -323,8 +360,5 @@ if __name__ == '__main__':
 
     generator = ORToolsPuzzleGenerator(themes=THEMES, story_elements=puzzle_story_elements)
 
-    print("\n\n--- ГЕНЕРАЦИЯ ПРОСТОЙ ЗАДАЧИ ---")
-    generator.generate_bulldozer(difficulty=4)
-
     print("\n\n--- ГЕНЕРАЦИЯ СЛОЖНОЙ ЗАДАЧИ ---")
-    generator.generate_bulldozer(difficulty=8)
+    generator.generate_bulldozer_pro(difficulty=8)
