@@ -355,14 +355,14 @@ class ORToolsPuzzleGenerator:
         print(answer_for_check)
         print("\n--- Скрытое Решение для самопроверки ---\n", self.solution)
 
-    def _format_clue(self, clue: Tuple[str, Any]) -> str:
-        # ИСПРАВЛЕНО: Полная и безопасная версия форматирования
+    def format_clue(self, clue: Tuple[str, Any]) -> str:
         clue_type, params = clue
         s = self.story_elements
-        g = lambda c, v: f"{s.get(c, c)} '{v}'"
+        # УМНАЯ ЛЯМБДА: если ключ не найден, используется его версия в нижнем регистре
+        g = lambda c, v: f"{s.get(c, c.lower())} '{v}'"
 
         try:
-            if clue_type == 'positional': return f"В {s.get('position', 'локация')} №{params[0]} находится {g(params[1], params[2])}."
+            if clue_type == 'positional': return f"В {s.get('position','локация')} №{params[0]} находится {g(params[1], params[2])}."
             if clue_type == 'direct_link': return f"Характеристикой {g(params[0], params[1])} является {g(params[2], params[3])}."
             if clue_type == 'negative_direct_link': return f"{g(params[0], params[1]).capitalize()} НЕ находится в одной локации с {g(params[2], params[3])}."
             if clue_type == 'relative_pos': return f"{g(params[0], params[1]).capitalize()} и {g(params[2], params[3])} находятся в соседних локациях."
@@ -370,11 +370,11 @@ class ORToolsPuzzleGenerator:
             if clue_type == 'at_edge': return f"{g(params[0], params[1]).capitalize()} находится в одной из крайних локаций."
             if clue_type == 'is_even': return f"Номер локации, где {g(params[0], params[1])}, — {'чётный' if params[2] else 'нечётный'}."
             if clue_type == 'three_in_a_row':
-                p1, p2, p3 = params
-                return f"Объекты {g(p1[0], p1[1])}, {g(p2[0], p2[1])} и {g(p3[0], p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
+                p1,p2,p3 = params
+                return f"Объекты {g(p1[0],p1[1])}, {g(p2[0],p2[1])} и {g(p3[0],p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
             if clue_type == 'ordered_chain':
-                p1, p2, p3 = params
-                return f"Локация, где {g(p1[0], p1[1])}, находится где-то левее локации, где {g(p2[0], p2[1])}, которая в свою очередь левее локации, где {g(p3[0], p3[1])}."
+                p1,p2,p3 = params
+                return f"Локация, где {g(p1[0],p1[1])}, находится где-то левее локации, где {g(p2[0],p2[1])}, которая в свою очередь левее локации, где {g(p3[0],p3[1])}."
             if clue_type == 'sum_equals':
                 return f"Сумма номеров локаций, где {g(params[0], params[1])} и где {g(params[2], params[3])}, равна {params[4]}."
             if clue_type == 'distance_greater_than':
