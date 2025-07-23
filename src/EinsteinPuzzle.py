@@ -1,4 +1,4 @@
-# EinsteinPuzzle.py
+# EinsteinPuzzle.py (Финальная Гибридная Версия v3 - с исправлением NameError)
 import random
 import pandas as pd
 from typing import Dict, List, Tuple, Any, Optional
@@ -8,7 +8,9 @@ from PuzzleDefinition import PuzzleDefinition
 
 class EinsteinPuzzleDefinition(PuzzleDefinition):
     """
-    Конкретная реализация для классической "Загадки Эйнштейна".
+    Конкретная реализация для "Загадки Эйнштейна".
+    Гибридная модель: надежная базовая архитектура с целевым добавлением
+    условных подсказок "Если-То" для повышения сложности и интересности.
     """
     def __init__(self, themes: Dict, story_elements: Dict, num_items: int, num_categories: int, is_circular: bool):
         self._name = "Загадка Эйнштейна"
@@ -20,16 +22,11 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         self._prepare_data()
 
     def _prepare_data(self):
-        # Выбираем одну случайную тему из предоставленных
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories = self.themes[selected_theme_name]
         self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
-
-        # Выбираем нужное количество категорий из доступных в теме
         self.cat_keys = random.sample(list(base_categories.keys()), self.num_categories)
-        # Для каждой выбранной категории, выбираем нужное количество элементов
         self.categories = {key: random.sample(values, self.num_items) for key, values in base_categories.items() if key in self.cat_keys}
-
         print(f"\n[Генератор]: Тема: '{selected_theme_name}', Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: {'Круговая' if self.is_circular else 'Линейная'}.")
 
     @property
@@ -40,31 +37,49 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         solution_data = {cat: random.sample(items, self.num_items) for cat, items in self.categories.items()}
         return pd.DataFrame(solution_data, index=range(1, self.num_items + 1))
 
+    # --- ИСПРАВЛЕННЫЙ МЕТОД ---
     def design_core_puzzle(self, solution: pd.DataFrame) -> Tuple[List, List]:
-        """Целенаправленно создает ядро из сложных подсказок."""
+        """Целенаправленно создает ядро из самых сложных подсказок, включая "Если-То"."""
         clue_pool = self.generate_clue_pool(solution)
         anchors = self.get_anchors(solution)
 
+        if_then_clues = clue_pool.pop('if_then', [])
+        random.shuffle(if_then_clues)
+
         strong_clues = clue_pool.get('direct_link', []) + clue_pool.get('positional', [])
-        complex_clues = [c for k, v in clue_pool.items() if k not in ['direct_link', 'positional'] for c in v]
+
+        # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+        other_complex_clues = [
+            c for k, v in clue_pool.items()
+            if k not in ['direct_link', 'positional']
+            for c in v # Добавлен недостающий цикл
+        ]
+
         random.shuffle(strong_clues)
-        random.shuffle(complex_clues)
+        random.shuffle(other_complex_clues)
 
-        # Ядро = якоря + N самых сложных подсказок, где N - размер сетки
         num_core_clues = self.num_items
-        core_puzzle = list(anchors) + complex_clues[:num_core_clues]
+        num_if_then = num_core_clues // 2
+        num_other_complex = num_core_clues - num_if_then
 
-        # Все остальные подсказки идут в "стены" для последующего укрепления
-        remaining_clues = strong_clues + complex_clues[num_core_clues:]
+        core_puzzle = list(anchors)
+        core_puzzle.extend(if_then_clues[:num_if_then])
+        core_puzzle.extend(other_complex_clues[:num_other_complex])
 
-        print(f"  - Спроектирован каркас из {len(core_puzzle)} сложных подсказок.")
+        remaining_clues = (
+                strong_clues +
+                if_then_clues[num_if_then:] +
+                other_complex_clues[num_other_complex:]
+        )
+
+        print(f"  - Спроектирован каркас из {len(core_puzzle)} подсказок (включая {len(if_then_clues[:num_if_then])} условных).")
         return core_puzzle, remaining_clues
+
 
     def get_anchors(self, solution: pd.DataFrame) -> set:
         anchors = {('positional', (1, self.cat_keys[0], solution.loc[1, self.cat_keys[0]]))}
-        if self.is_circular:
-            # Для надежности якорь должен использовать две разные категории
-            anchor_cat2 = self.cat_keys[1] if len(self.cat_keys) > 1 else self.cat_keys[0]
+        if self.is_circular and len(self.cat_keys) > 1:
+            anchor_cat2 = self.cat_keys[1]
             anchors.add(('relative_pos', (self.cat_keys[0], solution.loc[1, self.cat_keys[0]], anchor_cat2, solution.loc[2, anchor_cat2])))
         return anchors
 
@@ -107,6 +122,16 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                     unique_clues['three_in_a_row'].add(('three_in_a_row', params))
                 unique_clues['ordered_chain'].add(('ordered_chain', params))
 
+        simple_facts = list(unique_clues['positional']) + list(unique_clues['direct_link'])
+        random.shuffle(simple_facts)
+        if len(simple_facts) >= 2:
+            for _ in range(self.num_items * self.num_categories):
+                try:
+                    c1, c2 = random.sample(simple_facts, 2)
+                    unique_clues['if_then'].add(('if_then', (c1, c2)))
+                except (ValueError, IndexError):
+                    break
+
         for key, clues_set in unique_clues.items():
             pool[key] = list(clues_set)
         return pool
@@ -126,13 +151,16 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
 
         if clue_type == 'positional':
             pos_idx, _, val = params
-            if get_var(val) is not None: model.Add(get_var(val) == pos_idx)
+            p = get_var(val)
+            if p is not None: model.Add(p == pos_idx)
         elif clue_type == 'direct_link':
             _, val1, _, val2 = params
-            if get_var(val1) is not None and get_var(val2) is not None: model.Add(get_var(val1) == get_var(val2))
+            p1, p2 = get_var(val1), get_var(val2)
+            if p1 is not None and p2 is not None: model.Add(p1 == p2)
         elif clue_type == 'negative_direct_link':
             _, val1, _, val2 = params
-            if get_var(val1) is not None and get_var(val2) is not None: model.Add(get_var(val1) != get_var(val2))
+            p1, p2 = get_var(val1), get_var(val2)
+            if p1 is not None and p2 is not None: model.Add(p1 != p2)
         elif clue_type == 'relative_pos':
             _, val1, _, val2 = params
             p1, p2 = get_var(val1), get_var(val2)
@@ -144,20 +172,24 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 if p1 is not None and p2 is not None: model.AddAbsEquality(self.num_items // 2, p1-p2)
         elif clue_type in ['three_in_a_row', 'ordered_chain']:
             (c1,v1),(c2,v2),(c3,v3) = params
-            p1,p2,p3 = get_var(v1),get_var(v2),get_var(v3)
+            p1, p2, p3 = get_var(v1), get_var(v2), get_var(v3)
             if p1 is not None and p2 is not None and p3 is not None:
                 if clue_type == 'three_in_a_row':
-                    max_var, min_var = model.NewIntVar(1, self.num_items, ''), model.NewIntVar(1, self.num_items, '')
-                    model.AddMaxEquality(max_var, [p1,p2,p3]); model.AddMinEquality(min_var, [p1,p2,p3])
+                    max_var = model.NewIntVar(1, self.num_items, '')
+                    min_var = model.NewIntVar(1, self.num_items, '')
+                    model.AddMaxEquality(max_var, [p1,p2,p3])
+                    model.AddMinEquality(min_var, [p1,p2,p3])
                     model.Add(max_var - min_var == 2)
                 elif clue_type == 'ordered_chain':
-                    model.Add(p1 < p2); model.Add(p2 < p3)
+                    model.Add(p1 < p2)
+                    model.Add(p2 < p3)
         elif clue_type == 'at_edge':
             _, val = params
             p = get_var(val)
             if p is not None:
                 b1, b2 = model.NewBoolVar(''), model.NewBoolVar('')
-                model.Add(p==1).OnlyEnforceIf(b1); model.Add(p==self.num_items).OnlyEnforceIf(b2)
+                model.Add(p==1).OnlyEnforceIf(b1)
+                model.Add(p==self.num_items).OnlyEnforceIf(b2)
                 model.AddBoolOr([b1,b2])
         elif clue_type == 'is_even':
             _, val, is_even = params
@@ -165,27 +197,53 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             if p is not None: model.AddModuloEquality(0 if is_even else 1, p, 2)
         elif clue_type == 'sum_equals':
             _, val1, _, val2, total = params
-            p1,p2 = get_var(val1), get_var(val2)
+            p1, p2 = get_var(val1), get_var(val2)
             if p1 is not None and p2 is not None: model.Add(p1+p2==total)
         elif clue_type == 'distance_greater_than':
             _, val1, _, val2, dist = params
-            p1,p2 = get_var(val1), get_var(val2)
+            p1, p2 = get_var(val1), get_var(val2)
             if p1 is not None and p2 is not None:
                 abs_diff = model.NewIntVar(0, self.num_items, '')
                 model.AddAbsEquality(abs_diff, p1 - p2)
                 model.Add(abs_diff > dist)
+        elif clue_type == 'if_then':
+            condition_clue, consequence_clue = params
+            b_cond = model.NewBoolVar('')
+            b_cons = model.NewBoolVar('')
 
-    def quality_audit_and_select_question(self, puzzle: List[Tuple[str, Any]], solution: pd.DataFrame, min_path_len: int = 3):
+            def reify(cl, bool_var):
+                c_type, c_params = cl
+                if c_type == 'positional':
+                    pos, _, val = c_params
+                    p = get_var(val)
+                    if p is not None:
+                        model.Add(p == pos).OnlyEnforceIf(bool_var)
+                        model.Add(p != pos).OnlyEnforceIf(bool_var.Not())
+                elif c_type == 'direct_link':
+                    _, v1, _, v2 = c_params
+                    p1, p2 = get_var(v1), get_var(v2)
+                    if p1 is not None and p2 is not None:
+                        model.Add(p1 == p2).OnlyEnforceIf(bool_var)
+                        model.Add(p1 != p2).OnlyEnforceIf(bool_var.Not())
+
+            reify(condition_clue, b_cond)
+            reify(consequence_clue, b_cons)
+            model.AddImplication(b_cond, b_cons)
+
+    def quality_audit_and_select_question(self, puzzle: List[Tuple[str, Any]], solution: pd.DataFrame, min_path_len: int = 3) -> Tuple[List, Optional[Dict]]:
         graph = collections.defaultdict(list)
         all_items = {item for cat_items in self.categories.values() for item in cat_items}
 
+        def _extract_items_recursive(p, item_set):
+            if isinstance(p, (list, tuple)):
+                for item in p:
+                    _extract_items_recursive(item, item_set)
+            elif isinstance(p, str) and p in all_items:
+                item_set.add(p)
+
         for clue_type, params in puzzle:
             clue_items = set()
-            def extract_items(p):
-                if isinstance(p, (list, tuple)):
-                    for item in p: extract_items(item)
-                elif isinstance(p, str) and p in all_items: clue_items.add(p)
-            extract_items(params)
+            _extract_items_recursive(params, clue_items)
 
             clue_items_list = list(clue_items)
             for i in range(len(clue_items_list)):
@@ -252,6 +310,11 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 return f"Сумма номеров локаций, где {g(params[0], params[1])} и где {g(params[2], params[3])}, равна {params[4]}."
             if clue_type == 'distance_greater_than':
                 return f"Между локациями, где {g(params[0], params[1])}, и где {g(params[2], params[3])}, находится более чем {params[4]} локация(й)."
+            if clue_type == 'if_then':
+                cond_text = self.format_clue(params[0])
+                cons_text = self.format_clue(params[1])
+                if cond_text.endswith('.'): cond_text = cond_text[:-1]
+                return f"Если {cond_text}, то {cons_text[0].lower() + cons_text[1:]}"
         except (AttributeError, IndexError, KeyError) as e:
             return f"[Ошибка форматирования для {clue_type}: {e}]"
         return f"[Неформатированная подсказка: {clue_type}]"
