@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     # 1. Задаем желаемые параметры
     desired_theme_name_1 = "Тайна в Школе на Холме"
-    desired_num_items_1 = 8
+    desired_num_items_1 = 9
     desired_num_categories_1 = 8
     is_circular_1 = False
 
