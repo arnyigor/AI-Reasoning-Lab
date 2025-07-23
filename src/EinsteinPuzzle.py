@@ -11,7 +11,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
     Конкретная реализация для классической "Загадки Эйнштейна".
     """
     def __init__(self, themes: Dict, story_elements: Dict, num_items: int, num_categories: int, is_circular: bool):
-        self._name = "Архитектор"
+        self._name = "Загадка Эйнштейна"
         self.themes = themes
         self.story_elements = story_elements
         self.num_items = num_items
@@ -20,11 +20,14 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         self._prepare_data()
 
     def _prepare_data(self):
+        # Выбираем одну случайную тему из предоставленных
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories = self.themes[selected_theme_name]
         self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
 
+        # Выбираем нужное количество категорий из доступных в теме
         self.cat_keys = random.sample(list(base_categories.keys()), self.num_categories)
+        # Для каждой выбранной категории, выбираем нужное количество элементов
         self.categories = {key: random.sample(values, self.num_items) for key, values in base_categories.items() if key in self.cat_keys}
 
         print(f"\n[Генератор]: Тема: '{selected_theme_name}', Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: {'Круговая' if self.is_circular else 'Линейная'}.")
@@ -37,13 +40,8 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         solution_data = {cat: random.sample(items, self.num_items) for cat, items in self.categories.items()}
         return pd.DataFrame(solution_data, index=range(1, self.num_items + 1))
 
-    def get_anchors(self, solution: pd.DataFrame) -> set:
-        anchors = {('positional', (1, self.cat_keys[0], solution.loc[1, self.cat_keys[0]]))}
-        if self.is_circular:
-            anchors.add(('relative_pos', (self.cat_keys[0], solution.loc[1, self.cat_keys[0]], self.cat_keys[1], solution.loc[2, self.cat_keys[1]])))
-        return anchors
-
     def design_core_puzzle(self, solution: pd.DataFrame) -> Tuple[List, List]:
+        """Целенаправленно создает ядро из сложных подсказок."""
         clue_pool = self.generate_clue_pool(solution)
         anchors = self.get_anchors(solution)
 
@@ -52,17 +50,25 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         random.shuffle(strong_clues)
         random.shuffle(complex_clues)
 
-        num_core_clues = self.num_items # Количество сложных подсказок в ядре = размеру сетки
+        # Ядро = якоря + N самых сложных подсказок, где N - размер сетки
+        num_core_clues = self.num_items
         core_puzzle = list(anchors) + complex_clues[:num_core_clues]
 
-        # Остальные - "стены"
+        # Все остальные подсказки идут в "стены" для последующего укрепления
         remaining_clues = strong_clues + complex_clues[num_core_clues:]
 
         print(f"  - Спроектирован каркас из {len(core_puzzle)} сложных подсказок.")
         return core_puzzle, remaining_clues
 
+    def get_anchors(self, solution: pd.DataFrame) -> set:
+        anchors = {('positional', (1, self.cat_keys[0], solution.loc[1, self.cat_keys[0]]))}
+        if self.is_circular:
+            # Для надежности якорь должен использовать две разные категории
+            anchor_cat2 = self.cat_keys[1] if len(self.cat_keys) > 1 else self.cat_keys[0]
+            anchors.add(('relative_pos', (self.cat_keys[0], solution.loc[1, self.cat_keys[0]], anchor_cat2, solution.loc[2, anchor_cat2])))
+        return anchors
+
     def generate_clue_pool(self, solution: pd.DataFrame) -> Dict[str, List[Tuple[str, Any]]]:
-        # (Полная версия _generate_clue_pool из v26.1)
         pool = collections.defaultdict(list)
         unique_clues = collections.defaultdict(set)
 
@@ -115,7 +121,6 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         return model, variables
 
     def add_clue_constraint(self, model: cp_model.CpModel, variables: Dict[str, Any], clue: Tuple[str, Any]):
-        # (Полная версия _add_clue_as_or_tools_constraint из v26.1)
         clue_type, params = clue
         get_var = lambda val: variables.get(val)
 
@@ -171,7 +176,6 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 model.Add(abs_diff > dist)
 
     def quality_audit_and_select_question(self, puzzle: List[Tuple[str, Any]], solution: pd.DataFrame, min_path_len: int = 3):
-        # (Полная версия _quality_audit_and_select_question из v26.1)
         graph = collections.defaultdict(list)
         all_items = {item for cat_items in self.categories.values() for item in cat_items}
 
@@ -211,7 +215,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                     path_len = len(path) - 1
                     if path_len > max_path_len:
                         max_path_len = path_len
-                        best_question = {"question": f"Какой {self.story_elements.get(attribute_cat, attribute_cat)} у {self.story_elements.get(subject_cat, subject_cat)} по имени {subject_item}?",
+                        best_question = {"question": f"Какой {self.story_elements.get(attribute_cat, attribute_cat.lower())} у {self.story_elements.get(subject_cat, subject_cat.lower())} по имени {subject_item}?",
                                          "answer": f"Ответ для проверки: {answer_item}"}
                     break
                 for neighbor in graph.get(curr_node, []):
@@ -226,10 +230,9 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             return puzzle, None
 
     def format_clue(self, clue: Tuple[str, Any]) -> str:
-        # (Полная версия _format_clue из v26.1)
         clue_type, params = clue
         s = self.story_elements
-        g = lambda c, v: f"{s.get(c, c)} '{v}'"
+        g = lambda c, v: f"{s.get(c, c.lower())} '{v}'"
 
         try:
             if clue_type == 'positional': return f"В {s.get('position','локация')} №{params[0]} находится {g(params[1], params[2])}."

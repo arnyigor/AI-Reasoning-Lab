@@ -1,14 +1,14 @@
 # main.py
 import pandas as pd
-
 from CoreGenerator import CorePuzzleGenerator
 from EinsteinPuzzle import EinsteinPuzzleDefinition
 
 if __name__ == '__main__':
-    # Настройка Pandas для полного вывода больших таблиц
+    # Глобальные настройки для красивого вывода больших таблиц
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
+
     # Общие данные для всех "Загадок Эйнштейна"
     EINSTEIN_THEMES = {
         "Тайна в Школе на Холме": {
@@ -23,12 +23,6 @@ if __name__ == '__main__':
             "Цвет рюкзака": ["Красный", "Синий", "Зеленый", "Черный", "Желтый", "Фиолетовый", "Оранжевый", "Серый", "Белый", "Розовый"],
             "Мечта": ["Стать врачом", "Полететь в космос", "Написать книгу", "Создать игру", "Выиграть олимпиаду", "Стать актером", "Открыть бизнес", "Спасти мир", "Изобрести что-то", "Объехать мир"]
         },
-        "Офисная Тайна": {
-            "Сотрудник": ["Иванов", "Петров", "Смирнов", "Кузнецов", "Волков", "Соколов", "Лебедев"],
-            "Отдел": ["Финансы", "Маркетинг", "IT", "HR", "Продажи", "Логистика", "Аналитика"],
-            "Проект": ["Альфа", "Омега", "Квант", "Зенит", "Титан", "Орион", "Спектр"],
-            "Напиток": ["Кофе", "Зеленый чай", "Черный чай", "Вода", "Латте", "Капучино", "Эспрессо"]
-        },
         "Космическая Одиссея": {
             "Капитан": ["Рейнольдс", "Шепард", "Адама", "Старбак", "Пикар", "Соло", "Акбар"],
             "Корабль": ["Серенити", "Нормандия", "Галактика", "Звёздный Крейсер", "Энтерпрайз", "Сокол", "Прометей"],
@@ -41,34 +35,34 @@ if __name__ == '__main__':
         "position": "локация"
     }
 
+    # ===============================================================
+    # --- НАСТРОЙКИ ГЕНЕРАЦИИ ---
+    # ===============================================================
 
-    # --- ГЕНЕРАЦИЯ МАСШТАБНОЙ ЗАДАЧИ ---
-    print("\n\n--- ГЕНЕРАЦИЯ МАСШТАБНОЙ ЗАДАЧИ ---")
+    # --- ГЕНЕРАЦИЯ ЗАДАЧИ №1 (КЛАССИЧЕСКАЯ) ---
+    print("\n\n--- ГЕНЕРАЦИЯ КЛАССИЧЕСКОЙ ЗАДАЧИ 5x4 ---")
 
-    # Выбираем тему, с которой будем работать
-    target_theme_name = "Тайна в Школе на Холме"
-    target_theme = EINSTEIN_THEMES[target_theme_name]
+    # 1. Задаем желаемые параметры
+    desired_theme_name_1 = "Тайна в Школе на Холме"
+    desired_num_items_1 = 5
+    desired_num_categories_1 = 4
+    is_circular_1 = False
 
-    # Динамически определяем максимальные размеры
-    max_possible_items = min(len(v) for v in target_theme.values())
-    max_possible_categories = len(target_theme)
+    # 2. Проверяем, что наши желания выполнимы
+    target_theme_1 = EINSTEIN_THEMES[desired_theme_name_1]
+    max_possible_items_1 = min(len(v) for v in target_theme_1.values())
+    max_possible_categories_1 = len(target_theme_1)
 
-    # Задаем желаемые параметры для головоломки
-    # Например, мы хотим головоломку 7x5
-    desired_num_items = 8
-    desired_num_categories = 8
+    if desired_num_items_1 > max_possible_items_1:
+        raise ValueError(f"Ошибка в Задаче №1: Невозможно создать {desired_num_items_1} строк, в темах максимум {max_possible_items_1} элементов.")
+    if desired_num_categories_1 > max_possible_categories_1:
+        raise ValueError(f"Ошибка в Задаче №1: Невозможно создать {desired_num_categories_1} категорий, в теме '{desired_theme_name_1}' максимум {max_possible_categories_1}.")
 
-    # Проверяем, что наши желания выполнимы
-    if desired_num_items > max_possible_items:
-        raise ValueError(f"Невозможно создать головоломку {desired_num_items}x{desired_num_categories}: в темах недостаточно элементов (максимум {max_possible_items}).")
-    if desired_num_categories > max_possible_categories:
-        raise ValueError(f"Невозможно создать головоломку {desired_num_items}x{desired_num_categories}: в теме '{target_theme_name}' всего {max_possible_categories} категорий.")
-
-
-    einstein_def_large = EinsteinPuzzleDefinition(themes={target_theme_name: target_theme}, # Передаем только одну, выбранную тему
-                                                  story_elements=EINSTEIN_STORY_ELEMENTS,
-                                                  num_items=desired_num_items,
-                                                  num_categories=desired_num_categories,
-                                                  is_circular=False)
-    core_gen_large = CorePuzzleGenerator(puzzle_definition=einstein_def_large)
-    core_gen_large.generate()
+    # 3. Создаем и запускаем генератор
+    einstein_def_1 = EinsteinPuzzleDefinition(themes={desired_theme_name_1: target_theme_1},
+                                              story_elements=EINSTEIN_STORY_ELEMENTS,
+                                              num_items=desired_num_items_1,
+                                              num_categories=desired_num_categories_1,
+                                              is_circular=is_circular_1)
+    core_gen_1 = CorePuzzleGenerator(puzzle_definition=einstein_def_1)
+    core_gen_1.generate()
