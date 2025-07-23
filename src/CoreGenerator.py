@@ -6,7 +6,7 @@ from ortools.sat.python import cp_model
 class CorePuzzleGenerator:
     """
     Ядро генератора головоломок. Реализует универсальный алгоритм
-    v29.0 "Гроссмейстер", работающий с любым PuzzleDefinition.
+    v30.0 "Виртуоз", работающий с любым PuzzleDefinition.
     """
     def __init__(self, puzzle_definition: PuzzleDefinition):
         self.definition = puzzle_definition
@@ -51,13 +51,42 @@ class CorePuzzleGenerator:
 
     def _build_walls(self, core_puzzle: List, wall_clues: List) -> Optional[List]:
         current_clues = list(core_puzzle)
-        random.shuffle(wall_clues)
-        for clue in wall_clues:
+
+        # --- СТРАТЕГИЯ "СНАЧАЛА СЛОЖНОЕ" ---
+
+        # 1. Разделяем "стены" на сложные и простые
+        # (Используем ваш стабильный код без рейтинга, так как разделение уже есть)
+        simple_walls = [c for c in wall_clues if c[0] in ['positional', 'direct_link']]
+        complex_walls = [c for c in wall_clues if c[0] not in ['positional', 'direct_link']]
+
+        random.shuffle(simple_walls)
+        random.shuffle(complex_walls)
+
+        # 2. Этап 1: Пытаемся достичь уникальности, используя ТОЛЬКО сложные подсказки
+        print("  - [INFO] Этап 1/2: Укрепление сложными и средними подсказками...")
+        for clue in complex_walls:
+            current_clues.append(clue)
+            # Проверяем не слишком часто, чтобы ускорить процесс
+            if len(current_clues) % 5 == 0:
+                if self._check_solvability(current_clues) == 1:
+                    print(f"  - Уникальность достигнута на сложных уликах! Подсказок: {len(current_clues)}")
+                    return current_clues
+
+        # Проверяем еще раз в конце этапа
+        if self._check_solvability(current_clues) == 1:
+            print(f"  - Уникальность достигнута на сложных уликах! Подсказок: {len(current_clues)}")
+            return current_clues
+
+        # 3. Этап 2: Если не удалось, "добиваем" простыми подсказками
+        print("  - [INFO] Этап 2/2: Доукрепление прямыми подсказками...")
+        for clue in simple_walls:
             current_clues.append(clue)
             if self._check_solvability(current_clues) == 1:
-                print(f"  - Уникальность достигнута с {len(current_clues)} подсказками.")
+                print(f"  - Уникальность достигнута с добавлением простых улик. Подсказок: {len(current_clues)}")
                 return current_clues
+
         return None
+
 
     def _minimize_puzzle(self, puzzle: List[Tuple[str, Any]], anchors: set) -> List[Tuple[str, Any]]:
         current_puzzle = list(puzzle)
