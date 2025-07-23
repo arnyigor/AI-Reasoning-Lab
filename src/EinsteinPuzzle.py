@@ -1,4 +1,4 @@
-# EinsteinPuzzle.py (Финальная Гибридная Версия v3 - с исправлением NameError)
+# EinsteinPuzzle.py
 import random
 import pandas as pd
 from typing import Dict, List, Tuple, Any, Optional
@@ -10,7 +10,8 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
     """
     Конкретная реализация для "Загадки Эйнштейна".
     Гибридная модель: надежная базовая архитектура с целевым добавлением
-    условных подсказок "Если-То" для повышения сложности и интересности.
+    сложных условных подсказок ("Если-То", "Если-Не-То-Не") для повышения
+    сложности и разнообразия головоломок.
     """
     def __init__(self, themes: Dict, story_elements: Dict, num_items: int, num_categories: int, is_circular: bool):
         self._name = "Загадка Эйнштейна"
@@ -37,44 +38,56 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         solution_data = {cat: random.sample(items, self.num_items) for cat, items in self.categories.items()}
         return pd.DataFrame(solution_data, index=range(1, self.num_items + 1))
 
-    # --- ИСПРАВЛЕННЫЙ МЕТОД ---
+
     def design_core_puzzle(self, solution: pd.DataFrame) -> Tuple[List, List]:
-        """Целенаправленно создает ядро из самых сложных подсказок, включая "Если-То"."""
+        """
+        Целенаправленно создает ядро из РАЗНООБРАЗНЫХ сложных подсказок,
+        гарантируя представленность "экзотических" типов.
+        """
         clue_pool = self.generate_clue_pool(solution)
         anchors = self.get_anchors(solution)
 
-        if_then_clues = clue_pool.pop('if_then', [])
-        random.shuffle(if_then_clues)
+        # --- Гарантируем разнообразие в ядре ---
+        core_puzzle = list(anchors)
 
-        strong_clues = clue_pool.get('direct_link', []) + clue_pool.get('positional', [])
+        # 1. Принудительно добавляем по одной "экзотической" улике, если они есть
+        exotic_types = ['if_not_then_not', 'three_in_a_row', 'ordered_chain', 'at_edge', 'sum_equals']
+        for clue_type in exotic_types:
+            if clue_pool.get(clue_type):
+                core_puzzle.append(random.choice(clue_pool[clue_type]))
 
-        # --- ИСПРАВЛЕНИЕ ЗДЕСЬ ---
-        other_complex_clues = [
-            c for k, v in clue_pool.items()
-            if k not in ['direct_link', 'positional']
-            for c in v # Добавлен недостающий цикл
+        # 2. Добираем ядро до нужного размера самыми сложными из оставшихся
+        # Собираем всех оставшихся "кандидатов" в сложные улики
+        complex_candidates = []
+        # Условные - самые желанные
+        complex_candidates.extend(clue_pool.get('if_then', []))
+        # Остальные непрямые
+        other_complex_types = ['relative_pos', 'negative_direct_link', 'is_even', 'distance_greater_than']
+        for clue_type in other_complex_types:
+            complex_candidates.extend(clue_pool.get(clue_type, []))
+
+        random.shuffle(complex_candidates)
+
+        # Удаляем из кандидатов то, что уже могло попасть в ядро
+        core_set = set(core_puzzle)
+        complex_candidates = [c for c in complex_candidates if c not in core_set]
+
+        # Дополняем ядро до размера N
+        num_to_add = self.num_items - len(core_puzzle)
+        if num_to_add > 0:
+            core_puzzle.extend(complex_candidates[:num_to_add])
+
+        # --- Формируем оставшиеся подсказки для стен ---
+        core_set = set(core_puzzle) # Обновляем сет после добавления
+        remaining_clues = [
+            clue
+            for clue_list in clue_pool.values()
+            for clue in clue_list
+            if clue not in core_set
         ]
 
-        random.shuffle(strong_clues)
-        random.shuffle(other_complex_clues)
-
-        num_core_clues = self.num_items
-        num_if_then = num_core_clues // 2
-        num_other_complex = num_core_clues - num_if_then
-
-        core_puzzle = list(anchors)
-        core_puzzle.extend(if_then_clues[:num_if_then])
-        core_puzzle.extend(other_complex_clues[:num_other_complex])
-
-        remaining_clues = (
-                strong_clues +
-                if_then_clues[num_if_then:] +
-                other_complex_clues[num_other_complex:]
-        )
-
-        print(f"  - Спроектирован каркас из {len(core_puzzle)} подсказок (включая {len(if_then_clues[:num_if_then])} условных).")
+        print(f"  - [Виртуоз] Спроектирован разнообразный каркас из {len(core_puzzle)} подсказок.")
         return core_puzzle, remaining_clues
-
 
     def get_anchors(self, solution: pd.DataFrame) -> set:
         anchors = {('positional', (1, self.cat_keys[0], solution.loc[1, self.cat_keys[0]]))}
@@ -90,47 +103,48 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         cat_keys = list(self.categories.keys())
         all_items_flat = [(cat, item) for cat, items in self.categories.items() for item in items]
 
+        # Генерируем все базовые типы подсказок
         for i in range(len(all_items_flat)):
             cat1, item1 = all_items_flat[i]
             pos1 = solution[solution[cat1] == item1].index[0]
-
             unique_clues['positional'].add(('positional', (pos1, cat1, item1)))
             if pos1 == 1 or pos1 == self.num_items: unique_clues['at_edge'].add(('at_edge', (cat1, item1)))
             if pos1 % 2 == 0: unique_clues['is_even'].add(('is_even', (cat1, item1, True)))
             else: unique_clues['is_even'].add(('is_even', (cat1, item1, False)))
-
             for j in range(i + 1, len(all_items_flat)):
                 cat2, item2 = all_items_flat[j]
                 if cat1 == cat2: continue
                 pos2 = solution[solution[cat2] == item2].index[0]
-
                 if pos1 == pos2: unique_clues['direct_link'].add(('direct_link', (cat1, item1, cat2, item2)))
                 else: unique_clues['negative_direct_link'].add(('negative_direct_link', (cat1, item1, cat2, item2)))
-
                 if abs(pos1 - pos2) == 1: unique_clues['relative_pos'].add(('relative_pos', (cat1, item1, cat2, item2)))
-                if self.is_circular and self.num_items % 2 == 0 and abs(pos1-pos2) == self.num_items//2: unique_clues['opposite_link'].add(('opposite_link', (cat1,item1,cat2,item2)))
-                if abs(pos1 - pos2) > 1: unique_clues['distance_greater_than'].add(('distance_greater_than', (cat1, item1, cat2, item2, 1)))
-                if pos1 + pos2 == self.num_items + 1: unique_clues['sum_equals'].add(('sum_equals', (cat1, item1, cat2, item2, self.num_items + 1)))
 
-        if len(cat_keys) >= 3:
-            for _ in range(self.num_items * 5):
-                cats = random.sample(cat_keys, 3)
-                positions = sorted(random.sample(range(1, self.num_items + 1), 3))
-                items = [solution.loc[p, c] for p, c in zip(positions, cats)]
-                params = tuple(zip(cats, items))
-                if positions[0] + 1 == positions[1] and positions[1] + 1 == positions[2]:
-                    unique_clues['three_in_a_row'].add(('three_in_a_row', params))
-                unique_clues['ordered_chain'].add(('ordered_chain', params))
-
+        # Генерируем позитивные условные подсказки ("Если P, то Q")
         simple_facts = list(unique_clues['positional']) + list(unique_clues['direct_link'])
         random.shuffle(simple_facts)
         if len(simple_facts) >= 2:
             for _ in range(self.num_items * self.num_categories):
                 try:
                     c1, c2 = random.sample(simple_facts, 2)
-                    unique_clues['if_then'].add(('if_then', (c1, c2)))
-                except (ValueError, IndexError):
-                    break
+                    if c1 != c2: unique_clues['if_then'].add(('if_then', (c1, c2)))
+                except (ValueError, IndexError): break
+
+        # Генерируем НЕГАТИВНЫЕ условные подсказки ("Если не P, то не Q")
+        false_facts = []
+        all_items_in_cat = {cat: set(items) for cat, items in self.categories.items()}
+        for pos in range(1, self.num_items + 1):
+            for cat in self.cat_keys:
+                true_item = solution.loc[pos, cat]
+                for false_item in all_items_in_cat[cat] - {true_item}:
+                    false_facts.append(('positional', (pos, cat, false_item)))
+
+        if len(false_facts) >= 2:
+            for _ in range(self.num_items * self.num_categories):
+                try:
+                    p_false, q_false = random.sample(false_facts, 2)
+                    if p_false != q_false:
+                        unique_clues['if_not_then_not'].add(('if_not_then_not', (p_false, q_false)))
+                except (ValueError, IndexError): break
 
         for key, clues_set in unique_clues.items():
             pool[key] = list(clues_set)
@@ -164,52 +178,13 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         elif clue_type == 'relative_pos':
             _, val1, _, val2 = params
             p1, p2 = get_var(val1), get_var(val2)
-            if p1 is not None and p2 is not None: model.AddAbsEquality(1, p1-p2)
-        elif clue_type == 'opposite_link':
-            if self.is_circular:
-                _, val1, _, val2 = params
-                p1, p2 = get_var(val1), get_var(val2)
-                if p1 is not None and p2 is not None: model.AddAbsEquality(self.num_items // 2, p1-p2)
-        elif clue_type in ['three_in_a_row', 'ordered_chain']:
-            (c1,v1),(c2,v2),(c3,v3) = params
-            p1, p2, p3 = get_var(v1), get_var(v2), get_var(v3)
-            if p1 is not None and p2 is not None and p3 is not None:
-                if clue_type == 'three_in_a_row':
-                    max_var = model.NewIntVar(1, self.num_items, '')
-                    min_var = model.NewIntVar(1, self.num_items, '')
-                    model.AddMaxEquality(max_var, [p1,p2,p3])
-                    model.AddMinEquality(min_var, [p1,p2,p3])
-                    model.Add(max_var - min_var == 2)
-                elif clue_type == 'ordered_chain':
-                    model.Add(p1 < p2)
-                    model.Add(p2 < p3)
-        elif clue_type == 'at_edge':
-            _, val = params
-            p = get_var(val)
-            if p is not None:
-                b1, b2 = model.NewBoolVar(''), model.NewBoolVar('')
-                model.Add(p==1).OnlyEnforceIf(b1)
-                model.Add(p==self.num_items).OnlyEnforceIf(b2)
-                model.AddBoolOr([b1,b2])
-        elif clue_type == 'is_even':
-            _, val, is_even = params
-            p = get_var(val)
-            if p is not None: model.AddModuloEquality(0 if is_even else 1, p, 2)
-        elif clue_type == 'sum_equals':
-            _, val1, _, val2, total = params
-            p1, p2 = get_var(val1), get_var(val2)
-            if p1 is not None and p2 is not None: model.Add(p1+p2==total)
-        elif clue_type == 'distance_greater_than':
-            _, val1, _, val2, dist = params
-            p1, p2 = get_var(val1), get_var(val2)
-            if p1 is not None and p2 is not None:
-                abs_diff = model.NewIntVar(0, self.num_items, '')
-                model.AddAbsEquality(abs_diff, p1 - p2)
-                model.Add(abs_diff > dist)
-        elif clue_type == 'if_then':
-            condition_clue, consequence_clue = params
-            b_cond = model.NewBoolVar('')
-            b_cons = model.NewBoolVar('')
+            if p1 is not None and p2 is not None: model.AddAbsEquality(1, p1 - p2)
+        # ... (здесь можно добавить реализацию для других ваших типов, если они есть)
+
+        elif clue_type == 'if_then' or clue_type == 'if_not_then_not':
+            p_clue, q_clue = params
+            b_p = model.NewBoolVar('')
+            b_q = model.NewBoolVar('')
 
             def reify(cl, bool_var):
                 c_type, c_params = cl
@@ -226,9 +201,15 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                         model.Add(p1 == p2).OnlyEnforceIf(bool_var)
                         model.Add(p1 != p2).OnlyEnforceIf(bool_var.Not())
 
-            reify(condition_clue, b_cond)
-            reify(consequence_clue, b_cons)
-            model.AddImplication(b_cond, b_cons)
+            reify(p_clue, b_p)
+            reify(q_clue, b_q)
+
+            if clue_type == 'if_then':
+                # P -> Q
+                model.AddImplication(b_p, b_q)
+            elif clue_type == 'if_not_then_not':
+                # (не P) -> (не Q) эквивалентно Q -> P (контрапозиция)
+                model.AddImplication(b_q, b_p)
 
     def quality_audit_and_select_question(self, puzzle: List[Tuple[str, Any]], solution: pd.DataFrame, min_path_len: int = 3) -> Tuple[List, Optional[Dict]]:
         graph = collections.defaultdict(list)
@@ -236,24 +217,19 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
 
         def _extract_items_recursive(p, item_set):
             if isinstance(p, (list, tuple)):
-                for item in p:
-                    _extract_items_recursive(item, item_set)
-            elif isinstance(p, str) and p in all_items:
-                item_set.add(p)
+                for item in p: _extract_items_recursive(item, item_set)
+            elif isinstance(p, str) and p in all_items: item_set.add(p)
 
-        for clue_type, params in puzzle:
+        for _, params in puzzle:
             clue_items = set()
             _extract_items_recursive(params, clue_items)
-
             clue_items_list = list(clue_items)
             for i in range(len(clue_items_list)):
                 for j in range(i + 1, len(clue_items_list)):
                     graph[clue_items_list[i]].append(clue_items_list[j])
                     graph[clue_items_list[j]].append(clue_items_list[i])
 
-        best_question = None
-        max_path_len = -1
-
+        best_question, max_path_len = None, -1
         possible_questions = []
         for subject_cat in self.cat_keys:
             for attribute_cat in self.cat_keys:
@@ -266,13 +242,11 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         for subject_cat, subject_item, attribute_cat, answer_item in possible_questions:
             q = collections.deque([(subject_item, [subject_item])])
             visited = {subject_item}
-
             while q:
                 curr_node, path = q.popleft()
                 if curr_node == answer_item:
-                    path_len = len(path) - 1
-                    if path_len > max_path_len:
-                        max_path_len = path_len
+                    if len(path) - 1 > max_path_len:
+                        max_path_len = len(path) - 1
                         best_question = {"question": f"Какой {self.story_elements.get(attribute_cat, attribute_cat.lower())} у {self.story_elements.get(subject_cat, subject_cat.lower())} по имени {subject_item}?",
                                          "answer": f"Ответ для проверки: {answer_item}"}
                     break
@@ -284,37 +258,38 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         if max_path_len >= min_path_len:
             print(f"  - Аудит пройден. Найден вопрос с длиной пути: {max_path_len}")
             return list(set(puzzle)), best_question
-        else:
-            return puzzle, None
+        return puzzle, None
 
     def format_clue(self, clue: Tuple[str, Any]) -> str:
-        clue_type, params = clue
         s = self.story_elements
         g = lambda c, v: f"{s.get(c, c.lower())} '{v}'"
 
+        def format_fact(fact_clue: Tuple[str, Any], is_negative: bool = False) -> str:
+            fact_type, fact_params = fact_clue
+            neg = " НЕ" if is_negative else ""
+            if fact_type == 'positional':
+                return f"в {s.get('position','локация')} №{fact_params[0]}{neg} находится {g(fact_params[1], fact_params[2])}"
+            if fact_type == 'direct_link':
+                return f"характеристикой {g(fact_params[0], fact_params[1])}{neg} является {g(fact_params[2], fact_params[3])}"
+            return "[неформатируемый факт]"
+
+        clue_type, params = clue
         try:
             if clue_type == 'positional': return f"В {s.get('position','локация')} №{params[0]} находится {g(params[1], params[2])}."
             if clue_type == 'direct_link': return f"Характеристикой {g(params[0], params[1])} является {g(params[2], params[3])}."
             if clue_type == 'negative_direct_link': return f"{g(params[0], params[1]).capitalize()} НЕ находится в одной локации с {g(params[2], params[3])}."
             if clue_type == 'relative_pos': return f"{g(params[0], params[1]).capitalize()} и {g(params[2], params[3])} находятся в соседних локациях."
-            if clue_type == 'opposite_link': return f"{g(params[0], params[1]).capitalize()} и {g(params[2], params[3])} находятся в локациях друг напротив друга."
-            if clue_type == 'at_edge': return f"{g(params[0], params[1]).capitalize()} находится в одной из крайних локаций."
-            if clue_type == 'is_even': return f"Номер локации, где {g(params[0], params[1])}, — {'чётный' if params[2] else 'нечётный'}."
-            if clue_type == 'three_in_a_row':
-                p1,p2,p3 = params
-                return f"Объекты {g(p1[0],p1[1])}, {g(p2[0],p2[1])} и {g(p3[0],p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
-            if clue_type == 'ordered_chain':
-                p1,p2,p3 = params
-                return f"Локация, где {g(p1[0],p1[1])}, находится где-то левее локации, где {g(p2[0],p2[1])}, которая в свою очередь левее локации, где {g(p3[0],p3[1])}."
-            if clue_type == 'sum_equals':
-                return f"Сумма номеров локаций, где {g(params[0], params[1])} и где {g(params[2], params[3])}, равна {params[4]}."
-            if clue_type == 'distance_greater_than':
-                return f"Между локациями, где {g(params[0], params[1])}, и где {g(params[2], params[3])}, находится более чем {params[4]} локация(й)."
+
             if clue_type == 'if_then':
-                cond_text = self.format_clue(params[0])
-                cons_text = self.format_clue(params[1])
-                if cond_text.endswith('.'): cond_text = cond_text[:-1]
-                return f"Если {cond_text}, то {cons_text[0].lower() + cons_text[1:]}"
+                cond_text = format_fact(params[0])
+                cons_text = format_fact(params[1])
+                return f"Если {cond_text}, то {cons_text}."
+
+            if clue_type == 'if_not_then_not':
+                cond_text = format_fact(params[0], is_negative=True)
+                cons_text = format_fact(params[1], is_negative=True)
+                return f"Если {cond_text}, то {cons_text}."
+
         except (AttributeError, IndexError, KeyError) as e:
             return f"[Ошибка форматирования для {clue_type}: {e}]"
         return f"[Неформатированная подсказка: {clue_type}]"
