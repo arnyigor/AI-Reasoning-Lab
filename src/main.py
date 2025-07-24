@@ -47,8 +47,8 @@ if __name__ == '__main__':
 
     # 1. Задаем желаемые параметры
     desired_theme_name = "Тайна в Школе номер 7"
-    desired_num_items = 6
-    desired_num_categories = 6
+    desired_num_items = 7
+    desired_num_categories = 7
 
     # 2. Проверяем, что наши желания выполнимы
     target_theme = EINSTEIN_THEMES[desired_theme_name]
