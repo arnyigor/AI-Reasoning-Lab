@@ -157,3 +157,17 @@ class PuzzleDefinition(ABC):
             solution (pd.DataFrame): Полное решение для самопроверки.
         """
         pass
+
+    @property
+    @abstractmethod
+    def SolutionCollector(self):
+        """Возвращает класс для сбора решений."""
+        pass
+
+    @abstractmethod
+    def find_difference_and_create_clue(self, solution1: Dict, solution2: Dict, true_solution: pd.DataFrame) -> Optional[Tuple[Any, Any]]:
+        """
+        Сравнивает два решения, находит различие и создает "контр-улику",
+        которая соответствует истинному решению.
+        """
+        pass

@@ -68,9 +68,9 @@ if __name__ == '__main__':
     print("\n\n--- ГЕНЕРАЦИЯ ЗАДАЧИ ---")
 
     # 1. Задаем желаемые параметры
-    desired_theme_name = "Офисная Тайна"
-    desired_num_items = 4
-    desired_num_categories = 4
+    desired_theme_name = "Загадка в деревне"
+    desired_num_items = 5
+    desired_num_categories = 5
     is_circular_1 = False
 
     # 2. Проверяем, что наши желания выполнимы

@@ -22,6 +22,69 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         self.is_circular = is_circular
         self._prepare_data()
 
+    @property
+    def SolutionCollector(self):
+        """Возвращает вложенный класс SolutionCollector."""
+
+        class Collector(cp_model.CpSolverSolutionCallback):
+            """Собирает найденные решения в список."""
+            def __init__(self, limit: int):
+                super().__init__()
+                self.solutions = []
+                self._limit = limit
+                self._variables = None
+
+            def set_variables(self, variables: Dict[str, Any]):
+                self._variables = variables
+
+            def on_solution_callback(self):
+                if self._variables:
+                    current_solution = {
+                        name: self.Value(var) for name, var in self._variables.items()
+                    }
+                    self.solutions.append(current_solution)
+                if len(self.solutions) >= self._limit:
+                    self.StopSearch()
+
+            @property
+            def solution_count(self):
+                return len(self.solutions)
+
+        return Collector
+
+    def find_difference_and_create_clue(self, solution1: Dict, solution2: Dict, true_solution: pd.DataFrame) -> Optional[Tuple[Any, Any]]:
+        """
+        Находит первое различие между двумя решениями и создает простую
+        улику (POSITIONAL или DIRECT_LINK), которая соответствует истинному решению
+        и устраняет неоднозначность.
+        """
+        items = list(solution1.keys())
+        random.shuffle(items)
+
+        for item_name in items:
+            if solution1[item_name] != solution2[item_name]:
+                # Нашли различие! Например, в solution1 'Программист' в доме 2, а в solution2 - в доме 4.
+                # Теперь нам нужно создать улику, которая соответствует ИСТИННОМУ решению.
+
+                # Находим категорию этого объекта
+                item_category = None
+                for cat, cat_items in self.categories.items():
+                    if item_name in cat_items:
+                        item_category = cat
+                        break
+
+                if not item_category:
+                    continue
+
+                # Получаем правильную позицию из эталонного решения
+                true_pos = true_solution[true_solution[item_category] == item_name].index[0]
+
+                # Создаем самую простую и надежную "контр-улику" - позиционную
+                # Это гарантированно отсечет одно из неверных решений.
+                return (ClueType.POSITIONAL, (true_pos, item_category, item_name))
+
+        return None # Не удалось найти различий, что маловероятно
+
     def _prepare_data(self):
         selected_theme_name = random.choice(list(self.themes.keys()))
         base_categories = self.themes[selected_theme_name]
@@ -43,10 +106,10 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         anchors = self.get_anchors(solution)
         core_puzzle = list(anchors)
 
-        # --- ИЗМЕНЕНИЕ: Используем Enum ---
         exotic_types = [
             ClueType.IF_NOT_THEN_NOT, ClueType.THREE_IN_A_ROW, ClueType.ORDERED_CHAIN,
-            ClueType.AT_EDGE, ClueType.SUM_EQUALS, ClueType.EITHER_OR, ClueType.IF_AND_ONLY_IF
+            ClueType.AT_EDGE, ClueType.SUM_EQUALS, ClueType.EITHER_OR, ClueType.IF_AND_ONLY_IF,
+            ClueType.NEITHER_NOR_POS
         ]
 
         random.shuffle(exotic_types)
@@ -63,15 +126,16 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         ]
         for clue_type in other_complex_types:
             complex_candidates.extend(clue_pool.get(clue_type, []))
-        # --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
         random.shuffle(complex_candidates)
         core_set = {tuple(c) for c in core_puzzle}
         complex_candidates = [c for c in complex_candidates if tuple(c) not in core_set]
 
-        num_to_add = self.num_items - len(core_puzzle)
+        # ИЗМЕНЕНИЕ: Делаем каркас более насыщенным и менее зависимым от размера
+        num_to_add = int(self.num_items * 1.5) # Добавляем больше сложных улик в ядро
         if num_to_add > 0:
             core_puzzle.extend(complex_candidates[:num_to_add])
+        # КОНЕЦ ИЗМЕНЕНИЯ
 
         core_set = {tuple(c) for c in core_puzzle}
         remaining_clues = [clue for clue_list in clue_pool.values() for clue in clue_list if tuple(clue) not in core_set]
@@ -94,10 +158,8 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         all_items_flat = [(cat, item) for cat, items in self.categories.items() for item in items]
 
         def add_clue(clue_type: ClueType, params: Tuple):
-            """Вспомогательная функция для добавления уникальной подсказки."""
             unique_clues[clue_type].add((clue_type, params))
 
-        # --- ИЗМЕНЕНИЕ: Используем Enum и хелпер add_clue ---
         for i in range(len(all_items_flat)):
             cat1, item1 = all_items_flat[i]
             pos1 = solution[solution[cat1] == item1].index[0]
@@ -110,19 +172,15 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 cat2, item2 = all_items_flat[j]
                 if cat1 == cat2: continue
                 pos2 = solution[solution[cat2] == item2].index[0]
-                if pos1 == pos2:
-                    add_clue(ClueType.DIRECT_LINK, (cat1, item1, cat2, item2))
-                else:
-                    add_clue(ClueType.NEGATIVE_DIRECT_LINK, (cat1, item1, cat2, item2))
-                if abs(pos1 - pos2) == 1:
-                    add_clue(ClueType.RELATIVE_POS, (cat1, item1, cat2, item2))
-                if abs(pos1 - pos2) > 1:
-                    add_clue(ClueType.DISTANCE_GREATER_THAN, (cat1, item1, cat2, item2, 1))
-                if pos1 + pos2 == self.num_items + 1:
-                    add_clue(ClueType.SUM_EQUALS, (cat1, item1, cat2, item2, self.num_items + 1))
+                if pos1 == pos2: add_clue(ClueType.DIRECT_LINK, (cat1, item1, cat2, item2))
+                else: add_clue(ClueType.NEGATIVE_DIRECT_LINK, (cat1, item1, cat2, item2))
+                if abs(pos1 - pos2) == 1: add_clue(ClueType.RELATIVE_POS, (cat1, item1, cat2, item2))
+                if abs(pos1 - pos2) > 1: add_clue(ClueType.DISTANCE_GREATER_THAN, (cat1, item1, cat2, item2, 1))
+                if pos1 + pos2 == self.num_items + 1: add_clue(ClueType.SUM_EQUALS, (cat1, item1, cat2, item2, self.num_items + 1))
 
+        # ИЗМЕНЕНИЕ 1: Увеличиваем генерацию структурных улик
         if len(cat_keys) >= 3:
-            for _ in range(self.num_items * 5):
+            for _ in range(self.num_items * self.num_items * 3): # Увеличили значительно
                 try:
                     cats = random.sample(cat_keys, 3)
                     positions = sorted(random.sample(range(1, self.num_items + 1), 3))
@@ -135,8 +193,9 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
 
         simple_facts = list(unique_clues[ClueType.POSITIONAL]) + list(unique_clues[ClueType.DIRECT_LINK])
         random.shuffle(simple_facts)
+        # ИЗМЕНЕНИЕ 2: Увеличиваем генерацию условных улик
         if len(simple_facts) >= 2:
-            for _ in range(self.num_items * self.num_categories * 2):
+            for _ in range(self.num_items * self.num_categories * 5): # Увеличили значительно
                 try:
                     c1, c2 = random.sample(simple_facts, 2)
                     if c1 != c2:
@@ -152,14 +211,27 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 true_item = solution.loc[pos, cat]
                 for false_item in all_items_in_cat[cat] - {true_item}:
                     false_facts.append((ClueType.POSITIONAL, (pos, cat, false_item)))
+        # ИЗМЕНЕНИЕ 3: Увеличиваем генерацию условных отрицаний
         if len(false_facts) >= 2:
-            for _ in range(self.num_items * self.num_categories):
+            for _ in range(self.num_items * self.num_categories * 3): # Увеличили
                 try:
                     p_false, q_false = random.sample(false_facts, 2)
                     if p_false != q_false:
                         add_clue(ClueType.IF_NOT_THEN_NOT, (p_false, q_false))
                 except (ValueError, IndexError): break
-        # --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
+        # Генерация "Ни... ни..."
+        for p in range(1, self.num_items + 1):
+            candidates = []
+            for cat, item in all_items_flat:
+                item_pos = solution[solution[cat] == item].index[0]
+                if item_pos != p:
+                    candidates.append((cat, item))
+            if len(candidates) >= 2:
+                for _ in range(self.num_categories):
+                    num_items_in_clue = random.randint(2, min(len(candidates), 3))
+                    selected_items = random.sample(candidates, num_items_in_clue)
+                    add_clue(ClueType.NEITHER_NOR_POS, (tuple(selected_items), p))
 
         for key, clues_set in unique_clues.items():
             pool[key] = list(clues_set)
@@ -178,7 +250,6 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         clue_type, params = clue
         get_var = lambda val: variables.get(val)
 
-        # --- ИЗМЕНЕНИЕ: Используем Enum в if/elif ---
         if clue_type == ClueType.POSITIONAL:
             pos_idx, _, val = params
             p = get_var(val)
@@ -246,6 +317,12 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             elif clue_type == ClueType.IF_NOT_THEN_NOT: model.AddImplication(b_q.Not(), b_p.Not())
             elif clue_type == ClueType.EITHER_OR: model.AddBoolXOr([b_p, b_q])
             elif clue_type == ClueType.IF_AND_ONLY_IF: model.Add(b_p == b_q)
+        elif clue_type == ClueType.NEITHER_NOR_POS:
+            item_tuples, position = params
+            for cat, item in item_tuples:
+                p_var = get_var(item)
+                if p_var is not None:
+                    model.Add(p_var != position)
 
     def quality_audit_and_select_question(self, puzzle: List[Tuple[Any, Any]], solution: pd.DataFrame, min_path_len: int = 3) -> Tuple[List, Optional[Dict]]:
         # ... (без изменений) ...
@@ -334,6 +411,13 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 return f"Либо {format_fact(params[0])}, либо {format_fact(params[1])}."
             if clue_type == ClueType.IF_AND_ONLY_IF:
                 return f"Утверждение '{format_fact(params[0])}' истинно тогда и только тогда, когда истинно утверждение '{format_fact(params[1])}'."
+            if clue_type == ClueType.NEITHER_NOR_POS:
+                item_tuples, position = params
+                # Форматируем каждый объект: "профессия 'Врач'", "национальность 'Англичанин'"
+                formatted_items = [g(cat, item) for cat, item in item_tuples]
+                # Соединяем их в одну строку: "Ни ..., ни ..."
+                clue_text = "Ни " + ", ни ".join(formatted_items)
+                return f"{clue_text}, не находится в локации №{position}."
 
         except (AttributeError, IndexError, KeyError) as e:
             return f"[ОШИБКА ФОРМАТИРОВАНИЯ для {clue_type.name}: {e}]"
