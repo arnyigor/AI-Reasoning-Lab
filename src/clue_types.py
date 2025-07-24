@@ -31,4 +31,6 @@ class ClueType(Enum):
     IF_NOT_THEN_NOT = auto()      # (НЕ Условие, НЕ Следствие)
     EITHER_OR = auto()            # (Факт1, Факт2) - XOR
     IF_AND_ONLY_IF = auto()       # (Факт1, Факт2) - Эквивалентность
-    NEITHER_NOR_POS = auto()      # ([(Кат1, Зн1), (Кат2, Зн2), ...], Позиция)
+    NEITHER_NOR_POS = auto()      # Ни А, ни Б не находятся в позиции X
+    ARITHMETIC_RELATION = auto()  # Поз(А) * Поз(Б) = Результат
+    HIERARCHICAL_RELATION = auto()# А старше/больше/левее Б (в рамках своей категории)

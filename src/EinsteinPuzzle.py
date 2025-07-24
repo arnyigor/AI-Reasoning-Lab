@@ -45,16 +45,18 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         anchors = self.get_anchors(solution)
         core_puzzle = list(anchors)
 
+        # <<< ИЗМЕНЕНИЕ: Добавляем новые типы в список "экзотики" >>>
         exotic_types = [
             ClueType.IF_NOT_THEN_NOT, ClueType.THREE_IN_A_ROW, ClueType.ORDERED_CHAIN,
-            ClueType.AT_EDGE, ClueType.SUM_EQUALS, ClueType.EITHER_OR, ClueType.IF_AND_ONLY_IF
+            ClueType.AT_EDGE, ClueType.SUM_EQUALS, ClueType.EITHER_OR,
+            ClueType.IF_AND_ONLY_IF, ClueType.NEITHER_NOR_POS, ClueType.ARITHMETIC_RELATION
         ]
         random.shuffle(exotic_types)
 
         for clue_type in exotic_types:
             if clue_pool.get(clue_type):
                 core_puzzle.append(random.choice(clue_pool[clue_type]))
-
+        # ... (остальной метод design_core_puzzle без изменений)
         complex_candidates = []
         complex_candidates.extend(clue_pool.get(ClueType.IF_THEN, []))
         other_complex_types = [
@@ -65,10 +67,8 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             complex_candidates.extend(clue_pool.get(clue_type, []))
 
         random.shuffle(complex_candidates)
-
         core_set = {tuple(c) for c in core_puzzle}
         complex_candidates = [c for c in complex_candidates if tuple(c) not in core_set]
-
         num_to_add = (self.num_items // 2) - len(core_puzzle) + self.num_items
         if num_to_add > 0:
             core_puzzle.extend(complex_candidates[:num_to_add])
@@ -114,6 +114,33 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 if abs(pos1 - pos2) == 1: add_clue(ClueType.RELATIVE_POS, (cat1, item1, cat2, item2))
                 if abs(pos1 - pos2) > 1: add_clue(ClueType.DISTANCE_GREATER_THAN, (cat1, item1, cat2, item2, 1))
                 if pos1 + pos2 == self.num_items + 1: add_clue(ClueType.SUM_EQUALS, (cat1, item1, cat2, item2, self.num_items + 1))
+
+        for p in range(1, self.num_items + 1):
+            # Собираем всех, кто НЕ в позиции p
+            candidates = [(cat, item) for cat, item in all_items_flat if solution[solution[cat] == item].index[0] != p]
+            if len(candidates) >= 2:
+                # Генерируем несколько таких улик для каждой позиции
+                for _ in range(self.num_categories):
+                    # Выбираем 2 или 3 случайных объекта
+                    num_items_in_clue = random.randint(2, min(len(candidates), 3))
+                    selected_items = random.sample(candidates, num_items_in_clue)
+                    # Кортеж из кортежей, чтобы был хешируемым
+                    add_clue(ClueType.NEITHER_NOR_POS, (tuple(selected_items), p))
+
+        # <<< НОВЫЙ БЛОК 2: Генерация Арифметических отношений >>>
+        for _ in range(self.num_items * self.num_categories):
+            try:
+                # Выбираем два СОВЕРШЕННО СЛУЧАЙНЫХ объекта
+                (cat1, item1), (cat2, item2) = random.sample(all_items_flat, 2)
+                if cat1 == cat2: continue # Убедимся, что они из разных категорий
+
+                pos1 = solution[solution[cat1] == item1].index[0]
+                pos2 = solution[solution[cat2] == item2].index[0]
+
+                # Создаем улику на произведение
+                result = pos1 * pos2
+                add_clue(ClueType.ARITHMETIC_RELATION, ((cat1, item1), (cat2, item2), '*', result))
+            except (ValueError, IndexError): break
 
         if len(cat_keys) >= 3:
             for _ in range(self.num_items * 5):
@@ -212,6 +239,24 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             elif clue_type == ClueType.IF_NOT_THEN_NOT: model.AddImplication(b_p.Not(), b_q.Not())
             elif clue_type == ClueType.EITHER_OR: model.AddBoolXOr([b_p, b_q])
             elif clue_type == ClueType.IF_AND_ONLY_IF: model.Add(b_p == b_q)
+        elif clue_type == ClueType.NEITHER_NOR_POS:
+            item_tuples, position = params
+            for _, item in item_tuples:
+                p_var = get_var(item)
+                if p_var is not None:
+                    model.Add(p_var != position)
+
+        # <<< НОВЫЙ БЛОК 2: Обработка Арифметики >>>
+        elif clue_type == ClueType.ARITHMETIC_RELATION:
+            (cat1, item1), (cat2, item2), op, result = params
+            p1 = get_var(item1)
+            p2 = get_var(item2)
+
+            if p1 is not None and p2 is not None:
+                if op == '*':
+                    model.AddMultiplicationEquality(result, [p1, p2])
+                elif op == '+':
+                    model.Add(p1 + p2 == result)
 
     def quality_audit_and_select_question(self, puzzle: List, solution: pd.DataFrame, min_path_len: int = 3) -> Tuple[List, Optional[Dict]]:
         graph = collections.defaultdict(list)
@@ -272,6 +317,16 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             if clue_type == ClueType.IF_NOT_THEN_NOT: return f"Если {format_fact(params[0], True)}, то {format_fact(params[1], True)}."
             if clue_type == ClueType.EITHER_OR: return f"Либо {format_fact(params[0])}, либо {format_fact(params[1])}, но не одновременно."
             if clue_type == ClueType.IF_AND_ONLY_IF: return f"Утверждение '{format_fact(params[0])}' истинно тогда и только тогда, когда истинно '{format_fact(params[1])}'."
+            if clue_type == ClueType.NEITHER_NOR_POS:
+                item_tuples, position = params
+                formatted_items = [g(cat, item) for cat, item in item_tuples]
+                # Соединяем их в строку "Ни ..., ни ..., ни ..."
+                clue_text = "Ни " + ", ни ".join(formatted_items)
+                return f"{clue_text}, не находится в локации №{position}."
+            if clue_type == ClueType.ARITHMETIC_RELATION:
+                (cat1, item1), (cat2, item2), op, result = params
+                op_text = {'*': 'Произведение', '+': 'Сумма'}.get(op, 'Результат операции')
+                return f"{op_text} номеров локаций, где {g(cat1, item1)} и где {g(cat2, item2)}, равен {result}."
         except (AttributeError, IndexError, KeyError) as e: return f"[ОШИБКА ФОРМАТИРОВАНИЯ для {clue_type.name}: {e}]"
         return f"[Неизвестный тип подсказки: {clue_type.name}]"
 
