@@ -17,25 +17,6 @@ class PuzzleDefinition(ABC):
     от деталей конкретной головоломки, будь то "Загадка Эйнштейна" или что-то еще.
     """
 
-    CLUE_STRENGTH = {
-        # Самые сильные - задают точные позиции или связи
-        'positional': 10,
-        'direct_link': 9,
-        # Сильные структурные
-        'three_in_a_row': 8,
-        'opposite_link': 7,
-        # Средней силы - задают порядок или соседство
-        'relative_pos': 6,
-        'ordered_chain': 6,
-        'at_edge': 5,
-        # Слабые - числовые и негативные
-        'is_even': 4,
-        'sum_equals': 4,
-        'negative_direct_link': 3,
-        # Самые слабые - отсекают мало вариантов
-        'distance_greater_than': 2,
-    }
-
     @property
     @abstractmethod
     def name(self) -> str:
