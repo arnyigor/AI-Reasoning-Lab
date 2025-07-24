@@ -9,25 +9,11 @@ from clue_types import ClueType
 
 class EinsteinPuzzleDefinition(PuzzleDefinition):
     """
-    Финальная, масштабируемая реализация "Загадки Эйнштейна".
-    Использует Enum для типов подсказок и проверенную архитектуру "Виртуоз".
+    Финальная, каноническая реализация для "Загадки Эйнштейна".
+    Использует Enum для типов подсказок и проверенную архитектуру "Виртуоз",
+    включая полный репертуар сложных логических конструкций.
     """
-    CLUE_STRENGTH = {
-        ClueType.IF_THEN: 10,
-        ClueType.IF_AND_ONLY_IF: 10,
-        ClueType.THREE_IN_A_ROW: 9,
-        ClueType.ORDERED_CHAIN: 9,
-        ClueType.SUM_EQUALS: 8,
-        ClueType.EITHER_OR: 8,
-        ClueType.IF_NOT_THEN_NOT: 7,
-        ClueType.RELATIVE_POS: 6,
-        ClueType.POSITIONAL: 5,
-        ClueType.DIRECT_LINK: 5,
-        ClueType.AT_EDGE: 4,
-        ClueType.IS_EVEN: 3,
-        ClueType.NEGATIVE_DIRECT_LINK: 2,
-        ClueType.DISTANCE_GREATER_THAN: 1
-    }
+    # CLUE_STRENGTH находится в PuzzleDefinition.py, откуда и наследуется.
 
     def __init__(self, themes: Dict, story_elements: Dict, num_items: int, num_categories: int, is_circular: bool):
         self._name = "Загадка Эйнштейна"
@@ -126,6 +112,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 if pos1 == pos2: add_clue(ClueType.DIRECT_LINK, (cat1, item1, cat2, item2))
                 else: add_clue(ClueType.NEGATIVE_DIRECT_LINK, (cat1, item1, cat2, item2))
                 if abs(pos1 - pos2) == 1: add_clue(ClueType.RELATIVE_POS, (cat1, item1, cat2, item2))
+                if abs(pos1 - pos2) > 1: add_clue(ClueType.DISTANCE_GREATER_THAN, (cat1, item1, cat2, item2, 1))
                 if pos1 + pos2 == self.num_items + 1: add_clue(ClueType.SUM_EQUALS, (cat1, item1, cat2, item2, self.num_items + 1))
 
         if len(cat_keys) >= 3:
@@ -198,6 +185,9 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         elif clue_type == ClueType.SUM_EQUALS:
             _, v1, _, v2, total = params; p1, p2 = get_var(v1), get_var(v2)
             if p1 is not None and p2 is not None: model.Add(p1 + p2 == total)
+        elif clue_type == ClueType.IS_EVEN:
+            _, val, is_even = params; p = get_var(val)
+            if p is not None: model.AddModuloEquality(0 if is_even else 1, p, 2)
         elif clue_type in [ClueType.THREE_IN_A_ROW, ClueType.ORDERED_CHAIN]:
             (_, v1), (_, v2), (_, v3) = params; p1, p2, p3 = get_var(v1), get_var(v2), get_var(v3)
             if p1 is not None and p2 is not None and p3 is not None:
@@ -257,7 +247,6 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                     if neighbor not in visited: visited.add(neighbor); q.append((neighbor, path + [neighbor]))
         if max_path_len >= min_path_len:
             print(f"  - Аудит пройден. Найден вопрос с длиной пути: {max_path_len}")
-            # Преобразуем список списков в список кортежей перед созданием set
             return list(set(map(tuple, puzzle))), best_question
         return puzzle, None
 

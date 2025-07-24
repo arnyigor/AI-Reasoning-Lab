@@ -6,6 +6,19 @@ from ortools.sat.python import cp_model
 from clue_types import ClueType # <<< ИМПОРТ
 
 class PuzzleDefinition(ABC):
+    """
+        Абстрактный базовый класс, определяющий "контракт"
+        для любого типа логической головоломки.
+        """
+
+    CLUE_STRENGTH = {
+        ClueType.IF_THEN: 10, ClueType.IF_AND_ONLY_IF: 10, ClueType.THREE_IN_A_ROW: 9,
+        ClueType.ORDERED_CHAIN: 9, ClueType.SUM_EQUALS: 8, ClueType.EITHER_OR: 8,
+        ClueType.IF_NOT_THEN_NOT: 7, ClueType.RELATIVE_POS: 6, ClueType.POSITIONAL: 5,
+        ClueType.DIRECT_LINK: 5, ClueType.AT_EDGE: 4, ClueType.IS_EVEN: 3,
+        ClueType.NEGATIVE_DIRECT_LINK: 2, ClueType.DISTANCE_GREATER_THAN: 1
+    }
+
     @property
     @abstractmethod
     def name(self) -> str: pass
