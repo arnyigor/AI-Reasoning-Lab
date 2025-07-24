@@ -33,4 +33,5 @@ class ClueType(Enum):
     IF_AND_ONLY_IF = auto()       # (Факт1, Факт2) - Эквивалентность
     NEITHER_NOR_POS = auto()      # Ни А, ни Б не находятся в позиции X
     ARITHMETIC_RELATION = auto()  # Поз(А) * Поз(Б) = Результат
+    # --- ИЕРАРХИЧЕСКИЙ ТИП ---
     HIERARCHICAL_RELATION = auto()# А старше/больше/левее Б (в рамках своей категории)

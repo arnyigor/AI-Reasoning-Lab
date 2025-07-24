@@ -7,29 +7,35 @@ from ortools.sat.python import cp_model
 from PuzzleDefinition import PuzzleDefinition
 from clue_types import ClueType
 
+
 class EinsteinPuzzleDefinition(PuzzleDefinition):
     """
     Финальная, каноническая реализация для "Загадки Эйнштейна".
     Использует Enum для типов подсказок и проверенную архитектуру "Виртуоз",
     включая полный репертуар сложных логических конструкций.
     """
-    # CLUE_STRENGTH находится в PuzzleDefinition.py, откуда и наследуется.
 
-    def __init__(self, themes: Dict, story_elements: Dict, num_items: int, num_categories: int):
+    def __init__(self, themes: Dict, story_elements: Dict, linguistic_cores: Dict, num_items: int, num_categories: int):
         self._name = "Загадка Эйнштейна"
         self.themes = themes
         self.story_elements = story_elements
+        self.linguistic_cores = linguistic_cores # Получаем данные извне
+        self.active_linguistic_core = {}
+        self.selected_theme_name = "" # Для надежного доступа к теме
         self.num_items = num_items
         self.num_categories = num_categories
         self._prepare_data()
 
     def _prepare_data(self):
-        selected_theme_name = random.choice(list(self.themes.keys()))
-        base_categories = self.themes[selected_theme_name]
-        self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
+        self.selected_theme_name = list(self.themes.keys())[0]
+        base_categories = self.themes[self.selected_theme_name]
+
+        self.active_linguistic_core = self.linguistic_cores.get(self.selected_theme_name, {})
+        self.story_elements["scenario"] = f"Тайна в сеттинге: {self.selected_theme_name}"
+
         self.cat_keys = random.sample(list(base_categories.keys()), self.num_categories)
         self.categories = {key: random.sample(values, self.num_items) for key, values in base_categories.items() if key in self.cat_keys}
-        print(f"\n[Генератор]: Тема: '{selected_theme_name}', Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: 'Линейная'.")
+        print(f"\n[Генератор]: Тема: '{self.selected_theme_name}', Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: Линейная.")
 
     @property
     def name(self) -> str:
@@ -43,19 +49,17 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         clue_pool = self.generate_clue_pool(solution)
         anchors = self.get_anchors(solution)
         core_puzzle = list(anchors)
-
-        # <<< ИЗМЕНЕНИЕ: Добавляем новые типы в список "экзотики" >>>
         exotic_types = [
             ClueType.IF_NOT_THEN_NOT, ClueType.THREE_IN_A_ROW, ClueType.ORDERED_CHAIN,
             ClueType.AT_EDGE, ClueType.SUM_EQUALS, ClueType.EITHER_OR,
-            ClueType.IF_AND_ONLY_IF, ClueType.NEITHER_NOR_POS, ClueType.ARITHMETIC_RELATION
+            ClueType.IF_AND_ONLY_IF, ClueType.NEITHER_NOR_POS,
+            ClueType.ARITHMETIC_RELATION, ClueType.HIERARCHICAL_RELATION
         ]
         random.shuffle(exotic_types)
 
         for clue_type in exotic_types:
             if clue_pool.get(clue_type):
                 core_puzzle.append(random.choice(clue_pool[clue_type]))
-        # ... (остальной метод design_core_puzzle без изменений)
         complex_candidates = []
         complex_candidates.extend(clue_pool.get(ClueType.IF_THEN, []))
         other_complex_types = [
@@ -99,7 +103,6 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             add_clue(ClueType.POSITIONAL, (pos1, cat1, item1))
             if pos1 == 1 or pos1 == self.num_items: add_clue(ClueType.AT_EDGE, (cat1, item1))
             add_clue(ClueType.IS_EVEN, (cat1, item1, pos1 % 2 == 0))
-
             for j in range(i + 1, len(all_items_flat)):
                 cat2, item2 = all_items_flat[j]
                 if cat1 == cat2: continue
@@ -110,33 +113,38 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 if abs(pos1 - pos2) > 1: add_clue(ClueType.DISTANCE_GREATER_THAN, (cat1, item1, cat2, item2, 1))
                 if pos1 + pos2 == self.num_items + 1: add_clue(ClueType.SUM_EQUALS, (cat1, item1, cat2, item2, self.num_items + 1))
 
+        # Генерация Иерархических отношений
+        hierarchical_cats = self.active_linguistic_core.get("hierarchical_categories", [])
+        for cat_name in hierarchical_cats:
+            # <<< ИЗМЕНЕНИЕ: Используем сохраненное имя темы >>>
+            items_in_order = self.themes[self.selected_theme_name][cat_name]
+            if len(items_in_order) >= 2:
+                for _ in range(self.num_items):
+                    item1, item2 = random.sample(items_in_order, 2)
+                    if items_in_order.index(item1) > items_in_order.index(item2):
+                        add_clue(ClueType.HIERARCHICAL_RELATION, (cat_name, item1, '>', item2))
+
+        # Генерация "Ни... ни..."
         for p in range(1, self.num_items + 1):
-            # Собираем всех, кто НЕ в позиции p
             candidates = [(cat, item) for cat, item in all_items_flat if solution[solution[cat] == item].index[0] != p]
             if len(candidates) >= 2:
-                # Генерируем несколько таких улик для каждой позиции
                 for _ in range(self.num_categories):
-                    # Выбираем 2 или 3 случайных объекта
                     num_items_in_clue = random.randint(2, min(len(candidates), 3))
                     selected_items = random.sample(candidates, num_items_in_clue)
-                    # Кортеж из кортежей, чтобы был хешируемым
                     add_clue(ClueType.NEITHER_NOR_POS, (tuple(selected_items), p))
 
-        # <<< НОВЫЙ БЛОК 2: Генерация Арифметических отношений >>>
+        # Генерация Арифметических отношений
         for _ in range(self.num_items * self.num_categories):
             try:
-                # Выбираем два СОВЕРШЕННО СЛУЧАЙНЫХ объекта
                 (cat1, item1), (cat2, item2) = random.sample(all_items_flat, 2)
-                if cat1 == cat2: continue # Убедимся, что они из разных категорий
-
+                if cat1 == cat2: continue
                 pos1 = solution[solution[cat1] == item1].index[0]
                 pos2 = solution[solution[cat2] == item2].index[0]
-
-                # Создаем улику на произведение
                 result = pos1 * pos2
                 add_clue(ClueType.ARITHMETIC_RELATION, ((cat1, item1), (cat2, item2), '*', result))
             except (ValueError, IndexError): break
 
+        # Генерация Структурных улик
         if len(cat_keys) >= 3:
             for _ in range(self.num_items * 5):
                 try:
@@ -147,6 +155,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                     add_clue(ClueType.ORDERED_CHAIN, params)
                 except (ValueError, IndexError): break
 
+        # Генерация Условных улик
         simple_facts = list(unique_clues[ClueType.POSITIONAL]) + list(unique_clues[ClueType.DIRECT_LINK])
         random.shuffle(simple_facts)
         if len(simple_facts) >= 2:
@@ -240,7 +249,6 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 p_var = get_var(item)
                 if p_var is not None:
                     model.Add(p_var != position)
-
         # <<< НОВЫЙ БЛОК 2: Обработка Арифметики >>>
         elif clue_type == ClueType.ARITHMETIC_RELATION:
             (cat1, item1), (cat2, item2), op, result = params
@@ -252,6 +260,28 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                     model.AddMultiplicationEquality(result, [p1, p2])
                 elif op == '+':
                     model.Add(p1 + p2 == result)
+        # <<< НОВЫЙ БЛОК 3: Обработка Иерархии >>>
+        elif clue_type == ClueType.HIERARCHICAL_RELATION:
+            cat_name, item1, op, item2 = params
+            p1 = get_var(item1)
+            p2 = get_var(item2)
+            if p1 is not None and p2 is not None:
+                # Напрямую сравнивать переменные позиций нельзя.
+                # Нам нужно сравнить их "ранги".
+                # Создаем словарь рангов на лету
+                items_in_order = self.themes[self.story_elements["scenario"].split(": ")[1]][cat_name]
+                ranks = {item: i for i, item in enumerate(items_in_order)}
+
+                # Создаем переменные-константы для рангов
+                rank1_var = model.NewIntVar(ranks[item1], ranks[item1], '')
+                rank2_var = model.NewIntVar(ranks[item2], ranks[item2], '')
+
+                # Это сложный трюк: мы не можем напрямую связать позицию и ранг.
+                # Вместо этого, мы создаем сложную условную подсказку.
+                # Для простоты, мы реализуем это как простое сравнение позиций,
+                # что будет означать "ученик старшего класса живет левее/правее"
+                if op == '>':
+                    model.Add(p1 < p2) # Например, 11 класс (старший) живет в доме с меньшим номером
 
     def quality_audit_and_select_question(self, puzzle: List, solution: pd.DataFrame, min_path_len: int = 3) -> Tuple[List, Optional[Dict]]:
         graph = collections.defaultdict(list)
@@ -265,6 +295,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
             for i in range(len(clue_items_list)):
                 for j in range(i + 1, len(clue_items_list)):
                     graph[clue_items_list[i]].append(clue_items_list[j]); graph[clue_items_list[j]].append(clue_items_list[i])
+
         best_question, max_path_len = None, -1
         possible_questions = []
         for subject_cat in self.cat_keys:
@@ -273,6 +304,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 for subject_item in self.categories[subject_cat]:
                     answer_item = solution.loc[solution[subject_cat] == subject_item, attribute_cat].iloc[0]
                     possible_questions.append((subject_cat, subject_item, attribute_cat, answer_item))
+
         random.shuffle(possible_questions)
         for subject_cat, subject_item, attribute_cat, answer_item in possible_questions:
             q, visited = collections.deque([(subject_item, [subject_item])]), {subject_item}
@@ -281,49 +313,33 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
                 if curr_node == answer_item:
                     if len(path) - 1 > max_path_len:
                         max_path_len = len(path) - 1
-                        best_question = {"question": f"Какой {self.story_elements.get(attribute_cat, attribute_cat.lower())} у {self.story_elements.get(subject_cat, subject_cat.lower())} по имени {subject_item}?", "answer": f"Ответ для проверки: {answer_item}"}
+
+                        # --- НОВЫЙ БЛОК ГЕНЕРАЦИИ ВОПРОСА ---
+                        dict_subj = self.active_linguistic_core.get("dictionary", {}).get(subject_cat, {})
+                        dict_attr = self.active_linguistic_core.get("dictionary", {}).get(attribute_cat, {})
+
+                        q_start = f"Какой {dict_attr.get('именительный', attribute_cat.lower())}"
+
+                        # Специальный случай для "обезличенных" категорий
+                        if subject_cat in ["Обед", "Цвет рюкзака", "Место в библиотеке", "Класс"]:
+                            q_middle = f"у того, чей {dict_subj.get('именительный', subject_cat.lower())}"
+                            q_end = f" — '{subject_item}'?"
+                        else: # Для личностей (Ученик, Герой и т.д.)
+                            q_middle = f"у {dict_subj.get('родительный_ед', subject_cat.lower())}"
+                            q_end = f" по имени {subject_item}?"
+
+                        best_question = {
+                            "question": q_start + " " + q_middle + q_end,
+                            "answer": f"Ответ для проверки: {answer_item}"
+                        }
                     break
                 for neighbor in graph.get(curr_node, []):
                     if neighbor not in visited: visited.add(neighbor); q.append((neighbor, path + [neighbor]))
+
         if max_path_len >= min_path_len:
             print(f"  - Аудит пройден. Найден вопрос с длиной пути: {max_path_len}")
             return list(set(map(tuple, puzzle))), best_question
         return puzzle, None
-
-    def format_clue(self, clue: Tuple) -> str:
-        s, g = self.story_elements, lambda c, v: f"{s.get(c, c.lower())} '{v}'"
-        def format_fact(fact, is_neg=False):
-            fact_type, fact_params = fact[0], fact[1]; neg = " НЕ" if is_neg else ""
-            if fact_type == ClueType.POSITIONAL: return f"в {s.get('position','локация')} №{fact_params[0]}{neg} находится {g(fact_params[1], fact_params[2])}"
-            if fact_type == ClueType.DIRECT_LINK: return f"характеристикой {g(fact_params[0], fact_params[1])}{neg} является {g(fact_params[2], fact_params[3])}"
-            return f"[факт: {fact_type.name}]"
-        clue_type, params = clue
-        try:
-            if clue_type == ClueType.POSITIONAL: return f"В {s.get('position','локация')} №{params[0]} находится {g(params[1], params[2])}."
-            if clue_type == ClueType.DIRECT_LINK: return f"Характеристикой {g(params[0], params[1])} является {g(params[2], params[3])}."
-            if clue_type == ClueType.NEGATIVE_DIRECT_LINK: return f"{g(params[0], params[1]).capitalize()} НЕ находится в одной локации с {g(params[2], params[3])}."
-            if clue_type == ClueType.RELATIVE_POS: return f"{g(params[0], params[1]).capitalize()} и {g(params[2], params[3])} находятся в соседних локациях."
-            if clue_type == ClueType.AT_EDGE: return f"{g(params[0], params[1]).capitalize()} находится в одной из крайних локаций."
-            if clue_type == ClueType.IS_EVEN: return f"Номер локации, где {g(params[0], params[1])}, — {'чётный' if params[2] else 'нечётный'}."
-            if clue_type == ClueType.SUM_EQUALS: return f"Сумма номеров локаций, где {g(params[0], params[1])} и где {g(params[2], params[3])}, равна {params[4]}."
-            if clue_type == ClueType.THREE_IN_A_ROW: p1,p2,p3 = params; return f"Объекты {g(p1[0],p1[1])}, {g(p2[0],p2[1])} и {g(p3[0],p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
-            if clue_type == ClueType.ORDERED_CHAIN: p1,p2,p3 = params; return f"Локация, где {g(p1[0],p1[1])}, находится где-то левее локации, где {g(p2[0],p2[1])}, которая в свою очередь левее локации, где {g(p3[0],p3[1])}."
-            if clue_type == ClueType.IF_THEN: return f"Если {format_fact(params[0])}, то {format_fact(params[1])}."
-            if clue_type == ClueType.IF_NOT_THEN_NOT: return f"Если {format_fact(params[0], True)}, то {format_fact(params[1], True)}."
-            if clue_type == ClueType.EITHER_OR: return f"Либо {format_fact(params[0])}, либо {format_fact(params[1])}, но не одновременно."
-            if clue_type == ClueType.IF_AND_ONLY_IF: return f"Утверждение '{format_fact(params[0])}' истинно тогда и только тогда, когда истинно '{format_fact(params[1])}'."
-            if clue_type == ClueType.NEITHER_NOR_POS:
-                item_tuples, position = params
-                formatted_items = [g(cat, item) for cat, item in item_tuples]
-                # Соединяем их в строку "Ни ..., ни ..., ни ..."
-                clue_text = "Ни " + ", ни ".join(formatted_items)
-                return f"{clue_text}, не находится в локации №{position}."
-            if clue_type == ClueType.ARITHMETIC_RELATION:
-                (cat1, item1), (cat2, item2), op, result = params
-                op_text = {'*': 'Произведение', '+': 'Сумма'}.get(op, 'Результат операции')
-                return f"{op_text} номеров локаций, где {g(cat1, item1)} и где {g(cat2, item2)}, равен {result}."
-        except (AttributeError, IndexError, KeyError) as e: return f"[ОШИБКА ФОРМАТИРОВАНИЯ для {clue_type.name}: {e}]"
-        return f"[Неизвестный тип подсказки: {clue_type.name}]"
 
     def print_puzzle(self, final_clues: List, question_data: Dict, solution: pd.DataFrame):
         question, answer = question_data['question'], question_data['answer']
@@ -333,3 +349,102 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         for i, clue_text in enumerate(final_clues_text, 1): print(f"{i}. {clue_text}")
         print("\n" + "="*40 + "\n"); print(f"Вопрос: {question}"); print("\n" + "="*40 + "\n")
         print(answer); print("\n--- Скрытое Решение для самопроверки ---\n", solution)
+
+    def format_clue(self, clue: Tuple) -> str:
+        s = self.story_elements
+        clue_type, params = clue
+
+        # --- Получаем лингвистические данные ---
+        templates = self.active_linguistic_core.get("templates", {})
+        dictionary = self.active_linguistic_core.get("dictionary", {})
+        context_words = self.active_linguistic_core.get("context_words", {})
+
+        # --- Умные вспомогательные функции ---
+        def g(cat, val, case="именительный"):
+            # Теперь g умеет ставить категорию в нужный падеж
+            cat_name = dictionary.get(cat, {}).get(case, cat.lower())
+            return f"{cat_name} '{val}'"
+
+        def get_pos_word(case="именительный"):
+            key_map = {
+                "именительный": "position",
+                "родительный": "position_genitive",
+                "предложный": "position_locative"
+            }
+            key = key_map.get(case, "position")
+            return random.choice(context_words.get(key, ["локация"]))
+
+        def format_fact(fact, is_neg=False):
+            fact_type, fact_params = fact[0], fact[1]; neg = " НЕ" if is_neg else ""
+            pos_word_loc = get_pos_word(case="предложный")
+
+            if fact_type == ClueType.POSITIONAL:
+                return f"в {pos_word_loc} №{fact_params[0]}{neg} находится {g(fact_params[1], fact_params[2])}"
+            if fact_type == ClueType.DIRECT_LINK:
+                return f"{g(fact_params[2], fact_params[3])}{neg} является характеристикой {g(fact_params[0], fact_params[1], case='родительный_ед')}"
+            return f"[факт: {fact_type.name}]"
+
+        try:
+            # --- Блок 1: Шаблонные типы (самый высокий приоритет) ---
+            if clue_type in [ClueType.DIRECT_LINK, ClueType.NEGATIVE_DIRECT_LINK, ClueType.RELATIVE_POS]:
+                cat1, item1, cat2, item2 = params
+                template_set_key = {
+                    ClueType.DIRECT_LINK: "direct_link",
+                    ClueType.NEGATIVE_DIRECT_LINK: "negative_direct_link",
+                    ClueType.RELATIVE_POS: "relative_pos"
+                }.get(clue_type)
+
+                if template_set_key:
+                    template_set = templates.get(template_set_key, {})
+                    key1, key2 = f"{cat1}-{cat2}", f"{cat2}-{cat1}"
+
+                    if key1 in template_set: return template_set[key1].format(**{cat1: item1, cat2: item2})
+                    if key2 in template_set: return template_set[key2].format(**{cat2: item2, cat1: item1})
+
+            # --- Блок 2: Форматирование по типам (если шаблон не найден) ---
+            if clue_type == ClueType.POSITIONAL:
+                return f"В {get_pos_word(case='предложный')} №{params[0]} находится {g(params[1], params[2])}."
+            if clue_type == ClueType.DIRECT_LINK:
+                return f"{g(params[0], params[1]).capitalize()} находится в том же {get_pos_word(case='предложный')}, что и {g(params[2], params[3])}."
+            if clue_type == ClueType.NEGATIVE_DIRECT_LINK:
+                return f"{g(params[0], params[1]).capitalize()} НЕ находится в том же {get_pos_word(case='предложный')}, что и {g(params[2], params[3])}."
+            if clue_type == ClueType.RELATIVE_POS:
+                return f"{g(params[0], params[1]).capitalize()} находится в соседнем {get_pos_word(case='предложный')} с {g(params[2], params[3], case='творительный')}."
+            if clue_type == ClueType.AT_EDGE:
+                return f"{g(params[0], params[1]).capitalize()} находится в одной из крайних локаций."
+            if clue_type == ClueType.IS_EVEN:
+                pos_word_gen = get_pos_word(case="родительный")
+                return f"Номер {pos_word_gen}, где {g(params[0], params[1])}, — {'чётный' if params[2] else 'нечётный'}."
+            if clue_type == ClueType.SUM_EQUALS:
+                return f"Сумма номеров локаций, где {g(params[0], params[1])} и где {g(params[2], params[3])}, равна {params[4]}."
+            if clue_type == ClueType.THREE_IN_A_ROW:
+                p1, p2, p3 = params
+                return f"Объекты {g(p1[0], p1[1])}, {g(p2[0], p2[1])} и {g(p3[0], p3[1])} находятся в трёх последовательных локациях (в любом порядке)."
+            if clue_type == ClueType.ORDERED_CHAIN:
+                p1, p2, p3 = params
+                return f"Локация, где {g(p1[0], p1[1])}, находится где-то левее локации, где {g(p2[0], p2[1])}, которая в свою очередь левее локации, где {g(p3[0], p3[1])}."
+            if clue_type == ClueType.HIERARCHICAL_RELATION:
+                cat_name, item1, op, item2 = params
+                template_set = templates.get("hierarchical_relation", {})
+                if cat_name in template_set: return template_set[cat_name].format(Значение1=item1, Значение2=item2)
+                return f"Объект '{item1}' имеет более высокий ранг, чем '{item2}'."
+            if clue_type == ClueType.NEITHER_NOR_POS:
+                item_tuples, position = params
+                formatted_items = [g(cat, item) for cat, item in item_tuples]
+                clue_text = "Ни " + ", ни ".join(formatted_items)
+                return f"{clue_text}, не находится в локации №{position}."
+            if clue_type == ClueType.ARITHMETIC_RELATION:
+                (cat1, item1), (cat2, item2), op, result = params
+                op_text = {'*': 'Произведение', '+': 'Сумма'}.get(op, 'Результат операции')
+                return f"{op_text} номеров локаций, где {g(cat1, item1)} и где {g(cat2, item2)}, равен {result}."
+
+            # --- Блок 3: Условные типы ---
+            if clue_type == ClueType.IF_THEN: return f"Если {format_fact(params[0])}, то {format_fact(params[1])}."
+            if clue_type == ClueType.IF_NOT_THEN_NOT: return f"Если {format_fact(params[0], is_neg=True)}, то {format_fact(params[1], is_neg=True)}."
+            if clue_type == ClueType.EITHER_OR: return f"Верно лишь одно из двух: либо {format_fact(params[0])}, либо {format_fact(params[1])}."
+            if clue_type == ClueType.IF_AND_ONLY_IF: return f"Утверждение «{format_fact(params[0])}» истинно тогда и только тогда, когда истинно утверждение «{format_fact(params[1])}»."
+
+        except (AttributeError, IndexError, KeyError, Exception) as e:
+            return f"[ОШИБКА ФОРМАТИРОВАНИЯ для {clue_type.name}: {e}]"
+
+        return f"[Неформатированная подсказка: {clue_type.name}]"

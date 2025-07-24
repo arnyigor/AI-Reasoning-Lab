@@ -77,14 +77,26 @@ class CorePuzzleGenerator:
         anchor_tuples = {tuple(a) for a in anchors}
         clues_to_check = [c for c in current_puzzle if tuple(c) not in anchor_tuples]
 
-        # Оптимизация: Сначала пытаемся удалить самые СЛАБЫЕ улики
         clues_to_check.sort(key=lambda c: self.definition.CLUE_STRENGTH.get(c[0], 0))
 
+        initial_clue_count = len(current_puzzle)
+        removed_count = 0
+
         for clue in clues_to_check:
+            # Проверяем, существует ли еще эта подсказка в текущем наборе
+            # (она могла быть удалена как часть другой, более общей подсказки)
+            if clue not in current_puzzle:
+                continue
+
             temp_puzzle = [c for c in current_puzzle if c != clue]
             if self._check_solvability(temp_puzzle) == 1:
                 current_puzzle = temp_puzzle
-                print(f"  - Удалена избыточная подсказка. Осталось: {len(current_puzzle)}")
+                removed_count += 1
+
+        # --- ИЗМЕНЕНИЕ: Компактный лог ---
+        if removed_count > 0:
+            print(f"  - Удалено {removed_count} избыточных подсказок (с {initial_clue_count - len(anchors)} до {len(current_puzzle) - len(anchors)}).")
+
         print(f"  - Минимизация завершена. Осталось {len(current_puzzle)} подсказок.")
         return current_puzzle
 
