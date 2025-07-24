@@ -15,13 +15,12 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
     """
     # CLUE_STRENGTH находится в PuzzleDefinition.py, откуда и наследуется.
 
-    def __init__(self, themes: Dict, story_elements: Dict, num_items: int, num_categories: int, is_circular: bool):
+    def __init__(self, themes: Dict, story_elements: Dict, num_items: int, num_categories: int):
         self._name = "Загадка Эйнштейна"
         self.themes = themes
         self.story_elements = story_elements
         self.num_items = num_items
         self.num_categories = num_categories
-        self.is_circular = is_circular
         self._prepare_data()
 
     def _prepare_data(self):
@@ -30,7 +29,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         self.story_elements["scenario"] = f"Тайна в сеттинге: {selected_theme_name}"
         self.cat_keys = random.sample(list(base_categories.keys()), self.num_categories)
         self.categories = {key: random.sample(values, self.num_items) for key, values in base_categories.items() if key in self.cat_keys}
-        print(f"\n[Генератор]: Тема: '{selected_theme_name}', Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: {'Круговая' if self.is_circular else 'Линейная'}.")
+        print(f"\n[Генератор]: Тема: '{selected_theme_name}', Размер: {self.num_items}x{len(self.cat_keys)}, Геометрия: 'Линейная'.")
 
     @property
     def name(self) -> str:
@@ -83,11 +82,7 @@ class EinsteinPuzzleDefinition(PuzzleDefinition):
         return core_puzzle, remaining_clues
 
     def get_anchors(self, solution: pd.DataFrame) -> set:
-        anchors = {(ClueType.POSITIONAL, (1, self.cat_keys[0], solution.loc[1, self.cat_keys[0]]))}
-        if self.is_circular and len(self.cat_keys) > 1:
-            anchor_cat2 = self.cat_keys[1]
-            anchors.add((ClueType.RELATIVE_POS, (self.cat_keys[0], solution.loc[1, self.cat_keys[0]], anchor_cat2, solution.loc[2, anchor_cat2])))
-        return anchors
+        return {(ClueType.POSITIONAL, (1, self.cat_keys[0], solution.loc[1, self.cat_keys[0]]))}
 
     def generate_clue_pool(self, solution: pd.DataFrame) -> Dict[ClueType, List]:
         pool = collections.defaultdict(list)

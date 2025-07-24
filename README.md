@@ -77,8 +77,7 @@ print("\n\n--- ГЕНЕРАЦИЯ ЗАДАЧИ ЭКСПЕРТНОГО УРОВН
 einstein_def_expert = EinsteinPuzzleDefinition(themes=EINSTEIN_THEMES, 
                                                story_elements=EINSTEIN_STORY_ELEMENTS, 
                                                num_items=8,
-                                               num_categories=8,
-                                               is_circular=False)
+                                               num_categories=8)
 core_gen_expert = CorePuzzleGenerator(puzzle_definition=einstein_def_expert)
 core_gen_expert.generate()
 ```

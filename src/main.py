@@ -51,9 +51,8 @@ if __name__ == '__main__':
 
     # 1. Задаем желаемые параметры
     desired_theme_name_1 = "Тайна в Школе на Холме"
-    desired_num_items_1 = 8
-    desired_num_categories_1 = 8
-    is_circular_1 = False
+    desired_num_items_1 = 6
+    desired_num_categories_1 = 6
 
     # 2. Проверяем, что наши желания выполнимы
     target_theme_1 = EINSTEIN_THEMES[desired_theme_name_1]
@@ -69,7 +68,6 @@ if __name__ == '__main__':
     einstein_def_1 = EinsteinPuzzleDefinition(themes={desired_theme_name_1: target_theme_1},
                                               story_elements=EINSTEIN_STORY_ELEMENTS,
                                               num_items=desired_num_items_1,
-                                              num_categories=desired_num_categories_1,
-                                              is_circular=is_circular_1)
+                                              num_categories=desired_num_categories_1)
     core_gen_1 = CorePuzzleGenerator(puzzle_definition=einstein_def_1)
     core_gen_1.generate()
