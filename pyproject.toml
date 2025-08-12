@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "AI-Reasoning-Lab"
+version = "0.1.0"
+description = "Grandmaster AI Logical Tests Generator + BaseLogic Core Library"
+readme = "README.md"
+authors = [
+    { name = "arny", email = "arnyigor@gmail.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.20.0",
+    "pandas>=1.3.0",          # Мощный инструмент, понадобится для анализа и отчетности
+    "ollama>=0.2.0",          # Клиент для взаимодействия с локальными LLM через Ollama
+    "PyYAML>=6.0",             # Для чтения и парсинга файла конфигурации config.yaml
+    "tabulate>=0.9.0",
+    "requests>=2.25.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/arnyigor/AI-Reasoning-Lab"
+Documentation = "https://github.com/arnyigor/AI-Reasoning-Lab/blob/master/README.md"
+
+[tool.setuptools]
+packages = ["grandmaster", "baselogic"]
+
+[tool.setuptools.package-dir]
+"" = "."
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["grandmaster*", "baselogic*"]
