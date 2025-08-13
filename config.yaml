@@ -25,17 +25,17 @@ models_to_test:
 
 
   # --- Модель №2: Запуск через нативный клиент Ollama ---
-  - name: "jan-v1-local:latest"
-    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
-    options:
-      # Параметры, специфичные для Ollama
-      generation:
-        temperature: 0.5
-      # Настройки промпта для Ollama-клиента
-      prompting:
-        system_prompt: ""
-        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
-        template: null
+#  - name: "jan-v1-4b-gguf:latest"
+#    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
+#    options:
+#      # Параметры, специфичные для Ollama
+#      generation:
+#        temperature: 0.5
+#      # Настройки промпта для Ollama-клиента
+#      prompting:
+#        system_prompt: ""
+#        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
+#        template: null
 #
 #  - name: "DeepSeek-R1-0528-Qwen3-8B-Q4:latest"
 #    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
@@ -51,15 +51,15 @@ models_to_test:
 
 
   # --- Модель №3: Еще один пример для OpenAI-совместимого сервера ---
-#  - name: "openai/gpt-oss-20b" # Другое имя для примера
-#    client_type: "openai_compatible"
-#    api_base: "http://localhost:1234/v1" # Другой порт для примера
-##    api_key: "not-needed"
-#    options:
-#      generation:
-#        temperature: 0.1
-#      prompting:
-#        system_prompt: ""
+  - name: "tngtech/deepseek-r1t-chimera:free" # Другое имя для примера
+    client_type: "openai_compatible"
+    api_base: "http://127.0.0.1:1337/v1" # Другой порт для примера
+#    api_key: "not-needed"
+    options:
+      generation:
+        temperature: 0.5
+      prompting:
+        system_prompt: ""
 
 
 # --- Набор тестов для запуска ---

@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Dict, Any, List
 import logging
 
+import ollama
+
 # Импортируем оба наших класса-клиента
 from .llm_client import OllamaClient
 from .http_client import OpenAICompatibleClient

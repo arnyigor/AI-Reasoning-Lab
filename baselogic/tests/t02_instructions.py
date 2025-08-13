@@ -1,52 +1,39 @@
-import logging
-import random
 import re
-from typing import Dict, Any
+import random
+from typing import Dict, Any, List, Tuple
 
 from .abstract_test_generator import AbstractTestGenerator
-
+from ..core.logger import llm_logger
 
 class InstructionsTestGenerator(AbstractTestGenerator):
     """
-         Генерирует и проверяет задачи на точное следование инструкциям.
-         Использует только однозначно определенные правила.
-         """
-
-    def _shuffle_string(self, s: str) -> str:
-        """Перемешивает буквы в строке."""
-        chars = list(s)
-        random.shuffle(chars)
-        return "".join(chars)
+    Генерирует и проверяет задачи на точное следование инструкциям.
+    Использует только однозначно определенные правила.
+    """
 
     def _count_vowels(self, s: str) -> int:
-        """
-        Корректно считает количество гласных букв, используя
-        бесспорные наборы гласных для русского и английского языков.
-        """
-        # --- ИЗМЕНЕНИЕ: 'й' удалена из русских гласных ---
+        """Считает количество гласных букв в строке."""
         russian_vowels = "аеёиоуыэюя"
         english_vowels = "aeiou"
-
         vowels = russian_vowels + english_vowels
-
         return sum(1 for char in s.lower() if char in vowels)
 
     def generate(self) -> Dict[str, Any]:
         """
-       Генерирует случайный набор инструкций и эталонный результат,
-       используя только фразы без спорных букв ('й', 'y').
-       """
-        # --- ИЗМЕНЕНИЕ: Фразы со спорными буквами заменены ---
+        Генерирует случайный набор инструкций и эталонный результат.
+        """
         phrases = [
-            "мама мыла раму",  # Русский, 6 гласных
-            "hello world",  # Английский, 3 гласных
-            "корова молоко",  # Русский, 6 гласных
-            "push button",  # Английский, 3 гласных
-            "ученье свет",  # Русский, 4 гласных
-            "программист пишет код"  # Русский, 6 гласных
+            "мама мыла раму",
+            "hello world",
+            "корова молоко",
+            "push button",
+            "ученье свет, не ученье как свет так на работу",
+            "шла саша по шоссе и сосала сушку",
+            "ехали медведи на велосипеде"
         ]
         base_phrase = random.choice(phrases)
 
+        # Промпт остается тем же, с примером формата [скобки]
         instructions = [
             f"1. Возьми исходную фразу: '{base_phrase}'.",
             "2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.",
@@ -55,13 +42,14 @@ class InstructionsTestGenerator(AbstractTestGenerator):
             "ОБРАБОТАНО: [фраза в верхнем регистре]",
             "ГЛАСНЫХ: [число]"
         ]
-
         prompt = "Выполни в точности следующие инструкции по порядку:\n" + "\n".join(instructions)
 
-        # Вычисляем эталонный результат с помощью нашей исправленной функции
+        # Вычисляем эталонный результат
         processed_phrase = base_phrase.upper()
         vowel_count = self._count_vowels(base_phrase)
 
+        # ИЗМЕНЕНИЕ: Убираем квадратные скобки из эталона.
+        # Эталон должен содержать чистые данные, а не форматирование.
         expected_output = (
             f"ОБРАБОТАНО: {processed_phrase}\n"
             f"ГЛАСНЫХ: {vowel_count}"
@@ -74,19 +62,66 @@ class InstructionsTestGenerator(AbstractTestGenerator):
 
     def verify(self, llm_output: str, expected_output: Any) -> bool:
         """
-        Финальная версия. Максимально устойчива к форматированию, кодировкам
-        и "творчеству" моделей.
+        Проверяет ответ LLM, будучи устойчивым к форматированию и "рассуждениям" модели.
         """
-        expected_lines = [line.strip() for line in expected_output.strip().split('\n') if line.strip()]
-        if len(expected_lines) < 2:
+        # --- 1. Парсинг эталонных данных ---
+        try:
+            expected_lines = [line.strip() for line in expected_output.strip().split('\n') if line.strip()]
+            # Важно: убираем скобки здесь, если бы они были в эталоне.
+            # Но лучше их убрать в `generate`.
+            expected_phrase_raw = expected_lines[0].replace("ОБРАБОТАНО:", "").strip()
+            expected_count_raw = expected_lines[1].replace("ГЛАСНЫХ:", "").strip()
+        except (IndexError, AttributeError):
+            llm_logger.error("Ошибка парсинга эталонных данных (expected_output).")
             return False
 
-        expected_phrase = expected_lines[0].replace("ОБРАБОТАНО:", "").strip()
-        expected_count = expected_lines[1].replace("ГЛАСНЫХ:", "").strip()
+        # --- 2. Очистка вывода LLM ---
+        clean_output = self._cleanup_llm_response(llm_output)
+        single_line_output = re.sub(r'\s+', ' ', clean_output).strip()
 
-        # --- Очистка llm_output ---
+        # --- 3. Извлечение данных с помощью Regex ---
+        # ИЗМЕНЕНИЕ: Regex теперь опционально захватывает скобки `\[?` и `\]?`,
+        # чтобы быть толерантным к моделям, которые их все-таки добавят.
+        pattern = re.compile(
+            r"\bОБРАБОТАНО\b\s*:\s*\[?(?P<phrase>.+?)\]?\s*\bГЛАСНЫХ\b\s*:\s*\[?(?P<count>\d+)\]?",
+            re.IGNORECASE
+        )
 
-        # 1. Удаляем все известные нам спецтокены
+        # ИЗМЕНЕНИЕ: Используем findall, чтобы найти все совпадения.
+        # Нам нужно последнее, так как это и есть финальный ответ модели.
+        matches: List[Tuple[str, str]] = pattern.findall(single_line_output)
+
+        if not matches:
+            llm_logger.info("Не удалось найти шаблон 'ОБРАБОТАНО...ГЛАСНЫХ...' в ответе модели.")
+            return False
+
+        # Берем последнее совпадение
+        last_match = matches[-1]
+        extracted_phrase_raw = last_match[0].strip()
+        extracted_count_raw = last_match[1].strip()
+
+        # --- 4. Финальная нормализация и сравнение ---
+        # Приводим обе строки к нижнему регистру и удаляем все пробелы
+        norm_extracted_phrase = re.sub(r'\s+', '', extracted_phrase_raw).lower()
+        norm_expected_phrase = re.sub(r'\s+', '', expected_phrase_raw).lower()
+
+        # Сравниваем нормализованные строки
+        phrase_ok = (norm_extracted_phrase == norm_expected_phrase)
+        count_ok = (extracted_count_raw == expected_count_raw)
+
+        # Логирование для отладки
+        if not (phrase_ok and count_ok):
+            llm_logger.info("--- ОШИБКА ВЕРИФИКАЦИИ ---")
+            llm_logger.info("Ожидалось: фраза='%s', число='%s'", norm_expected_phrase, expected_count_raw)
+            llm_logger.info("Извлечено:  фраза='%s', число='%s'", norm_extracted_phrase, extracted_count_raw)
+            llm_logger.info("Исходный извлеченный текст: фраза='%s'", extracted_phrase_raw)
+            llm_logger.info("-------------------------")
+
+        return phrase_ok and count_ok
+
+    def _cleanup_llm_response(self, llm_output: str) -> str:
+        """Вспомогательный метод для очистки ответа модели."""
+        # Удаляем спецтокены
         known_tokens = [
             r"<\|im_start\|>", r"<\|im_end\|>", r"<\|endoftext\|>",
             r"<s>", r"</s>", r"<think>", r"</think>", r"<\|eot_id\|>"
@@ -94,53 +129,11 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         tokens_pattern = re.compile("|".join(known_tokens), re.IGNORECASE)
         clean_output = tokens_pattern.sub("", llm_output)
 
-        # 2. Удаляем Markdown
+        # Удаляем Markdown
         clean_output = re.sub(r'[*_`~]', '', clean_output)
         clean_output = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', clean_output)
         clean_output = re.sub(r'^\s{0,3}#{1,6}\s*', '', clean_output, flags=re.MULTILINE)
         clean_output = re.sub(r'^[*\-\+]\s+', '', clean_output, flags=re.MULTILINE)
 
-        # >>>>> ГЛАВНОЕ ИЗМЕНЕНИЕ <<<<<
-        # 3. "Расплющиваем" весь текст в одну строку, заменяя любые
-        #    пробельные символы (включая \n, \r, \t) на один пробел.
-        #    Это делает парсинг нечувствительным к переносам строк.
-        single_line_output = re.sub(r'\s+', ' ', clean_output).strip()
+        return clean_output
 
-        # --- Регулярное выражение для извлечения из ОДНОЙ СТРОКИ ---
-        # Убираем re.DOTALL, так как он больше не нужен
-        pattern = re.compile(
-            r"\bОБРАБОТАНО\b:\s*(?P<phrase>.+?)\s*\bГЛАСНЫХ\b:\s*(?P<count>\d+)",
-            re.IGNORECASE
-        )
-
-        match = pattern.search(single_line_output)
-        if not match:
-            return False
-
-        extracted_phrase = match.group('phrase').strip()
-        extracted_count = match.group('count').strip()
-
-        # --- Финальная нормализация перед сравнением ---
-        # 1. Приводим обе строки к нижнему регистру
-        # 2. Удаляем все пробелы
-        # Это делает сравнение нечувствительным к регистру и пробелам
-
-        norm_extracted_phrase = re.sub(r'\s+', '', extracted_phrase).lower()
-        norm_expected_phrase = re.sub(r'\s+', '', expected_phrase).lower()
-
-        phrase_ok = (norm_extracted_phrase == norm_expected_phrase)
-        count_ok = (extracted_count == expected_count)
-
-        # Логирование для отладки
-        if not phrase_ok:
-            logging.debug("Ошибка сравнения фраз!")
-            logging.debug("Ожидалось (нормализовано): '%s'", norm_expected_phrase)
-            logging.debug("Извлечено (нормализовано):  '%s'", norm_extracted_phrase)
-
-        if extracted_phrase.endswith('.'):
-            extracted_phrase = extracted_phrase[:-1].strip()
-
-        phrase_ok = (extracted_phrase == expected_phrase)
-        count_ok = (extracted_count == expected_count)
-
-        return phrase_ok and count_ok
