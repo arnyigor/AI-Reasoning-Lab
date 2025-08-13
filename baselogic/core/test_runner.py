@@ -4,8 +4,7 @@ import importlib
 from pathlib import Path
 from typing import Dict, Any, List
 import logging
-
-import ollama
+from .enums import TestStatus
 
 # Импортируем оба наших класса-клиента
 from .llm_client import OllamaClient

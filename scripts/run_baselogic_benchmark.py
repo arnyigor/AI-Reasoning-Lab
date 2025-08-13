@@ -80,16 +80,21 @@ def main():
 
         results_dir = project_root / "results" / "raw"
         reporter = Reporter(results_dir=results_dir)
-        report_content = reporter.generate_markdown_report()
 
+        # --- Генерация детального отчета (как и раньше) ---
+        report_content = reporter.generate_markdown_report()
         report_path = project_root / "results" / "reports"
         report_path.mkdir(exist_ok=True)
         report_file = report_path / f"report_{time.strftime('%Y%m%d_%H%M%S')}.md"
-
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
+        logging.info("✅ Детальный отчет сохранен в: %s", report_file)
 
-        logging.info("✅ Отчет успешно сгенерирован и сохранен в: %s", report_file)
+        leaderboard_content = reporter.generate_advanced_leaderboard()
+        leaderboard_file = project_root / "LEADERBOARD.md" # Перезаписываем старый файл
+        with open(leaderboard_file, 'w', encoding='utf-8') as f:
+            f.write(leaderboard_content)
+        logging.info("✅ Продвинутая таблица лидеров обновлена: %s", leaderboard_file)
     except Exception as e:
         logging.error("❌ Произошла ошибка при генерации отчета: %s", e, exc_info=True)
 
