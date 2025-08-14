@@ -50,28 +50,28 @@ models_to_test:
 #        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
 #        template: null
 #
-  - name: "gemma-3-12b-it:latest"
-    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
-    options:
-      # Параметры, специфичные для Ollama
-      generation:
-        temperature: 0.5
-      # Настройки промпта для Ollama-клиента
-      prompting:
-      query_timeout: 50
-
-#   --- Модель №3: Еще один пример для OpenAI-совместимого сервера ---
-#  - name: "deepseek/deepseek-r1-0528-qwen3-8b" # Другое имя для примера
-#    client_type: "openai_compatible"
-#    api_base: "http://127.0.0.1:1234/v1" # Другой порт для примера
-##    api_key: "123"
+#  - name: "jan-v1-4b:latest"
+#    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
 #    options:
+#      # Параметры, специфичные для Ollama
 #      generation:
 #        temperature: 0.5
+#      # Настройки промпта для Ollama-клиента
 #      prompting:
-#        system_prompt: ""
-#        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
-#        template: "null"
+#      query_timeout: 50
+
+#   --- Модель №3: Еще один пример для OpenAI-совместимого сервера ---
+  - name: "jan-v1-4b" # Другое имя для примера
+    client_type: "openai_compatible"
+    api_base: "http://127.0.0.1:1234/v1" # Другой порт для примера
+#    api_key: "123"
+    options:
+      generation:
+        temperature: 0.5
+      prompting:
+        system_prompt: ""
+        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
+        template: "null"
 
 
   # --- Модель №3: Еще один пример для OpenAI-совместимого сервера ---
