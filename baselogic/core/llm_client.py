@@ -1,103 +1,169 @@
+import json
+import logging
+import threading
+import time
 from typing import Dict, Any, Optional
 
 import ollama
+import requests
 
-from .logger import llm_logger
+llm_logger = logging.getLogger("llama_client")
 
 
 class OllamaClient:
     """
     Класс-клиент для инкапсуляции взаимодействия с API Ollama.
-    Логирует все запросы и ответы и поддерживает кастомные опции для моделей.
     """
 
     def __init__(self, model_name: str, model_options: Optional[Dict[str, Any]] = None):
         """
         Инициализирует клиент.
-
-        Args:
-            model_name (str): Имя модели в Ollama.
-            model_options (Optional[Dict[str, Any]]): Словарь с опциями.
         """
         self.model_name = model_name
         self.model_options = model_options if model_options else {}
 
-        # Извлекаем опции с разумными значениями по умолчанию
-        self.system_prompt = self.model_options.get('system_prompt', None)
-        self.temperature = self.model_options.get('temperature', 0.0)
-        self._check_model_exists()
+        prompting_opts = self.model_options.get('prompting') or {}
+        generation_opts = self.model_options.get('generation') or {}
+
+        self.system_prompt = prompting_opts.get('system_prompt')
+        self.generation_options = generation_opts
+
+        # Таймаут для запросов (в секундах)
+        self.query_timeout = self.model_options.get('query_timeout', 180)
+
+        # ИСПРАВЛЕНИЕ: Проверяем модель, но НЕ завершаем программу
+        skip_validation = self.model_options.get('skip_model_validation', False)
+        if not skip_validation:
+            self._check_model_exists()
+        else:
+            llm_logger.info("⚠️ Проверка существования модели пропущена")
+
+    def _check_model_exists(self):
+        """
+        ИСПРАВЛЕНО: Проверяет модель без завершения программы.
+        """
+        target_model = self.model_name
+        ollama_api_url = "http://127.0.0.1:11434/api/tags"
+
+        try:
+            llm_logger.info("Проверка наличия модели '%s'...", target_model)
+            response = requests.get(ollama_api_url, timeout=5)
+            response.raise_for_status()
+
+            data = response.json()
+            model_list = data.get('models', [])
+
+            local_models = [
+                model_info.get('name') or model_info.get('model', '')
+                for model_info in model_list
+                if isinstance(model_info, dict)
+            ]
+
+            if target_model in local_models:
+                llm_logger.info("✅ Модель '%s' найдена", target_model)
+            else:
+                llm_logger.warning("⚠️ Модель '%s' не найдена в списке. Доступные: %s",
+                                   target_model, local_models[:3])
+
+        except Exception as e:
+            llm_logger.warning("⚠️ Не удалось проверить модель: %s. Продолжаем работу.", e)
+
+    def get_model_details(self) -> Dict[str, Any]:
+        """
+        ИСПРАВЛЕНО: Возвращает словарь вместо Python объекта.
+        """
+        llm_logger.info("Запрос деталей для модели: %s", self.model_name)
+        try:
+            response = ollama.show(self.model_name)
+
+            # ИСПРАВЛЕНИЕ: Преобразуем объект в чистый словарь
+            details_dict = {
+                "modelfile": response.get("modelfile"),
+                "parameters": response.get("parameters"),
+                "template": response.get("template"),
+                "details": {}
+            }
+
+            # Безопасно извлекаем details
+            if hasattr(response, 'details') and response.details:
+                details_obj = response.details
+                details_dict["details"] = {
+                    "family": getattr(details_obj, 'family', 'N/A'),
+                    "parameter_size": getattr(details_obj, 'parameter_size', 'N/A'),
+                    "quantization_level": getattr(details_obj, 'quantization_level', 'N/A'),
+                    "format": getattr(details_obj, 'format', 'N/A')
+                }
+
+            return details_dict
+
+        except Exception as e:
+            error_details = f"Ошибка при получении деталей модели: {e}"
+            llm_logger.error(error_details)
+            return {"error": str(e)}
 
     def query(self, user_prompt: str) -> str:
         """
-        Отправляет промпт модели, явно отключая стриминг,
-        и возвращает ее текстовый ответ.
-
-        Args:
-            user_prompt (str): Промпт от пользователя/теста.
-
-        Returns:
-            str: Текстовый ответ от модели или строка с ошибкой.
+        ИСПРАВЛЕНО: Убрана попытка передачи timeout в ollama.chat()
         """
         messages = []
         if self.system_prompt:
             messages.append({'role': 'system', 'content': self.system_prompt})
         messages.append({'role': 'user', 'content': user_prompt})
 
-        # Формируем сообщение для лога
-        log_message = (
-            f"REQUEST:\n"
-            f"  Model: {self.model_name}\n"
-            f"  Temperature: {self.temperature}\n"
-            f"  System Prompt: {self.system_prompt or 'Not set'}\n"
-            f"  User Prompt: {user_prompt}\n\n"
-        )
+        llm_logger.info("    🚀 Отправка запроса к модели '%s'...", self.model_name)
+        llm_logger.info("    ⏰ Таймаут: %d секунд", self.query_timeout)
 
-        try:
-            response = ollama.chat(
-                model=self.model_name,
-                messages=messages,
-                options={'temperature': self.temperature},
-                stream=False
-            )
+        # Переменные для потока
+        result = [None]
+        error = [None]
+        completed = [False]
 
-            full_response_text = response['message']['content']
+        def make_request():
+            """Функция для выполнения запроса в отдельном потоке."""
+            try:
+                # ИСПРАВЛЕНО: НЕ передаем timeout в options
+                response = ollama.chat(
+                    model=self.model_name,
+                    messages=messages,
+                    options=self.generation_options,  # БЕЗ timeout
+                    stream=False
+                )
+                result[0] = response['message']['content'].strip()
+                completed[0] = True
+            except Exception as e:
+                error[0] = e
+                completed[0] = True
 
-            log_message += f"RESPONSE (Success):\n{full_response_text}"
-            llm_logger.info(log_message)
+        # Остальной код с threading остается без изменений
+        start_time = time.time()
+        thread = threading.Thread(target=make_request)
+        thread.daemon = True
+        thread.start()
 
-            return full_response_text
+        elapsed = 0
+        while elapsed < self.query_timeout and not completed[0]:
+            time.sleep(1)
+            elapsed += 1
 
-        except ollama.ResponseError as e:
-            error_details = f"RESPONSE (Ollama API Error):\n{e.error}"
-            log_message += error_details
-            llm_logger.error(log_message)
-            return error_details
+            if elapsed % 10 == 0:
+                llm_logger.info("    ⏳ Ожидание ответа... (%dс/%dс)", elapsed, self.query_timeout)
 
-        except Exception as e:
-            error_details = f"RESPONSE (Unexpected Error):\n{e}"
-            log_message += error_details
-            llm_logger.error(log_message, exc_info=True)  # Добавляем traceback
-            return error_details
+        end_time = time.time()
+        execution_time = end_time - start_time
 
-    def _check_model_exists(self):
-        """Проверяет, существует ли модель в Ollama."""
-        try:
-            response = ollama.list()
-
-            if hasattr(response, 'models'):
-                model_names = []
-                for model in response.models:
-                    # Объекты модели имеют атрибут 'model', а не 'name'
-                    if hasattr(model, 'model'):
-                        model_names.append(model.model)
-                    elif hasattr(model, 'name'):
-                        model_names.append(model.name)
-
-                if self.model_name not in model_names:
-                    llm_logger.warning(f"Модель '{self.model_name}' не найдена в Ollama. Доступные модели: {model_names}")
+        if completed[0]:
+            if error[0]:
+                if hasattr(error[0], 'error'):
+                    llm_logger.error("    🚫 Ollama API Error: %s", error[0].error)
+                    return f"API_ERROR: {error[0].error}"
                 else:
-                    llm_logger.info(f"Модель '{self.model_name}' найдена в Ollama")
+                    llm_logger.error("    💥 Ошибка: %s", str(error[0]), exc_info=True)
+                    return f"UNEXPECTED_ERROR: {str(error[0])}"
             else:
-                llm_logger.warning("Неожиданный формат ответа от Ollama API при получении списка моделей")
-        except Exception as e:
-            llm_logger.warning(f"Не удалось проверить наличие модели '{self.model_name}': {e}", exc_info=True)
+                llm_logger.info("    ✅ Ответ получен за %.1fс", execution_time)
+                return result[0]
+        else:
+            llm_logger.error("    ⏱️ ТАЙМАУТ: Модель не ответила за %d секунд", self.query_timeout)
+            return f"TIMEOUT_ERROR: Модель не ответила за {self.query_timeout} секунд"
+
+

@@ -69,11 +69,7 @@ def main():
 
         # 4. Генерация и сохранение таблицы лидеров
         print("\n[2/2] Генерация продвинутой таблицы лидеров...")
-        leaderboard_content = reporter.generate_advanced_leaderboard(
-            accuracy_weight=args.aw,
-            speed_weight=args.sw,
-            confidence_threshold=args.ct
-        )
+        leaderboard_content = reporter.generate_advanced_leaderboard( )
         leaderboard_file = project_root / "LEADERBOARD.md"
         with open(leaderboard_file, 'w', encoding='utf-8') as f:
             f.write(leaderboard_content)

@@ -1,8 +1,11 @@
 import requests
 import json
+import logging
 from typing import Dict, Any, Optional
 
-from .logger import llm_logger
+# Используем llm_logger, как и в OllamaClient, для консистентности
+# Если у вас другой логер, замените его
+llm_logger = logging.getLogger(__name__)
 
 
 class OpenAICompatibleClient:
@@ -32,6 +35,7 @@ class OpenAICompatibleClient:
 
         # Извлекаем системный промпт
         self.system_prompt = self.prompting_options.get('system_prompt')
+        llm_logger.info("✅ OpenAICompatibleClient инициализирован для '%s' по адресу: %s", model_name, self.api_url)
 
     def query(self, user_prompt: str) -> str:
         """
@@ -63,9 +67,12 @@ class OpenAICompatibleClient:
             f"  Headers: {headers}\n"
             f"  Payload: {json.dumps(payload, indent=2, ensure_ascii=False)}\n\n"
         )
+        llm_logger.debug(log_message)
 
         try:
-            response = requests.post(self.api_url, headers=headers, json=payload, timeout=180) # Таймаут 3 минуты
+            timeout = self.model_options.get('query_timeout', 180) # Таймаут 3 минуты по умолчанию
+            llm_logger.info("    🚀 Отправляем запрос к API (таймаут: %dс)...", timeout)
+            response = requests.post(self.api_url, headers=headers, json=payload, timeout=timeout)
             response.raise_for_status()  # Вызовет исключение для кодов 4xx/5xx
 
             data = response.json()
@@ -76,16 +83,48 @@ class OpenAICompatibleClient:
             full_response_text = data['choices'][0]['message']['content']
 
             log_message += f"RESPONSE (Success):\n{full_response_text}"
-            llm_logger.info(log_message)
+            llm_logger.info("    ✅ Ответ от API получен.")
+            llm_logger.debug(log_message)
             return full_response_text.strip()
 
+        except requests.exceptions.Timeout:
+            error_details = "RESPONSE (HTTP Timeout Error): Сервер не ответил за установленное время."
+            llm_logger.error(error_details)
+            return f"TIMEOUT_ERROR: {error_details}"
         except requests.exceptions.RequestException as e:
             error_details = f"RESPONSE (HTTP Request Error):\n{e}"
             log_message += error_details
             llm_logger.error(log_message, exc_info=True)
             return f"HTTP_ERROR: {e}"
         except (ValueError, KeyError, IndexError) as e:
-            error_details = f"RESPONSE (JSON Parsing Error):\n{e}\nRaw Response: {response.text}"
+            raw_response = response.text if 'response' in locals() else "No response received"
+            error_details = f"RESPONSE (JSON Parsing Error):\n{e}\nRaw Response: {raw_response}"
             log_message += error_details
             llm_logger.error(log_message, exc_info=True)
             return f"JSON_PARSING_ERROR: {e}"
+
+    # =========================================================================
+    # ДОБАВЛЕНО: Метод-заглушка для совместимости с TestRunner
+    # =========================================================================
+    def get_model_details(self) -> Dict[str, Any]:
+        """
+        Предоставляет "заглушку" с деталями для API-моделей.
+        Это обеспечивает совместимость с процессом сбора данных в TestRunner.
+        """
+        llm_logger.info("    ⚙️ Генерация стандартных деталей для API-модели: %s", self.model_name)
+        # OpenAI API не имеют стандартного эндпоинта 'show', как у Ollama.
+        # Мы возвращаем стандартную структуру, чтобы Reporter мог ее обработать.
+        return {
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": self.prompting_options.get('template', 'N/A (API)'),
+            "details": {
+                "family": "api",  # Идентификатор для группировки
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            # Этот флаг поможет Reporter'у точно определить, что это API модель
+            "object": "model"
+        }
+
