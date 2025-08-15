@@ -1,6 +1,6 @@
 # 🏆 Таблица Лидеров Бенчмарка
 
-*Последнее обновление: 2025-08-15 12:37:36*
+*Последнее обновление: 2025-08-15 14:10:20*
 
 | Модель                                  |   Ранг |   Trust_Score | Accuracy   | Verbosity   | Avg Time   |   Runs |
 |:----------------------------------------|-------:|--------------:|:-----------|:------------|:-----------|-------:|
@@ -10,13 +10,16 @@
 | jan-v1-4b                               |      4 |         0.54  | 69.0%      | 91.1%       | 57,097 мс  |     42 |
 | deepseek/deepseek-chat-v3-0324:free     |      5 |         0.524 | 78.6%      | 8.9%        | 17,800 мс  |     14 |
 | google/gemma-3n-e4b                     |      6 |         0.457 | 58.3%      | 0.0%        | 808 мс     |     60 |
-| deepseek/deepseek-r1-0528-qwen3-8b:free |      7 |         0.313 | 60.0%      | 0.0%        | 15,843 мс  |     10 |
-| openai/gpt-oss-20b                      |      8 |         0.237 | 50.0%      | 0.0%        | 15,224 мс  |     10 |
-| deepseek/deepseek-r1-0528-qwen3-8b      |      9 |         0.185 | 37.5%      | 86.2%       | 15,143 мс  |     16 |
-| tngtech/deepseek-r1t-chimera:free       |     10 |         0.152 | 33.3%      | 91.2%       | 8,978 мс   |     15 |
-| gemma3:4b                               |     11 |         0.112 | 25.0%      | 0.0%        | 6,972 мс   |     20 |
-| qwen2.5-7b-instruct-1m-q4_k_m:latest    |     12 |         0.063 | 22.2%      | 88.2%       | 2,669 мс   |      9 |
-| meta-llama-3-8b-instruct                |     13 |         0.057 | 20.0%      | 83.7%       | 2,725 мс   |     10 |
+| deepseek/deepseek-r1:free               |      7 |         0.397 | 70.0%      | 0.0%        | 14,202 мс  |     10 |
+| deepseek/deepseek-r1-0528-qwen3-8b:free |      8 |         0.313 | 60.0%      | 0.0%        | 15,843 мс  |     10 |
+| openai/gpt-oss-20b                      |      9 |         0.237 | 50.0%      | 0.0%        | 15,224 мс  |     10 |
+| deepseek/deepseek-r1-0528-qwen3-8b      |     10 |         0.185 | 37.5%      | 86.2%       | 15,143 мс  |     16 |
+| tngtech/deepseek-r1t-chimera:free       |     11 |         0.152 | 33.3%      | 91.2%       | 8,978 мс   |     15 |
+| gemma3:4b                               |     12 |         0.112 | 25.0%      | 0.0%        | 6,972 мс   |     20 |
+| meta-llama/llama-3.1-405b-instruct:free |     13 |         0.095 | 50.0%      | 52.8%       | 18,429 мс  |      2 |
+| qwen2.5-7b-instruct-1m-q4_k_m:latest    |     14 |         0.063 | 22.2%      | 88.2%       | 2,669 мс   |      9 |
+| moonshotai/kimi-k2:free                 |     15 |         0.057 | 20.0%      | 0.0%        | 4,072 мс   |     10 |
+| meta-llama-3-8b-instruct                |     16 |         0.057 | 20.0%      | 83.7%       | 2,725 мс   |     10 |
 
 ---
 ## 🎯 Методология Ранжирования
@@ -62,15 +65,18 @@
 | ('gemini-2.5-flash', 't02_instructions')                        |        22 |        21 | 95%        |
 | ('tngtech/deepseek-r1t2-chimera:free', 't02_instructions')      |        20 |        18 | 90%        |
 | ('deepseek/deepseek-chat-v3-0324:free', 't02_instructions')     |        14 |        11 | 79%        |
+| ('deepseek/deepseek-r1:free', 't02_instructions')               |        10 |         7 | 70%        |
 | ('jan-v1-4b', 't02_instructions')                               |        42 |        29 | 69%        |
 | ('deepseek/deepseek-r1-0528-qwen3-8b:free', 't02_instructions') |        10 |         6 | 60%        |
 | ('google/gemma-3n-e4b', 't02_instructions')                     |        60 |        35 | 58%        |
 | ('openai/gpt-oss-20b', 't02_instructions')                      |        10 |         5 | 50%        |
+| ('meta-llama/llama-3.1-405b-instruct:free', 't02_instructions') |         2 |         1 | 50%        |
 | ('deepseek/deepseek-r1-0528-qwen3-8b', 't02_instructions')      |        16 |         6 | 38%        |
 | ('tngtech/deepseek-r1t-chimera:free', 't02_instructions')       |        15 |         5 | 33%        |
 | ('gemma3:4b', 't02_instructions')                               |        20 |         5 | 25%        |
 | ('qwen2.5-7b-instruct-1m-q4_k_m:latest', 't02_instructions')    |         9 |         2 | 22%        |
 | ('meta-llama-3-8b-instruct', 't02_instructions')                |        10 |         2 | 20%        |
+| ('moonshotai/kimi-k2:free', 't02_instructions')                 |        10 |         2 | 20%        |
 
 ### 📖 Как читать детальную статистику
 

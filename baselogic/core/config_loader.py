@@ -1,55 +1,92 @@
+# config_loader.py
 import os
-from typing import Dict, Any
-import yaml
+import re
+from typing import Any, Dict, List, Optional
+
 from dotenv import load_dotenv
 
-class ConfigLoader:
-    """Загружает конфигурацию из файла и переменных окружения"""
-    
-    @staticmethod
-    def load_config(config_path: str) -> Dict[str, Any]:
-        """
-        Загружает конфигурацию из .env файла, затем из YAML,
-        и в конце переопределяет переменными окружения.
-        """
-        # 1. Загружаем переменные из .env файла в окружение
-        # Ищет .env файл в текущей директории или выше по дереву
+class EnvConfigLoader:
+    """
+    Загружает и парсит конфигурацию приложения исключительно из переменных окружения.
+
+    Поддерживает вложенные структуры и списки с помощью именования переменных
+    в формате: PREFIX_KEY_INDEX__SUBKEY.
+    Использует двойное подчеркивание '__' как разделитель вложенности.
+    """
+
+    def __init__(self, prefix: str = "BC"):
+        self.prefix = prefix
+        self.env_vars = self._load_and_filter_env(prefix)
+
+    def _load_and_filter_env(self, prefix: str) -> Dict[str, str]:
         load_dotenv()
+        prefix_str = f"{prefix}_"
+        filtered_vars = {}
+        for key, value in os.environ.items():
+            if key.startswith(prefix_str):
+                clean_key = key[len(prefix_str):]
+                filtered_vars[clean_key] = value
+        return filtered_vars
 
-        # 2. Загружаем базовую конфигурацию из YAML
-        with open(config_path, 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
-        
-        # 3. Переопределяем переменными окружения (которые теперь включают .env)
-        ConfigLoader._override_from_env(config, 'models_to_test')
-        ConfigLoader._override_from_env(config, 'tests_to_run')
-        ConfigLoader._override_from_env(config, 'runs_per_test')
-        
-        return config
-    
     @staticmethod
-    def _override_from_env(config: Dict[str, Any], key: str):
+    def _set_nested_value(d: Dict[str, Any], path: str, value: Any) -> None:
         """
-        Переопределяет значение в конфигурации из переменной окружения.
-
-        Имя переменной окружения формируется по правилу: BASELOGIC_{KEY_IN_UPPERCASE}.
-        Например, для ключа 'runs_per_test' переменная будет BASELOGIC_RUNS_PER_TEST.
-
-        Args:
-            config (Dict[str, Any]): Словарь с конфигурацией.
-            key (str): Ключ для переопределения.
+        Устанавливает значение во вложенный словарь по пути.
+        Использует двойное подчеркивание '__' в качестве разделителя вложенности.
         """
-        env_key = f"BASELOGIC_{key.upper()}"
-        env_value = os.getenv(env_key)
-        
-        if env_value:
-            # Преобразуем значение в нужный тип
-            if key == 'runs_per_test':
-                config[key] = int(env_value)
-            elif key in ['models_to_test', 'tests_to_run']:
-                # Для списков ожидаем строку, разделенную запятыми
-                config[key] = [item.strip() for item in env_value.split(',')]
+        keys = path.lower().split('__')
+        current_level = d
+        for key in keys[:-1]:
+            current_level = current_level.setdefault(key, {})
+
+        last_key = keys[-1]
+        try:
+            if isinstance(value, str):
+                if value.isdigit():
+                    value = int(value)
+                elif re.match(r"^\d+?\.\d+?$", value):
+                    value = float(value)
+                elif value.lower() in ['true', 'false']:
+                    value = value.lower() == 'true'
+        except (ValueError, TypeError):
+            pass
+        current_level[last_key] = value
+
+    def load_config(self) -> Dict[str, Any]:
+        config: Dict[str, Any] = {}
+        models_data: Dict[int, Dict[str, Any]] = {}
+        model_pattern = re.compile(r"MODELS_(\d+)_(.*)")
+
+        for key, value in self.env_vars.items():
+            match = model_pattern.match(key)
+            if match:
+                index = int(match.group(1))
+                path = match.group(2)
+                if index not in models_data:
+                    models_data[index] = {}
+                EnvConfigLoader._set_nested_value(models_data[index], path, value)
+            elif key == "TESTS_TO_RUN":
+                config["tests_to_run"] = [item.strip() for item in value.split(',')]
             else:
-                config[key] = env_value
-            
-            print(f"INFO: Конфигурация '{key}' переопределена значением из переменной окружения '{env_key}'.")
+                EnvConfigLoader._set_nested_value(config, key, value)
+
+        if models_data:
+            sorted_models = sorted(models_data.items())
+            config["models_to_test"] = [model for _, model in sorted_models]
+
+        return config
+
+# --- Пример использования ---
+if __name__ == "__main__":
+    print("Загрузка конфигурации из переменных окружения...")
+
+    # Предполагается, что у вас есть .env файл в директории проекта
+    # или переменные окружения установлены системно.
+
+    config_loader = EnvConfigLoader(prefix="BC")
+    final_config = config_loader.load_config()
+
+    # Красивый вывод для проверки
+    import json
+    print("\nИтоговая конфигурация:")
+    print(json.dumps(final_config, indent=2, ensure_ascii=False))
