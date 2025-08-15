@@ -1,0 +1,2202 @@
+[
+    {
+        "test_id": "t02_instructions_1",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 2",
+        "expected_output": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 3",
+        "is_correct": false,
+        "execution_time_ms": 835.9734999976354,
+        "verification_details": {
+            "expected_phrase": "pushbutton",
+            "extracted_phrase": "pushbutton",
+            "expected_count": "3",
+            "extracted_count": "2"
+        }
+    },
+    {
+        "test_id": "t02_instructions_2",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 2",
+        "expected_output": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 3",
+        "is_correct": false,
+        "execution_time_ms": 565.7374000002164,
+        "verification_details": {
+            "expected_phrase": "pushbutton",
+            "extracted_phrase": "pushbutton",
+            "expected_count": "3",
+            "extracted_count": "2"
+        }
+    },
+    {
+        "test_id": "t02_instructions_3",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ехали медведи на велосипеде'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 10",
+        "expected_output": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 1012.7171999993152,
+        "verification_details": {
+            "expected_phrase": "ехалимедвединавелосипеде",
+            "extracted_phrase": "ехалимедвединавелосипеде",
+            "expected_count": "12",
+            "extracted_count": "10"
+        }
+    },
+    {
+        "test_id": "t02_instructions_4",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 11",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 1011.4670000039041,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "11"
+        }
+    },
+    {
+        "test_id": "t02_instructions_5",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 775.2974999966682,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_6",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 579.61449999857,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_7",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ученье свет, не ученье как свет так на работу'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ\nГЛАСНЫХ: 21",
+        "expected_output": "ОБРАБОТАНО: УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ\nГЛАСНЫХ: 15",
+        "is_correct": false,
+        "execution_time_ms": 1180.391599998984,
+        "verification_details": {
+            "expected_phrase": "ученьесвет,неученьекаксветтакнаработу",
+            "extracted_phrase": "ученьесвет,неученьекаксветтакнаработу",
+            "expected_count": "15",
+            "extracted_count": "21"
+        }
+    },
+    {
+        "test_id": "t02_instructions_8",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": true,
+        "execution_time_ms": 1034.897400000773,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "12"
+        }
+    },
+    {
+        "test_id": "t02_instructions_9",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ехали медведи на велосипеде'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 10",
+        "expected_output": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 1003.080400005274,
+        "verification_details": {
+            "expected_phrase": "ехалимедвединавелосипеде",
+            "extracted_phrase": "ехалимедвединавелосипеде",
+            "expected_count": "12",
+            "extracted_count": "10"
+        }
+    },
+    {
+        "test_id": "t02_instructions_10",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 655.4538999989745,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_11",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 588.9311999999336,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_12",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ученье свет, не ученье как свет так на работу'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ\nГЛАСНЫХ: 21",
+        "expected_output": "ОБРАБОТАНО: УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ\nГЛАСНЫХ: 15",
+        "is_correct": false,
+        "execution_time_ms": 1192.0697999958065,
+        "verification_details": {
+            "expected_phrase": "ученьесвет,неученьекаксветтакнаработу",
+            "extracted_phrase": "ученьесвет,неученьекаксветтакнаработу",
+            "expected_count": "15",
+            "extracted_count": "21"
+        }
+    },
+    {
+        "test_id": "t02_instructions_13",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 2",
+        "expected_output": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 3",
+        "is_correct": false,
+        "execution_time_ms": 597.313899997971,
+        "verification_details": {
+            "expected_phrase": "pushbutton",
+            "extracted_phrase": "pushbutton",
+            "expected_count": "3",
+            "extracted_count": "2"
+        }
+    },
+    {
+        "test_id": "t02_instructions_14",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 596.5272000030382,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_15",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 754.3494999990799,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_16",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 576.7835000006016,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_17",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 11",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 1001.8604999931995,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "11"
+        }
+    },
+    {
+        "test_id": "t02_instructions_18",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 602.4107000048389,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_19",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 640.075600000273,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_20",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ехали медведи на велосипеде'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 10",
+        "expected_output": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 988.4213999976055,
+        "verification_details": {
+            "expected_phrase": "ехалимедвединавелосипеде",
+            "extracted_phrase": "ехалимедвединавелосипеде",
+            "expected_count": "12",
+            "extracted_count": "10"
+        }
+    },
+    {
+        "test_id": "t02_instructions_21",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ехали медведи на велосипеде'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 11",
+        "expected_output": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 924.0927999999258,
+        "verification_details": {
+            "expected_phrase": "ехалимедвединавелосипеде",
+            "extracted_phrase": "ехалимедвединавелосипеде",
+            "expected_count": "12",
+            "extracted_count": "11"
+        }
+    },
+    {
+        "test_id": "t02_instructions_22",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 777.619100001175,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_23",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 645.3156999996281,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_24",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 656.6872999974294,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_25",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": true,
+        "execution_time_ms": 1017.8081000049133,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "12"
+        }
+    },
+    {
+        "test_id": "t02_instructions_26",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": true,
+        "execution_time_ms": 889.8975999982213,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "12"
+        }
+    },
+    {
+        "test_id": "t02_instructions_27",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ученье свет, не ученье как свет так на работу'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ\nГЛАСНЫХ: 21",
+        "expected_output": "ОБРАБОТАНО: УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ\nГЛАСНЫХ: 15",
+        "is_correct": false,
+        "execution_time_ms": 1192.3778999989736,
+        "verification_details": {
+            "expected_phrase": "ученьесвет,неученьекаксветтакнаработу",
+            "extracted_phrase": "ученьесвет,неученьекаксветтакнаработу",
+            "expected_count": "15",
+            "extracted_count": "21"
+        }
+    },
+    {
+        "test_id": "t02_instructions_28",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 656.6270999974222,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_29",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": true,
+        "execution_time_ms": 1017.1516999980668,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "12"
+        }
+    },
+    {
+        "test_id": "t02_instructions_30",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 761.6082999957143,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_31",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 644.709200001671,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_32",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 766.1236000058125,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_33",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 2",
+        "expected_output": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 3",
+        "is_correct": false,
+        "execution_time_ms": 587.3005999965244,
+        "verification_details": {
+            "expected_phrase": "pushbutton",
+            "extracted_phrase": "pushbutton",
+            "expected_count": "3",
+            "extracted_count": "2"
+        }
+    },
+    {
+        "test_id": "t02_instructions_34",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 768.1346999961534,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_35",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 11",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 1017.1535999979824,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "11"
+        }
+    },
+    {
+        "test_id": "t02_instructions_36",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: МАМА МЫЛА РАМУ\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 786.3113999992493,
+        "verification_details": {
+            "expected_phrase": "мамамылараму",
+            "extracted_phrase": "мамамылараму",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_37",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 594.1658000010648,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_38",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 650.6308000025456,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_39",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 586.883999996644,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_40",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 509.21440000092844,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_41",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 645.2210999996169,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_42",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 594.9237999957404,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_43",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": true,
+        "execution_time_ms": 657.229999997071,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "6"
+        }
+    },
+    {
+        "test_id": "t02_instructions_44",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 11",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 1012.7321999971173,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "11"
+        }
+    },
+    {
+        "test_id": "t02_instructions_45",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 2",
+        "expected_output": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 3",
+        "is_correct": false,
+        "execution_time_ms": 583.8485999993281,
+        "verification_details": {
+            "expected_phrase": "pushbutton",
+            "extracted_phrase": "pushbutton",
+            "expected_count": "3",
+            "extracted_count": "2"
+        }
+    },
+    {
+        "test_id": "t02_instructions_46",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 2",
+        "expected_output": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 3",
+        "is_correct": false,
+        "execution_time_ms": 541.6049999985262,
+        "verification_details": {
+            "expected_phrase": "pushbutton",
+            "extracted_phrase": "pushbutton",
+            "expected_count": "3",
+            "extracted_count": "2"
+        }
+    },
+    {
+        "test_id": "t02_instructions_47",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ехали медведи на велосипеде'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 11",
+        "expected_output": "ОБРАБОТАНО: ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 1022.6779000004171,
+        "verification_details": {
+            "expected_phrase": "ехалимедвединавелосипеде",
+            "extracted_phrase": "ехалимедвединавелосипеде",
+            "expected_count": "12",
+            "extracted_count": "11"
+        }
+    },
+    {
+        "test_id": "t02_instructions_48",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: HELLO WORLD\nГЛАСНЫХ: 3",
+        "is_correct": true,
+        "execution_time_ms": 600.5714999992051,
+        "verification_details": {
+            "expected_phrase": "helloworld",
+            "extracted_phrase": "helloworld",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_49",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": true,
+        "execution_time_ms": 991.2450999981957,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "12"
+        }
+    },
+    {
+        "test_id": "t02_instructions_50",
+        "category": "t02_instructions",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 11",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 877.5419999947189,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "11"
+        }
+    }
+]

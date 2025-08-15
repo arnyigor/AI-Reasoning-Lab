@@ -1,0 +1,134 @@
+[
+    {
+        "test_id": "t02_instructions_1",
+        "category": "t02_instructions",
+        "model_name": "deepseek/deepseek-r1-0528-qwen3-8b",
+        "model_details": {
+            "model_name": "deepseek/deepseek-r1-0528-qwen3-8b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "<think>\nИтак, мне нужно внимательно выполнить эти инструкции. Начну с первой: взять исходную фразу 'push button'. Это просто, я знаю эту фразу.\n\nВторое требование — написать ее в верхнем регистре. Значит, 'push button' превращается в 'PUSH BUTTON'. Я должен убедиться, что все буквы заглавные и нет нижних или смешанных случаев.\n\nТеперь третий шаг: посчитать количество гласных букв в исходной фразе. Гласными считаются A, E, I, O, U (и их русские аналоги). Но здесь фраза на английском, так что буду использовать английские гласные.\n\nРазбираю 'push button': буквы P, U, S, H и B, U, T, T, O, N. Теперь ищу гласные: в 'push' есть U — это гласная. В 'button' есть U и O — обе гласные.\n\nПодсчитываю: U в 'push', U и O в 'button'. Итого три гласные буквы. Нужно проверить, чтобы не было ошибок: P — согласная, S — согласная, H — согласная; B — согласная, T — согласная (даже если дублируется), N — согласная. Да, только U, U и O.\n\nЧетвертое требование — вывести результат строго в указанном формате: \"ОБРАБОТАНО: [фраза в верхнем регистре]\" и \"ГЛАСНЫХ: [число]\". Значит, нужно написать:\n\nОБРАБОТАНО: PUSH BUTTON\n\nГЛАСНЫХ: 3\n\nВажно не добавлять лишних слов или пояснений. Формат должен быть точным.\n\nПодтверждаю порядок выполнения: сначала верхний регистр, потом подсчет гласных в исходной фразе (не измененной), и вывод только данных без комментариев.\n\nКажется, все правильно. Отправляю ответ.\n</think>\nОБРАБОТАНО: PUSH BUTTON  \nГЛАСНЫХ: 3",
+        "expected_output": "ОБРАБОТАНО: PUSH BUTTON\nГЛАСНЫХ: 3",
+        "is_correct": false,
+        "execution_time_ms": 19312.453500002448,
+        "verification_details": {
+            "expected_phrase": "pushbutton",
+            "extracted_phrase": "фразавверхнемрегистре",
+            "expected_count": "3",
+            "extracted_count": "3"
+        }
+    },
+    {
+        "test_id": "t02_instructions_2",
+        "category": "t02_instructions",
+        "model_name": "deepseek/deepseek-r1-0528-qwen3-8b",
+        "model_details": {
+            "model_name": "deepseek/deepseek-r1-0528-qwen3-8b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "<think>\nХорошо, пользователь дал четкие инструкции по шагам. Начну с первого пункта: нужно преобразовать исходную фразу \"шла саша по шоссе и сосала сушку\" в верхний регистр.\n\nТеперь ко второму шагу — подсчет гласных букв. Сначала напомню себе, что русские гласные буквы: А, Е, Ё, И, О, У, Ы, Э, Ю. Важно учитывать их полную форму и регистр, но так как фраза уже в верхнем регистре, проблем с нижним случаем быть не должно.\n\nТретий шаг — вывод результата строго в указанном формате без лишних комментариев. Пользователь явно хочет получить только необходимую информацию, поэтому нужно соблюдать точность и краткость.\n</think>\nОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 14",
+        "expected_output": "ОБРАБОТАНО: ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ\nГЛАСНЫХ: 12",
+        "is_correct": false,
+        "execution_time_ms": 8687.114300002577,
+        "verification_details": {
+            "expected_phrase": "шласашапошоссеисосаласушку",
+            "extracted_phrase": "шласашапошоссеисосаласушку",
+            "expected_count": "12",
+            "extracted_count": "14"
+        }
+    },
+    {
+        "test_id": "t02_instructions_3",
+        "category": "t02_instructions",
+        "model_name": "deepseek/deepseek-r1-0528-qwen3-8b",
+        "model_details": {
+            "model_name": "deepseek/deepseek-r1-0528-qwen3-8b",
+            "client_type": "openai_compatible",
+            "options": {
+                "generation": {
+                    "temperature": 0.3
+                },
+                "query_timeout": 60
+            },
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "llm_response": "<think>\nХорошо, пользователь дал четкие инструкции по шагам обработки фразы \"корова молоко\". Нужно действовать строго последовательно.\n\nВо-первых, приведу фразу к верхнему регистру: \"КОРОВА МОЛОКО\".\n\nЗатем подсчитаю гласные буквы в русском алфавите (А, Е, Ё, И, О, У, Ы, Э, Ю, Я). В фразе есть следующие гласные: \n- \"О\" в \"КОРОВА\"\n- \"О\", \"О\" и \"О\" в \"МОЛОКО\"\n\nИтого 4 гласных буквы.\n\nТеперь оформлю результат как указано пользователем. Важно не добавлять лишних слов, только точные данные.\n</think>\nОБРАБОТАНО: КОРова МОЛОКО  \nГЛАСНЫХ: 4",
+        "expected_output": "ОБРАБОТАНО: КОРОВА МОЛОКО\nГЛАСНЫХ: 6",
+        "is_correct": false,
+        "execution_time_ms": 10646.137900002941,
+        "verification_details": {
+            "expected_phrase": "коровамолоко",
+            "extracted_phrase": "коровамолоко",
+            "expected_count": "6",
+            "extracted_count": "4"
+        }
+    }
+]
