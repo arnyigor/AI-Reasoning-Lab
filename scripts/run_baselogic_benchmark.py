@@ -73,7 +73,7 @@ def main():
 
         # Вызываем ОДИН метод, который генерирует весь отчет
         # Confidence Threshold можно вынести в config.yaml, если нужно
-        report_content = reporter.generate_leaderboard_report(confidence_threshold=20)
+        report_content = reporter.generate_leaderboard_report()
 
         # Сохраняем отчет в главный файл LEADERBOARD.md в корне проекта
         report_file = project_root / "BENCHMARK_REPORT.md"

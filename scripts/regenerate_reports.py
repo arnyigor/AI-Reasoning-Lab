@@ -69,9 +69,7 @@ def main():
     try:
         log.info("Генерация комплексного отчета...")
         # Вызываем новый метод, передавая ему параметр из командной строки
-        report_content = reporter.generate_leaderboard_report(
-            confidence_threshold=args.ct
-        )
+        report_content = reporter.generate_leaderboard_report()
 
         # Сохраняем отчет в файл, указанный пользователем
         report_file = project_root / args.output_file
