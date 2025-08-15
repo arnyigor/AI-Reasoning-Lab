@@ -25,14 +25,14 @@ models_to_test:
   #      query_timeout: 60
 
 
-  - name: "gemini-2.5-flash"
-#    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
-    client_type: "openai_compatible"
-    api_base: "http://127.0.0.1:1337/v1" # Другой порт для примера
+  - name: "jan-v1-4b"
+    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
+#    client_type: "openai_compatible"
+#    api_base: "http://127.0.0.1:1337/v1" # Другой порт для примера
     options:
       generation:
         temperature: 0.3
-      query_timeout: 60
+      query_timeout: 180
 
 
   # --- Модель №3: Еще один пример для OpenAI-совместимого сервера ---
@@ -60,7 +60,7 @@ tests_to_run:
 
 # --- Общие параметры тестирования ---
 # Количество уникальных тестовых заданий для каждой категории/модели
-runs_per_test: 15
+runs_per_test: 10
 
 # --- Настройки логирования ---
 logging:
