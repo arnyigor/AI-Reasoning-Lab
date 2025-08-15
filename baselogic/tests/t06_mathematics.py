@@ -3,6 +3,7 @@ import re
 from typing import Dict, Any, List
 
 from .abstract_test_generator import AbstractTestGenerator
+from ..core.safe_evaluator import SafeExpressionEvaluator
 
 class MathematicsTestGenerator(AbstractTestGenerator):
     """
@@ -27,12 +28,12 @@ class MathematicsTestGenerator(AbstractTestGenerator):
         expression = f"({num1} {op1} {num2}) {op2} {num3}"
 
         # Безопасно вычисляем правильный ответ
-        # eval() здесь безопасен, т.к. мы полностью контролируем входную строку
         try:
-            expected_result = eval(expression)
-        except ZeroDivisionError:
-            # На случай, если в будущем добавим деление
-            expected_result = 0
+            expected_result = SafeExpressionEvaluator.evaluate(expression)
+        except Exception as e:
+            # В случае ошибки вычисления, генерируем новое выражение
+            # Это может произойти при делении на ноль или других проблемах
+            return self.generate()
 
         prompt = (
             "Вычисли значение следующего арифметического выражения. "

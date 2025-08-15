@@ -15,25 +15,14 @@ def setup_main_logger():
     """
     Настраивает основной логер для вывода в консоль (уровень INFO и выше).
     """
-    # Мы настраиваем корневой логер. Это повлияет на все дочерние логеры.
     log = logging.getLogger()
-
-    # Если обработчики уже есть (от предыдущих запусков в той же сессии), не дублируем их.
     if any(isinstance(h, logging.StreamHandler) for h in log.handlers):
         return
-
-    log.setLevel(logging.INFO) # Минимальный уровень для вывода в консоль
-
-    # Форматтер для консоли
-    console_formatter = logging.Formatter(
-        '%(asctime)s - %(levelname)-8s - %(message)s'
-    )
-
-    # Обработчик для вывода в консоль
+    log.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('%(asctime)s - %(levelname)-8s - %(message)s')
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(console_formatter)
-
     log.addHandler(console_handler)
 
 
@@ -41,39 +30,35 @@ def main():
     """
     Главная функция для запуска платформы тестирования LLM "Базовый Контроль".
     """
-    # 1. Настраиваем оба логера в самом начале.
-    # Это гарантирует, что все последующие модули будут использовать уже настроенные логеры.
     setup_main_logger()
     setup_llm_logger()
 
-    # 2. Импортируем TestRunner ПОСЛЕ настройки логеров.
-    # Это важно, так как модуль test_runner при импорте получает свой логер.
     from baselogic.core.test_runner import TestRunner
 
     logging.info("🚀 Запуск платформы 'Базовый Контроль'...")
 
-    # 3. Загрузка конфигурации
+    # --- Загрузка конфигурации ---
+    # (Этот блок остается без изменений)
     config_path = project_root / "config.yaml"
     try:
+        # Предполагается, что у вас есть ConfigLoader, если нет - верните простой yaml.safe_load
         with open(config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
         logging.info("✅ Конфигурация успешно загружена.")
-        # Используем %s форматирование для логов, это безопаснее
         logging.info("   - Модели для тестирования: %s", config.get('models_to_test', 'не указаны'))
         logging.info("   - Набор тестов: %s", config.get('tests_to_run', 'не указан'))
-    except FileNotFoundError:
-        logging.error("❌ Файл конфигурации не найден по пути: %s", config_path)
-        return
     except Exception as e:
         logging.critical("❌ Не удалось прочитать или обработать config.yaml: %s", e, exc_info=True)
         return
 
-    # 4. Инициализация и запуск Test Runner'а
+    # --- Инициализация и запуск Test Runner'а ---
+    # (Этот блок остается без изменений)
     logging.info("[ЭТАП 2: Инициализация ядра тестирования]")
     runner = TestRunner(config)
     runner.run()
 
-    # 5. Генерация отчета
+
+    # 5. Генерация единого комплексного отчета
     logging.info("[ЭТАП 3: Генерация отчета]")
     try:
         from baselogic.core.reporter import Reporter
@@ -81,20 +66,22 @@ def main():
         results_dir = project_root / "results" / "raw"
         reporter = Reporter(results_dir=results_dir)
 
-        # --- Генерация детального отчета (как и раньше) ---
-        report_content = reporter.generate_markdown_report()
-        report_path = project_root / "results" / "reports"
-        report_path.mkdir(exist_ok=True)
-        report_file = report_path / f"report_{time.strftime('%Y%m%d_%H%M%S')}.md"
+        # Проверяем, есть ли данные для отчета
+        if reporter.all_results.empty:
+            logging.warning("Нет данных для генерации отчета. Завершение работы.")
+            return
+
+        # Вызываем ОДИН метод, который генерирует весь отчет
+        # Confidence Threshold можно вынести в config.yaml, если нужно
+        report_content = reporter.generate_leaderboard_report(confidence_threshold=20)
+
+        # Сохраняем отчет в главный файл LEADERBOARD.md в корне проекта
+        report_file = project_root / "BENCHMARK_REPORT.md"
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        logging.info("✅ Детальный отчет сохранен в: %s", report_file)
 
-        leaderboard_content = reporter.generate_advanced_leaderboard()
-        leaderboard_file = project_root / "LEADERBOARD.md" # Перезаписываем старый файл
-        with open(leaderboard_file, 'w', encoding='utf-8') as f:
-            f.write(leaderboard_content)
-        logging.info("✅ Продвинутая таблица лидеров обновлена: %s", leaderboard_file)
+        logging.info("✅ Комплексный отчет обновлен/создан: %s", report_file)
+
     except Exception as e:
         logging.error("❌ Произошла ошибка при генерации отчета: %s", e, exc_info=True)
 

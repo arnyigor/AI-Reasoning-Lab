@@ -7,12 +7,17 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 import logging
 
-# Импортируем оба наших класса-клиента
-from .llm_client import OllamaClient
-from .http_client import OpenAICompatibleClient
+# Импортируем фабрику и интерфейсы
+from .client_factory import LLMClientFactory
+from .interfaces import ILLMClient, LLMClientError
+from .logger import setup_logging, get_logger, log_llm_interaction, log_test_result, log_system_event
+from .config_validator import validate_config, get_config_summary
+from .progress_tracker import ProgressTracker
+
+from .plugin_manager import PluginManager
 
 # Настраиваем логер для этого модуля
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 
 class TimeoutError(Exception):
@@ -83,111 +88,164 @@ class TestRunner:
 
     def _load_test_generators(self) -> Dict[str, Any]:
         """
-        Динамически импортирует и инстанциирует классы генераторов тестов.
+        Динамически импортирует и инстанциирует классы генераторов тестов, включая плагины.
         """
         generators = {}
         base_module_path = "baselogic.tests"
 
-        if 'tests_to_run' not in self.config or not self.config['tests_to_run']:
-            log.warning("В 'config.yaml' не определен список тестов 'tests_to_run'. Тесты не будут запущены.")
-            return generators
+        # 1. Загрузка "встроенных" тестов
+        if 'tests_to_run' in self.config and self.config['tests_to_run']:
+            for test_key in self.config['tests_to_run']:
+                try:
+                    class_name_parts = test_key.split('_')[1:]
+                    class_name = "".join([part.capitalize() for part in class_name_parts]) + "TestGenerator"
+                    module_name = f"{base_module_path}.{test_key}"
+                    module = importlib.import_module(module_name)
+                    generator_class = getattr(module, class_name)
+                    generators[test_key] = generator_class
+                    log.info("✅ Встроенный тест '%s' успешно загружен.", test_key)
+                except (ImportError, AttributeError) as e:
+                    log.warning("❌ Не удалось загрузить встроенный тест '%s'. Ошибка: %s", test_key, e)
 
-        for test_key in self.config['tests_to_run']:
-            try:
-                # Преобразуем имя файла в имя класса
-                class_name_parts = test_key.split('_')[1:]
-                class_name = "".join([part.capitalize() for part in class_name_parts]) + "TestGenerator"
+        # 2. Обнаружение и загрузка плагинов
+        log.info("🔎 Поиск плагинов тестов...")
+        plugin_manager = PluginManager()
+        plugins = plugin_manager.discover_plugins()
+        if plugins:
+            log.info(f"✅ Найдено плагинов: {len(plugins)}")
+            for plugin_name, plugin_class in plugins.items():
+                if plugin_name in generators:
+                    log.warning(f"⚠️ Плагин '{plugin_name}' перезаписывает встроенный тест с тем же именем.")
+                generators[plugin_name] = plugin_class
+                log.info(f"  - Плагин '{plugin_name}' успешно загружен.")
+        else:
+            log.info("Плагины не найдены.")
 
-                module_name = f"{base_module_path}.{test_key}"
-                module = importlib.import_module(module_name)
-                generator_class = getattr(module, class_name)
-                generators[test_key] = generator_class
-                log.info("✅ Тест '%s' успешно загружен.", test_key)
-            except (ImportError, AttributeError) as e:
-                log.warning("❌ Не удалось загрузить тест '%s'. Ошибка: %s", test_key, e)
+        # 3. Фильтрация тестов, если указан список tests_to_run
+        if 'tests_to_run' in self.config and self.config['tests_to_run']:
+            tests_to_run = set(self.config['tests_to_run'])
+            filtered_generators = {name: gen for name, gen in generators.items() if name in tests_to_run}
+            if len(filtered_generators) != len(tests_to_run):
+                missing = tests_to_run - set(filtered_generators.keys())
+                log.warning(f"⚠️ Некоторые тесты из 'tests_to_run' не найдены: {', '.join(missing)}")
+            return filtered_generators
+        
+        if not generators:
+            log.warning("Не найдено ни одного теста для запуска.")
+
         return generators
 
     def run(self):
         """
-        Запускает полный цикл тестирования с подробной диагностикой.
+        Запускает полный цикл тестирования с обработкой ошибок.
         """
         if not self.config.get('models_to_test'):
             log.error("В 'config.yaml' не найден или пуст список моделей 'models_to_test'. Запуск отменен.")
             return
 
-        for model_config in self.config['models_to_test']:
-            model_name = model_config.get('name')
-            if not model_name:
-                log.warning("Найден конфиг модели без имени ('name'). Пропуск.")
-                continue
+        successful_models = []
+        failed_models = []
 
-            model_options = model_config.get('options', {})
-            client_type = model_config.get('client_type', 'ollama')
+        total_models = len(self.config.get('models_to_test', []))
+        total_tests = len(self.config.get('tests_to_run', []))
+        runs_per_test = self.config.get('runs_per_test', 1)
 
-            log.info("=" * 80)
-            log.info("🚀 НАЧАЛО ТЕСТИРОВАНИЯ МОДЕЛИ: %s (Клиент: %s)", model_name, client_type)
-            log.info("=" * 80)
+        progress = ProgressTracker(total_models, total_tests, runs_per_test)
 
-            # --- ЭТАП 1: Создание клиента ---
-            log.info("🔧 ЭТАП 1: Создание клиента...")
-            client = self._create_client_safely(model_config)
-            if client is None:
-                log.error("❌ Пропускаем модель '%s' из-за ошибки создания клиента", model_name)
-                continue
+        try:
+            for model_config in self.config['models_to_test']:
+                model_name = model_config.get('name')
+                if not model_name:
+                    log.warning("Найден конфиг модели без имени ('name'). Пропуск.")
+                    continue
 
-            # --- ЭТАП 2: Получение метаданных модели ---
-            log.info("📊 ЭТАП 2: Получение метаданных модели...")
-            model_details = self._get_model_details_safely(client, model_name)
+                client_type = model_config.get('client_type', 'ollama')
 
-            # --- ЭТАП 3: Выполнение тестов ---
-            log.info("🧪 ЭТАП 3: Выполнение тестов...")
-            model_results = self._run_tests_safely(client, model_name, model_details)
+                log.info("=" * 80)
+                log.info("🚀 НАЧАЛО ТЕСТИРОВАНИЯ МОДЕЛИ: %s (Клиент: %s)", model_name, client_type)
+                log.info("=" * 80)
 
-            # --- ЭТАП 4: Сохранение результатов ---
-            log.info("💾 ЭТАП 4: Сохранение результатов...")
-            self._save_results(model_name, model_results)
+                try:
+                    # --- ЭТАП 1: Создание клиента ---
+                    log.info("🔧 ЭТАП 1: Создание клиента...")
+                    client = self._create_client_safely(model_config)
+                    if client is None:
+                        log.error("❌ Пропускаем модель '%s' из-за ошибки создания клиента", model_name)
+                        failed_models.append((model_name, "Ошибка создания клиента"))
+                        # Обновляем прогресс-бар даже при ошибке, чтобы он не "зависал"
+                        for test_name in self.config.get('tests_to_run', []):
+                            for _ in range(runs_per_test):
+                                progress.update(model_name, test_name)
+                        continue
 
-            log.info("✅ Модель '%s' завершена. Результатов: %d", model_name, len(model_results))
-            log.info("=" * 80 + "\n")
+                    # --- ЭТАП 2: Получение метаданных модели ---
+                    log.info("📊 ЭТАП 2: Получение метаданных модели...")
+                    model_details = self._get_model_details_safely(client, model_name)
 
-    def _create_client_safely(self, model_config: Dict[str, Any]) -> Optional[Any]:
+                    # --- ЭТАП 3: Выполнение тестов ---
+                    log.info("🧪 ЭТАП 3: Выполнение тестов...")
+                    model_results = self._run_tests_safely(client, model_name, model_details, progress)
+
+                    # --- ЭТАП 4: Сохранение результатов ---
+                    log.info("💾 ЭТАП 4: Сохранение результатов...")
+                    self._save_results(model_name, model_results)
+
+                    if not model_results:
+                        log.warning("⚠️ Модель '%s' не дала ни одного ответа. Считается ошибкой.", model_name)
+                        failed_models.append((model_name, "Нет ответов от модели"))
+                    else:
+                        log.info("✅ Модель '%s' завершена. Результатов: %d", model_name, len(model_results))
+                        successful_models.append(model_name)
+                    
+                except Exception as e:
+                    error_msg = f"Критическая ошибка тестирования модели {model_name}: {e}"
+                    log.error("❌ %s", error_msg, exc_info=True)
+                    failed_models.append((model_name, str(e)))
+                    continue
+
+                log.info("=" * 80 + "\n")
+        finally:
+            progress.close()
+
+        # Итоговый отчет
+        log.info("📊 ИТОГОВЫЙ ОТЧЕТ:")
+        log.info("✅ Успешно протестировано: %d моделей", len(successful_models))
+        if successful_models:
+            log.info("   - %s", ", ".join(successful_models))
+        
+        if failed_models:
+            log.warning("❌ Ошибки в %d моделях:", len(failed_models))
+            for model, error in failed_models:
+                log.warning("   - %s: %s", model, error)
+
+    def _create_client_safely(self, model_config: Dict[str, Any]) -> Optional[ILLMClient]:
         """Безопасно создает клиент с обработкой ошибок."""
         model_name = model_config.get('name')
         client_type = model_config.get('client_type', 'ollama')
-        model_options = model_config.get('options', {})
 
         try:
             log.info("  🔧 Создаем клиент типа '%s'...", client_type)
-
-            if client_type == "openai_compatible":
-                api_base = model_config.get('api_base')
-                if not api_base:
-                    log.error("  ❌ Для клиента 'openai_compatible' не указан 'api_base'")
-                    return None
-                client = OpenAICompatibleClient(
-                    model_name=model_name, api_base=api_base,
-                    api_key=model_config.get('api_key'), model_options=model_options
-                )
-            elif client_type == "ollama":
-                client = OllamaClient(model_name=model_name, model_options=model_options)
-            else:
-                log.error("  ❌ Неизвестный тип клиента '%s'", client_type)
-                return None
-
+            
+            # Используем фабрику для создания клиента
+            client = LLMClientFactory.create_client(model_config)
+            
             log.info("  ✅ Клиент успешно создан")
             return client
 
+        except LLMClientError as e:
+            log.error("  ❌ Ошибка создания клиента: %s", e)
+            return None
         except Exception as e:
-            log.error("  ❌ Ошибка создания клиента: %s", e, exc_info=True)
+            log.error("  ❌ Неожиданная ошибка создания клиента: %s", e, exc_info=True)
             return None
 
-    def _get_model_details_safely(self, client: Any, model_name: str) -> Dict[str, Any]:
+    def _get_model_details_safely(self, client: ILLMClient, model_name: str) -> Dict[str, Any]:
         """Безопасно получает детали модели."""
         try:
             log.info("  📊 Запрашиваем детали модели '%s'...", model_name)
 
             def get_details():
-                return client.get_model_details()
+                return client.get_model_info()
 
             model_details = run_with_timeout(get_details, timeout_seconds=10)
 
@@ -209,7 +267,7 @@ class TestRunner:
             log.error("  ❌ %s", error_msg, exc_info=True)
             return {"error": error_msg}
 
-    def _run_tests_safely(self, client: Any, model_name: str, model_details: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _run_tests_safely(self, client: ILLMClient, model_name: str, model_details: Dict[str, Any], progress: ProgressTracker) -> List[Dict[str, Any]]:
         """Безопасно выполняет все тесты с детальной диагностикой."""
         model_results = []
         num_runs = self.config.get('runs_per_test', 1)
@@ -234,18 +292,40 @@ class TestRunner:
                     )
                     if result:
                         model_results.append(result)
-                        status = "✅ УСПЕХ" if result['is_correct'] else "❌ НЕУДАЧА"
-                        log.info("    %s (%.0f мс): %s", status, result['execution_time_ms'], test_id)
+                        if result['is_correct']:
+                            status = "✅ УСПЕХ"
+                            log.info("    %s (%.0f мс): %s", status, result['execution_time_ms'], test_id)
+                        else:
+                            status = "❌ НЕУДАЧА"
+                            verification_details = result.get('verification_details', {})
+                            log.warning("    %s (%.0f мс): %s", status, result['execution_time_ms'], test_id)
+                            
+                            # Логирование деталей верификации
+                            if verification_details:
+                                log.info("--- ОШИБКА ВЕРИФИКАЦИИ ---")
+                                log.info("Ожидалось: фраза='%s', число='%s'",
+                                         verification_details.get('expected_phrase', 'N/A'),
+                                         verification_details.get('expected_count', 'N/A'))
+                                log.info("Извлечено:  фраза='%s', число='%s'",
+                                         verification_details.get('extracted_phrase', 'N/A'),
+                                         verification_details.get('extracted_count', 'N/A'))
+                                log.info("Исходный извлеченный текст: фраза='%s'",
+                                         verification_details.get('raw_response', 'N/A')[:200])
+                                log.info("-------------------------")
                     else:
-                        log.warning("    ⚠️ Тест %s не выполнен", test_id)
+                        log.warning("    ⚠️ Тест %s не выполнен (не получено результата)", test_id)
 
                 except Exception as e:
-                    log.error("    ❌ Критическая ошибка в тесте %s: %s", test_id, e, exc_info=True)
+                    log.error("    ❌ Критическая ошибка в тесте %s: %s", test_id, e)
+                    log.error("    Подробности ошибки:", exc_info=True)
+                finally:
+                    # Обновляем прогресс-бар в любом случае
+                    progress.update(model_name, test_key)
 
         log.info("  📊 Всего выполнено тестов: %d", len(model_results))
         return model_results
 
-    def _run_single_test_safely(self, client: Any, test_key: str, test_id: str,
+    def _run_single_test_safely(self, client: ILLMClient, test_key: str, test_id: str,
                                 generator_class: Any, model_name: str,
                                 model_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Выполняет один тест с подробной диагностикой и таймаутами."""
@@ -286,7 +366,11 @@ class TestRunner:
                 return client.query(prompt)
 
             # Увеличиваем таймаут для запроса к модели
-            llm_response = client.query(prompt)
+            try:
+                llm_response = client.query(prompt)
+            except LLMClientError as e:
+                log.error("      ❌ Ошибка LLM клиента: %s", e)
+                return None
             end_time = time.perf_counter()
 
             exec_time_ms = (end_time - start_time) * 1000
@@ -299,7 +383,9 @@ class TestRunner:
             def verify_response():
                 return generator_instance.verify(llm_response, expected_output)
 
-            is_correct = run_with_timeout(verify_response, timeout_seconds=5)
+            verification_result = run_with_timeout(verify_response, timeout_seconds=5)
+            is_correct = verification_result.get('is_correct', False)
+            verification_details = verification_result.get('details', {})
             log.debug("      ✅ Верификация завершена: %s", is_correct)
 
             # Шаг 5: Сбор результатов
@@ -312,7 +398,8 @@ class TestRunner:
                 "llm_response": llm_response,
                 "expected_output": expected_output,
                 "is_correct": is_correct,
-                "execution_time_ms": exec_time_ms
+                "execution_time_ms": exec_time_ms,
+                "verification_details": verification_details
             }
 
         except TimeoutError as e:

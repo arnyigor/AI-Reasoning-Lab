@@ -3,18 +3,18 @@ import json
 import logging
 from typing import Dict, Any, Optional
 
-# Используем llm_logger, как и в OllamaClient, для консистентности
-# Если у вас другой логер, замените его
-llm_logger = logging.getLogger(__name__)
+from .interfaces import LLMClientError, LLMTimeoutError, LLMConnectionError, LLMResponseError
+from .base_client import BaseLLMClient
+from .types import ModelOptions
 
 
-class OpenAICompatibleClient:
+class OpenAICompatibleClient(BaseLLMClient):
     """
     HTTP-клиент для взаимодействия с любым сервером, предоставляющим
     OpenAI-совместимый эндпоинт /chat/completions.
     (например, LM Studio, Jan, vLLM).
     """
-    def __init__(self, model_name: str, api_base: str, api_key: Optional[str] = None, model_options: Optional[Dict[str, Any]] = None):
+    def __init__(self, model_name: str, api_base: str, api_key: Optional[str] = None, model_options: Optional[ModelOptions] = None):
         """
         Инициализирует HTTP-клиент.
 
@@ -22,22 +22,16 @@ class OpenAICompatibleClient:
             model_name (str): Имя модели, которое будет передано в теле запроса.
             api_base (str): Базовый URL сервера (например, "http://localhost:1234/v1").
             api_key (Optional[str]): Необязательный ключ API.
-            model_options (Optional[Dict[str, Any]]): Словарь с опциями.
+            model_options (Optional[ModelOptions]): Словарь с опциями.
         """
-        self.model_name = model_name
+        super().__init__(model_name, model_options)
+        
         self.api_url = f"{api_base.rstrip('/')}/chat/completions"
         self.api_key = api_key
-        self.model_options = model_options if model_options else {}
+        
+        self.logger.info("✅ OpenAICompatibleClient инициализирован для '%s' по адресу: %s", model_name, self.api_url)
 
-        # Разбираем опции для удобства
-        self.generation_options = self.model_options.get('generation', {})
-        self.prompting_options = self.model_options.get('prompting', {})
-
-        # Извлекаем системный промпт
-        self.system_prompt = self.prompting_options.get('system_prompt')
-        llm_logger.info("✅ OpenAICompatibleClient инициализирован для '%s' по адресу: %s", model_name, self.api_url)
-
-    def query(self, user_prompt: str) -> str:
+    def _execute_query(self, user_prompt: str) -> str:
         """
         Отправляет HTTP POST-запрос на сервер и возвращает текстовый ответ.
         """
@@ -47,17 +41,14 @@ class OpenAICompatibleClient:
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
-        messages = []
-        if self.system_prompt:
-            messages.append({'role': 'system', 'content': self.system_prompt})
-        messages.append({'role': 'user', 'content': user_prompt})
+        messages = self._prepare_messages(user_prompt)
 
         # Собираем тело запроса в соответствии со спецификацией OpenAI
         payload = {
             "model": self.model_name,
             "messages": messages,
             "stream": False,
-            **self.generation_options # Добавляем все опции генерации: temp, stop, etc.
+            **self.generation_opts # Добавляем все опции генерации: temp, stop, etc.
         }
 
         # --- Логирование запроса ---
@@ -67,12 +58,11 @@ class OpenAICompatibleClient:
             f"  Headers: {headers}\n"
             f"  Payload: {json.dumps(payload, indent=2, ensure_ascii=False)}\n\n"
         )
-        llm_logger.debug(log_message)
+        self.logger.debug(log_message)
 
         try:
-            timeout = self.model_options.get('query_timeout', 180) # Таймаут 3 минуты по умолчанию
-            llm_logger.info("    🚀 Отправляем запрос к API (таймаут: %dс)...", timeout)
-            response = requests.post(self.api_url, headers=headers, json=payload, timeout=timeout)
+            self.logger.info("    🚀 Отправляем запрос к API (таймаут: %dс)...", self.query_timeout)
+            response = requests.post(self.api_url, headers=headers, json=payload, timeout=self.query_timeout)
             response.raise_for_status()  # Вызовет исключение для кодов 4xx/5xx
 
             data = response.json()
@@ -83,48 +73,52 @@ class OpenAICompatibleClient:
             full_response_text = data['choices'][0]['message']['content']
 
             log_message += f"RESPONSE (Success):\n{full_response_text}"
-            llm_logger.info("    ✅ Ответ от API получен.")
-            llm_logger.debug(log_message)
-            return full_response_text.strip()
+            self.logger.info("    ✅ Ответ от API получен.")
+            self.logger.debug(log_message)
+            return self._validate_response(full_response_text)
 
         except requests.exceptions.Timeout:
             error_details = "RESPONSE (HTTP Timeout Error): Сервер не ответил за установленное время."
-            llm_logger.error(error_details)
-            return f"TIMEOUT_ERROR: {error_details}"
+            self.logger.error(error_details)
+            raise LLMTimeoutError(error_details)
         except requests.exceptions.RequestException as e:
             error_details = f"RESPONSE (HTTP Request Error):\n{e}"
             log_message += error_details
-            llm_logger.error(log_message, exc_info=True)
-            return f"HTTP_ERROR: {e}"
+            self.logger.error(log_message, exc_info=True)
+            raise LLMConnectionError(f"HTTP_ERROR: {e}") from e
         except (ValueError, KeyError, IndexError) as e:
             raw_response = response.text if 'response' in locals() else "No response received"
             error_details = f"RESPONSE (JSON Parsing Error):\n{e}\nRaw Response: {raw_response}"
             log_message += error_details
-            llm_logger.error(log_message, exc_info=True)
-            return f"JSON_PARSING_ERROR: {e}"
+            self.logger.error(log_message, exc_info=True)
+            raise LLMResponseError(f"JSON_PARSING_ERROR: {e}") from e
 
-    # =========================================================================
-    # ДОБАВЛЕНО: Метод-заглушка для совместимости с TestRunner
-    # =========================================================================
-    def get_model_details(self) -> Dict[str, Any]:
+    def get_model_info(self) -> Dict[str, Any]:
         """
-        Предоставляет "заглушку" с деталями для API-моделей.
-        Это обеспечивает совместимость с процессом сбора данных в TestRunner.
+        Возвращает информацию о модели.
+        Для HTTP-клиентов генерируем стандартную информацию.
         """
-        llm_logger.info("    ⚙️ Генерация стандартных деталей для API-модели: %s", self.model_name)
-        # OpenAI API не имеют стандартного эндпоинта 'show', как у Ollama.
-        # Мы возвращаем стандартную структуру, чтобы Reporter мог ее обработать.
-        return {
+        self.logger.info("    ⚙️ Генерация стандартных деталей для API-модели: %s", self.model_name)
+        
+        # Базовая информация
+        base_info = super().get_model_info()
+        
+        # Добавляем специфичную для HTTP клиента информацию
+        http_info = {
+            "client_type": "openai_compatible",
+            "api_url": self.api_url,
             "modelfile": "N/A (API)",
             "parameters": "N/A (API)",
-            "template": self.prompting_options.get('template', 'N/A (API)'),
+            "template": self.prompting_opts.get('template', 'N/A (API)'),
             "details": {
                 "family": "api",  # Идентификатор для группировки
                 "parameter_size": "N/A",
                 "quantization_level": "API",
                 "format": "api"
             },
-            # Этот флаг поможет Reporter'у точно определить, что это API модель
             "object": "model"
         }
+        
+        base_info.update(http_info)
+        return base_info
 

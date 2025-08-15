@@ -6,72 +6,33 @@
 # Каждая модель - это объект со своим именем, типом клиента и опциями.
 models_to_test:
 
-#  # --- Модель №1: Запуск через LM Studio (или другой OpenAI-совместимый сервер) ---
-#  - name: "Meta-Llama-3-8B-Instruct-GGUF" # Имя модели, как его "видит" сервер LM Studio
-#    client_type: "openai_compatible"     # Указываем, что используем HTTP-клиент
-#    api_base: "http://localhost:1234/v1" # URL вашего сервера LM Studio
-#    api_key: "lm-studio"                 # Необязательный ключ API, LM Studio требует любой
-#    options:
-#      # Параметры, которые будут переданы в теле JSON-запроса
-#      generation:
-#        temperature: 0.7
-#        max_tokens: 1024 # Пример параметра, который может поддерживать ваш сервер
-#        # stop: ["<|eot_id|>"] # Пример стоп-токена для Llama 3
-#      # Настройки для составления промпта
-#      prompting:
-#        system_prompt: "You are a precise and helpful assistant. Provide clear and direct answers."
-#        # Шаблон промпта не используется, т.к. мы передаем messages в стандартном формате
-#        template: null
+  #  # --- Модель №1: Запуск через LM Studio (или другой OpenAI-совместимый сервер) ---
+  #  - name: "Meta-Llama-3-8B-Instruct-GGUF" # Имя модели, как его "видит" сервер LM Studio
+  #    client_type: "openai_compatible"     # Указываем, что используем HTTP-клиент
+  #    api_base: "http://localhost:1234/v1" # URL вашего сервера LM Studio
+  #    api_key: "lm-studio"                 # Необязательный ключ API, LM Studio требует любой
+  #    options:
+  #      # Параметры, которые будут переданы в теле JSON-запроса
+  #      generation:
+  #        temperature: 0.7
+  #        max_tokens: 1024 # Пример параметра, который может поддерживать ваш сервер
+  #        # stop: ["<|eot_id|>"] # Пример стоп-токена для Llama 3
+  #      # Настройки для составления промпта
+  #      prompting:
+  #        system_prompt: "You are a precise and helpful assistant. Provide clear and direct answers."
+  #        # Шаблон промпта не используется, т.к. мы передаем messages в стандартном формате
+  #        template: null
+  #      query_timeout: 60
 
 
-  # --- Модель №2: Запуск через нативный клиент Ollama ---
-#  - name: "deepseek-r1-0528-qwen3-8b:latest"
+  - name: "jan-v1-4b"
 #    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
-#    options:
-#      # Параметры, специфичные для Ollama
-#      generation:
-#        temperature: 0.5
-#      # Настройки промпта для Ollama-клиента
-#      prompting:
-#        system_prompt: ""
-#        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
-#        template: null
-#      query_timeout: 60
-#
-#  - name: "DeepSeek-R1-0528-Qwen3-8B-Q4:latest"
-#    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
-#    options:
-#      # Параметры, специфичные для Ollama
-#      generation:
-#        temperature: 0.5
-#      # Настройки промпта для Ollama-клиента
-#      prompting:
-#        system_prompt: ""
-#        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
-#        template: null
-#
-#  - name: "jan-v1-4b:latest"
-#    client_type: "ollama"  # Явно указываем, что используем Ollama-клиент
-#    options:
-#      # Параметры, специфичные для Ollama
-#      generation:
-#        temperature: 0.5
-#      # Настройки промпта для Ollama-клиента
-#      prompting:
-#      query_timeout: 50
-
-#   --- Модель №3: Еще один пример для OpenAI-совместимого сервера ---
-  - name: "jan-v1-4b" # Другое имя для примера
     client_type: "openai_compatible"
     api_base: "http://127.0.0.1:1234/v1" # Другой порт для примера
-#    api_key: "123"
     options:
       generation:
-        temperature: 0.5
-      prompting:
-        system_prompt: ""
-        # Если бы у модели был сложный шаблон, мы бы указали его здесь для OllamaClient
-        template: "null"
+        temperature: 0.3
+      query_timeout: 60
 
 
   # --- Модель №3: Еще один пример для OpenAI-совместимого сервера ---
@@ -88,8 +49,9 @@ models_to_test:
 
 # --- Набор тестов для запуска ---
 tests_to_run:
-#  - t01_simple_logic
+  #  - t01_simple_logic
   - t02_instructions
+#  - custom_logic
 #  - t03_code_gen
 #  - t04_data_extraction
 #  - t05_summarization
@@ -98,4 +60,10 @@ tests_to_run:
 
 # --- Общие параметры тестирования ---
 # Количество уникальных тестовых заданий для каждой категории/модели
-runs_per_test: 3
+runs_per_test: 10
+
+# --- Настройки логирования ---
+logging:
+  level: "INFO"           # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "DETAILED"      # SIMPLE, DETAILED, JSON
+  directory: "logs"       # Директория для логов

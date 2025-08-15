@@ -1,211 +1,167 @@
 import time
+import re
 from pathlib import Path
 import pandas as pd
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class Reporter:
     """
-    Анализирует сырые JSON-результаты и генерирует сводный отчет в формате Markdown.
+    Анализирует сырые JSON-результаты и генерирует комплексный отчет в формате Markdown.
     """
 
     def __init__(self, results_dir: Path):
-        """
-        Инициализирует Reporter.
-
-        Args:
-            results_dir (Path): Путь к директории с сырыми JSON-результатами.
-        """
         self.results_dir = results_dir
-        # _load_all_results теперь вызывается внутри generate_markdown_report,
-        # чтобы вывод print() не появлялся при простом создании объекта.
-        self.all_results: pd.DataFrame = pd.DataFrame()
+        self.all_results: pd.DataFrame = self._load_all_results()
 
     def _load_all_results(self) -> pd.DataFrame:
-        """Загружает все JSON файлы из папки с результатами."""
+        """Загружает и объединяет все JSON файлы из папки с результатами."""
         all_data = []
-        json_files = sorted(list(self.results_dir.glob("*.json"))) # Сортируем для предсказуемого порядка
-
-        print(f"Найдено файлов результатов: {len(json_files)}")
+        json_files = sorted(list(self.results_dir.glob("*.json")))
+        log.info("Найдено файлов для отчета: %d", len(json_files))
 
         for json_file in json_files:
             try:
                 data = pd.read_json(json_file)
-                if data.empty:
-                    print(f"Пропущен пустой файл: {json_file.name}")
-                    continue
-
-                # --- ИЗМЕНЕНИЕ 1: Добавляем источник данных ---
-                # Создаем новую колонку, чтобы знать, из какого файла пришла каждая строка.
-                # Это ключ к подсчету количества запусков.
-                data['source_file'] = json_file.name
-
-                print(f"Загружен файл: {json_file.name}, записей: {len(data)}")
-                all_data.append(data)
+                if not data.empty:
+                    all_data.append(data)
             except Exception as e:
-                print(f"Ошибка при чтении файла {json_file}: {e}")
-                continue
+                log.error("Ошибка при чтении файла %s: %s", json_file, e)
 
         if not all_data:
-            print("Не найдено данных для анализа.")
+            log.warning("Не найдено данных для построения отчета.")
             return pd.DataFrame()
 
         combined_data = pd.concat(all_data, ignore_index=True)
-        print(f"Всего записей для анализа: {len(combined_data)}")
+        log.info("Всего записей для анализа: %d", len(combined_data))
         return combined_data
 
-    def generate_markdown_report(self) -> str:
-        """Создает и возвращает текст отчета в формате Markdown."""
-        # Загружаем данные только при генерации отчета
-        self.all_results = self._load_all_results()
-
-        if self.all_results.empty:
-            return "# Отчет о Тестировании\n\nНе найдено файлов с результатами для анализа."
-
-        # --- ИЗМЕНЕНИЕ 2: Считаем количество запусков ---
-        # Группируем по имени модели и считаем количество уникальных 'source_file' для каждой.
-        # .nunique() - это "number of unique", идеальная функция для этой задачи.
-        runs_count = self.all_results.groupby('model_name')['source_file'].nunique()
-        runs_count.name = "Запусков" # Даем имя серии, чтобы оно стало заголовком колонки
-
-        # Сводная таблица по % правильных ответов
-        summary = self.all_results.groupby(['model_name', 'category'])['is_correct'].mean().unstack()
-        summary['Overall'] = self.all_results.groupby('model_name')['is_correct'].mean()
-
-        # Форматирование в проценты
-        summary_percent = summary.map(lambda x: f"{x:.0%}" if pd.notna(x) else "N/A")
-
-        # --- ИЗМЕНЕНИЕ 3: Добавляем колонку с запусками в сводную таблицу ---
-        # Используем pd.concat для объединения по индексу (model_name)
-        summary_with_runs = pd.concat([runs_count, summary_percent], axis=1)
-
-        # Генерация отчета
-        report_md = "# 📊 Отчет о Тестировании LLM\n\n"
-        report_md += "## Сводная таблица (% верных ответов)\n\n"
-        report_md += self._to_markdown_table(summary_with_runs)
-        report_md += "\n\n"
-
-        # Статистика по времени выполнения
-        report_md += "## Статистика по времени выполнения (мс)\n\n"
-        time_stats = self.all_results.groupby('model_name')['execution_time_ms'].agg(['mean', 'min', 'max'])
-        time_stats = time_stats.round(0).astype(int)
-        time_stats.columns = ['Среднее', 'Мин', 'Макс']
-        report_md += self._to_markdown_table(time_stats)
-        report_md += "\n\n"
-
-        # Детальная информация по тестам
-        report_md += "## Детальная статистика по тестам\n\n"
-        test_stats = self.all_results.groupby(['model_name', 'category'])['is_correct'].agg(['count', 'sum'])
-
-        # Добавляем долю правильных ответов
-        test_stats['Доля'] = (test_stats['sum'] / test_stats['count']).map(lambda x: f"{x:.0%}")
-        test_stats.columns = ['Всего попыток', 'Правильных', 'Доля']
-
-        report_md += self._to_markdown_table(test_stats)
-
-        return report_md
-
     def _to_markdown_table(self, df: pd.DataFrame) -> str:
-        """Преобразует DataFrame в Markdown таблицу."""
+        """Безопасно преобразует DataFrame в Markdown таблицу."""
         if df.empty:
-            return "Нет данных\n"
+            return "Нет данных для отображения.\n"
+        try:
+            # fillna перед to_markdown для корректного отображения
+            return df.fillna("N/A").to_markdown() + "\n"
+        except ImportError:
+            log.error(
+                "Для генерации Markdown-таблиц требуется библиотека 'tabulate'. Пожалуйста, установите ее: pip install tabulate")
+            return "Ошибка: библиотека 'tabulate' не установлена.\n"
 
-        # Заменяем NaN на более понятный 'N/A' для отображения
-        df_display = df.fillna('N/A')
+    def _calculate_verbosity(self, df: pd.DataFrame) -> pd.Series:
+        """Рассчитывает 'индекс болтливости' для каждой модели."""
 
-        lines = []
+        def get_clean_len(text):
+            # ... (эта вложенная функция остается без изменений) ...
+            pattern = re.compile(
+                r"\bОБРАБОТАНО\b:.*?\bГЛАСНЫХ\b:.*?\d+",
+                re.DOTALL | re.IGNORECASE
+            )
+            match = pattern.search(text)
+            return len(match.group(0)) if match else 0
 
-        if isinstance(df_display.index, pd.MultiIndex):
-            headers = list(df_display.index.names) + list(df_display.columns)
-        else:
-            # Используем имя индекса, если оно есть, или 'Model' по умолчанию
-            index_name = df_display.index.name if df_display.index.name else 'Model'
-            headers = [index_name] + list(df_display.columns)
+        # Создаем временные колонки в основном DataFrame
+        df['raw_len'] = df['llm_response'].str.len()
+        df['clean_len'] = df['llm_response'].apply(get_clean_len)
 
-        lines.append("| " + " | ".join(str(h) for h in headers) + " |")
-        lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+        # Группируем по имени модели
+        grouped = df.groupby('model_name')
 
-        for idx, row in df_display.iterrows():
-            if isinstance(idx, tuple):
-                row_values = [str(i) for i in idx] + [str(v) for v in row.values]
-            else:
-                row_values = [str(idx)] + [str(v) for v in row.values]
-            lines.append("| " + " | ".join(row_values) + " |")
+        # Считаем суммы по нужным колонкам
+        sums = grouped[['raw_len', 'clean_len']].sum()
 
-        return "\n".join(lines) + "\n"
+        # Рассчитываем индекс болтливости, избегая деления на ноль
+        # Это более читаемый и эффективный способ, чем .apply с лямбдой
+        model_verbosity = (sums['raw_len'] - sums['clean_len']) / sums['raw_len']
+        model_verbosity = model_verbosity.fillna(0)  # Заменяем NaN (если raw_len был 0) на 0
 
-    def generate_advanced_leaderboard(
+        # Удаляем временные колонки, чтобы не "загрязнять" основной DataFrame
+        df.drop(columns=['raw_len', 'clean_len'], inplace=True)
+
+        return model_verbosity
+
+    def generate_leaderboard_report(
             self,
-            accuracy_weight: float = 0.7,
-            speed_weight: float = 0.3,
-            confidence_threshold: int = 10
+            confidence_threshold: int = 20
     ) -> str:
         """
-        Создает и возвращает продвинутую таблицу лидеров с композитным баллом.
-
-        Итоговый балл учитывает точность, скорость и количество запусков (доверие).
-
-        Args:
-            accuracy_weight (float): Вес точности в итоговом балле.
-            speed_weight (float): Вес скорости в итоговом балле.
-            confidence_threshold (int): Количество запусков, после которого
-                                        результату можно полностью доверять (штраф = 0).
-        Returns:
-            str: Текст таблицы лидеров в формате Markdown.
+        Создает и возвращает основной, самодостаточный отчет с таблицей лидеров
+        и подробными объяснениями всех метрик.
         """
-        if self.all_results.empty:
-            self.all_results = self._load_all_results()
-
         if self.all_results.empty:
             return "# 🏆 Таблица Лидеров\n\nНе найдено данных для анализа."
 
-        # 1. Агрегируем базовые метрики
+        # --- Этапы 1-5: Расчет и форматирование метрик (без изменений) ---
         metrics = self.all_results.groupby('model_name').agg(
             Accuracy=('is_correct', 'mean'),
-            Avg_Time_ms=('execution_time_ms', 'mean'),
-            Runs=('source_file', 'nunique')
+            Total_Runs=('is_correct', 'count')
         )
-
-        # 2. Нормализуем метрики (0-1, где 1 - лучше)
-        metrics['norm_accuracy'] = metrics['Accuracy']
-        min_time = metrics['Avg_Time_ms'].min()
-        max_time = metrics['Avg_Time_ms'].max()
-        if max_time == min_time:
-            metrics['norm_speed'] = 0.5
-        else:
-            metrics['norm_speed'] = (max_time - metrics['Avg_Time_ms']) / (max_time - min_time)
-
-        # 3. Рассчитываем базовый балл (точность + скорость)
-        metrics['Base_Score'] = (accuracy_weight * metrics['norm_accuracy'] +
-                                 speed_weight * metrics['norm_speed'])
-
-        # --- ИЗМЕНЕНИЕ: Рассчитываем модификатор доверия и финальный балл ---
-        metrics['Confidence'] = (metrics['Runs'] / confidence_threshold).clip(upper=1.0)
-        metrics['Final_Score'] = metrics['Base_Score'] * metrics['Confidence']
-
-        # 4. Сортируем по финальному баллу
-        metrics.sort_values(by='Final_Score', ascending=False, inplace=True)
+        metrics['Confidence_Mod'] = (metrics['Total_Runs'] / confidence_threshold).clip(upper=1.0)
+        metrics['Reasoning_Score'] = metrics['Accuracy'] * metrics['Confidence_Mod']
+        metrics.sort_values(by='Reasoning_Score', ascending=False, inplace=True)
         metrics.insert(0, 'Ранг', range(1, len(metrics) + 1))
-
-        # 5. Форматируем для вывода
-        metrics['Score'] = metrics['Final_Score'].map(lambda x: f"{x:.3f}")
+        metrics['Score'] = metrics['Reasoning_Score'].map(lambda x: f"{x:.3f}")
         metrics['Accuracy'] = metrics['Accuracy'].map(lambda x: f"{x:.1%}")
-        metrics['Avg_Time_ms'] = metrics['Avg_Time_ms'].map(lambda x: f"{x:,.0f} мс")
-        # Добавляем отображение модификатора доверия для наглядности
-        metrics['Confidence_Mod'] = metrics['Confidence'].map(lambda x: f"{x:.0%}")
-
-        # 6. Выбираем финальные колонки
-        leaderboard_df = metrics[['Ранг', 'Score', 'Accuracy', 'Avg_Time_ms', 'Runs', 'Confidence_Mod']]
+        metrics['Confidence'] = metrics['Confidence_Mod'].map(lambda x: f"{x:.0%}")
+        metrics['Runs'] = metrics['Total_Runs']
+        leaderboard_df = metrics[['Ранг', 'Score', 'Accuracy', 'Runs', 'Confidence']]
         leaderboard_df.index.name = "Модель"
 
-        # 7. Генерируем Markdown с обновленным объяснением
+        # --- Генерация Markdown Отчета ---
+
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-        leaderboard_md = f"# 🏆 Таблица Лидеров\n\n"
-        leaderboard_md += f"*Последнее обновление: {timestamp}*\n\n"
-        leaderboard_md += self._to_markdown_table(leaderboard_df)
-        leaderboard_md += "\n---\n"
-        leaderboard_md += "### Как рассчитывается балл (Score)\n\n"
-        leaderboard_md += "Итоговый балл учитывает Точность, Скорость и Доверие (зависит от числа запусков).\n"
-        leaderboard_md += f"`Score = ({accuracy_weight} * Точность + {speed_weight} * Скорость) * Модификатор_Доверия`\n\n"
-        leaderboard_md += f"> **Модификатор Доверия** — это штраф за малое количество запусков. Он равен 100% при {confidence_threshold} и более запусках."
+        report_md = f"# 🏆 Таблица Лидеров Бенчмарка\n\n"
+        report_md += f"*Последнее обновление: {timestamp}*\n\n"
 
-        return leaderboard_md
+        # --- Таблица лидеров ---
+        report_md += self._to_markdown_table(leaderboard_df)
+        report_md += "\n---\n"
 
+        report_md += "### 📖 Как читать таблицу лидеров\n\n"
+        report_md += "- **Ранг**: Итоговое место модели в рейтинге.\n"
+        report_md += "- **Score (Итоговый балл)**: Главный показатель производительности модели. Он вознаграждает модели, которые не только точны, но и прошли достаточное количество тестов, чтобы мы могли доверять их результатам. Рассчитывается как `Accuracy * Confidence`.\n"
+        report_md += "- **Accuracy (Точность)**: Процент правильных ответов. Это ключевой показатель \"интеллекта\" модели.\n"
+        report_md += "- **Runs (Запуски)**: Общее количество тестовых задач, выполненных моделью.\n"
+        report_md += f"- **Confidence (Уверенность)**: Насколько мы можем доверять показателю точности. Этот модификатор \"штрафует\" модели за малое количество тестов. Он достигает 100% при **{confidence_threshold}** и более запусках.\n"
+        report_md += "\n\n"
+
+        # --- Детальная статистика по тестам ---
+        report_md += "## 📊 Детальная статистика по тестам\n\n"
+        test_stats = self.all_results.groupby(['model_name', 'category'])['is_correct'].agg(['count', 'sum'])
+        test_stats['Accuracy'] = (test_stats['sum'] / test_stats['count'])
+        test_stats.columns = ['Попыток', 'Успешно', 'Точность']
+        test_stats['Точность'] = test_stats['Точность'].map(lambda x: f"{x:.0%}")
+        report_md += self._to_markdown_table(test_stats)
+        report_md += "\n"
+
+        # >>>>> НАЧАЛО ИЗМЕНЕНИЙ: ОБЪЯСНЕНИЕ ДЕТАЛЬНОЙ СТАТИСТИКИ <<<<<
+        report_md += "### 📖 Как читать детальную статистику\n\n"
+        report_md += "Эта таблица показывает \"сильные\" и \"слабые\" стороны каждой модели, раскрывая ее производительность в каждой конкретной категории тестов.\n\n"
+        report_md += "- **Категория**: Название набора тестов (например, `t01_simple_logic`, `t03_code_gen`).\n"
+        report_md += "- **Попыток**: Сколько задач из этой категории было предложено модели.\n"
+        report_md += "- **Успешно**: Сколько из этих задач модель решила правильно.\n"
+        report_md += "- **Точность**: Процент успеха в данной, конкретной категории.\n"
+        report_md += "\n\n"
+        # >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
+
+        # --- Технические метрики (без влияния на рейтинг) ---
+        report_md += "## ⚙️ Технические метрики\n\n"
+        verbosity = self._calculate_verbosity(self.all_results)
+        verbosity.name = "Verbosity_Index"
+        tech_metrics = self.all_results.groupby('model_name').agg(
+            Avg_Time_ms=('execution_time_ms', 'mean')
+        )
+        tech_metrics = pd.concat([tech_metrics, verbosity], axis=1)
+        tech_metrics['Avg_Time_ms'] = tech_metrics['Avg_Time_ms'].map(lambda x: f"{x:,.0f} мс")
+        tech_metrics['Verbosity_Index'] = tech_metrics['Verbosity_Index'].map(lambda x: f"{x:.1%}")
+        report_md += self._to_markdown_table(tech_metrics)
+        report_md += "\n"
+
+        report_md += "### 📖 Как читать технические метрики\n\n"
+        report_md += "Эти показатели оценивают не правильность ответа, а \"поведение\" и эффективность модели. Они не влияют на `Score`, но важны для выбора модели под конкретную практическую задачу.\n\n"
+        report_md += "- **Avg_Time_ms (Среднее время)**: Сколько миллисекунд в среднем требуется модели для генерации ответа. Показывает производительность модели на вашем оборудовании.\n"
+        report_md += "- **Verbosity Index (Индекс Болтливости)**: Доля ответа, не являющаяся прямым решением (например, рассуждения модели вслух, \"мусорные\" токены). `0%` — идеально лаконичный ответ, `90%` — означает, что 90% текста в ответе является \"шумом\", который нужно отфильтровывать.\n"
+
+        return report_md

@@ -32,7 +32,7 @@ class AbstractTestGenerator(ABC):
         pass
 
     @abstractmethod
-    def verify(self, llm_output: str, expected_output: Any) -> bool:
+    def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
         """
         Проверяет, является ли ответ LLM правильным.
 
@@ -41,6 +41,8 @@ class AbstractTestGenerator(ABC):
             expected_output (Any): Эталонный результат из метода generate().
 
         Returns:
-            bool: True, если ответ верный, иначе False.
+            Dict[str, Any]: Словарь с результатами верификации.
+                - 'is_correct' (bool): True, если ответ верный.
+                - 'details' (Dict[str, Any]): Дополнительная информация для логов.
         """
         pass

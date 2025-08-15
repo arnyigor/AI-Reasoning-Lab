@@ -1,85 +1,90 @@
 # /scripts/regenerate_reports.py
 
 import sys
-from pathlib import Path
 import argparse
 import time
+from pathlib import Path
+import logging
 
+# --- Настройка ---
 # Добавляем корень проекта в sys.path для надежных импортов
-# Это гарантирует, что скрипт можно запускать из любой директории
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-# Импортируем наш Reporter
+# Импортируем наш обновленный Reporter
 from baselogic.core.reporter import Reporter
+
+def setup_logger():
+    """Настраивает простой логер для вывода в консоль."""
+    log = logging.getLogger('ReportGenerator')
+    if log.hasHandlers():
+        return log
+    log.setLevel(logging.INFO)
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)-8s - %(message)s')
+    handler.setFormatter(formatter)
+    log.addHandler(handler)
+    return log
 
 def main():
     """
-    Главная функция для перегенерации отчетов из существующих JSON-файлов.
+    Главная функция для перегенерации единого, комплексного отчета
+    из существующих JSON-файлов результатов.
     """
+    log = setup_logger()
+
     # 1. Настройка парсера аргументов командной строки
     parser = argparse.ArgumentParser(
-        description="Перегенерация отчетов и таблицы лидеров из существующих JSON-результатов.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter # Показывает значения по умолчанию в --help
+        description="Перегенерация комплексного отчета из существующих JSON-результатов.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument(
-        '--aw', '--accuracy-weight',
-        type=float,
-        default=0.7,
-        help="Вес точности (accuracy) в итоговом балле таблицы лидеров."
-    )
-    parser.add_argument(
-        '--sw', '--speed-weight',
-        type=float,
-        default=0.3,
-        help="Вес скорости (speed) в итоговом балле таблицы лидеров."
-    )
+    # Удалены аргументы --aw и --sw, так как скорость больше не учитывается в балле
     parser.add_argument(
         '--ct', '--confidence-threshold',
         type=int,
-        default=10,
-        help="Количество запусков для достижения 100% доверия к результату."
+        default=20, # Увеличим значение по умолчанию для большей надежности
+        help="Количество запусков для достижения 100% доверия к результату (влияет на Score)."
+    )
+    parser.add_argument(
+        '--output-file', '-o',
+        type=str,
+        default="BENCHMARK_REPORT.md",
+        help="Имя файла для сохранения сгенерированного отчета в корне проекта."
     )
     args = parser.parse_args()
 
-    # Проверка, что сумма весов равна 1
-    if not (0.999 < args.aw + args.sw < 1.001):
-        print(f"Ошибка: Сумма весов должна быть равна 1.0, а у вас: {args.aw + args.sw}")
-        sys.exit(1)
-
-
-    print("🚀 Запуск перегенерации отчетов...")
-    print(f"Используемые веса для таблицы лидеров: Точность={args.aw}, Скорость={args.sw}")
-    print(f"Используемый порог доверия: {args.ct} запусков")
+    log.info("🚀 Запуск перегенерации отчета...")
+    log.info("Используемый порог доверия (Confidence Threshold): %d запусков", args.ct)
 
     # 2. Инициализация Reporter
     results_dir = project_root / "results" / "raw"
     reporter = Reporter(results_dir=results_dir)
 
-    # 3. Генерация и сохранение детального отчета
+    # Проверяем, есть ли данные для работы
+    if reporter.all_results.empty:
+        log.warning("В директории '%s' не найдено валидных файлов с результатами. Работа завершена.", results_dir)
+        return
+
+    # 3. Генерация и сохранение единого комплексного отчета
     try:
-        print("\n[1/2] Генерация детального отчета...")
-        report_content = reporter.generate_markdown_report()
-        report_path = project_root / "results" / "reports"
-        report_path.mkdir(exist_ok=True)
-        report_file = report_path / f"report_regenerated_{time.strftime('%Y%m%d_%H%M%S')}.md"
+        log.info("Генерация комплексного отчета...")
+        # Вызываем новый метод, передавая ему параметр из командной строки
+        report_content = reporter.generate_leaderboard_report(
+            confidence_threshold=args.ct
+        )
+
+        # Сохраняем отчет в файл, указанный пользователем
+        report_file = project_root / args.output_file
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        print(f"✅ Детальный отчет сохранен в: {report_file}")
 
-        # 4. Генерация и сохранение таблицы лидеров
-        print("\n[2/2] Генерация продвинутой таблицы лидеров...")
-        leaderboard_content = reporter.generate_advanced_leaderboard( )
-        leaderboard_file = project_root / "LEADERBOARD.md"
-        with open(leaderboard_file, 'w', encoding='utf-8') as f:
-            f.write(leaderboard_content)
-        print(f"✅ Таблица лидеров обновлена: {leaderboard_file}")
+        log.info("✅ Комплексный отчет успешно сгенерирован и сохранен в: %s", report_file)
 
     except Exception as e:
-        print(f"\n❌ Произошла критическая ошибка: {e}")
+        log.critical("❌ Произошла критическая ошибка при генерации отчета: %s", e, exc_info=True)
         sys.exit(1)
 
-    print("\n🎉 Работа успешно завершена!")
+    log.info("\n🎉 Работа успешно завершена!")
 
 
 if __name__ == "__main__":
