@@ -41,7 +41,7 @@ def main():
     parser.add_argument(
         '--output-file', '-o',
         type=str,
-        default="BENCHMARK_REPORT.md",
+        default="BASE_LOGIC_BENCHMARK_REPORT.md",
         help="Имя файла для сохранения сгенерированного отчета в корне проекта."
     )
     args = parser.parse_args()

@@ -97,7 +97,7 @@ def main():
         report_content = reporter.generate_leaderboard_report()
 
         # Сохраняем отчет в главный файл LEADERBOARD.md в корне проекта
-        report_file = project_root / "BENCHMARK_REPORT.md"
+        report_file = project_root / "BASE_LOGIC_BENCHMARK_REPORT.md"
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write(report_content)
 

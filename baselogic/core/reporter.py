@@ -180,7 +180,7 @@ class Reporter:
 
         # --- Этап 5: Генерация Markdown Отчета с обновленными пояснениями ---
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-        report_md = f"# 🏆 Таблица Лидеров Бенчмарка\n\n"
+        report_md = f"# 🏆 Таблица Лидеров Бенчмарка base_logic\n\n"
         report_md += f"*Последнее обновление: {timestamp}*\n\n"
         report_md += self._to_markdown_table(leaderboard_df)
         report_md += "\n---\n"
