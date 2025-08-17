@@ -35,7 +35,6 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         ]
         base_phrase = random.choice(phrases)
 
-        # Промпт остается тем же, с примером формата [скобки]
         instructions = [
             f"1. Возьми исходную фразу: '{base_phrase}'.",
             "2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.",
@@ -50,80 +49,86 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         processed_phrase = base_phrase.upper()
         vowel_count = self._count_vowels(base_phrase)
 
-        # ИЗМЕНЕНИЕ: Убираем квадратные скобки из эталона.
-        # Эталон должен содержать чистые данные, а не форматирование.
-        expected_output = (
-            f"ОБРАБОТАНО: {processed_phrase}\n"
-            f"ГЛАСНЫХ: {vowel_count}"
-        )
-
+        # Возвращаем словарь с чистыми данными, а не отформатированную строку
         return {
             'prompt': prompt,
-            'expected_output': expected_output
+            'expected_output': {
+                'phrase': processed_phrase,
+                'count': str(vowel_count) # Сразу приводим к строке для консистентности
+            }
         }
 
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
         """
         Проверяет ответ LLM, будучи устойчивым к форматированию и "рассуждениям" модели.
         """
-        # --- 1. Парсинг эталонных данных ---
-        try:
-            expected_lines = [line.strip() for line in expected_output.strip().split('\n') if line.strip()]
-            expected_phrase_raw = expected_lines[0].replace("ОБРАБОТАНО:", "").strip()
-            expected_count_raw = expected_lines[1].replace("ГЛАСНЫХ:", "").strip()
-        except (IndexError, AttributeError):
-            log.error("Ошибка парсинга эталонных данных (expected_output).")
-            return {'is_correct': False, 'details': {'error': 'Failed to parse expected_output'}}
+        # --- 1. Получение эталонных данных ---
+        expected_phrase = expected_output.get('phrase', '')
+        expected_count = expected_output.get('count', '')
 
         # --- 2. Очистка вывода LLM ---
         clean_output = self._cleanup_llm_response(llm_output)
 
-        # --- 3. Извлечение данных с помощью Regex ---
-        phrase_match = re.search(r"ОБРАБОТАНО\s*:\s*\[?([^\]\n]+)\]?", clean_output, re.IGNORECASE)
-        count_match = re.search(r"ГЛАСНЫХ\s*:\s*\[?(\d+)\]?", clean_output, re.IGNORECASE)
+        # --- 3. Извлечение данных с помощью ЕДИНОГО нежадного Regex ---
+        # Этот шаблон ищет всю структуру, правильно разделяя фразу и число.
+        # \s* - ноль или больше пробельных символов
+        # .*? - нежадный захват любых символов
+        # \d+ - одно или больше чисел
+        pattern = re.compile(
+            r"\bОБРАБОТАНО\b\s*:\s*(?P<phrase>.*?)\s*\bГЛАСНЫХ\b\s*:\s*(?P<count>\d+)",
+            re.DOTALL | re.IGNORECASE
+        )
 
-        if not phrase_match or not count_match:
-            log.info("Не удалось найти 'ОБРАБОТАНО' и/или 'ГЛАСНЫХ' в ответе модели.")
-            return {'is_correct': False, 'details': {'error': "Keywords not found in response", 'raw_response': llm_output}}
+        match = pattern.search(clean_output)
 
-        extracted_phrase_raw = phrase_match.group(1).strip()
-        extracted_count_raw = count_match.group(1).strip()
+        if not match:
+            # Если шаблон не найден, значит, модель не следовала формату
+            log.warning("Верификатор не нашел шаблон 'ОБРАБОТАНО... ГЛАСНЫХ...' в очищенном ответе.")
+            return {
+                'is_correct': False,
+                'details': {
+                    'error': "Keywords not found in response",
+                    'cleaned_response_snippet': clean_output[:200]
+                }
+            }
+
+        extracted_phrase = match.group('phrase').strip()
+        extracted_count = match.group('count').strip()
 
         # --- 4. Финальная нормализация и сравнение ---
-        norm_extracted_phrase = re.sub(r'\s+', '', extracted_phrase_raw).lower()
-        norm_expected_phrase = re.sub(r'\s+', '', expected_phrase_raw).lower()
+        norm_extracted_phrase = re.sub(r'[\s.]', '', extracted_phrase).lower()
+        norm_expected_phrase = re.sub(r'[\s.]', '', expected_phrase).lower()
 
         phrase_ok = (norm_extracted_phrase == norm_expected_phrase)
-        count_ok = (extracted_count_raw == expected_count_raw)
+        count_ok = (extracted_count == expected_count)
 
-        if not (phrase_ok and count_ok):
-            log.info("--- ОШИБКА ВЕРИФИКАЦИИ ---")
-            log.info("Ожидалось: фраза='%s', число='%s'", norm_expected_phrase, expected_count_raw)
-            log.info("Извлечено:  фраза='%s', число='%s'", norm_extracted_phrase, extracted_count_raw)
-            log.info("Исходный извлеченный текст: фраза='%s'", extracted_phrase_raw)
-            log.info("-------------------------")
-            
         is_correct = phrase_ok and count_ok
+
+        # --- 5. Формирование детального результата ---
+        details = {
+            "reason": "OK" if is_correct else "Mismatch in phrase or count",
+            "expected_phrase": expected_phrase,
+            "extracted_phrase": extracted_phrase,
+            "phrase_match": phrase_ok,
+            "expected_count": expected_count,
+            "extracted_count": extracted_count,
+            "count_match": count_ok
+        }
 
         return {
             'is_correct': is_correct,
-            'details': {
-                'expected_phrase': norm_expected_phrase,
-                'extracted_phrase': norm_extracted_phrase,
-                'expected_count': expected_count_raw,
-                'extracted_count': extracted_count_raw
-            }
+            'details': details
         }
 
     def _cleanup_llm_response(self, llm_output: str) -> str:
         """Вспомогательный метод для очистки ответа модели."""
-        # Удаляем спецтокены
         # Удаляем блоки <think>...</think>
         clean_output = re.sub(r'<think>.*?</think>', '', llm_output, flags=re.DOTALL | re.IGNORECASE)
 
+        # Удаляем известные спецтокены
         known_tokens = [
             r"<\|im_start\|>", r"<\|im_end\|>", r"<\|endoftext\|>",
-            r"<s>", r"</s>", r"<\|eot_id\|>"
+            r"<s>", r"</s>", r"<\|eot_id\|>", r"assistant" # часто добавляется после <|im_start|>
         ]
         tokens_pattern = re.compile("|".join(known_tokens), re.IGNORECASE)
         clean_output = tokens_pattern.sub("", clean_output)
@@ -134,4 +139,4 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         clean_output = re.sub(r'^\s{0,3}#{1,6}\s*', '', clean_output, flags=re.MULTILINE)
         clean_output = re.sub(r'^[*\-\+]\s+', '', clean_output, flags=re.MULTILINE)
 
-        return clean_output
+        return clean_output.strip()

@@ -1,8 +1,14 @@
+import os
 import re
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Optional, Dict, Any
+
+from dotenv import load_dotenv
+
+# Загружаем переменные окружения из .env файла
+load_dotenv()
 
 def create_ollama_model(
         gguf_path: str,
@@ -201,7 +207,11 @@ def list_ollama_models() -> str:
 # Примеры использования
 # ------------------------------
 if __name__ == "__main__":
-    gguf_file = r"C:/Users/ArnyPC/.lmstudio/models/lmstudio-community/DeepSeek-R1-0528-Qwen3-8B-GGUF/DeepSeek-R1-0528-Qwen3-8B-Q6_K.gguf"
+    # Читаем путь к GGUF файлу из переменной окружения
+    gguf_file = os.getenv("GGUF_MODEL_PATH")
+
+    if not gguf_file:
+        raise ValueError("Путь к модели не найден. Убедитесь, что переменная GGUF_MODEL_PATH задана в .env файле.")
 
     # Демонстрация разных стратегий автоопределения имени
     path_obj = Path(gguf_file)

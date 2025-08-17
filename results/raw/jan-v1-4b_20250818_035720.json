@@ -1,0 +1,922 @@
+[
+    {
+        "test_id": "t01_simple_logic_1",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария сильнее Борис.\n- Елена сильнее Мария.\n\nВопрос: Кто из них самая слабая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХм, давай подумаю над этой логической задачей. У нас есть три человека: Мария, Борис и Елена. Нужно определить, кто самая слабая.\n\nУсловия:\n1. Мария сильнее Бориса.\n2. Елена сильнее Марины.\n\nИз первого условия следует, что Мария > Борис по силе. Второе условие говорит, что Елена > Мария. Тогда если соединить эти две неравенства, получается Елена > Мария > Борис. То есть порядок по силе: Елена самая сильная, затем Мария, а Борис самый слабый.\n\nВопрос: Кто самая слабая? Тогда ответ должен быть Борис. Надо проверить, нет ли ошибки в рассуждениях. Если у нас два неравенства, то цепочка Елена > Мария > Борис показывает, что Борис ниже всех. Да, точно, он самый слабый.\n</think>\n\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Елена",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 4044.3113000364974,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Борис"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_2",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена сильнее Ирина.\n- Алексей сильнее Елена.\n\nВопрос: Кто из них самая слабая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Елена, Ирина и Алексей. Нужно определить, кто из них самая слабая.\n\nСначала посмотрю на условия:\n\n1. Елена сильнее Ирины.\n2. Алексей сильнее Елены.\n\nЗначит, если Елена сильнее Ирины, то порядок силы здесь: Елена > Ирина.\n\nВторое условие говорит, что Алексей сильнее Елены, так что добавляем в цепочку: Алексей > Елена > Ирина.\n\nТогда самая слабая из них — это Ирина. Потому что она находится в конце этой цепочки. Надо убедиться, что нет других участников. В условии задачи только три человека: Елена, Ирина и Алексей. Значит, ответ должен быть Ирина.\n\nНужно проверить, не пропустил ли я что-то. Если Алексей сильнее Елены, а Елена — Ирины, то да, Ирина самая слабая.\n</think>\n\nИрина",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Алексей",
+                "Елена"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 4007.476400001906,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Ирина"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_3",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор быстрее Мария.\n- Елена быстрее Виктор.\n\nВопрос: Кто из них самая быстрая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХм, давайте разберёмся с этой логической задачей. У нас есть три человека: Виктор, Мария и Елена. Нужно определить, кто самая быстрая.\n\nСначала посмотрю на условия:\n\n1. Виктор быстрее Марии.\n2. Елена быстрее Виктора.\n\nИз первого утверждения: Виктор > Мария (по скорости). То есть Виктор быстрее, чем Мария.\n\nВо втором утверждении: Елена > Виктор. Значит, Елена быстрее Виктора.\n\nТеперь соединяю эти два факта. Если Елена быстрее Виктора, а Виктор быстрее Марины, то логично, что Елена быстрее обоих. То есть порядок по скорости: Елена > Виктор > Мария.\n\nТаким образом, самая быстрая — Елена.\n</think>\n\nЕлена",
+        "expected_output": {
+            "correct": "Мария",
+            "incorrect": [
+                "Елена",
+                "Виктор"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 3438.5529999854043,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе",
+            "expected_name": "Мария",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": true,
+            "cleaned_output_snippet": "Елена"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_4",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей быстрее Мария.\n- Мария быстрее Григорий.\n\nВопрос: Кто из них самая быстрая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давай разберусь с этой логической задачей. Условия: Алексей быстрее Марии, а Мария быстрее Григория. Нужно определить, кто из них самый быстрый.\n\nСначала вспомню, что когда говорят \"Алексей быстрее Марии\", это значит, что Алексей находится выше по скорости, то есть его скорость больше. То же самое с Мария и Григорием: Мария быстрее Григория.\n\nЗначит, порядок должен быть таковым: Алексей > Мария > Григорий. Тогда самый быстрый — это Алексей. Но нужно убедиться, что я правильно понял сравнение. В задаче не сказано ничего про других людей, поэтому предполагаем, что речь только о трёх.\n\nДа, если Алексей быстрее Марии, а Мария — Григория, то Алексей впереди по скорости. Ответ должен быть Алексей.\n</think>\n\nАлексей",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Алексей",
+                "Мария"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 3576.864000002388,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": true,
+            "cleaned_output_snippet": "Алексей"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_5",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария старше Григорий.\n- Григорий старше Борис.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давай разберусь с этой задачей. У нас есть три человека: Мария, Григорий и Борис. Надо определить, кто самый младший.\n\nСначала посмотрю на условия: \"Мария старше Григория\" — это значит, что Мария > Григорий по возрасту. Далее: \"Григорий старше Бориса\" — так что Григорий > Борис.\n\nЕсли собрать всё вместе, то получается цепочка: Мария > Григорий > Борис. Значит, Борис младший из троих. Проверяю еще раз: если Григорий старше Бориса, то Борис самый младший. Да, вроде всё логично. Нет других вариантов, так как цепочка убывает по возрасту. Ответ должен быть Борис.\n</think>\n\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Мария",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3272.3999999579974,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Борис"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_6",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена старше Борис.\n- Борис старше Жанна.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХм, давайте разберусь с этой задачей. У нас есть три человека: Елена, Борис и Жанна. Условия говорят, что Елена старше Бориса, а Борис старше Жанны. Нужно определить, кто самый младший.\n\nПервое, что приходит в голову — это построение цепочки возрастов. Если Елена старше Бориса, то порядок: Елена > Борис. Потом Борис старше Жанны, значит, Борис > Жанна. Сложив эти две неравенства, получается Елена > Борис > Жанна. То есть Жанна самая младшая. Надо проверить, не пропустил ли я кого-то или не перепутал порядок. Вроде все логично: сначала Елена, потом Борис, затем Жанна. Значит, самый младший — Жанна.\n</think>\n\nЖанна",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Елена",
+                "Борис"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3495.945400034543,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Жанна"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_7",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина сильнее Алексей.\n- Дмитрий сильнее Ирина.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХм, давай подумаю над этой задачей. У нас есть три человека: Ирина, Алексей и Дмитрий. Нужно определить, кто самый сильный по условиям.\n\nСначала посмотрю на условия:\n1. Ирина сильнее Алексея. То есть Ирина > Алексей.\n2. Дмитрий сильнее Ирины. То есть Дмитрий > Ирина.\n\nЕсли связать эти два утверждения, то получается Дмитрий > Ирина > Алексей. Значит, самый сильный — Дмитрий. Надо проверить, нет ли здесь каких-то подводных камней. Может быть, задача на логику сравнений? Но похоже, что это прямая цепочка. Тогда ответ Дмитрий.\n</think>\n\nДмитрий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Ирина",
+                "Алексей"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 2828.6867999704555,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Дмитрий"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_8",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария старше Елена.\n- Виктор старше Мария.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Мария, Елена и Виктор. Нужно определить, кто самый младший.\n\nСначала посмотрю на условия:\n\n1. Мария старше Елены.\n2. Виктор старше Марианы.\n\nЗначит, можно составить цепочку возрастов. Если Виктор старше Марианы, а Мария старше Елены, то получается так: Виктор > Мария > Елена. Тогда самый младший — это Елена.\n\nПроверю, не пропустил ли я что-то. Допустим, нет других людей в задаче. Задача про три человека. Так что ответ должен быть Елена.\n</think>\n\nЕлена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Виктор",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 2786.0986999585293,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Елена"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_9",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий быстрее Ирина.\n- Жанна быстрее Дмитрий.\n\nВопрос: Кто из них самая быстрая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Дмитрий, Ирина и Жанна. Нужно определить, кто самая быстрая.\n\nСначала посмотрю на условия:\n1. Дмитрий быстрее Ирины.\n2. Жанна быстрее Дмитрия.\n\nИз первого условия: Дмитрий > Ирина (по скорости).\nВторое условие говорит, что Жанна > Дмитрий.\n\nЕсли соединить эти два утверждения, то получается Жанна > Дмитрий > Ирина. Значит, Жанна самая быстрая, потому что она выше всех в этой цепочке.\n\nНадо убедиться, что нет других возможных вариантов. Допустим, если бы было какое-то неравенство, но по условию только два сравнения. Так что логично, что Жанна первая, потом Дмитрий, потом Ирина.\n\nОтвет должен быть только имя: Жанна.\n</think>\n\nЖанна",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Жанна",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 3621.11259996891,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": true,
+            "cleaned_output_snippet": "Жанна"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_10",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина старше Елена.\n- Елена старше Наталья.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберёмся с этой логической задачей. У нас есть три девушки: Ирина, Елена и Наталья. Нужно определить, кто из них самый старший.\n\nСначала посмотрю на условия:\n1. Ирина старше Елены.\n2. Елена старше Натальи.\n\nЗначит, если Ирина старше Елены, а Елена — Натальи, то логично, что Ирина старше обеих. То есть порядок возрастно: Ирина → Елена → Наталья. Тогда самый старший — Ирина.\n\nНужно убедиться, что я не перепутал. Если бы было наоборот, например, Елена старше Ирины, но в условии сказано иначе. Всё правильно: из двух сравнений можно сделать вывод о тройном порядке. Так что ответ должен быть Ирина.\n\nДа, точно, только имя без объяснений.\n</think>\n\nИрина",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Елена",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3516.6223000269383,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Ирина"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_11",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Наталья сильнее Дмитрий.\n- Дмитрий сильнее Алексей.\n\nВопрос: Кто из них самая слабая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберёмся с этой логической задачей. У нас есть три человека: Наталья, Дмитрий и Алексей. Условия говорят, что Наталья сильнее Дмитрия, а Дмитрий сильнее Алексея. Нужно определить, кто из них самый слабый.\n\nСначала я попробую представить отношения по силе. Если Наталья сильнее Дмитрия, то в порядке убывания силы мы можем написать Наталья > Дмитрий. Далее, Дмитрий сильнее Алексея, значит, Дмитрий > Алексей. Теперь соединяю эти две связи: Наталья > Дмитрий > Алексей.\n\nЕсли это верно, то самый слабый должен быть Алексей, так как он находится в конце этой цепочки. То есть, у нас нет информации о том, кто быстрее или сильнее других вне этих двух сравнений. По данным условия, Алексей слабее Дмитрия, а Дмитрий слабее Натальи, значит, Алексей самая слабая.\n\nПроверю ещё раз: если бы было иное, например, кто-то из них был равен, но в условии сказано \"сильнее\", что обычно означает строгую несвязность. То есть, все три человека имеют различную силу. Значит, порядок Наталья > Дмитрий > Алексей, и ответ — Алексей.\n</think>\n\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Наталья",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 5128.81780002499,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Алексей"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_12",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария старше Алексей.\n- Наталья старше Мария.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХм, давай подумаю над этой логической задачей. У нас есть три человека: Мария, Алексей и Наталья. Условия говорят, что Мария старше Алексея, а Наталья старше Марии. Нужно определить самого младшего.\n\nПервым делом, построю цепочку возрастов. Если Наталья старше Марии, то Наталья > Мария по возрасту. А Мария старше Алексея — значит Мария > Алексей. Тогда общая последовательность будет: Наталья → Мария → Алексей. То есть самый младший должен быть Алексей.\n\nПроверю, может быть я где-то ошибся. Допустим, если бы было \"Наталья старше Марии\" и \"Мария старше Алексея\", то да, Алексей младше обоих. Значит, ответ — Алексей.\n</think>\n\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Наталья",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3352.1116000483744,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Алексей"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_13",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий старше Ирина.\n- Жанна старше Дмитрий.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. Условия таковы: Дмитрий старше Ирина, а Жанна старше Дмитрия. Нужно определить, кто из них самый младший.\n\nПервым делом, мне нужно представить отношения между возрастами. Если Жанна старше Дмитрия, то порядок будет Жанна — Дмитрий. А Дмитрий старше Ирина, значит, Димитрий — Ирина. Теперь соединю их: Жанна > Дмитрий > Ирина. То есть, если это по возрасту от eldest к youngest, то самый младший — Ирина.\n\nПроверю еще раз: Жанна старше Дмитрия (Жанна больше по возрасту), Дмитрий старше Ирины. Значит, Ирина младше Дмитрия, а значит, она самая молодая из трех. Кажется, все правильно. Нет других людей в задаче, так что ответ должен быть Ирина.\n</think>\n\nИрина",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Жанна",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3544.845200027339,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Ирина"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_14",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей выше Наталья.\n- Борис выше Алексей.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Алексей, Наталья и Борис. Нужно определить, кто самый высокий.\n\nСначала посмотрю на условия:\n\n1. Алексей выше Натальи.\n2. Борис выше Алексея.\n\nИз первого утверждения следует, что порядок высоты: Алексей > Наталья.\n\nВо втором — Борис выше Алексея, то есть Борис > Алексей.\n\nТеперь соединю эти два факта. Если Борис выше Алексея, а Алексей выше Натальи, то по принципу транзитивности отношения \"выше\" получается, что Борис самый высокий, затем Алексей, а Наталья самая низкая.\n\nПроверю: если Борис > Алексей и Алексей > Наталья, тогда да, Борис выше обоих. Значит, ответ — Борис.\n</think>\n\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Алексей",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3469.2321000038646,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Борис"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_15",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна быстрее Наталья.\n- Наталья быстрее Дмитрий.\n\nВопрос: Кто из них самая быстрая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. Условия: Жанна быстрее Наталья, а Наталья быстрее Дмитрия. Нужно определить, кто из них самый быстрый.\n\nСначала вспомню, что если А быстрее Б, то это значит, что А занимает лучшее место по скорости. То есть порядок должен быть таким: Жанна > Наталья > Дмитрий. Тогда самая быстрая из трех — Жанна.\n\nНо давайте убедимся. Предположим, что у нас есть три человека: Жанна (J), Наталья (N), Дмитрий (D). Из условия J быстрее N, значит J > N. И N быстрее D, то есть N > D. Тогда цепочка J > N > D. Значит, первое место — Жанна.\n\nВозможные ошибки: может быть, кто-то перепутает порядок. Например, думать, что Дмитрий быстрее Натальи, но по условию наоборот. Нет, все правильно. Так что ответ Жанна.\n</think>\n\nЖанна",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Жанна",
+                "Наталья"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 4066.373899986502,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": true,
+            "cleaned_output_snippet": "Жанна"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_16",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария старше Наталья.\n- Наталья старше Григорий.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Мария, Наталья и Григорий. Условия говорят, что Мария старше Натальи, а Наталья старше Григория. Нужно определить, кто из них самый младший.\n\nПервым делом вспомню, что если А старше Б, то Б младше А. То есть отношения здесь чёткие: Мария > Наталья по возрасту, а Наталья > Григорий. Значит, можно составить цепочку: Мария старше Натальи, которая в свою очередь старше Григория. Тогда порядок от eldest к youngest будет Мария → Наталья → Григорий.\n\nТаким образом, самый младший должен быть Григорий. Нужно проверить, не перепутано ли. Если бы было например Наталья старше Марии, то всё было бы иначе, но по условию наоборот. Всё сходится: Григорий младше Натальи, а она младше Мари. Значит, ответ Григорий.\n</think>\n\nГригорий",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Мария",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 4298.430599970743,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Григорий"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_17",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей сильнее Ирина.\n- Ирина сильнее Елена.\n\nВопрос: Кто из них самая слабая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Алексей, Ирина и Елена. Условия говорят, что Алексей сильнее Ирины, а Ирина сильнее Елены. Нужно определить, кто из них самый слабый.\n\nСначала я попробую представить отношения по силе. Если Алексей сильнее Ирина, то это значит, что Алексей > Ирина (по силе). Затем Ирина сильнее Елены, то есть Ирина > Елена. Теперь соединяю эти две неравенства: Алексей > Ирина > Елена.\n\nЕсли построить цепочку, то самая слабая будет та, кто находится в конце этой цепочки. То есть Елена — последняя, значит, она самая слабая. Проверю еще раз: если Алексей сильнее Ирины, а Ирина — Елены, то да, Елена хуже всех.\n\nНет никаких других условий, поэтому ответ должен быть Елена.\n</think>\n\nЕлена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Алексей",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 4055.3599999984726,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Елена"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_18",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна быстрее Борис.\n- Дмитрий быстрее Жанна.\n\nВопрос: Кто из них самая быстрая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Жанна, Борис и Дмитрий. Нужно определить, кто из них самый быстрый.\n\nСначала посмотрю на условия:\n\n1. Жанна быстрее Бориса.\n2. Дмитрий быстрее Жанны.\n\nИтак, первое утверждение говорит, что Жанна > Борис (по скорости). Второе — Дмитрий > Жанна. Значит, если связать их вместе, получается Дмитрий > Жанна > Борис. То есть порядок по скорости: Дмитрий самый быстрый, затем Жанна, потом Борис.\n\nНужно убедиться, что я не перепутал направление неравенств. В таких задачах обычно \"A быстрее B\" означает, что A имеет больший показатель скорости, то есть A > B. Тогда да, Дмитрий быстрее Жанны значит Дмитрий > Жанна.\n\nПоэтому последовательность: Дмитрий — самая быстрая, затем Жанна, Борис самый медленный.\n\nВопрос: Кто из них самая быстрая? Ответ должен быть только имя. Значит, в данном случае Дмитрий.\n</think>\n\nДмитрий",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Дмитрий",
+                "Жанна"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 4825.864699960221,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": true,
+            "cleaned_output_snippet": "Дмитрий"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_19",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей сильнее Елена.\n- Елена сильнее Григорий.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Алексей, Елена и Григорий. Условия говорят, что Алексей сильнее Елены, а Елена сильнее Григория.\n\nНужно определить, кто из них самый сильный. Давайте подумаем пошагово. Если Алексей сильнее Елены, то можно записать это как Алексей > Елена. А Елена сильнее Григория — значит, Елена > Григорий.\n\nТеперь соединим эти два утверждения. Если Алексей больше Елены, а Елена больше Григория, то по принципу транзитивности сравнений, Алексей должен быть сильнее Григория тоже. То есть получается цепочка: Алексей > Елена > Григорий.\n\nЗначит, самый сильный — это Алексей, потому что он находится на верхушке этой цепочки. Проверю еще раз: если у нас есть два сравнения, то третий человек (Григорий) слабее Елены, а она слабее Алексея. Значит, ответ Алексей.\n</think>\n\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Елена",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 4283.640199981164,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Алексей"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_20",
+        "category": "t01_simple_logic",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена выше Мария.\n- Жанна выше Елена.\n\nВопрос: Кто из них самая низкая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этой логической задачей. У нас есть три человека: Елена, Мария и Жанна. Нужно определить, кто из них самый низкий.\n\nСначала посмотрю на условия:\n\n1. Елена выше Марии.\n2. Жанна выше Елены.\n\nЗначит, если Жанна выше Елены, а Елена выше Мари, то цепочка будет: Жанна > Елена > Мария.\n\nТаким образом, самая низкая из них — это Мария.\n\nНадо убедиться, что я не перепутал порядок. Если Елена выше Марии, то Мария короче Елены. Жанна выше Елены, значит, Жанна еще выше всех. Значит, кто-то из трех — Мария самая низкая.\n\nДа, ответ должен быть Мария.\n</think>\n\nМария",
+        "expected_output": {
+            "correct": "Мария",
+            "incorrect": [
+                "Жанна",
+                "Елена"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3235.3314999490976,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Мария",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Мария"
+        }
+    }
+]

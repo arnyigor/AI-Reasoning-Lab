@@ -1,0 +1,782 @@
+[
+    {
+        "test_id": "t06_mathematics_1",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (14 * 10) + 5",
+        "llm_response": "<think>\nХорошо, давай разберусь с этим выражением. У меня есть (14 * 10) + 5. Нужно посчитать его значение и написать только результат.\n\nСначала вспомню порядок действий: сначала умножение, потом сложение. Здесь скобки указывают, что сначала нужно вычислить 14 умножить на 10. Давай посчитаю: 14 * 10. Умножение на 10 обычно легко — просто добавляешь ноль в конце, так что 14*10 будет 140.\n\nТеперь прибавляем 5 к результату. Получается 140 + 5. Сложив их, получится 145.\n\nПроверю еще раз: 14 умножить на 10 — да, 140. Плюс 5 — 145. Вроде все правильно.\n</think>\n\n145",
+        "expected_output": "145",
+        "is_correct": true,
+        "execution_time_ms": 3792.258299945388,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "145",
+            "extracted_numbers": "[14, 10, 5, 14, 10, 14, 10, 10, 14, 10, 140, 5, 140, 5, 145, 14, 10, 140, 5, 145, 145]",
+            "llm_output_snippet": "<think>\nХорошо, давай разберусь с этим выражением. У меня есть (14 * 10) + 5. Нужно посчитать его зн"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_2",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (13 - 1) * 5",
+        "llm_response": "<think>\nХорошо, давайте решим это арифметическое выражение. У нас есть (13 - 1) * 5. Нужно найти его значение и написать только число в ответе.\n\nСначала посмотрю на скобки. Внутри них стоит вычитание: 13 минус 1. Посчитаю это: 13 - 1 = 12. Теперь выражение упростится до 12 * 5. Умножу 12 на 5. Давайте подумаем, как быстро это сделать. Можно представить, что 10*5=50 и 2*5=10, значит 50+10=60. Или просто 12*5: 12*5=60.\n\nПроверю ещё раз: (13-1) это 12, умножить на 5 даёт 60. Вроде правильно. Думаю, ответ должен быть 60.\n</think>\n\n60",
+        "expected_output": "60",
+        "is_correct": true,
+        "execution_time_ms": 3396.5964000090025,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "60",
+            "extracted_numbers": "[13, 1, 5, 13, 1, 13, 1, 12, 12, 5, 12, 5, 10, 5, 50, 2, 5, 10, 50, 10, 60, 12, 5, 12, 5, 60, 13, -1, 12, 5, 60, 60, 60]",
+            "llm_output_snippet": "<think>\nХорошо, давайте решим это арифметическое выражение. У нас есть (13 - 1) * 5. Нужно найти его"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_3",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (10 * 2) - 2",
+        "llm_response": "<think>\nХорошо, давайте посчитаем это выражение. У нас есть (10 * 2) - 2. Сначала нужно выполнить умножение внутри скобок. 10 умножить на 2 будет 20. Потом вычесть 2 из полученного результата: 20 минус 2 равно 20-2=18. Кажется, всё правильно. Надо проверить ещё раз, чтобы не ошибиться. Да, 10*2 это 20, 20-2 это 18. Финальный ответ должен быть 18.\n</think>\n\n18",
+        "expected_output": "18",
+        "is_correct": true,
+        "execution_time_ms": 2182.1439000195824,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "18",
+            "extracted_numbers": "[10, 2, 2, 10, 2, 20, 2, 20, 2, 20, -2, 18, 10, 2, 20, 20, -2, 18, 18, 18]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаем это выражение. У нас есть (10 * 2) - 2. Сначала нужно выполнить ум"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_4",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (4 * 9) - 2",
+        "llm_response": "<think>\nХорошо, давай посчитаю это выражение. У меня есть (4 * 9) - 2. Сначала нужно выполнить умножение в скобках. 4 умножить на 9... ну, 4*9 это 36. Потом вычесть 2: 36 - 2 = 34. Кажется, всё правильно. Давай проверю ещё раз: 4*9=36, 36-2=34. Да, ответ должен быть 34.\n</think>\n\n34",
+        "expected_output": "34",
+        "is_correct": true,
+        "execution_time_ms": 1942.6912000053562,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "34",
+            "extracted_numbers": "[4, 9, 2, 4, 9, 4, 9, 36, 2, 36, 2, 34, 4, 9, 36, 36, -2, 34, 34, 34]",
+            "llm_output_snippet": "<think>\nХорошо, давай посчитаю это выражение. У меня есть (4 * 9) - 2. Сначала нужно выполнить умнож"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_5",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (14 * 3) - 2",
+        "llm_response": "<think>\nДано выражение: (14 * 3) - 2\n\nСначала вычислю умножение внутри скобок:\n14 * 3 = 42\n\nЗатем вычту 2 из полученного результата:\n42 - 2 = 40\n\nИтак, значение выражения равно 40.\n</think>\n\n40",
+        "expected_output": "40",
+        "is_correct": true,
+        "execution_time_ms": 1225.1475999946706,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "40",
+            "extracted_numbers": "[14, 3, 2, 14, 3, 42, 2, 42, 2, 40, 40, 40]",
+            "llm_output_snippet": "<think>\nДано выражение: (14 * 3) - 2\n\nСначала вычислю умножение внутри скобок:\n14 * 3 = 42\n\nЗатем вы"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_6",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (11 - 7) + 5",
+        "llm_response": "<think>\nХорошо, давайте разберемся с этим выражением. У нас есть (11 - 7) + 5. Нужно посчитать его значение. Сначала я вспомню порядок действий: скобки сначала, потом умножение и деление, затем сложение и вычитание. Здесь скобки есть, так что начну с них.\n\nВнутри скобок 11 минус 7. Посчитаю это: 11 - 7 равно 4. Теперь выражение упрощается до 4 + 5. Сложив эти числа, получаем 9. Проверяю еще раз: 11-7=4, 4+5=9. Вроде все правильно. Нет ли здесь подводных камней? Например, если бы были другие операции или скобки, но в данном случае их нет. Значит, ответ должен быть 9.\n</think>\n\n9",
+        "expected_output": "9",
+        "is_correct": true,
+        "execution_time_ms": 3238.0461000138894,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "9",
+            "extracted_numbers": "[11, 7, 5, 11, 7, 11, 7, 4, 4, 5, 9, 11, -7, 4, 4, 5, 9, 9, 9]",
+            "llm_output_snippet": "<think>\nХорошо, давайте разберемся с этим выражением. У нас есть (11 - 7) + 5. Нужно посчитать его з"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_7",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (7 * 8) - 5",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. Сначала нужно выполнить умножение в скобках: 7 умножить на 8. Проверяю, 7*8=56. Затем вычитаем 5: 56 - 5 = 51. Надо убедиться, что я не перепутал порядок операций. В данном случае сначала скобки, потом минус. Да, всё верно, ответ должен быть 51.\n</think>\n\n51",
+        "expected_output": "51",
+        "is_correct": true,
+        "execution_time_ms": 1890.0751000037417,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "51",
+            "extracted_numbers": "[7, 8, 7, 8, 56, 5, 56, 5, 51, 51, 51]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. Сначала нужно выполнить умножение в скобках: 7 умнож"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_8",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (17 - 2) + 5",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. Сначала вижу скобки: (17 - 2). Надо сначала вычислить то, что внутри скобок. 17 минус 2 равно 15. Потом добавляю 5 к полученному числу. То есть 15 плюс 5 будет 20. Получается ответ 20.\n</think>\n\n20",
+        "expected_output": "20",
+        "is_correct": true,
+        "execution_time_ms": 1519.2575000110082,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "20",
+            "extracted_numbers": "[17, 2, 17, 2, 15, 5, 15, 5, 20, 20, 20]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. Сначала вижу скобки: (17 - 2). Надо сначала вычислит"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_9",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (2 * 2) - 4",
+        "llm_response": "<think>\nХорошо, давай посчитаю это выражение. Сначала вижу скобки: (2 * 2). Надо сначала умножить 2 на 2. Это будет 4. Потом вычитаем 4: 4 - 4. Получается 0. Не перепутал? Да, все правильно. Скобки сначала, потом вычитание. Ответ должен быть 0.\n</think>\n\n0",
+        "expected_output": "0",
+        "is_correct": true,
+        "execution_time_ms": 1564.8002999951132,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "0",
+            "extracted_numbers": "[2, 2, 2, 2, 4, 4, 4, 4, 0, 0, 0]",
+            "llm_output_snippet": "<think>\nХорошо, давай посчитаю это выражение. Сначала вижу скобки: (2 * 2). Надо сначала умножить 2 "
+        }
+    },
+    {
+        "test_id": "t06_mathematics_10",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (4 - 4) + 4",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. Сначала у нас есть скобки: (4 - 4). Выполняем действие внутри скобок. 4 минус 4 равно нулю. Затем выражение становится 0 + 4. Сложив ноль и четыре, получаем четыре. Так что ответ должен быть 4.\n</think>\n\n4",
+        "expected_output": "4",
+        "is_correct": true,
+        "execution_time_ms": 1297.3695000400767,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "4",
+            "extracted_numbers": "[4, 4, 4, 4, 0, 4, 4, 4]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. Сначала у нас есть скобки: (4 - 4). Выполняем действ"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_11",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (6 - 3) + 2",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (6 - 3) + 2. Сначала нужно выполнить операцию в скобках. 6 минус 3 равно 3. Потом прибавляем 2: 3 плюс 2 будет 5. Так что ответ должен быть 5.\n\nПодожди, может я ошибся? Давайте проверю ещё раз. Скобки сначала: 6-3=3. Затем 3+2=5. Да, всё верно. Нет никаких сложностей здесь. Всё просто.\n</think>\n\n5",
+        "expected_output": "5",
+        "is_correct": true,
+        "execution_time_ms": 2092.2742999973707,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "5",
+            "extracted_numbers": "[6, 3, 2, 6, 3, 3, 2, 3, 2, 5, 5, 6, -3, 3, 3, 2, 5, 5]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (6 - 3) + 2. Сначала нужно выполнить опер"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_12",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (3 + 1) * 4",
+        "llm_response": "<think>\nХорошо, мне нужно вычислить это арифметическое выражение: (3 + 1) * 4. Давайте подумаю шаг за шагом.\n\nСначала посмотрю на скобки. В выражении есть скобки, значит, сначала нужно выполнить операцию внутри них. Внутри скобок у нас 3 плюс 1. Вычисляю это: 3 + 1 равно 4. Теперь выражение станет 4 * 4.\n\nДалее перемножаю эти два числа: 4 умножить на 4. Результат 16. То есть, финальный ответ должен быть 16. Надо проверить, нет ли ошибок. Даже если бы я сначала умножил 3 на 4 и потом прибавил 1, это было бы неправильно из-за скобок. Но здесь порядок действий соблюден: сначала скобки, затем умножение. Да, все верно.\n\nВ общем, ответ 16.\n</think>\n\n16",
+        "expected_output": "16",
+        "is_correct": true,
+        "execution_time_ms": 3651.600299985148,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "16",
+            "extracted_numbers": "[3, 1, 4, 3, 1, 3, 1, 4, 4, 4, 4, 4, 16, 16, 3, 4, 1, 16, 16]",
+            "llm_output_snippet": "<think>\nХорошо, мне нужно вычислить это арифметическое выражение: (3 + 1) * 4. Давайте подумаю шаг з"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_13",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (3 - 7) + 3",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (3 - 7) + 3. Начну с действия в скобках: 3 минус 7. Это будет -4, потому что 7 больше 3, так что результат отрицательный. Теперь у нас осталось (-4) плюс 3. Сложу их: -4 + 3 равно -1. Проверю еще раз — да, правильно. Итак, ответ -1.\n</think>\n\n-1",
+        "expected_output": "-1",
+        "is_correct": true,
+        "execution_time_ms": 1717.3601999529637,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "-1",
+            "extracted_numbers": "[3, 7, 3, 3, 7, -4, 7, 3, -4, 3, -4, 3, -1, -1, -1]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (3 - 7) + 3. Начну с действия в скобках: "
+        }
+    },
+    {
+        "test_id": "t06_mathematics_14",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (18 * 1) + 3",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (18 * 1) + 3. Сначала нужно выполнить умножение внутри скобок. 18 умножить на 1 равно 18. Потом прибавляем 3: 18 + 3 = 21. Вроде всё правильно, не вижу ошибок.\n</think>\n\n21",
+        "expected_output": "21",
+        "is_correct": true,
+        "execution_time_ms": 1456.046500010416,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "21",
+            "extracted_numbers": "[18, 1, 3, 18, 1, 18, 3, 18, 3, 21, 21]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (18 * 1) + 3. Сначала нужно выполнить умн"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_15",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (18 + 9) - 3",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. Сначала в скобках: 18 плюс 9. Сколько это будет? 18+9=27. Потом вычитаем 3: 27-3=24. Надо проверить, правильно ли я считал. Да, 18 плюс 9 — это 27, минус три дает 24. Вроде все верно.\n</think>\n\n24",
+        "expected_output": "24",
+        "is_correct": true,
+        "execution_time_ms": 1661.9799999753013,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "24",
+            "extracted_numbers": "[18, 9, 18, 9, 27, 3, 27, -3, 24, 18, 9, 27, 24, 24]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. Сначала в скобках: 18 плюс 9. Сколько это будет? 18+"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_16",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (3 - 10) * 4",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (3 - 10) * 4. Сначала нужно выполнить вычитание в скобках. 3 минус 10 равно... ну, 3 уменьшить на 10 будет отрицательное число, то есть -7. Потом умножаем это на 4: -7 * 4. Как это посчитать? 7*4=28, так как минус умножается на положительное, получится -28. Значит, ответ -28.\n\nПроверю еще раз: (3-10) это -7, умножить на 4 — да, -28. Кажется, всё верно.\n</think>\n\n-28",
+        "expected_output": "-28",
+        "is_correct": true,
+        "execution_time_ms": 2697.264799964614,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "-28",
+            "extracted_numbers": "[3, 10, 4, 3, 10, 3, 10, -7, 4, -7, 4, 7, 4, 28, -28, -28, 3, -10, -7, 4, -28, -28]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (3 - 10) * 4. Сначала нужно выполнить выч"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_17",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (16 * 6) + 3",
+        "llm_response": "<think>\nХорошо, давай решу это выражение по шагам. У нас есть (16 * 6) + 3. Сначала нужно выполнить умножение внутри скобок. Посчитаю 16 умножить на 6. 16*6... 10*6=60, 6*6=36, итого 60+36=96. Затем прибавлю 3: 96 + 3 = 99. Думаю, ответ 99.\n</think>\n\n99",
+        "expected_output": "99",
+        "is_correct": true,
+        "execution_time_ms": 1901.138000015635,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "99",
+            "extracted_numbers": "[16, 6, 3, 16, 6, 16, 6, 10, 6, 60, 6, 6, 36, 60, 36, 96, 3, 96, 3, 99, 99, 99]",
+            "llm_output_snippet": "<think>\nХорошо, давай решу это выражение по шагам. У нас есть (16 * 6) + 3. Сначала нужно выполнить "
+        }
+    },
+    {
+        "test_id": "t06_mathematics_18",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (9 - 1) * 5",
+        "llm_response": "<think>\nДавайте вычислим это арифметическое выражение пошагово. \n\nСначала в скобках: $9 - 1 = 8$. \nПотом умножаем результат на 5: $8 * 5 = 40$.\n\nИтак, финальный ответ равен $40$.\n\nМне нужно только вывести число без дополнительных слов или объяснений.\n</think>\n\n40",
+        "expected_output": "40",
+        "is_correct": true,
+        "execution_time_ms": 1457.238100003451,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "40",
+            "extracted_numbers": "[9, 1, 8, 5, 8, 5, 40, 40, 40]",
+            "llm_output_snippet": "<think>\nДавайте вычислим это арифметическое выражение пошагово. \n\nСначала в скобках: $9 - 1 = 8$. \nП"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_19",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (14 + 6) - 5",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (14 + 6) - 5. Сначала нужно выполнить операцию в скобках. 14 плюс 6 равно... ну, 14+6 это 20. Потом отнимаем 5: 20-5 будет 15. Вроде всё правильно. Давайте проверю ещё раз. Скобки сначала: 14+6=20, затем 20-5=15. Да, ответ 15.\n</think>\n\n15",
+        "expected_output": "15",
+        "is_correct": true,
+        "execution_time_ms": 1971.9952999730594,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "15",
+            "extracted_numbers": "[14, 6, 5, 14, 6, 14, 6, 20, 5, 20, -5, 15, 14, 6, 20, 20, -5, 15, 15, 15]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. У нас есть (14 + 6) - 5. Сначала нужно выполнить опе"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_20",
+        "category": "t06_mathematics",
+        "model_name": "jan-v1-4b",
+        "model_details": {
+            "model_name": "jan-v1-4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (16 + 10) - 3",
+        "llm_response": "<think>\nХорошо, давайте посчитаю это выражение. Сначала мне нужно выполнить действия в скобках. У нас есть (16 + 10). Сложу 16 и 10 — получается 26. Потом вычитаем 3: 26 - 3 = 23. Надо убедиться, что я не перепутал порядок операций. Здесь сначала скобки, потом вычитание. Всё верно, ответ должен быть 23.\n</think>\n\n23",
+        "expected_output": "23",
+        "is_correct": true,
+        "execution_time_ms": 1855.1391999935731,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "23",
+            "extracted_numbers": "[16, 10, 16, 10, 26, 3, 26, 3, 23, 23, 23]",
+            "llm_output_snippet": "<think>\nХорошо, давайте посчитаю это выражение. Сначала мне нужно выполнить действия в скобках. У на"
+        }
+    }
+]

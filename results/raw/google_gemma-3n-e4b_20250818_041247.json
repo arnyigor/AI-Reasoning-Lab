@@ -1,0 +1,782 @@
+[
+    {
+        "test_id": "t06_mathematics_1",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (8 - 10) + 5",
+        "llm_response": "3",
+        "expected_output": "3",
+        "is_correct": true,
+        "execution_time_ms": 407.8669000300579,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "3",
+            "extracted_numbers": "[3]",
+            "llm_output_snippet": "3"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_2",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (17 + 8) * 4",
+        "llm_response": "104",
+        "expected_output": "100",
+        "is_correct": false,
+        "execution_time_ms": 253.90889996197075,
+        "verification_details": {
+            "reason": "Правильное число не найдено среди извлеченных",
+            "expected_number": "100",
+            "extracted_numbers": "[104]",
+            "llm_output_snippet": "104"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_3",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (2 * 10) - 3",
+        "llm_response": "17",
+        "expected_output": "17",
+        "is_correct": true,
+        "execution_time_ms": 212.10040000732988,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "17",
+            "extracted_numbers": "[17]",
+            "llm_output_snippet": "17"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_4",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (4 - 9) * 3",
+        "llm_response": "-15",
+        "expected_output": "-15",
+        "is_correct": true,
+        "execution_time_ms": 235.20250001456589,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "-15",
+            "extracted_numbers": "[-15]",
+            "llm_output_snippet": "-15"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_5",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (16 - 2) + 5",
+        "llm_response": "19",
+        "expected_output": "19",
+        "is_correct": true,
+        "execution_time_ms": 218.6896000057459,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "19",
+            "extracted_numbers": "[19]",
+            "llm_output_snippet": "19"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_6",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (5 * 7) + 5",
+        "llm_response": "40",
+        "expected_output": "40",
+        "is_correct": true,
+        "execution_time_ms": 207.4991000117734,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "40",
+            "extracted_numbers": "[40]",
+            "llm_output_snippet": "40"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_7",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (6 + 7) * 2",
+        "llm_response": "30",
+        "expected_output": "26",
+        "is_correct": false,
+        "execution_time_ms": 187.12660000892356,
+        "verification_details": {
+            "reason": "Правильное число не найдено среди извлеченных",
+            "expected_number": "26",
+            "extracted_numbers": "[30]",
+            "llm_output_snippet": "30"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_8",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (5 * 6) - 5",
+        "llm_response": "25",
+        "expected_output": "25",
+        "is_correct": true,
+        "execution_time_ms": 203.44330003717914,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "25",
+            "extracted_numbers": "[25]",
+            "llm_output_snippet": "25"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_9",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (8 - 6) * 3",
+        "llm_response": "6",
+        "expected_output": "6",
+        "is_correct": true,
+        "execution_time_ms": 163.67719997651875,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "6",
+            "extracted_numbers": "[6]",
+            "llm_output_snippet": "6"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_10",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (9 * 7) + 2",
+        "llm_response": "65",
+        "expected_output": "65",
+        "is_correct": true,
+        "execution_time_ms": 212.77109999209642,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "65",
+            "extracted_numbers": "[65]",
+            "llm_output_snippet": "65"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_11",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (8 + 9) - 5",
+        "llm_response": "12",
+        "expected_output": "12",
+        "is_correct": true,
+        "execution_time_ms": 214.53540003858507,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "12",
+            "extracted_numbers": "[12]",
+            "llm_output_snippet": "12"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_12",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (12 - 3) + 5",
+        "llm_response": "14",
+        "expected_output": "14",
+        "is_correct": true,
+        "execution_time_ms": 199.11660003708676,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "14",
+            "extracted_numbers": "[14]",
+            "llm_output_snippet": "14"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_13",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (2 * 1) - 2",
+        "llm_response": "0",
+        "expected_output": "0",
+        "is_correct": true,
+        "execution_time_ms": 153.16320001147687,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "0",
+            "extracted_numbers": "[0]",
+            "llm_output_snippet": "0"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_14",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (3 * 8) + 2",
+        "llm_response": "26",
+        "expected_output": "26",
+        "is_correct": true,
+        "execution_time_ms": 220.59709997847676,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "26",
+            "extracted_numbers": "[26]",
+            "llm_output_snippet": "26"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_15",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (14 * 3) - 3",
+        "llm_response": "39",
+        "expected_output": "39",
+        "is_correct": true,
+        "execution_time_ms": 212.65679999487475,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "39",
+            "extracted_numbers": "[39]",
+            "llm_output_snippet": "39"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_16",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (7 * 10) + 3",
+        "llm_response": "73",
+        "expected_output": "73",
+        "is_correct": true,
+        "execution_time_ms": 211.06229996075854,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "73",
+            "extracted_numbers": "[73]",
+            "llm_output_snippet": "73"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_17",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (18 - 8) + 4",
+        "llm_response": "14",
+        "expected_output": "14",
+        "is_correct": true,
+        "execution_time_ms": 155.59120004763827,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "14",
+            "extracted_numbers": "[14]",
+            "llm_output_snippet": "14"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_18",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (15 - 7) * 3",
+        "llm_response": "36",
+        "expected_output": "24",
+        "is_correct": false,
+        "execution_time_ms": 219.20890000183135,
+        "verification_details": {
+            "reason": "Правильное число не найдено среди извлеченных",
+            "expected_number": "24",
+            "extracted_numbers": "[36]",
+            "llm_output_snippet": "36"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_19",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (15 * 6) - 5",
+        "llm_response": "85",
+        "expected_output": "85",
+        "is_correct": true,
+        "execution_time_ms": 205.52220003446564,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "85",
+            "extracted_numbers": "[85]",
+            "llm_output_snippet": "85"
+        }
+    },
+    {
+        "test_id": "t06_mathematics_20",
+        "category": "t06_mathematics",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (6 * 7) - 3",
+        "llm_response": "39",
+        "expected_output": "39",
+        "is_correct": true,
+        "execution_time_ms": 207.91310002095997,
+        "verification_details": {
+            "reason": "OK",
+            "expected_number": "39",
+            "extracted_numbers": "[39]",
+            "llm_output_snippet": "39"
+        }
+    }
+]

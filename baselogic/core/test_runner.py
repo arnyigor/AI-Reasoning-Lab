@@ -1,3 +1,4 @@
+import gc
 import time
 import json
 import importlib
@@ -302,16 +303,11 @@ class TestRunner:
                             
                             # Логирование деталей верификации
                             if verification_details:
-                                log.info("--- ОШИБКА ВЕРИФИКАЦИИ ---")
-                                log.info("Ожидалось: фраза='%s', число='%s'",
-                                         verification_details.get('expected_phrase', 'N/A'),
-                                         verification_details.get('expected_count', 'N/A'))
-                                log.info("Извлечено:  фраза='%s', число='%s'",
-                                         verification_details.get('extracted_phrase', 'N/A'),
-                                         verification_details.get('extracted_count', 'N/A'))
-                                log.info("Исходный извлеченный текст: фраза='%s'",
-                                         verification_details.get('raw_response', 'N/A')[:200])
-                                log.info("-------------------------")
+                                log.info("      --- Детали провала верификации ---")
+                                # Просто итерируемся по словарю и выводим все, что там есть
+                                for key, value in verification_details.items():
+                                    log.info("      - %s: %s", key, str(value)[:200]) # Обрезаем длинные строки
+                                log.info("      ---------------------------------")
                     else:
                         log.warning("    ⚠️ Тест %s не выполнен (не получено результата)", test_id)
 
@@ -321,6 +317,8 @@ class TestRunner:
                 finally:
                     # Обновляем прогресс-бар в любом случае
                     progress.update(model_name, test_key)
+                    # Принудительно вызываем сборщик мусора после каждого теста
+                    gc.collect()
 
         log.info("  📊 Всего выполнено тестов: %d", len(model_results))
         return model_results
@@ -362,12 +360,20 @@ class TestRunner:
 
             start_time = time.perf_counter()
 
-            def query_model():
-                return client.query(prompt)
-
-            # Увеличиваем таймаут для запроса к модели
+            llm_response = None
             try:
-                llm_response = client.query(prompt)
+                # Определяем функцию, которую будем запускать с таймаутом
+                def query_model_with_timeout():
+                    return client.query(prompt)
+
+                # Вызываем client.query с общим таймаутом на всю операцию
+                # Берем таймаут из опций модели или используем значение по умолчанию
+                query_timeout = client.model_options.get('query_timeout', 180) # 3 минуты по умолчанию
+                llm_response = run_with_timeout(query_model_with_timeout, timeout_seconds=query_timeout)
+
+            except TimeoutError as e:
+                log.error("      ⏱️ Таймаут при запросе к модели (%ds): %s", query_timeout, e)
+                return None # Возвращаем None, чтобы тест считался невыполненным
             except LLMClientError as e:
                 log.error("      ❌ Ошибка LLM клиента: %s", e)
                 return None

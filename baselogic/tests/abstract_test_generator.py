@@ -23,11 +23,6 @@ class AbstractTestGenerator(ABC):
     def generate(self) -> Dict[str, Any]:
         """
         Генерирует один уникальный экземпляр теста.
-
-        Returns:
-            Dict[str, Any]: Словарь, содержащий как минимум:
-                - 'prompt' (str): Промпт для LLM.
-                - 'expected_output' (Any): Эталонный результат для верификации.
         """
         pass
 
@@ -42,7 +37,7 @@ class AbstractTestGenerator(ABC):
 
         Returns:
             Dict[str, Any]: Словарь с результатами верификации.
-                - 'is_correct' (bool): True, если ответ верный.
-                - 'details' (Dict[str, Any]): Дополнительная информация для логов.
+                Должен содержать как минимум ключ 'is_correct' (bool).
+                Может содержать ключ 'details' (dict) для отладочной информации.
         """
         pass
