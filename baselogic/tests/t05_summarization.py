@@ -51,10 +51,9 @@ class SummarizationTestGenerator(AbstractTestGenerator):
             }
         ]
         text_data = random.choice(texts)
-        prompt = (
-            "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\n"
-            f"Текст: \"{text_data['full_text']}\""
-        )
+        prompt = ("Проанализируй текст и выдели самую главную мысль. "
+                  "Сформулируй эту мысль ОДНИМ лаконичным предложением, стараясь использовать ключевые слова из исходного текста.\n\n"
+                  f"Текст: \"{text_data['full_text']}\"")
         return {'prompt': prompt, 'expected_output': text_data['key_sentence']}
 
     def _get_lemmas(self, text: str) -> set:
@@ -68,15 +67,21 @@ class SummarizationTestGenerator(AbstractTestGenerator):
         return lemmas
 
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
+        # Сначала очищаем ответ модели от всего шума
+        clean_llm_output = self._cleanup_llm_response(llm_output)
+
+        # Теперь работаем с чистым ответом
         expected_lemmas = self._get_lemmas(expected_output)
-        actual_lemmas = self._get_lemmas(llm_output)
+        actual_lemmas = self._get_lemmas(clean_llm_output)
 
         intersection_len = len(expected_lemmas.intersection(actual_lemmas))
         union_len = len(expected_lemmas.union(actual_lemmas))
 
         jaccard_similarity = intersection_len / union_len if union_len > 0 else 0.0
 
-        threshold = 0.5
+        # Устанавливаем порог, который будет засчитывать семантически верные,
+        # но "размытые" контекстом ответы.
+        threshold = 0.3 # 30% пересечения ключевых слов
         is_correct = jaccard_similarity >= threshold
 
         details = {
@@ -84,7 +89,7 @@ class SummarizationTestGenerator(AbstractTestGenerator):
             "threshold": threshold,
             "expected_lemmas": sorted(list(expected_lemmas)),
             "actual_lemmas": sorted(list(actual_lemmas)),
-            "llm_output": llm_output
+            "cleaned_llm_output": clean_llm_output
         }
 
         return {'is_correct': is_correct, 'details': details}

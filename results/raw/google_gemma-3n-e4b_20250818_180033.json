@@ -1,0 +1,605 @@
+[
+    {
+        "test_id": "t05_summarization_1",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 1071.4385999599472,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "самый",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    },
+    {
+        "test_id": "t05_summarization_2",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 850.5820999853313,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "самый",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    },
+    {
+        "test_id": "t05_summarization_3",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 847.4610999692231,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "самый",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    },
+    {
+        "test_id": "t05_summarization_4",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 868.9619000069797,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "самый",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    },
+    {
+        "test_id": "t05_summarization_5",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 844.64049997041,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "самый",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    },
+    {
+        "test_id": "t05_summarization_6",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Кошки — популярные домашние животные. Они известны своей независимостью. Большинство кошек можно приучить к лотку.\"",
+        "llm_response": "Кошки – распространенные и неприхотливые домашние питомцы, которые легко адаптируются к жизни в доме.",
+        "expected_output": "Кошки — популярные домашние животные.",
+        "is_correct": false,
+        "execution_time_ms": 684.6157999825664,
+        "verification_details": {
+            "similarity_score": "0.17",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "домашний",
+                "животное",
+                "кошка",
+                "популярный"
+            ],
+            "actual_lemmas": [
+                "адаптироваться",
+                "дом",
+                "домашний",
+                "жизнь",
+                "который",
+                "кошка",
+                "легко",
+                "неприхотливый",
+                "питомец",
+                "распространить"
+            ],
+            "llm_output": "Кошки – распространенные и неприхотливые домашние питомцы, которые легко адаптируются к жизни в доме."
+        }
+    },
+    {
+        "test_id": "t05_summarization_7",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 891.3580999942496,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "самый",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    },
+    {
+        "test_id": "t05_summarization_8",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Кошки — популярные домашние животные. Они известны своей независимостью. Большинство кошек можно приучить к лотку.\"",
+        "llm_response": "Кошки – распространенные и удобные домашние питомцы, ценящиеся за свою независимость и способность легко приспосабливаться к жизни в доме.",
+        "expected_output": "Кошки — популярные домашние животные.",
+        "is_correct": false,
+        "execution_time_ms": 842.6561999949627,
+        "verification_details": {
+            "similarity_score": "0.13",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "домашний",
+                "животное",
+                "кошка",
+                "популярный"
+            ],
+            "actual_lemmas": [
+                "дом",
+                "домашний",
+                "жизнь",
+                "кошка",
+                "легко",
+                "независимость",
+                "питомец",
+                "приспосабливаться",
+                "распространить",
+                "свой",
+                "способность",
+                "удобный",
+                "цениться"
+            ],
+            "llm_output": "Кошки – распространенные и удобные домашние питомцы, ценящиеся за свою независимость и способность легко приспосабливаться к жизни в доме."
+        }
+    },
+    {
+        "test_id": "t05_summarization_9",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь наиболее распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 868.2859999826178,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "наиболее",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь наиболее распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    },
+    {
+        "test_id": "t05_summarization_10",
+        "category": "t05_summarization",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Внимательно прочти текст. Суммируй его ОДНИМ предложением, передав самую главную мысль своими словами.\n\nТекст: \"Солнечная энергия — это излучение Солнца. Это самый обильный источник энергии на Земле. Фотоэлектрические панели преобразуют солнечный свет в электричество.\"",
+        "llm_response": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей.",
+        "expected_output": "Фотоэлектрические панели преобразуют солнечный свет в электричество.",
+        "is_correct": false,
+        "execution_time_ms": 871.31399998907,
+        "verification_details": {
+            "similarity_score": "0.36",
+            "threshold": 0.5,
+            "expected_lemmas": [
+                "панель",
+                "преобразовать",
+                "свет",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество"
+            ],
+            "actual_lemmas": [
+                "земля",
+                "источник",
+                "мочь",
+                "панель",
+                "помощь",
+                "преобразовать",
+                "распространить",
+                "самый",
+                "солнечный",
+                "фотоэлектрический",
+                "электричество",
+                "энергия",
+                "являться"
+            ],
+            "llm_output": "Солнечная энергия, являясь самым распространенным источником энергии на Земле, может быть преобразована в электричество с помощью фотоэлектрических панелей."
+        }
+    }
+]

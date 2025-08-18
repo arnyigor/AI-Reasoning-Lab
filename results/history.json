@@ -14,20 +14,20 @@
         "Accuracy":0.9,
         "Total_Runs":20
     },
-    "jan-v1-4b":{
-        "Trust_Score":0.6794794576,
-        "Accuracy":0.7804878049,
-        "Total_Runs":82
-    },
     "gemini-2.5-flash-lite":{
         "Trust_Score":0.6566364941,
         "Accuracy":0.8823529412,
         "Total_Runs":17
     },
+    "jan-v1-4b":{
+        "Trust_Score":0.595357267,
+        "Accuracy":0.6956521739,
+        "Total_Runs":92
+    },
     "google\/gemma-3n-e4b":{
-        "Trust_Score":0.551440378,
-        "Accuracy":0.6113207547,
-        "Total_Runs":265
+        "Trust_Score":0.5301029714,
+        "Accuracy":0.5890909091,
+        "Total_Runs":275
     },
     "deepseek\/deepseek-chat-v3-0324:free":{
         "Trust_Score":0.5241076941,
