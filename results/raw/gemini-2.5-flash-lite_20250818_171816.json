@@ -1,0 +1,784 @@
+[
+    {
+        "test_id": "t01_simple_logic_1",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина сильнее Виктор.\n- Виктор сильнее Наталья.\n\nВопрос: Кто из них самая слабая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Наталья",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Ирина",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1787.9262999631464,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Наталья"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_2",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина старше Борис.\n- Борис старше Григорий.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Ирина",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Борис",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1185.9057000256144,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Ирина"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_3",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Борис быстрее Дмитрий.\n- Григорий быстрее Борис.\n\nВопрос: Кто из них самая быстрая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Григорий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Григорий",
+                "Борис"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 1188.7446000473574,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": true,
+            "cleaned_output_snippet": "Григорий"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_4",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий старше Алексей.\n- Алексей старше Наталья.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Дмитрий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Алексей",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1564.2478000372648,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Дмитрий"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_5",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна старше Виктор.\n- Елена старше Жанна.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Виктор",
+        "expected_output": {
+            "correct": "Виктор",
+            "incorrect": [
+                "Елена",
+                "Жанна"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 2316.410499974154,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Виктор",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Виктор"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_6",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий выше Жанна.\n- Мария выше Дмитрий.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Мария",
+        "expected_output": {
+            "correct": "Мария",
+            "incorrect": [
+                "Дмитрий",
+                "Жанна"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1125.130000000354,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Мария",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Мария"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_7",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор сильнее Григорий.\n- Елена сильнее Виктор.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Елена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Виктор",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1262.0872999541461,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Елена"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_8",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор быстрее Жанна.\n- Жанна быстрее Григорий.\n\nВопрос: Кто из них самый быстрый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Виктор",
+        "expected_output": {
+            "correct": "Виктор",
+            "incorrect": [
+                "Жанна",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1279.989000002388,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Виктор",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Виктор"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_9",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена старше Ирина.\n- Ирина старше Дмитрий.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Елена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Ирина",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1130.4885999998078,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Елена"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_10",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор выше Григорий.\n- Григорий выше Алексей.\n\nВопрос: Кто из них самая низкая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Алексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Виктор",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1249.217300035525,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Алексей"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_11",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей выше Ирина.\n- Ирина выше Наталья.\n\nВопрос: Кто из них самая низкая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Наталья",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Алексей",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1265.1124999974854,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Наталья"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_12",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей выше Ирина.\n- Григорий выше Алексей.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Григорий",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Алексей",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1260.2399999741465,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Григорий"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_13",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей выше Мария.\n- Мария выше Дмитрий.\n\nВопрос: Кто из них самая низкая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Дмитрий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Алексей",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1531.9000000017695,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Дмитрий"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_14",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина сильнее Виктор.\n- Алексей сильнее Ирина.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Алексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Ирина",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1110.8622000319883,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Алексей"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_15",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор быстрее Жанна.\n- Жанна быстрее Алексей.\n\nВопрос: Кто из них самая быстрая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Виктор",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Виктор",
+                "Жанна"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 1095.4803000204265,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": true,
+            "cleaned_output_snippet": "Виктор"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_16",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария выше Наталья.\n- Наталья выше Алексей.\n\nВопрос: Кто из них самая низкая?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Алексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Мария",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1352.6144999777898,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Алексей"
+        }
+    },
+    {
+        "test_id": "t01_simple_logic_19",
+        "category": "t01_simple_logic",
+        "model_name": "gemini-2.5-flash-lite",
+        "model_details": {
+            "model_name": "gemini-2.5-flash-lite",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1337/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Григорий выше Борис.\n- Жанна выше Григорий.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "llm_response": "Жанна",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Григорий",
+                "Борис"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1173.5176999936812,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "cleaned_output_snippet": "Жанна"
+        }
+    }
+]

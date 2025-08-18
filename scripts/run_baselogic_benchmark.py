@@ -1,10 +1,6 @@
-import json
-
-import yaml
-from pathlib import Path
-import sys
 import logging
-import time
+import sys
+from pathlib import Path
 
 from baselogic.core.config_loader import EnvConfigLoader
 
@@ -14,6 +10,7 @@ sys.path.append(str(project_root))
 
 # Импортируем только функцию для настройки файлового логера
 from baselogic.core.logger import setup_llm_logger
+
 
 def setup_main_logger():
     """
@@ -69,7 +66,8 @@ def main():
         logging.info("   - Набор тестов: %s", config.get('tests_to_run'))
 
     except Exception as e:
-        logging.critical("❌ Не удалось загрузить или проверить конфигурацию из переменных окружения: %s", e, exc_info=True)
+        logging.critical("❌ Не удалось загрузить или проверить конфигурацию из переменных окружения: %s", e,
+                         exc_info=True)
         return
 
     # --- Инициализация и запуск Test Runner'а ---
@@ -77,7 +75,6 @@ def main():
     logging.info("[ЭТАП 2: Инициализация ядра тестирования]")
     runner = TestRunner(config)
     runner.run()
-
 
     # 5. Генерация единого комплексного отчета
     logging.info("[ЭТАП 3: Генерация отчета]")
@@ -105,7 +102,6 @@ def main():
 
     except Exception as e:
         logging.error("❌ Произошла ошибка при генерации отчета: %s", e, exc_info=True)
-
 
     logging.info("✅ Работа платформы успешно завершена.")
 

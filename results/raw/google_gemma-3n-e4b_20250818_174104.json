@@ -1,0 +1,452 @@
+[
+    {
+        "test_id": "t04_data_extraction_1",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на user.name@company.org. Техническая поддержка доступна по почте info@my-site.co.uk. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список извлеченных email-адресов:\n\n1. user.name@company.org\n2. info@my-site.co.uk",
+        "expected_output": "{'info@my-site.co.uk', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 1207.4768000165932,
+        "verification_details": {
+            "expected_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_2",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на user.name@company.org. Техническая поддержка доступна по почте info@my-site.co.uk. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов, извлеченных из текста:\n\n1. user.name@company.org\n2. info@my-site.co.uk",
+        "expected_output": "{'info@my-site.co.uk', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 882.2844999958761,
+        "verification_details": {
+            "expected_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_3",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на user.name@company.org. Техническая поддержка доступна по почте test@example.com. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов, извлеченных из текста:\n\n1. user.name@company.org\n2. test@example.com",
+        "expected_output": "{'test@example.com', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 798.7875999533571,
+        "verification_details": {
+            "expected_set": [
+                "test@example.com",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "test@example.com",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_4",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на info@my-site.co.uk. Техническая поддержка доступна по почте user.name@company.org. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот извлеченные email-адреса из текста в виде нумерованного списка:\n\n1. info@my-site.co.uk\n2. user.name@company.org",
+        "expected_output": "{'info@my-site.co.uk', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 990.8200000063516,
+        "verification_details": {
+            "expected_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_5",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на info@my-site.co.uk. Техническая поддержка доступна по почте test@example.com. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов, извлеченных из текста:\n\n1. info@my-site.co.uk\n2. test@example.com",
+        "expected_output": "{'info@my-site.co.uk', 'test@example.com'}",
+        "is_correct": true,
+        "execution_time_ms": 848.4940999769606,
+        "verification_details": {
+            "expected_set": [
+                "info@my-site.co.uk",
+                "test@example.com"
+            ],
+            "extracted_set": [
+                "info@my-site.co.uk",
+                "test@example.com"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_6",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на test@example.com. Техническая поддержка доступна по почте info@my-site.co.uk. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов, извлеченных из текста:\n\n1. test@example.com\n2. info@my-site.co.uk",
+        "expected_output": "{'info@my-site.co.uk', 'test@example.com'}",
+        "is_correct": true,
+        "execution_time_ms": 853.3174000331201,
+        "verification_details": {
+            "expected_set": [
+                "info@my-site.co.uk",
+                "test@example.com"
+            ],
+            "extracted_set": [
+                "info@my-site.co.uk",
+                "test@example.com"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_7",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на user.name@company.org. Техническая поддержка доступна по почте info@my-site.co.uk. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов из предоставленного текста:\n\n1. user.name@company.org\n2. info@my-site.co.uk",
+        "expected_output": "{'info@my-site.co.uk', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 866.2034000153653,
+        "verification_details": {
+            "expected_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_8",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на test@example.com. Техническая поддержка доступна по почте user.name@company.org. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов, извлеченных из текста:\n\n1. test@example.com\n2. user.name@company.org",
+        "expected_output": "{'test@example.com', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 807.4922999949194,
+        "verification_details": {
+            "expected_set": [
+                "test@example.com",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "test@example.com",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_9",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на info@my-site.co.uk. Техническая поддержка доступна по почте user.name@company.org. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов, извлеченных из текста:\n\n1.  info@my-site.co.uk\n2.  user.name@company.org",
+        "expected_output": "{'info@my-site.co.uk', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 945.2704999712296,
+        "verification_details": {
+            "expected_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "info@my-site.co.uk",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    },
+    {
+        "test_id": "t04_data_extraction_10",
+        "category": "t04_data_extraction",
+        "model_name": "google/gemma-3n-e4b",
+        "model_details": {
+            "model_name": "google/gemma-3n-e4b",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Извлеки все email-адреса из текста ниже и представь их в виде нумерованного списка.\n\nТекст: \"Для связи с отделом продаж, пишите на user.name@company.org. Техническая поддержка доступна по почте test@example.com. Наш главный офис находится в Москве.\"",
+        "llm_response": "Вот список email-адресов, извлеченных из текста:\n\n1.  user.name@company.org\n2.  test@example.com",
+        "expected_output": "{'test@example.com', 'user.name@company.org'}",
+        "is_correct": true,
+        "execution_time_ms": 855.366200034041,
+        "verification_details": {
+            "expected_set": [
+                "test@example.com",
+                "user.name@company.org"
+            ],
+            "extracted_set": [
+                "test@example.com",
+                "user.name@company.org"
+            ],
+            "missed": [],
+            "extra": []
+        }
+    }
+]

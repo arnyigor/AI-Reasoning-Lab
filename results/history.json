@@ -19,15 +19,25 @@
         "Accuracy":0.7804878049,
         "Total_Runs":82
     },
+    "gemini-2.5-flash-lite":{
+        "Trust_Score":0.6566364941,
+        "Accuracy":0.8823529412,
+        "Total_Runs":17
+    },
     "google\/gemma-3n-e4b":{
-        "Trust_Score":0.5663568798,
-        "Accuracy":0.6311111111,
-        "Total_Runs":225
+        "Trust_Score":0.551440378,
+        "Accuracy":0.6113207547,
+        "Total_Runs":265
     },
     "deepseek\/deepseek-chat-v3-0324:free":{
         "Trust_Score":0.5241076941,
         "Accuracy":0.7857142857,
         "Total_Runs":14
+    },
+    "jan-nano":{
+        "Trust_Score":0.499242507,
+        "Accuracy":0.5625,
+        "Total_Runs":240
     },
     "deepseek\/deepseek-r1:free":{
         "Trust_Score":0.3967781475,

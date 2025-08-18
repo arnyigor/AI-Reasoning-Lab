@@ -1,0 +1,1306 @@
+[
+    {
+        "test_id": "t03_code_gen_1",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 4589.898800011724,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_2",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 219.93739996105433,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_3",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 180.4431999917142,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_4",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 173.48360002506524,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_5",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 175.06999999750406,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_6",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 260.0317999604158,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_7",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 173.37360000237823,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_8",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(numbers):\n    return max(numbers)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 171.6658000368625,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_9",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 233.85820002295077,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_10",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 172.60609997902066,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_11",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 240.58919999515638,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_12",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 219.9679000186734,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_13",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 223.820099956356,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_14",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 222.79309999430552,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_15",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 221.66089998790994,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_16",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 177.9571999795735,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_17",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 243.85359999723732,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_18",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 172.22989996662363,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_19",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 240.8422000007704,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_20",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 173.1961999903433,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_21",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 241.35389999719337,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_22",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 178.9742999826558,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_23",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 242.74859996512532,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_24",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 174.19139994308352,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_25",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def is_palindrome(s):\n    return s == s[::-1]",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 243.5134999686852,
+        "verification_details": {
+            "error": "Логическая ошибка (AssertionError)",
+            "failed_test": ""
+        }
+    },
+    {
+        "test_id": "t03_code_gen_26",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 176.64939997484908,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_27",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 172.56529995938763,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_28",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 173.10999997425824,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_29",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(numbers):\n    return max(numbers)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 162.90749999461696,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    },
+    {
+        "test_id": "t03_code_gen_30",
+        "category": "t03_code_gen",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "client_type": "openai_compatible",
+            "options": {},
+            "metrics": {
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "avg_response_time": 0.0,
+                "success_rate": 0.0
+            },
+            "api_url": "http://127.0.0.1:1234/v1/chat/completions",
+            "modelfile": "N/A (API)",
+            "parameters": "N/A (API)",
+            "template": "N/A (API)",
+            "details": {
+                "family": "api",
+                "parameter_size": "N/A",
+                "quantization_level": "API",
+                "format": "api"
+            },
+            "object": "model"
+        },
+        "prompt": "Напиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.\nТвой ответ должен содержать ТОЛЬКО блок кода, без каких-либо объяснений.",
+        "llm_response": "def find_max(nums):\n    return max(nums)",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 173.07149997213855,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        }
+    }
+]
