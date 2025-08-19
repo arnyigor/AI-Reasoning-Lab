@@ -181,9 +181,6 @@ class TestRunner:
                 )
             elif client_type == "gemini":
                 provider = GeminiClient(api_key=model_config.get('api_key'))
-            elif client_type == "ollama":
-                log.error("  ❌ Не используется, заменено на openai_compatible с http запросом: %s", client_type)
-                return None
             else:
                 log.error("  ❌ Неизвестный тип провайдера: %s", client_type)
                 return None

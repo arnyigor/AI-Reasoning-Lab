@@ -70,54 +70,66 @@ class AdapterLLMClient(ILLMClient):
     def query(self, user_prompt: str) -> Dict[str, Any]:
         """
         Реализует основной метод интерфейса ILLMClient.
-        Вызывается TestRunner'ом.
+        Устойчив к "мыслительным циклам" моделей благодаря ограничению на количество чанков.
         """
-
         log.info("Adapter получил промпт (длина: %d символов).", len(user_prompt))
         log.debug("--- Входящий промпт ---\n%s\n-----------------------", user_prompt)
 
+        is_ollama_native = self.model_config.get('client_type') == 'ollama'
+
+        if is_ollama_native:
+            # Ollama иногда лучше работает с таким "затравочным" промптом
+            user_prompt += "\nassistant:"
         messages = [{"role": "user", "content": user_prompt}]
 
-        # Определяем, нужно ли использовать потоковый режим, на основе конфига
         inference_opts = self.model_config.get('inference', {})
         use_stream = str(inference_opts.get('stream', 'false')).lower() == 'true'
 
-        # Получаем остальные параметры генерации из конфига
         generation_opts = self.model_config.get('generation', {})
 
-        # Вызываем наш новый клиент
         response_or_stream = self.new_client.chat(
             messages,
             stream=use_stream,
             **generation_opts
         )
 
-        final_response_str: str = ""
         if use_stream:
             log.info("Начало получения потокового ответа...")
 
-            # Используем print() для немедленного вывода в консоль "на лету"
-            print(">>> LLM Stream: ", end="", flush=True)
+            # 1. Получаем лимит из конфига или используем значение по умолчанию
+            max_chunks = int(inference_opts.get('stream_max_chunks', 2000))
 
             chunks = []
+            chunk_count = 0
+
+            print(">>> LLM Stream: ", end="", flush=True)
+
             if isinstance(response_or_stream, Generator):
                 for chunk in response_or_stream:
-                    print(chunk, end="", flush=True)  # Печатаем каждый чанк
+                    print(chunk, end="", flush=True)
                     chunks.append(chunk)
 
+                    # 2. Проверяем счетчик на каждой итерации
+                    chunk_count += 1
+                    if chunk_count >= max_chunks:
+                        log.warning("ПРЕДУПРЕЖДЕНИЕ: Превышен лимит на количество потоковых чанков (%d). Поток принудительно остановлен.", max_chunks)
+                        print("...[STREAM TRUNCATED]...", flush=True) # Сообщаем пользователю
+                        break # Выходим из цикла
+
                 final_response_str = "".join(chunks)
-                print()  # Перевод строки в конце, чтобы не смешивать с логами
-                log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
+                print()
+                log.info("Потоковый ответ полностью получен (или прерван). Собрано %d чанков, %d символов.", chunk_count, len(final_response_str))
             else:
                 log.warning("Ожидался генератор (stream=True), но получен тип %s.", type(response_or_stream).__name__)
                 final_response_str = str(response_or_stream)
 
-        else:  # не-потоковый режим
+            # >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
+
+        else: # не-потоковый режим
             if isinstance(response_or_stream, str):
                 final_response_str = response_or_stream
             else:
                 log.warning("Ожидалась строка (stream=False), но получен тип %s.", type(response_or_stream).__name__)
                 final_response_str = str(response_or_stream)
 
-        # Возвращаем результат в формате, который ожидает TestRunner
         return self._parse_think_response(final_response_str)

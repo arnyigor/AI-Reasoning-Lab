@@ -58,7 +58,14 @@ class AbstractTestGenerator(ABC):
         if not isinstance(llm_output, str):
             return ""
 
-        # Удаляем блоки <think>...</think>
+        # --- НАЧАЛО ИЗМЕНЕНИЙ: "Агрессивная" очистка ---
+        # 1. Удаляем "болтовню" до <think> или до основного ответа
+        # Ищем первое вхождение <think> или осмысленного слова и отрезаем все до него
+        first_meaningful_match = re.search(r"<think>|([A-ZА-ЯЁ][a-zа-яё])", llm_output)
+        if first_meaningful_match:
+            llm_output = llm_output[first_meaningful_match.start():]
+
+        # 2. Удаляем блоки <think>...</think>
         clean_output = re.sub(r'<think>.*?</think>', '', llm_output, flags=re.DOTALL | re.IGNORECASE)
 
         # Удаляем известные спецтокены
