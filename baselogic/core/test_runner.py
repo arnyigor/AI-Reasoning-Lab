@@ -1,4 +1,5 @@
 import gc
+import os
 import time
 import json
 import importlib
@@ -7,6 +8,8 @@ import threading
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import logging
+
+import psutil
 
 # Импортируем фабрику и интерфейсы
 from .client_factory import LLMClientFactory
@@ -90,13 +93,16 @@ class TestRunner:
     def _load_test_generators(self) -> Dict[str, Any]:
         """
         Динамически импортирует и инстанциирует классы генераторов тестов, включая плагины.
+        Плагины имеют приоритет и могут переопределять встроенные тесты.
         """
         generators = {}
         base_module_path = "baselogic.tests"
+        tests_to_run_set = set(self.config.get('tests_to_run', []))
 
-        # 1. Загрузка "встроенных" тестов
-        if 'tests_to_run' in self.config and self.config['tests_to_run']:
-            for test_key in self.config['tests_to_run']:
+        # 1. Загрузка "встроенных" тестов, если они указаны
+        # Мы итерируемся по tests_to_run_set, чтобы не загружать лишнего
+        if tests_to_run_set:
+            for test_key in tests_to_run_set:
                 try:
                     class_name_parts = test_key.split('_')[1:]
                     class_name = "".join([part.capitalize() for part in class_name_parts]) + "TestGenerator"
@@ -105,32 +111,47 @@ class TestRunner:
                     generator_class = getattr(module, class_name)
                     generators[test_key] = generator_class
                     log.info("✅ Встроенный тест '%s' успешно загружен.", test_key)
-                except (ImportError, AttributeError) as e:
-                    log.warning("❌ Не удалось загрузить встроенный тест '%s'. Ошибка: %s", test_key, e)
+                except (ImportError, AttributeError):
+                    # Это нормально, если тест является плагином, а не встроенным
+                    log.debug("Встроенный тест '%s' не найден, будет выполнен поиск в плагинах.", test_key)
 
         # 2. Обнаружение и загрузка плагинов
         log.info("🔎 Поиск плагинов тестов...")
         plugin_manager = PluginManager()
         plugins = plugin_manager.discover_plugins()
+
         if plugins:
             log.info(f"✅ Найдено плагинов: {len(plugins)}")
             for plugin_name, plugin_class in plugins.items():
+                # >>>>> ИЗМЕНЕНИЕ: Улучшенное логирование <<<<<
                 if plugin_name in generators:
-                    log.warning(f"⚠️ Плагин '{plugin_name}' перезаписывает встроенный тест с тем же именем.")
+                    # Это не предупреждение, а фича! Сообщаем об этом.
+                    log.info(f"  - Плагин '{plugin_name}' успешно загружен (ПЕРЕОПРЕДЕЛЯЕТ встроенный тест).")
+                else:
+                    log.info(f"  - Плагин '{plugin_name}' успешно загружен.")
                 generators[plugin_name] = plugin_class
-                log.info(f"  - Плагин '{plugin_name}' успешно загружен.")
         else:
             log.info("Плагины не найдены.")
 
         # 3. Фильтрация тестов, если указан список tests_to_run
-        if 'tests_to_run' in self.config and self.config['tests_to_run']:
+        if hasattr(self, 'config') and 'tests_to_run' in self.config and self.config['tests_to_run']:
             tests_to_run = set(self.config['tests_to_run'])
             filtered_generators = {name: gen for name, gen in generators.items() if name in tests_to_run}
             if len(filtered_generators) != len(tests_to_run):
                 missing = tests_to_run - set(filtered_generators.keys())
                 log.warning(f"⚠️ Некоторые тесты из 'tests_to_run' не найдены: {', '.join(missing)}")
             return filtered_generators
-        
+
+        # 3. Финальная фильтрация (альтернативный путь через параметр tests_to_run_set)
+        if tests_to_run_set:
+            filtered_generators = {name: gen for name, gen in generators.items() if name in tests_to_run_set}
+            if len(filtered_generators) != len(tests_to_run_set):
+                # Находим тесты, которые не были найдены ни во встроенных, ни в плагинах
+                missing = tests_to_run_set - set(filtered_generators.keys())
+                if missing:
+                    log.warning(f"⚠️ Некоторые тесты из 'tests_to_run' не найдены нигде: {', '.join(missing)}")
+            return filtered_generators
+
         if not generators:
             log.warning("Не найдено ни одного теста для запуска.")
 
@@ -226,7 +247,6 @@ class TestRunner:
 
         try:
             log.info("  🔧 Создаем клиент типа '%s'...", client_type)
-            
             # Используем фабрику для создания клиента
             client = LLMClientFactory.create_client(model_config)
             
@@ -269,7 +289,7 @@ class TestRunner:
             return {"error": error_msg}
 
     def _run_tests_safely(self, client: ILLMClient, model_name: str, model_details: Dict[str, Any], progress: ProgressTracker) -> List[Dict[str, Any]]:
-        """Безопасно выполняет все тесты с детальной диагностикой."""
+        """Безопасно выполняет все тесты с детальной диагностикой и поддержкой итерируемых генераторов."""
         model_results = []
         num_runs = self.config.get('runs_per_test', 1)
 
@@ -278,142 +298,172 @@ class TestRunner:
             return model_results
 
         log.info("  🧪 Всего категорий тестов: %d", len(self.test_generators))
-        log.info("  🔄 Запусков на категорию: %d", num_runs)
 
         for test_key, generator_class in self.test_generators.items():
             log.info("  --- 📝 КАТЕГОРИЯ: %s ---", test_key)
 
-            for run_num in range(1, num_runs + 1):
-                test_id = f"{test_key}_{run_num}"
-                log.info("    🔍 Тест %d/%d: %s", run_num, num_runs, test_id)
+            try:
+                # Создаем экземпляр генератора ОДИН РАЗ на категорию
+                generator_instance = generator_class(test_id=test_key)
 
-                try:
-                    result = self._run_single_test_safely(
-                        client, test_key, test_id, generator_class, model_name, model_details
+                if hasattr(generator_instance, '__iter__'):
+                    log.info("    Итерируемый генератор обнаружен. Выполняются все сгенерированные кейсы.")
+                    test_cases_iterable = iter(generator_instance)
+                else:
+                    log.info("    Стандартный генератор. Запусков на категорию: %d", num_runs)
+                    # Оборачиваем стандартный генератор, чтобы использовать один и тот же цикл
+                    test_cases_iterable = (generator_instance.generate() for _ in range(num_runs))
+
+                run_num = 0
+                for test_data in test_cases_iterable:
+                    run_num += 1
+                    # Получаем уникальный ID из сгенерированных данных
+                    current_test_id = test_data.get('test_id', f"{test_key}_{run_num}")
+                    log.info("    🔍 Тест #%d: %s", run_num, current_test_id)
+
+                    result = self._run_single_test_with_monitoring(
+                        client, current_test_id, generator_instance, test_data, model_name, model_details
                     )
+
                     if result:
                         model_results.append(result)
-                        if result['is_correct']:
-                            status = "✅ УСПЕХ"
-                            log.info("    %s (%.0f мс): %s", status, result['execution_time_ms'], test_id)
-                        else:
-                            status = "❌ НЕУДАЧА"
-                            verification_details = result.get('verification_details', {})
-                            log.warning("    %s (%.0f мс): %s", status, result['execution_time_ms'], test_id)
-                            
-                            # Логирование деталей верификации
-                            if verification_details:
-                                log.info("      --- Детали провала верификации ---")
-                                # Просто итерируемся по словарю и выводим все, что там есть
-                                for key, value in verification_details.items():
-                                    log.info("      - %s: %s", key, str(value)[:200]) # Обрезаем длинные строки
-                                log.info("      ---------------------------------")
                     else:
-                        log.warning("    ⚠️ Тест %s не выполнен (не получено результата)", test_id)
+                        log.warning("    ⚠️ Тест %s не выполнен (не получено результата)", current_test_id)
 
-                except Exception as e:
-                    log.error("    ❌ Критическая ошибка в тесте %s: %s", test_id, e)
-                    log.error("    Подробности ошибки:", exc_info=True)
-                finally:
-                    # Обновляем прогресс-бар в любом случае
+                    # Обновляем прогресс-бар после каждого тест-кейса
                     progress.update(model_name, test_key)
-                    # Принудительно вызываем сборщик мусора после каждого теста
                     gc.collect()
 
-        log.info("  📊 Всего выполнено тестов: %d", len(model_results))
+            except Exception as e:
+                log.error("    ❌ Критическая ошибка при обработке категории %s: %s", test_key, e, exc_info=True)
+                # Убедимся, что прогресс-бар не зависнет
+                for _ in range(num_runs):
+                    progress.update(model_name, test_key)
+
+        log.info("  📊 Всего выполнено тест-кейсов для модели: %d", len(model_results))
         return model_results
 
-    def _run_single_test_safely(self, client: ILLMClient, test_key: str, test_id: str,
-                                generator_class: Any, model_name: str,
-                                model_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Выполняет один тест с подробной диагностикой и таймаутами."""
+    # В файле baselogic/core/test_runner.py
+
+    def _run_single_test_with_monitoring(self, client: ILLMClient, test_id: str,
+                                         generator_instance: Any, test_data: Dict[str, Any],
+                                         model_name: str, model_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Выполняет один тест-кейс с мониторингом ресурсов и обработкой
+        структурированных ответов от клиента.
+        """
+        process = psutil.Process(os.getpid())
 
         try:
-            # Шаг 1: Создание генератора
-            log.debug("      1️⃣ Создание генератора для %s", test_id)
-
-            def create_generator():
-                return generator_class(test_id=test_id)
-
-            generator_instance = run_with_timeout(create_generator, timeout_seconds=5)
-            log.debug("      ✅ Генератор создан")
-
-            # Шаг 2: Генерация тестовых данных
-            log.debug("      2️⃣ Генерация тестовых данных")
-
-            def generate_test_data():
-                return generator_instance.generate()
-
-            test_data = run_with_timeout(generate_test_data, timeout_seconds=10)
-
+            # Шаг 1: Подготовка данных (без изменений)
             if not test_data or 'prompt' not in test_data or 'expected_output' not in test_data:
                 log.error("      ❌ Генератор вернул некорректные данные: %s", test_data)
                 return None
 
             prompt = test_data['prompt']
             expected_output = test_data['expected_output']
-            log.debug("      ✅ Тестовые данные сгенерированы (промпт: %d символов)", len(prompt))
+            metadata = test_data.get('metadata', {})
+            log.debug("      ✅ Тестовые данные готовы (промпт: %d символов)", len(prompt))
 
-            # Шаг 3: Запрос к модели (самое критичное место)
+            # Шаг 2: Запрос к модели с мониторингом
             log.info("      3️⃣ Отправка запроса к модели...")
-            log.debug("      Промпт: %s", prompt[:100] + "..." if len(prompt) > 100 else prompt)
 
             start_time = time.perf_counter()
+            initial_ram = process.memory_info().rss / (1024 * 1024)
+            peak_ram = initial_ram
 
-            llm_response = None
+            # --- ИЗМЕНЕНИЕ 1: Адаптация под новый формат ответа ---
+            response_struct = None  # Инициализируем переменную для структурированного ответа
             try:
-                # Определяем функцию, которую будем запускать с таймаутом
-                def query_model_with_timeout():
-                    return client.query(prompt)
+                # Ваш существующий код с потоками для мониторинга и таймаута
+                response_container = [None]
+                exception_container = [None]
 
-                # Вызываем client.query с общим таймаутом на всю операцию
-                # Берем таймаут из опций модели или используем значение по умолчанию
-                query_timeout = client.model_options.get('query_timeout', 180) # 3 минуты по умолчанию
-                llm_response = run_with_timeout(query_model_with_timeout, timeout_seconds=query_timeout)
+                def query_target():
+                    try:
+                        # client.query() теперь возвращает словарь
+                        response_container[0] = client.query(prompt)
+                    except Exception as e:
+                        exception_container[0] = e
 
-            except TimeoutError as e:
-                log.error("      ⏱️ Таймаут при запросе к модели (%ds): %s", query_timeout, e)
-                return None # Возвращаем None, чтобы тест считался невыполненным
-            except LLMClientError as e:
-                log.error("      ❌ Ошибка LLM клиента: %s", e)
-                return None
+                query_thread = threading.Thread(target=query_target)
+                query_thread.daemon = True
+                query_thread.start()
+
+                # Мониторинг RAM пока выполняется запрос
+                while query_thread.is_alive():
+                    current_ram = process.memory_info().rss / (1024 * 1024)
+                    if current_ram > peak_ram:
+                        peak_ram = current_ram
+
+                    # Используем таймаут из опций клиента
+                    query_timeout = getattr(client, 'query_timeout', 180)
+                    if (time.perf_counter() - start_time) > query_timeout:
+                        log.error("      ⏱️ Таймаут (%ds) в TestRunner. Прерывание.", query_timeout)
+                        # Поток продолжит работать, но мы выйдем из цикла
+                        # Это грубое прерывание, но лучше, чем бесконечное ожидание
+                        raise TimeoutError(f"Операция превысила лимит времени TestRunner: {query_timeout}s")
+
+                    query_thread.join(0.2)
+
+                if exception_container[0]:
+                    raise exception_container[0]
+
+                response_struct = response_container
+
+            except (LLMClientError, TimeoutError) as e:
+                log.error("      ❌ Ошибка во время запроса к LLM: %s", e)
+                return None # Завершаем тест-кейс при ошибке
+
             end_time = time.perf_counter()
 
             exec_time_ms = (end_time - start_time) * 1000
-            log.debug("      ✅ Ответ получен за %.0f мс", exec_time_ms)
-            log.debug("      Ответ: %s", llm_response[:100] + "..." if len(llm_response) > 100 else llm_response)
+            ram_usage_mb = peak_ram - initial_ram
+            log.debug("      ✅ Ответ от клиента получен за %.0f мс. Пиковое потребление RAM: %.2f MB", exec_time_ms, ram_usage_mb)
 
-            # Шаг 4: Верификация
+            # --- ИЗМЕНЕНИЕ 2: Извлекаем нужные части из ответа ---
+            # Безопасно извлекаем 'мысли' и 'ответ' из словаря
+            if isinstance(response_struct, list) and len(response_struct) == 1:
+                log.info("Извлекаем словарь из списка")
+                response_struct = response_struct[0]
+            if isinstance(response_struct, dict):
+                thinking_response = response_struct.get("thinking_response", "")
+                llm_response = response_struct.get("llm_response", "")
+            else:
+                # Обработка случая, когда вернулся не словарь (например, список или None)
+                log.error("Неожиданный тип ответа от клиента: %s", type(response_struct))
+                return None
+
+            # Шаг 3: Верификация
             log.debug("      4️⃣ Верификация ответа")
-
-            def verify_response():
-                return generator_instance.verify(llm_response, expected_output)
-
-            verification_result = run_with_timeout(verify_response, timeout_seconds=5)
+            # Передаем в verify только финальный ответ (llm_response), как и раньше
+            verification_result = generator_instance.verify(llm_response, expected_output)
             is_correct = verification_result.get('is_correct', False)
-            verification_details = verification_result.get('details', {})
-            log.debug("      ✅ Верификация завершена: %s", is_correct)
 
-            # Шаг 5: Сбор результатов
-            return {
+            # Шаг 4: Сбор результатов
+            # --- ИЗМЕНЕНИЕ 3: Сохраняем обе части ответа в итоговый JSON ---
+            final_result = {
                 "test_id": test_id,
-                "category": test_key,
                 "model_name": model_name,
                 "model_details": model_details,
-                "prompt": prompt,
-                "llm_response": llm_response,
+                "prompt_len_chars": len(prompt),
+                "thinking_response": thinking_response,  # Новое поле с "мыслями"
+                "llm_response": llm_response,           # Финальный ответ
                 "expected_output": expected_output,
                 "is_correct": is_correct,
                 "execution_time_ms": exec_time_ms,
-                "verification_details": verification_details
+                "verification_details": verification_result.get('details', {}),
+                "performance_metrics": {
+                    "peak_ram_usage_mb": round(ram_usage_mb, 2)
+                }
             }
+            final_result.update(metadata)
+            return final_result
 
-        except TimeoutError as e:
-            log.error("      ⏱️ Таймаут в тесте %s: %s", test_id, e)
-            return None
         except Exception as e:
-            log.error("      ❌ Ошибка в тесте %s: %s", test_id, e, exc_info=True)
+            log.error("      ❌ Критическая ошибка в тест-кейсе %s: %s", test_id, e, exc_info=True)
             return None
+
 
     def _save_results(self, model_name: str, results: List[Dict[str, Any]]):
         """Сохраняет результаты в JSON файл."""

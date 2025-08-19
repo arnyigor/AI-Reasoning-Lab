@@ -1,19 +1,17 @@
-# config_loader.py
+# baselogic/core/config_loader.py
+import json
+import logging
 import os
 import re
-from typing import Any, Dict, List, Optional
+from json import JSONDecodeError
+from typing import Any, Dict
 
 from dotenv import load_dotenv
 
+log = logging.getLogger(__name__)
+
+
 class EnvConfigLoader:
-    """
-    Загружает и парсит конфигурацию приложения исключительно из переменных окружения.
-
-    Поддерживает вложенные структуры и списки с помощью именования переменных
-    в формате: PREFIX_KEY_INDEX__SUBKEY.
-    Использует двойное подчеркивание '__' как разделитель вложенности.
-    """
-
     def __init__(self, prefix: str = "BC"):
         self.prefix = prefix
         self.env_vars = self._load_and_filter_env(prefix)
@@ -21,72 +19,74 @@ class EnvConfigLoader:
     def _load_and_filter_env(self, prefix: str) -> Dict[str, str]:
         load_dotenv()
         prefix_str = f"{prefix}_"
-        filtered_vars = {}
-        for key, value in os.environ.items():
-            if key.startswith(prefix_str):
-                clean_key = key[len(prefix_str):]
-                filtered_vars[clean_key] = value
-        return filtered_vars
+        return {key[len(prefix_str):]: value for key, value in os.environ.items() if key.startswith(prefix_str)}
 
     @staticmethod
-    def _set_nested_value(d: Dict[str, Any], path: str, value: Any) -> None:
-        """
-        Устанавливает значение во вложенный словарь по пути.
-        Использует двойное подчеркивание '__' в качестве разделителя вложенности.
-        """
-        keys = path.lower().split('__')
-        current_level = d
-        for key in keys[:-1]:
-            current_level = current_level.setdefault(key, {})
+    def _convert_type(value: str) -> Any:
+        if not isinstance(value, str):
+            return value
+        val_lower = value.lower()
+        if val_lower == 'true': return True
+        if val_lower == 'false': return False
+        if value.isdigit(): return int(value)
+        if re.match(r"^\d+\.\d+$", value): return float(value)
+        if value.startswith('[') and value.endswith(']'):
+            try:
+                import json
+                return json.loads(value)
+            except JSONDecodeError:
+                pass
 
-        last_key = keys[-1]
-        try:
-            if isinstance(value, str):
-                if value.isdigit():
-                    value = int(value)
-                elif re.match(r"^\d+?\.\d+?$", value):
-                    value = float(value)
-                elif value.lower() in ['true', 'false']:
-                    value = value.lower() == 'true'
-        except (ValueError, TypeError):
-            pass
-        current_level[last_key] = value
+        return value
 
     def load_config(self) -> Dict[str, Any]:
+        """
+        Загружает и парсит конфигурацию из переменных окружения.
+
+        Поддерживает структурированную конфигурацию моделей с вложенными секциями,
+        такими как generation, inference, prompting, query и options.
+        """
         config: Dict[str, Any] = {}
         models_data: Dict[int, Dict[str, Any]] = {}
-        model_pattern = re.compile(r"MODELS_(\d+)_(.*)")
+        model_key_pattern = re.compile(r"MODELS?_(\d+)_(.*)", re.IGNORECASE)
 
         for key, value in self.env_vars.items():
-            match = model_pattern.match(key)
-            if match:
-                index = int(match.group(1))
-                path = match.group(2)
+            model_match = model_key_pattern.match(key)
+
+            if model_match:
+                index = int(model_match.group(1))
+                path_str = model_match.group(2).lower()
+
                 if index not in models_data:
                     models_data[index] = {}
-                EnvConfigLoader._set_nested_value(models_data[index], path, value)
-            elif key == "TESTS_TO_RUN":
+
+                # --- ИСПРАВЛЕННАЯ ЛОГИКА: Добавляем "options" в список вложенных префиксов ---
+                nested_prefixes = ['generation', 'inference', 'prompting', 'query', 'options']
+
+                is_nested = False
+                for prefix in nested_prefixes:
+                    if path_str.startswith(prefix + '_'):
+                        is_nested = True
+                        section = prefix
+                        param_key = path_str[len(prefix) + 1:]
+
+                        section_dict = models_data[index].setdefault(section, {})
+                        section_dict[param_key] = self._convert_type(value)
+                        break
+
+                if not is_nested:
+                    models_data[index][path_str] = self._convert_type(value)
+
+            elif key.upper() == "TESTS_TO_RUN":
                 config["tests_to_run"] = [item.strip() for item in value.split(',')]
             else:
-                EnvConfigLoader._set_nested_value(config, key, value)
+                config[key.lower()] = self._convert_type(value)
 
         if models_data:
-            sorted_models = sorted(models_data.items())
-            config["models_to_test"] = [model for _, model in sorted_models]
+            valid_models = [
+                model_dict for _, model_dict in sorted(models_data.items())
+                if 'name' in model_dict and model_dict['name']
+            ]
+            config["models_to_test"] = valid_models
 
         return config
-
-# --- Пример использования ---
-if __name__ == "__main__":
-    print("Загрузка конфигурации из переменных окружения...")
-
-    # Предполагается, что у вас есть .env файл в директории проекта
-    # или переменные окружения установлены системно.
-
-    config_loader = EnvConfigLoader(prefix="BC")
-    final_config = config_loader.load_config()
-
-    # Красивый вывод для проверки
-    import json
-    print("\nИтоговая конфигурация:")
-    print(json.dumps(final_config, indent=2, ensure_ascii=False))

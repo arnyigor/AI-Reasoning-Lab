@@ -3,9 +3,13 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+*.gguf
+
 # C extensions
 *.so
-
+# Python virtual environment
+venv/
+/venv/
 # Distribution / packaging
 .Python
 build/

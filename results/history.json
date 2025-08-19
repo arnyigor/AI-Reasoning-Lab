@@ -39,12 +39,12 @@
         "Accuracy":0.5625,
         "Total_Runs":240
     },
-    "deepseek\/deepseek-r1:free":{
+    "qwen3:8b-q4_K_M":{
         "Trust_Score":0.3967781475,
         "Accuracy":0.7,
         "Total_Runs":10
     },
-    "qwen3:8b-q4_K_M":{
+    "deepseek\/deepseek-r1:free":{
         "Trust_Score":0.3967781475,
         "Accuracy":0.7,
         "Total_Runs":10
@@ -70,9 +70,9 @@
         "Total_Runs":15
     },
     "gemma3:4b":{
-        "Trust_Score":0.1118617014,
-        "Accuracy":0.25,
-        "Total_Runs":20
+        "Trust_Score":0.1254861604,
+        "Accuracy":0.2608695652,
+        "Total_Runs":23
     },
     "qwen3:8b":{
         "Trust_Score":0.1077912674,
@@ -94,15 +94,20 @@
         "Accuracy":0.2,
         "Total_Runs":10
     },
+    "moonshotai\/kimi-k2:free":{
+        "Trust_Score":0.0566821515,
+        "Accuracy":0.2,
+        "Total_Runs":10
+    },
     "meta-llama-3-8b-instruct":{
         "Trust_Score":0.0566821515,
         "Accuracy":0.2,
         "Total_Runs":10
     },
-    "moonshotai\/kimi-k2:free":{
-        "Trust_Score":0.0566821515,
-        "Accuracy":0.2,
-        "Total_Runs":10
+    "Jan-v1-4B":{
+        "Trust_Score":3.584186086e-17,
+        "Accuracy":0.0,
+        "Total_Runs":7
     },
     "google\/gemma-3-12b":{
         "Trust_Score":0.0,
