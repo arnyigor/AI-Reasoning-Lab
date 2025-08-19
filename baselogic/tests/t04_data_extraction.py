@@ -43,4 +43,7 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
             'extra': list(extracted_emails - expected_output)
         }
 
-        return {'is_correct': is_correct, 'details': details}
+        return {
+            'is_correct': is_correct,
+            'details': details
+        }

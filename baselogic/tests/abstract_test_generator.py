@@ -9,6 +9,39 @@ class AbstractTestGenerator(ABC):
     def __init__(self, test_id: str):
         self.test_id = test_id
 
+    def parse_llm_output(self, llm_raw_output: str) -> Dict[str, str]:
+        """
+        Извлекает структурированный ответ из "сырого" вывода LLM.
+        Каждый дочерний класс должен реализовать свою логику парсинга.
+
+        Args:
+            llm_raw_output: Полный, необработанный текстовый ответ от модели.
+
+        Returns:
+            Словарь со структурированным результатом. Должен содержать как минимум
+            ключ 'answer' для передачи в verify().
+            Пример: {'answer': 'Елена', 'thinking_log': 'Все рассуждения модели...'}
+        """
+        # Предоставляем реализацию по умолчанию, которая делает базовую очистку
+        # и предполагает, что весь ответ является финальным.
+        # Дочерние классы ДОЛЖНЫ переопределить это для сложной логики.
+        clean_answer = self._cleanup_llm_response(llm_raw_output)
+        return {
+            'answer': clean_answer,
+            'thinking_log': llm_raw_output # Сохраняем оригинал для логов
+        }
+
+    @abstractmethod
+    def verify(self, parsed_answer: str, expected_output: Any) -> Dict[str, Any]:
+        """
+        Проверяет ИЗВЛЕЧЕННЫЙ ответ на соответствие ожиданиям.
+
+        Args:
+            parsed_answer: Ответ, уже извлеченный и очищенный методом parse_llm_output.
+            expected_output: Ожидаемый результат из self.generate().
+        """
+        pass
+
     @abstractmethod
     def generate(self) -> Dict[str, Any]:
         pass

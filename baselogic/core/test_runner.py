@@ -1,5 +1,6 @@
 import gc
 import os
+import re
 import time
 import json
 import importlib
@@ -70,7 +71,6 @@ def run_with_timeout(func, timeout_seconds: int = 30):
         raise exception[0]
 
     return result[0]
-
 
 class TestRunner:
     """
@@ -213,11 +213,20 @@ class TestRunner:
                     self._save_results(model_name, model_results)
 
                     if not model_results:
-                        log.warning("⚠️ Модель '%s' не дала ни одного ответа. Считается ошибкой.", model_name)
-                        failed_models.append((model_name, "Нет ответов от модели"))
+                        log.warning("⚠️ Модель '%s' не сгенерировала ни одного результата. Считается ошибкой.", model_name)
+                        failed_models.append((model_name, "Нет результатов от модели"))
                     else:
-                        log.info("✅ Модель '%s' завершена. Результатов: %d", model_name, len(model_results))
-                        successful_models.append(model_name)
+                        # Считаем, сколько тестов реально прошли проверку
+                        num_correct = sum(1 for r in model_results if r.get('is_correct'))
+                        total_tests_run = len(model_results)
+
+                        if num_correct == total_tests_run:
+                            log.info("✅ Модель '%s' успешно прошла все тесты (%d из %d).", model_name, num_correct, total_tests_run)
+                            successful_models.append(model_name)
+                        else:
+                            error_reason = f"Провалено {total_tests_run - num_correct} из {total_tests_run} тестов"
+                            log.warning("❌ Модель '%s' провалила тестирование. %s.", model_name, error_reason)
+                            failed_models.append((model_name, error_reason))
                     
                 except Exception as e:
                     error_msg = f"Критическая ошибка тестирования модели {model_name}: {e}"
@@ -343,8 +352,6 @@ class TestRunner:
         log.info("  📊 Всего выполнено тест-кейсов для модели: %d", len(model_results))
         return model_results
 
-    # В файле baselogic/core/test_runner.py
-
     def _run_single_test_with_monitoring(self, client: ILLMClient, test_id: str,
                                          generator_instance: Any, test_data: Dict[str, Any],
                                          model_name: str, model_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
@@ -434,21 +441,35 @@ class TestRunner:
                 log.error("Неожиданный тип ответа от клиента: %s", type(response_struct))
                 return None
 
-            # Шаг 3: Верификация
-            log.debug("      4️⃣ Верификация ответа")
-            # Передаем в verify только финальный ответ (llm_response), как и раньше
-            verification_result = generator_instance.verify(llm_response, expected_output)
+            # Шаг 3: Парсинг "сырого" ответа с помощью генератора
+            log.debug("      4️⃣ Парсинг ответа генератором...")
+            # response_struct['llm_response'] содержит полный "сырой" вывод модели
+            raw_llm_output = response_struct.get('llm_response', '')
+
+            # Генератор сам решает, как извлечь из мусора нужные данные
+            parsed_struct = generator_instance.parse_llm_output(raw_llm_output)
+
+            # Извлекаем чистый ответ и лог рассуждений из структуры, которую вернул парсер
+            final_answer_for_verify = parsed_struct.get('answer', '')
+            thinking_log_from_parser = parsed_struct.get('thinking_log', raw_llm_output)
+
+            # Шаг 4: Верификация чистого ответа
+            log.debug("      5️⃣ Верификация извлеченного ответа: '%s'", final_answer_for_verify)
+            verification_result = generator_instance.verify(final_answer_for_verify, expected_output)
             is_correct = verification_result.get('is_correct', False)
 
-            # Шаг 4: Сбор результатов
-            # --- ИЗМЕНЕНИЕ 3: Сохраняем обе части ответа в итоговый JSON ---
+            # Шаг 5: Сборка итогового результата для сохранения в JSON
             final_result = {
                 "test_id": test_id,
                 "model_name": model_name,
                 "model_details": model_details,
-                "prompt_len_chars": len(prompt),
-                "thinking_response": thinking_response,  # Новое поле с "мыслями"
-                "llm_response": llm_response,           # Финальный ответ
+                "prompt": prompt,
+
+                # --- Ключевые поля для отладки ---
+                "raw_llm_output": raw_llm_output, # Полный, необработанный вывод от клиента.
+                "parsed_answer": final_answer_for_verify, # ТО, что было извлечено и отправлено на верификацию.
+                "thinking_log": thinking_log_from_parser, # Полный лог рассуждений, возвращенный парсером.
+
                 "expected_output": expected_output,
                 "is_correct": is_correct,
                 "execution_time_ms": exec_time_ms,

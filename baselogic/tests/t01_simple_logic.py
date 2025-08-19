@@ -1,18 +1,23 @@
 import random
 import re
 from typing import Dict, Any, List, Tuple
+import Levenshtein
 
-from .abstract_test_generator import AbstractTestGenerator
+from baselogic.tests.abstract_test_generator import AbstractTestGenerator
+
+NAME_RE = re.compile(r"[A-Za-zА-Яа-яЁё]+")
 
 class SimpleLogicTestGenerator(AbstractTestGenerator):
     """
-    Генерирует и проверяет простые задачи на транзитивные умозаключения.
+    Генерирует простые логические задачи на транзитивность отношений.
+    Задача строится по принципу: A > B, B > C.
+    Вопрос задается о том, кто является максимальным (A) или минимальным (C) элементом.
     """
-
     NAMES: List[str] = [
         "Алексей", "Борис", "Виктор", "Григорий", "Дмитрий",
         "Елена", "Жанна", "Ирина", "Мария", "Наталья"
     ]
+    # Структура кортежа: (сравнение 'больше', сравнение 'меньше', превосходная 'макс', превосходная 'мин')
     RELATIONS: List[Tuple[str, str, str, str]] = [
         ("старше", "младше", "самый старший", "самый младший"),
         ("быстрее", "медленнее", "самый быстрый", "самая быстрая"),
@@ -20,96 +25,130 @@ class SimpleLogicTestGenerator(AbstractTestGenerator):
         ("сильнее", "слабее", "самый сильный", "самая слабая"),
     ]
 
+    def parse_llm_output(self, llm_raw_output: str) -> Dict[str, str]:
+        """
+        Ищет в "сыром" выводе модели последнее имя из списка self.NAMES.
+        Это универсальная стратегия для данного типа задач.
+        """
+        # Сначала применяем базовую очистку от спецтокенов
+        clean_output = self._cleanup_llm_response(llm_raw_output)
+
+        # Находим все слова, похожие на имена
+        all_found_words = NAME_RE.findall(clean_output)
+        if not all_found_words:
+            return {'answer': '', 'thinking_log': llm_raw_output}
+
+        # Фильтруем их, оставляя только те, что есть в нашем списке имен
+        valid_names_lower = {name.lower() for name in self.NAMES}
+        valid_found_names = [
+            word for word in all_found_words
+            if word.lower() in valid_names_lower
+        ]
+
+        final_answer = ""
+        if valid_found_names:
+            # Если нашли имена из нашего списка, берем ПОСЛЕДНЕЕ
+            final_answer = valid_found_names[-1]
+        else:
+            # Если точных совпадений нет (модель могла опечататься),
+            # берем последнее найденное "слово" и надеемся на Levenshtein в verify
+            final_answer = all_found_words[-1]
+
+        return {
+            'answer': final_answer,
+            'thinking_log': llm_raw_output # Всегда сохраняем полный вывод для отладки
+        }
+
     def generate(self) -> Dict[str, Any]:
         """
-        Генерирует уникальную логическую задачу.
+        Генерирует словарь с промптом и ожидаемым ответом для логической задачи.
+
+        Returns:
+            Словарь с ключами 'prompt' и 'expected_output'.
         """
-        relation_set = random.choice(self.RELATIONS)
-        chosen_names = random.sample(self.NAMES, 3)
-        random.shuffle(chosen_names)
-        solution_order = chosen_names
+        # Выбираем случайный набор отношений
+        relation_tuple = random.choice(self.RELATIONS)
+        # ИЗМЕНЕНО: Распаковываем кортеж в именованные переменные для читаемости
+        comp_pos, _, super_max, super_min = relation_tuple
 
-        clues = [
-            f"{solution_order[0]} {relation_set[0]} {solution_order[1]}.",
-            f"{solution_order[1]} {relation_set[0]} {solution_order[2]}."
-        ]
-        random.shuffle(clues)
+        # ИЗМЕНЕНО: Выбираем 3 имени и сразу распаковываем их в переменные.
+        # Это самый чистый и идиоматичный способ.
+        name_a, name_b, name_c = random.sample(self.NAMES, 3)
 
+        # Создаем логическую цепочку: A > B, B > C
+        # ИЗМЕНЕНО: Используем конкретный элемент из кортежа отношений (comp_pos)
+        clue_1 = f"{name_a} {comp_pos} {name_b}."
+        clue_2 = f"{name_b} {comp_pos} {name_c}."
+
+        all_clues = [clue_1, clue_2]
+        random.shuffle(all_clues)
+
+        # ИЗМЕНЕНО: Исправлена логика определения вопроса и ответа
         ask_for_max = random.choice([True, False])
         if ask_for_max:
-            question = f"Кто из них {relation_set[2]}?"
-            correct_answer = solution_order[0]
+            # Спрашиваем про самого "большого" (A)
+            question = f"Кто из них {super_max}?"
+            answer = name_a
         else:
-            question = f"Кто из них {relation_set[3]}?"
-            correct_answer = solution_order[2]
+            # Спрашиваем про самого "маленького" (C)
+            question = f"Кто из них {super_min}?"
+            answer = name_c
+
+        # ИЗМЕНЕНО: Формируем список условий более надежным способом
+        clues_text = "\n- ".join(all_clues)
 
         prompt = (
             "Реши простую логическую задачу.\n\n"
-            f"Условия:\n- {clues[0]}\n- {clues[1]}\n\n"
+            f"Условия:\n- {clues_text}\n\n"
             f"Вопрос: {question}\n\n"
             "Твой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений."
         )
 
-        incorrect_answers = [name for name in solution_order if name != correct_answer]
+        # Формируем список неправильных ответов
+        wrong_answers = [name for name in (name_a, name_b, name_c) if name != answer]
 
         return {
             'prompt': prompt,
             'expected_output': {
-                'correct': correct_answer,
-                'incorrect': incorrect_answers
+                'correct': answer,
+                'incorrect': wrong_answers
             }
         }
 
-    def _cleanup_llm_response(self, llm_output: str) -> str:
-        """
-        Вспомогательный метод для очистки ответа модели от "шума".
-        Удаляет рассуждения в <think>, спецтокены и Markdown.
-        """
-        if not isinstance(llm_output, str):
-            return ""
-
-        # Удаляем блоки <think>...</think>
-        clean_output = re.sub(r'<think>.*?</think>', '', llm_output, flags=re.DOTALL | re.IGNORECASE)
-
-        # Удаляем известные спецтокены
-        known_tokens = [
-            r"<\|im_start\|>", r"<\|im_end\|>", r"<\|endoftext\|>",
-            r"<s>", r"</s>", r"<\|eot_id\|>", r"assistant"
-        ]
-        tokens_pattern = re.compile("|".join(known_tokens), re.IGNORECASE)
-        clean_output = tokens_pattern.sub("", clean_output)
-
-        # Удаляем Markdown
-        clean_output = re.sub(r'[*_`~]', '', clean_output)
-
-        return clean_output.strip()
-
     def verify(self, llm_output: str, expected_output: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Проверяет ответ по строгому правилу на ОЧИЩЕННЫХ данных.
+        Проверяет ответ языковой модели на соответствие ожидаемому.
+
+        Args:
+            llm_output: Строка, сгенерированная моделью.
+            expected_output: Словарь с правильным и неправильными ответами.
+
+        Returns:
+            Словарь с результатом проверки.
         """
-        correct_name = expected_output['correct']
-        incorrect_names = expected_output['incorrect']
+        expected = expected_output['correct'].lower()
+        words = NAME_RE.findall(llm_output)
 
-        # >>>>> ГЛАВНОЕ ИЗМЕНЕНИЕ <<<<<
-        # Сначала очищаем ответ от всего "шума"
-        clean_output = self._cleanup_llm_response(llm_output)
-        output_lower = clean_output.lower()
+        if len(words) != 1:
+            return {
+                'is_correct': False,
+                'details': {
+                    'expected': expected_output['correct'],
+                    'found_words': words,
+                    'reason': f"Найдено {len(words)} слов вместо 1"
+                }
+            }
 
-        is_correct_present = correct_name.lower() in output_lower
-        is_any_incorrect_present = any(name.lower() in output_lower for name in incorrect_names)
-
-        is_correct = is_correct_present and not is_any_incorrect_present
-
-        details = {
-            "reason": "OK" if is_correct else "Неверное имя или упоминание неверного имени в финальном ответе",
-            "expected_name": correct_name,
-            "found_correct_in_cleaned": is_correct_present,
-            "found_incorrect_in_cleaned": is_any_incorrect_present,
-            "cleaned_output_snippet": clean_output[:100]
-        }
+        actual = words[0].lower()
+        distance = Levenshtein.distance(actual, expected)
+        success = distance <= 1  # Допускаем 1 опечатку
 
         return {
-            'is_correct': is_correct,
-            'details': details
+            'is_correct': success,
+            'details': {
+                'expected': expected_output['correct'],
+                'found_word': actual,
+                'levenshtein_distance': distance,
+                'reason': 'OK' if success else f'Расстояние Левенштейна {distance} > 1'
+            }
         }

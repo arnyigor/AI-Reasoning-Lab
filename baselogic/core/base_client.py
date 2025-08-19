@@ -209,19 +209,21 @@ class BaseLLMClient(ILLMClient, ABC):
             "min_response_time": f"{self.metrics.min_response_time:.2f}с" if self.metrics.min_response_time != float('inf') else "N/A",
             "max_response_time": f"{self.metrics.max_response_time:.2f}с"
         }
-    
+
     def _prepare_messages(self, user_prompt: str) -> list:
         """
         Подготавливает сообщения для отправки.
         Общая логика для всех клиентов.
         """
         messages = []
-        
+
         if self.system_prompt:
             messages.append({'role': 'system', 'content': self.system_prompt})
-        
+            self.logger.info("📤 System prompt: %s", self.system_prompt)
+
         messages.append({'role': 'user', 'content': user_prompt})
-        
+        self.logger.info("📥 User prompt: %s", user_prompt)
+
         return messages
     
     def _validate_response(self, response: Any) -> str:

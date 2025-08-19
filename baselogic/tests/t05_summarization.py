@@ -92,4 +92,7 @@ class SummarizationTestGenerator(AbstractTestGenerator):
             "cleaned_llm_output": clean_llm_output
         }
 
-        return {'is_correct': is_correct, 'details': details}
+        return {
+            'is_correct': is_correct,
+            'details': details
+        }
