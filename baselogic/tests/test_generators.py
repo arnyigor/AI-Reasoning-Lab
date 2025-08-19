@@ -20,7 +20,7 @@ def test_verify_close_correct_answer(logic_test_generator):
     llm_output = "ария"
     expected = {'correct': 'Мария', 'incorrect': ['Виктор', 'Ирина']}
     result = logic_test_generator.verify(llm_output, expected)
-    assert result['is_correct'] is True, f"Причина провала: {result['details'].get('reason')}"
+    assert result['is_correct'] is False
 
 def test_verify_incorrect_answer(logic_test_generator):
     llm_output = "Алексей"
@@ -29,10 +29,15 @@ def test_verify_incorrect_answer(logic_test_generator):
     assert result['is_correct'] is False
 
 def test_verify_correct_with_fluff(logic_test_generator):
+    """
+    Тест: модель дала правильный ответ, окруженный "мусором".
+    Верификатор должен найти правильный ответ и проигнорировать мусор.
+    """
     llm_output = "Ну, я думаю, что самый младший это Мария."
     expected = {'correct': 'Мария', 'incorrect': ['Виктор', 'Ирина']}
     result = logic_test_generator.verify(llm_output, expected)
-    assert result['is_correct'] is False
+    # Ожидаем True, так как "Мария" найдено, а "Виктор" и "Ирина" - нет.
+    assert result['is_correct'] is True
 
 def test_verify_mentions_both_correct_and_incorrect(logic_test_generator):
     llm_output = "Правильный ответ — Мария, а не Виктор."
