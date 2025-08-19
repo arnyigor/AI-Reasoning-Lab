@@ -23,12 +23,16 @@ class LLMClient:
         Отправляет запрос к LLM и возвращает текстовый ответ.
         """
         log.info("Вызван метод chat (stream=%s)", stream)
-        generation_opts = self.model_config.get('generation', {}).copy()
-        generation_opts.pop('stream', None)
-        generation_opts.update(kwargs)
+        # Собираем все опции в один словарь
+        all_opts = self.model_config.get('generation', {}).copy()
+        all_opts.update(self.model_config.get('inference', {})) # Добавляем и inference
+        all_opts.update(kwargs)
+
+        # Удаляем stream, чтобы не было конфликтов
+        all_opts.pop('stream', None)
 
         payload = self.provider.prepare_payload(
-            messages, self.model, stream=stream, **generation_opts
+            messages, self.model, stream=stream, **all_opts # Передаем все опции
         )
 
         raw_response_or_stream = self.provider.send_request(payload)

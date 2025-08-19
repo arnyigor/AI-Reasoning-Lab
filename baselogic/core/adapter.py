@@ -1,6 +1,6 @@
+import logging
 import re
 from typing import Dict, Any, Generator
-import logging
 
 # Импортируем интерфейс, которому должен соответствовать адаптер
 from .interfaces import ILLMClient
@@ -9,6 +9,7 @@ from .llm_client import LLMClient
 
 # Получаем логгер для этого модуля
 log = logging.getLogger(__name__)
+
 
 class AdapterLLMClient(ILLMClient):
     """
@@ -21,6 +22,7 @@ class AdapterLLMClient(ILLMClient):
     в старом формате (`{"thinking_response": ..., "llm_response": ...}`),
     но "под капотом" использует всю мощь новой архитектуры.
     """
+
     def __init__(self, new_llm_client: LLMClient, model_config: Dict[str, Any]):
         """
         Инициализирует адаптер.
@@ -70,6 +72,10 @@ class AdapterLLMClient(ILLMClient):
         Реализует основной метод интерфейса ILLMClient.
         Вызывается TestRunner'ом.
         """
+
+        log.info("Adapter получил промпт (длина: %d символов).", len(user_prompt))
+        log.debug("--- Входящий промпт ---\n%s\n-----------------------", user_prompt)
+
         messages = [{"role": "user", "content": user_prompt}]
 
         # Определяем, нужно ли использовать потоковый режим, на основе конфига
@@ -96,17 +102,17 @@ class AdapterLLMClient(ILLMClient):
             chunks = []
             if isinstance(response_or_stream, Generator):
                 for chunk in response_or_stream:
-                    print(chunk, end="", flush=True) # Печатаем каждый чанк
+                    print(chunk, end="", flush=True)  # Печатаем каждый чанк
                     chunks.append(chunk)
 
                 final_response_str = "".join(chunks)
-                print() # Перевод строки в конце, чтобы не смешивать с логами
+                print()  # Перевод строки в конце, чтобы не смешивать с логами
                 log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
             else:
                 log.warning("Ожидался генератор (stream=True), но получен тип %s.", type(response_or_stream).__name__)
                 final_response_str = str(response_or_stream)
 
-        else: # не-потоковый режим
+        else:  # не-потоковый режим
             if isinstance(response_or_stream, str):
                 final_response_str = response_or_stream
             else:

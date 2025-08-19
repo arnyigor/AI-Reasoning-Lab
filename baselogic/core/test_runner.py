@@ -174,7 +174,6 @@ class TestRunner:
         log.info("  🔧 Создаем провайдера типа '%s' для модели '%s'...", client_type, model_name)
 
         try:
-            provider = None
             if client_type == "openai_compatible":
                 provider = OpenAICompatibleClient(
                     api_key=model_config.get('api_key'),
