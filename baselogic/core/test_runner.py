@@ -1,27 +1,26 @@
 import gc
 import importlib
 import json
+import logging
 import os
-import threading
 import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 import psutil
 
-from .AdapterLLMClient import AdapterLLMClient
+from .adapter import AdapterLLMClient
 from .GeminiClient import GeminiClient
 # --- ИЗМЕНЕНИЕ 1: Обновляем импорты для новой архитектуры ---
 # Импортируем старый интерфейс, который ожидает TestRunner
 from .interfaces import ILLMClient, LLMClientError
 # Импортируем компоненты новой архитектуры
-from .llm_client import LLMClient, OpenAICompatibleClient
-# И импортируем "переходник" между ними
-
+from .llm_client import LLMClient
+from .openai_client import OpenAICompatibleClient
 from .plugin_manager import PluginManager
 from .progress_tracker import ProgressTracker
 
-import logging
+# И импортируем "переходник" между ними
 # Просто получаем логгер в начале файла. Он уже настроен!
 log = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ class TestRunner:
         # Ищем все файлы tXX_*.py в директории tests
         tests_dir = Path(__file__).parent.parent / "tests"
         for test_file in tests_dir.glob("t[0-9][0-9]_*.py"):
-            test_key = test_file.stem # Получаем имя файла без .py, например 't01_simple_logic'
+            test_key = test_file.stem  # Получаем имя файла без .py, например 't01_simple_logic'
             try:
                 class_name_parts = test_key.split('_')[1:]
                 class_name = "".join([part.capitalize() for part in class_name_parts]) + "TestGenerator"
@@ -90,7 +89,7 @@ class TestRunner:
         tests_to_run_set = set(tests_to_run_raw)
         if not tests_to_run_set:
             log.warning("Список 'tests_to_run' в конфиге пуст. Тесты не будут запущены.")
-            return {} # Возвращаем пустой словарь
+            return {}  # Возвращаем пустой словарь
 
         filtered_generators = {name: gen for name, gen in generators.items() if name in tests_to_run_set}
 
