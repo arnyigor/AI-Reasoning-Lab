@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional, Union
 from dataclasses import dataclass
 
 from .interfaces import ILLMClient, LLMClientError, LLMTimeoutError, LLMConnectionError, LLMResponseError
+from .logger import llm_logger
 from .types import ModelOptions, ClientConfig
 from .metrics import record_request_metrics
 
@@ -78,7 +79,7 @@ class BaseLLMClient(ILLMClient, ABC):
 
         # Метрики и логирование
         self.metrics = ClientMetrics()
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = llm_logger
         
         # Валидация
         self._validate_config()

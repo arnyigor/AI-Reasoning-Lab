@@ -2,41 +2,23 @@ import logging
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from baselogic.core.config_loader import EnvConfigLoader
+from baselogic.core.logger import setup_logging
+from baselogic.core.test_runner import TestRunner
 
 # Добавляем корень проекта в sys.path для надежных импортов
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
 # Импортируем только функцию для настройки файлового логера
-from baselogic.core.logger import setup_llm_logger
-
-
-def setup_main_logger():
-    """
-    Настраивает основной логер для вывода в консоль (уровень INFO и выше).
-    """
-    log = logging.getLogger()
-    if any(isinstance(h, logging.StreamHandler) for h in log.handlers):
-        return
-    log.setLevel(logging.INFO)
-    console_formatter = logging.Formatter('%(asctime)s - %(levelname)-8s - %(message)s')
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(console_formatter)
-    log.addHandler(console_handler)
 
 
 def main():
     """
     Главная функция для запуска платформы тестирования LLM "Базовый Контроль".
     """
-    setup_main_logger()
-    setup_llm_logger()
-
-    from baselogic.core.test_runner import TestRunner
-
-    logging.info("🚀 Запуск платформы 'Базовый Контроль'...")
 
     # --- Загрузка конфигурации ---
 
@@ -46,10 +28,29 @@ def main():
     try:
         # 1. Создаем экземпляр нашего загрузчика
         # Префикс 'BC' соответствует тому, что мы использовали в .env файле
-        config_loader = EnvConfigLoader(prefix="BC")
+        # >>>>> НАЧАЛО ИЗМЕНЕНИЙ: Явная загрузка .env <<<<<
 
-        # 2. Загружаем конфигурацию
+        # 1. Формируем путь к .env файлу в корне проекта
+        dotenv_path = project_root / ".env"
+
+        # 2. Загружаем переменные из него, явно указывая кодировку
+        # 'utf-8-sig' - специальная кодировка, которая умеет обрабатывать и игнорировать BOM
+        if dotenv_path.exists():
+            load_dotenv(dotenv_path=dotenv_path, encoding='utf-8-sig')
+            print(f"INFO: Переменные из {dotenv_path} загружены.")
+        else:
+            print("WARNING: .env файл не найден. Используются только системные переменные окружения.")
+
+        config_loader = EnvConfigLoader(prefix="BC")
         config = config_loader.load_config()
+
+        # >>>>> ИЗМЕНЕНИЕ: Передаем ВЕСЬ конфиг <<<<<
+        setup_logging(config)
+        log = logging.getLogger(__name__) # Получаем логгер после настройки
+
+        log.info("🚀 Запуск платформы 'Базовый Контроль'...")
+        log.info("   - Модели для тестирования: %s", config.get('models_to_test', 'не указаны'))
+        log.info("   - Набор тестов: %s", config.get('tests_to_run', 'не указан'))
 
         # 3. (Лучшая практика) Проверяем, что ключевые параметры загружены
         if not config.get("models_to_test") or not config.get("tests_to_run"):
@@ -58,7 +59,7 @@ def main():
                 "Проверьте ваши .env переменные (например, BC_MODELS_0_NAME, BC_TESTS_TO_RUN)."
             )
 
-        logging.info("✅ Конфигурация успешно загружена из переменных окружения.")
+        logging.info("✅ Конфигурация успешно загружена из переменных окружения.%s", config)
 
         # Улучшим логирование: выведем только имена моделей для краткости
         model_names = [model.get('name', 'N/A') for model in config['models_to_test']]

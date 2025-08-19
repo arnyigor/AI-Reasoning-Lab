@@ -2,10 +2,10 @@ import random
 import re
 from typing import Dict, Any
 import pymorphy2
-import logging
 
 from .abstract_test_generator import AbstractTestGenerator
 
+import logging
 log = logging.getLogger(__name__)
 
 # --- Глобальный Singleton для MorphAnalyzer ---

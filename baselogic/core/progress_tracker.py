@@ -1,27 +1,42 @@
 from tqdm import tqdm
-from typing import List, Dict, Any
 
 class ProgressTracker:
-    """Отслеживает прогресс тестирования"""
-    
-    def __init__(self, total_models: int, total_tests: int, runs_per_test: int):
-        self.total_operations = total_models * total_tests * runs_per_test
-        self.current_operation = 0
+    """
+    Простая и эффективная обертка над tqdm для отображения общего прогресса тестирования.
+    """
+
+    def __init__(self, total_steps: int):
+        """
+        Инициализирует трекер.
+
+        Args:
+            total_steps (int): Общее количество всех тест-кейсов, которые будут выполнены.
+        """
         self.pbar = tqdm(
-            total=self.total_operations,
+            total=total_steps,
             desc="Тестирование LLM",
             unit="тест"
         )
-    
+        # Сохраняем последние показанные значения, чтобы не обновлять текст в консоли без надобности
+        self.last_model = ""
+        self.last_test = ""
+
     def update(self, model_name: str, test_name: str):
-        """Обновляет прогресс"""
-        self.current_operation += 1
-        self.pbar.set_postfix({
-            'Модель': model_name,
-            'Тест': test_name
-        })
+        """
+        Обновляет прогресс-бар на один шаг и устанавливает описание текущей задачи.
+        """
+        # Обновляем текстовое описание только тогда, когда оно действительно изменилось.
+        # Это предотвращает лишнее мерцание и немного повышает производительность.
+        if model_name != self.last_model or test_name != self.last_test:
+            self.pbar.set_postfix_str(f"Модель={model_name}, Тест={test_name}")
+            self.last_model = model_name
+            self.last_test = test_name
+
+        # Продвигаем прогресс-бар на 1 шаг
         self.pbar.update(1)
-    
+
     def close(self):
-        """Закрывает прогресс-бар"""
+        """
+        Корректно закрывает прогресс-бар после завершения всех операций.
+        """
         self.pbar.close()

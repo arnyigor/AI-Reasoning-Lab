@@ -1,11 +1,9 @@
 import re
 import random
 from typing import Dict, Any, List, Tuple
-
 from .abstract_test_generator import AbstractTestGenerator
-from ..core.logger import get_logger
-
-log = get_logger(__name__)
+import logging
+log = logging.getLogger(__name__)
 
 class InstructionsTestGenerator(AbstractTestGenerator):
     """

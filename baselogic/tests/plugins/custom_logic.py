@@ -1,10 +1,11 @@
 import re
 from typing import Dict, Any, Optional, List
 
-from baselogic.core.logger import get_logger
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
-log = get_logger(__name__)
+import logging
+# Просто получаем логгер в начале файла. Он уже настроен!
+log = logging.getLogger(__name__)
 
 class CustomLogicTestGenerator(AbstractTestGenerator):
     """Пользовательский генератор логических тестов"""

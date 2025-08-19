@@ -6,11 +6,13 @@ from typing import Dict, Any, Generator, Tuple
 
 from dotenv import load_dotenv
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
-from baselogic.core.logger import get_logger
 
 # Загружаем переменные окружения
 load_dotenv()
-log = get_logger(__name__)
+import logging
+
+# Просто получаем логгер в начале файла. Он уже настроен!
+log = logging.getLogger(__name__)
 
 class ContextStressTestGenerator(AbstractTestGenerator):
     """

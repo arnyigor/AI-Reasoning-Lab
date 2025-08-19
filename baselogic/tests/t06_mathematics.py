@@ -4,8 +4,7 @@ from typing import Dict, Any, List
 
 # Импортируем абстрактный класс и безопасный вычислитель
 from .abstract_test_generator import AbstractTestGenerator
-# Предполагается, что SafeExpressionEvaluator находится в ../core/
-# Если это не так, исправьте путь.
+
 from ..core.safe_evaluator import SafeExpressionEvaluator
 
 class MathematicsTestGenerator(AbstractTestGenerator):

@@ -1,13 +1,18 @@
 # baselogic/clients/ollama_client.py
-import logging
+import json
+from collections.abc import Iterable, Generator
+from typing import Any, Dict, List, Optional, Union
+
+import requests
 
 from baselogic.core.interfaces import ProviderClient
-from baselogic.core.logger import get_logger
 
-import json
-import requests
-from typing import Any, Dict, List, Optional, Union
-from collections.abc import Iterable, Generator
+import logging
+
+from baselogic.core.logger import setup_logging
+
+log = logging.getLogger(__name__)
+
 
 # ==============================================================================
 # SECTION 2: УНИВЕРСАЛЬНЫЙ КЛИЕНТ ДЛЯ OpenAI-СОВМЕСТИМЫХ API
@@ -16,6 +21,7 @@ class OpenAICompatibleClient(ProviderClient):
     """
     Клиент для взаимодействия с любым API, совместимым с OpenAI.
     """
+
     def __init__(self, api_key: Optional[str], base_url: str = "https://api.openai.com/v1"):
         self.base_url = base_url.rstrip('/')
         self.endpoint = f"{self.base_url}/chat/completions"
@@ -29,12 +35,20 @@ class OpenAICompatibleClient(ProviderClient):
             log.debug("API ключ не предоставлен (ожидаемо для локальных серверов).")
         self.session.headers.update(headers)
 
-    def prepare_payload(self, messages: List[Dict[str, str]], model: str, *, stream: bool = False, **kwargs: Any) -> Dict[str, Any]:
-        log.debug("Подготовка payload для модели '%s'...", model)
-        if "num_chunks" in kwargs:
-            kwargs["n"] = kwargs.pop("num_chunks")
-        payload: Dict[str, Any] = {"model": model, "messages": messages, "stream": stream}
-        payload.update({k: v for k, v in kwargs.items() if v is not None})
+    def prepare_payload(self, messages: List[Dict[str, str]], model: str, *, stream: bool = False, **kwargs: Any) -> \
+            Dict[str, Any]:
+        payload: Dict[str, Any] = {
+            "model": model,
+            "messages": messages,
+            "stream": stream,
+        }
+        # kwargs будет содержать ВЕСЬ словарь 'generation' из конфига.
+        # Мы больше не фильтруем по известным нам ключам.
+        payload.update(kwargs)
+
+        # Удаляем None значения, если они есть
+        payload = {k: v for k, v in payload.items() if v is not None}
+
         log.debug("Payload сформирован: %s", payload)
         return payload
 
@@ -43,7 +57,7 @@ class OpenAICompatibleClient(ProviderClient):
         log.info("Отправка запроса на %s (stream=%s)...", self.endpoint, is_stream)
         try:
             resp = self.session.post(self.endpoint, json=payload, stream=is_stream, timeout=180)
-            log.debug("HTTP Status Code: %d", resp.status_code)
+            log.info("HTTP Status Code: %d", resp.status_code)
             resp.raise_for_status()
             log.info("Запрос успешно выполнен.")
             if is_stream:
@@ -59,7 +73,7 @@ class OpenAICompatibleClient(ProviderClient):
 
     # >>>>> Улучшаем обработчик потока <<<<<
     def _handle_stream(self, response: requests.Response) -> Generator[Dict[str, Any], None, None]:
-        log.debug("Начало обработки потокового ответа...")
+        log.info("Начало обработки потокового ответа...")
         for line in response.iter_lines():
             if line:
                 decoded_line = line.decode('utf-8')
@@ -78,7 +92,7 @@ class OpenAICompatibleClient(ProviderClient):
                             break
                     except json.JSONDecodeError:
                         log.warning("Не удалось декодировать JSON-чанк: %s", content)
-        log.debug("Обработка потока завершена.")
+        log.info("Обработка потока завершена.")
 
     def extract_choices(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
         choices = response.get("choices", [])
@@ -97,41 +111,57 @@ class OpenAICompatibleClient(ProviderClient):
             log.debug("Извлечена дельта: '%s'", content)
         return content
 
+
 # ==============================================================================
 # SECTION 3: УНИВЕРСАЛЬНЫЙ КЛИЕНТ ВЕРХНЕГО УРОВНЯ (без изменений)
 # ==============================================================================
+# baselogic/core/llm_client.py
+
 class LLMClient:
-    def __init__(self, provider: ProviderClient, model: str):
+    """
+    Универсальный клиент для работы с различными LLM через провайдеров.
+    Возвращает "сырые" данные от провайдера.
+    """
+
+    def __init__(self, provider: ProviderClient, model_config: Dict[str, Any]):
         self.provider = provider
-        self.model = model
-        log.info("LLMClient создан для модели '%s' с провайдером %s", model, provider.__class__.__name__)
-    def chat(self, messages: List[Dict[str, str]], *, stream: bool = False, parse_response: bool = False, **kwargs: Any) -> Union[str, Dict[str, Any], Iterable[str], Iterable[Dict[str, Any]]]:
-        log.info("Вызван метод chat (stream=%s, parse_response=%s)", stream, parse_response)
-        payload = self.provider.prepare_payload(messages, self.model, stream=stream, **kwargs)
-        raw_response = self.provider.send_request(payload)
-        if stream:
-            response_iterator = iter(raw_response)
-            if parse_response:
-                log.info("Возвращаем 'сырой' итератор чанков.")
-                return response_iterator
-            else:
-                log.info("Возвращаем генератор текста из потока.")
-                return self._assemble_text_from_stream(response_iterator)
-        else:
-            full_response = raw_response
-            choices = self.provider.extract_choices(full_response)
-            if not choices:
-                log.warning("API вернул ответ без 'choices'.")
-                return "" if not parse_response else {"choices": [], "raw_response": full_response}
-            if parse_response:
-                return {"model": self.model, "provider": self.provider.__class__.__name__, "choices": [{"content": self.provider.extract_content_from_choice(c), "raw_choice": c} for c in choices], "raw_response": full_response}
-            else:
-                return "".join(self.provider.extract_content_from_choice(c) for c in choices)
-    def _assemble_text_from_stream(self, chunk_iterator: Iterable[Dict[str, Any]]) -> Generator[str, None, None]:
-        for chunk in chunk_iterator:
-            delta = self.provider.extract_delta_from_chunk(chunk)
-            if delta:
-                yield delta
+        self.model_config = model_config
+        self.model = model_config.get('name', 'unknown_model')
+        log.info("LLMClient создан для модели '%s'...", self.model)
+
+    def chat(
+            self,
+            messages: List[Dict[str, str]],
+            *,
+            stream: bool = False,
+            **kwargs: Any
+    ) -> Union[Dict[str, Any], Iterable[Dict[str, Any]]]:
+        """
+        Отправляет запрос к LLM и возвращает "сырой" ответ от провайдера.
+
+        Args:
+            messages: Список сообщений для отправки модели.
+            stream: Если True, возвращает итератор по чанкам ответа.
+            **kwargs: Дополнительные параметры генерации (temperature и т.д.).
+
+        Returns:
+            - Если stream=False: Полный JSON-ответ от API в виде словаря.
+            - Если stream=True: Итератор по чанкам ответа (каждый чанк - словарь).
+        """
+        log.info("Вызван метод chat (stream=%s)", stream)
+
+        # Извлекаем все опции генерации.
+        generation_opts = self.model_config.get('generation', {})
+        generation_opts.update(kwargs)  # Переданные аргументы перезаписывают дефолтные
+
+        payload = self.provider.prepare_payload(
+            messages, self.model, stream=stream, **generation_opts
+        )
+
+        # Просто вызываем провайдера и возвращаем его результат как есть.
+        # Вся логика парсинга вынесена на более высокий уровень (в адаптер).
+        return self.provider.send_request(payload)
+
 
 # ==============================================================================
 # SECTION 4: ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ
@@ -142,10 +172,8 @@ if __name__ == '__main__':
     # Выводим сообщения уровня INFO и выше в консоль.
     # Для отладки можно изменить level на logging.DEBUG.
     from dotenv import load_dotenv
-    # Устанавливаем имя логера, чтобы соответствовать остальному коду
-    log = get_logger("LLMClientExample")
-
     load_dotenv()
+    setup_logging()
     log.info("Переменные из .env файла загружены.")
 
     # --- Пример 1: Работа с локальной моделью (Jan, LM Studio, Ollama) ---
@@ -161,7 +189,7 @@ if __name__ == '__main__':
         # Убедитесь, что эта модель запущена на вашем сервере
         llm_client_local = LLMClient(
             provider=local_provider,
-            model="deepseek/deepseek-r1-0528-qwen3-8b" # ИЗМЕНИТЕ НА ИМЯ ВАШЕЙ МОДЕЛИ
+            model_config={"name": "deepseek/deepseek-r1-0528-qwen3-8b", 'stream': True}
         )
 
         # --- НЕПОТОКОВЫЙ ЗАПРОС ---
@@ -190,7 +218,8 @@ if __name__ == '__main__':
 
     # --- Пример 2: Работа с API OpenAI (если есть ключ) ---
     import os
-    openai_api_key = os.getenv("OPENAI_API_KEY", "sk-...") # Пытаемся взять ключ из окружения
+
+    openai_api_key = os.getenv("OPENAI_API_KEY", "sk-...")  # Пытаемся взять ключ из окружения
 
     if not openai_api_key or openai_api_key == "sk-...":
         log.info("\nПропускаем тест OpenAI: ключ OPENAI_API_KEY не установлен.")
@@ -199,11 +228,10 @@ if __name__ == '__main__':
         try:
             # Шаг 1: Создаем провайдера для OpenAI
             openai_provider = OpenAICompatibleClient(api_key=openai_api_key)
-
             # Шаг 2: Создаем универсальный клиент
             llm_client_openai = LLMClient(
                 provider=openai_provider,
-                model="gpt-4o-mini"
+                model_config={"name": "gpt-4o-mini"}
             )
 
             # Шаг 3: Делаем запрос
@@ -218,7 +246,8 @@ if __name__ == '__main__':
 
     # --- Пример 3: Работа с API Google Gemini ---
     import os
-    gemini_api_key = os.getenv("GEMINI_API_KEY") # Лучше хранить ключ в переменных окружения
+
+    gemini_api_key = os.getenv("GEMINI_API_KEY")  # Лучше хранить ключ в переменных окружения
 
     if not gemini_api_key:
         log.info("\nПропускаем тест Gemini: ключ GEMINI_API_KEY не установлен.")
@@ -226,6 +255,7 @@ if __name__ == '__main__':
         log.info("\n--- Тестирование Google Gemini API ---")
         try:
             from baselogic.core.GeminiClient import GeminiClient
+
             # Шаг 1: Создаем нашего нового провайдера для Gemini
             gemini_provider = GeminiClient(api_key=gemini_api_key)
 
@@ -233,7 +263,7 @@ if __name__ == '__main__':
             # но передаем ему gemini_provider.
             llm_client_gemini = LLMClient(
                 provider=gemini_provider,
-                model="gemini-1.5-flash" # Используем актуальное имя модели
+                model="gemini-1.5-flash"  # Используем актуальное имя модели
             )
 
             # Шаг 3: Делаем запрос. Все остальное выглядит так же!

@@ -3,7 +3,8 @@
 import sys
 import argparse
 from pathlib import Path
-import logging
+
+from baselogic.core.logger import setup_logging
 
 # --- Настройка ---
 # Добавляем корень проекта в sys.path для надежных импортов
@@ -13,25 +14,13 @@ sys.path.append(str(project_root))
 # Импортируем наш обновленный Reporter
 from baselogic.core.reporter import Reporter
 
-def setup_logger():
-    """Настраивает простой логер для вывода в консоль."""
-    log = logging.getLogger('ReportGenerator')
-    if log.hasHandlers():
-        return log
-    log.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)-8s - %(message)s')
-    handler.setFormatter(formatter)
-    log.addHandler(handler)
-    return log
-
 def main():
     """
     Главная функция для перегенерации единого, комплексного отчета
     из существующих JSON-файлов результатов, с учетом файла истории.
     """
-    log = setup_logger()
 
+    setup_logging()
     # 1. Настройка парсера аргументов командной строки
     parser = argparse.ArgumentParser(
         description="Перегенерация комплексного отчета из существующих JSON-результатов с учетом истории.",
