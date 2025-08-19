@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Iterable, Union, List
+
 
 class ILLMClient(ABC):
     """
@@ -8,7 +9,7 @@ class ILLMClient(ABC):
     """
 
     @abstractmethod
-    def query(self, user_prompt: str) -> Dict[str, Any]: # <-- ИЗМЕНЕНИЕ ЗДЕСЬ
+    def query(self, user_prompt: str) -> Dict[str, Any]:  # <-- ИЗМЕНЕНИЕ ЗДЕСЬ
         """
         Отправляет запрос к LLM и возвращает СТРУКТУРИРОВАННЫЙ ответ.
 
@@ -26,7 +27,7 @@ class ILLMClient(ABC):
             LLMClientError: При ошибках взаимодействия с LLM
         """
         pass
-    
+
     @abstractmethod
     def get_model_info(self) -> Dict[str, Any]:
         """
@@ -36,7 +37,7 @@ class ILLMClient(ABC):
             Словарь с информацией о модели (название, параметры, etc.)
         """
         pass
-    
+
     @abstractmethod
     def get_model_name(self) -> str:
         """
@@ -46,6 +47,96 @@ class ILLMClient(ABC):
             Название модели
         """
         pass
+
+
+class ProviderClient(ABC):
+    """
+    Абстрактный базовый класс для клиентов провайдеров языковых моделей.
+
+    Определяет контракт, которому должны следовать все конкретные клиенты
+    провайдеров, такие как OpenAI, Anthropic, Gemini и т.д. Этот интерфейс
+    обеспечивает полную независимость LLMClient от деталей реализации
+    конкретного API.
+    """
+
+    @abstractmethod
+    def prepare_payload(
+            self,
+            messages: List[Dict[str, str]],
+            model: str,
+            *,
+            stream: bool = False,
+            **kwargs: Any
+    ) -> Dict[str, Any]:
+        """
+        Собирает тело запроса (payload) для API провайдера.
+
+        Args:
+            messages: Список сообщений в универсальном формате.
+            model: Имя модели.
+            stream: Включить ли потоковую передачу.
+            **kwargs: Дополнительные параметры для модели (temperature, max_tokens и др.).
+
+        Returns:
+            Словарь, представляющий JSON-тело запроса.
+        """
+        ...
+
+    @abstractmethod
+    def send_request(
+            self,
+            payload: Dict[str, Any]
+    ) -> Union[Dict[str, Any], Iterable[Dict[str, Any]]]:
+        """
+        Отправляет подготовленный payload на эндпоинт API.
+
+        Args:
+            payload: Тело запроса, созданное `prepare_payload`.
+
+        Returns:
+            - Если stream=False: Полный JSON-ответ в виде словаря.
+            - Если stream=True: Итератор по чанкам ответа (каждый чанк - словарь).
+        """
+        ...
+
+    @abstractmethod
+    def extract_choices(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """
+        Извлекает список "ответов" (choices) из полного JSON-ответа.
+
+        Args:
+            response: Полный JSON-ответ от API.
+
+        Returns:
+            Список объектов-ответов.
+        """
+        ...
+
+    @abstractmethod
+    def extract_content_from_choice(self, choice: Dict[str, Any]) -> str:
+        """
+        Извлекает текстовое содержимое из одного "ответа" (choice) в не-потоковом режиме.
+
+        Args:
+            choice: Один элемент из списка, возвращенного `extract_choices`.
+
+        Returns:
+            Строка с текстом ответа.
+        """
+        ...
+
+    @abstractmethod
+    def extract_delta_from_chunk(self, chunk: Dict[str, Any]) -> str:
+        """
+        Извлекает текстовую дельту из одного чанка в потоковом режиме.
+
+        Args:
+            chunk: Один чанк (словарь) из итератора, возвращенного `send_request`.
+
+        Returns:
+            Строка с фрагментом текста.
+        """
+        ...
 
 
 class LLMClientError(Exception):

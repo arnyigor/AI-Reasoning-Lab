@@ -1,25 +1,20 @@
 import gc
-import os
-import re
-import time
-import json
 import importlib
-import signal
+import json
+import os
 import threading
+import time
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-import logging
 
 import psutil
 
 # Импортируем фабрику и интерфейсы
 from .client_factory import LLMClientFactory
 from .interfaces import ILLMClient, LLMClientError
-from .logger import setup_logging, get_logger, log_llm_interaction, log_test_result, log_system_event
-from .config_validator import validate_config, get_config_summary
-from .progress_tracker import ProgressTracker
-
+from .logger import get_logger
 from .plugin_manager import PluginManager
+from .progress_tracker import ProgressTracker
 
 # Настраиваем логер для этого модуля
 log = get_logger(__name__)
@@ -71,6 +66,7 @@ def run_with_timeout(func, timeout_seconds: int = 30):
         raise exception[0]
 
     return result[0]
+
 
 class TestRunner:
     """
@@ -213,7 +209,8 @@ class TestRunner:
                     self._save_results(model_name, model_results)
 
                     if not model_results:
-                        log.warning("⚠️ Модель '%s' не сгенерировала ни одного результата. Считается ошибкой.", model_name)
+                        log.warning("⚠️ Модель '%s' не сгенерировала ни одного результата. Считается ошибкой.",
+                                    model_name)
                         failed_models.append((model_name, "Нет результатов от модели"))
                     else:
                         # Считаем, сколько тестов реально прошли проверку
@@ -221,13 +218,14 @@ class TestRunner:
                         total_tests_run = len(model_results)
 
                         if num_correct == total_tests_run:
-                            log.info("✅ Модель '%s' успешно прошла все тесты (%d из %d).", model_name, num_correct, total_tests_run)
+                            log.info("✅ Модель '%s' успешно прошла все тесты (%d из %d).", model_name, num_correct,
+                                     total_tests_run)
                             successful_models.append(model_name)
                         else:
                             error_reason = f"Провалено {total_tests_run - num_correct} из {total_tests_run} тестов"
                             log.warning("❌ Модель '%s' провалила тестирование. %s.", model_name, error_reason)
                             failed_models.append((model_name, error_reason))
-                    
+
                 except Exception as e:
                     error_msg = f"Критическая ошибка тестирования модели {model_name}: {e}"
                     log.error("❌ %s", error_msg, exc_info=True)
@@ -243,7 +241,7 @@ class TestRunner:
         log.info("✅ Успешно протестировано: %d моделей", len(successful_models))
         if successful_models:
             log.info("   - %s", ", ".join(successful_models))
-        
+
         if failed_models:
             log.warning("❌ Ошибки в %d моделях:", len(failed_models))
             for model, error in failed_models:
@@ -258,7 +256,7 @@ class TestRunner:
             log.info("  🔧 Создаем клиент типа '%s'...", client_type)
             # Используем фабрику для создания клиента
             client = LLMClientFactory.create_client(model_config)
-            
+
             log.info("  ✅ Клиент успешно создан")
             return client
 
@@ -297,7 +295,8 @@ class TestRunner:
             log.error("  ❌ %s", error_msg, exc_info=True)
             return {"error": error_msg}
 
-    def _run_tests_safely(self, client: ILLMClient, model_name: str, model_details: Dict[str, Any], progress: ProgressTracker) -> List[Dict[str, Any]]:
+    def _run_tests_safely(self, client: ILLMClient, model_name: str, model_details: Dict[str, Any],
+                          progress: ProgressTracker) -> List[Dict[str, Any]]:
         """Безопасно выполняет все тесты с детальной диагностикой и поддержкой итерируемых генераторов."""
         model_results = []
         num_runs = self.config.get('runs_per_test', 1)
@@ -420,13 +419,14 @@ class TestRunner:
 
             except (LLMClientError, TimeoutError) as e:
                 log.error("      ❌ Ошибка во время запроса к LLM: %s", e)
-                return None # Завершаем тест-кейс при ошибке
+                return None  # Завершаем тест-кейс при ошибке
 
             end_time = time.perf_counter()
 
             exec_time_ms = (end_time - start_time) * 1000
             ram_usage_mb = peak_ram - initial_ram
-            log.debug("      ✅ Ответ от клиента получен за %.0f мс. Пиковое потребление RAM: %.2f MB", exec_time_ms, ram_usage_mb)
+            log.debug("      ✅ Ответ от клиента получен за %.0f мс. Пиковое потребление RAM: %.2f MB", exec_time_ms,
+                      ram_usage_mb)
 
             # --- ИЗМЕНЕНИЕ 2: Извлекаем нужные части из ответа ---
             # Безопасно извлекаем 'мысли' и 'ответ' из словаря
@@ -466,9 +466,9 @@ class TestRunner:
                 "prompt": prompt,
 
                 # --- Ключевые поля для отладки ---
-                "raw_llm_output": raw_llm_output, # Полный, необработанный вывод от клиента.
-                "parsed_answer": final_answer_for_verify, # ТО, что было извлечено и отправлено на верификацию.
-                "thinking_log": thinking_log_from_parser, # Полный лог рассуждений, возвращенный парсером.
+                "raw_llm_output": raw_llm_output,  # Полный, необработанный вывод от клиента.
+                "parsed_answer": final_answer_for_verify,  # ТО, что было извлечено и отправлено на верификацию.
+                "thinking_log": thinking_log_from_parser,  # Полный лог рассуждений, возвращенный парсером.
 
                 "expected_output": expected_output,
                 "is_correct": is_correct,
@@ -484,7 +484,6 @@ class TestRunner:
         except Exception as e:
             log.error("      ❌ Критическая ошибка в тест-кейсе %s: %s", test_id, e, exc_info=True)
             return None
-
 
     def _save_results(self, model_name: str, results: List[Dict[str, Any]]):
         """Сохраняет результаты в JSON файл."""

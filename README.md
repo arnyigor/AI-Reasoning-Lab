@@ -222,9 +222,14 @@ cat BASE_LOGIC_BENCHMARK_REPORT.md | less
 
 Для быстрой проверки работоспособности модели можно использовать прямые HTTP-запросы к Ollama API:
 
+Пример для MacOS
 ```bash
 curl -X POST http://localhost:11434/api/chat \
   -d '{"model": "jan-v1-4b", "messages": [{"role": "user", "content": "Скажи привет"}], "stream": true}'
+```
+Пример для Windows
+```bash
+curl -X POST http://localhost:11434/api/chat -H "Content-Type: application/json" -d "{\"model\": \"jan-v1-4b\", \"messages\": [{\"role\": \"user\", \"content\": \"Скажи привет\"}], \"stream\": true}"
 ```
 
 Этот способ позволяет убедиться, что модель корректно загружена и отвечает, до запуска полного тестирования через AI-Reasoning-Lab.
