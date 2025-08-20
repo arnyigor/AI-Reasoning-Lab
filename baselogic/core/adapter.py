@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from typing import Dict, Any, Generator
 
 # Импортируем интерфейс, которому должен соответствовать адаптер
@@ -100,31 +101,42 @@ class AdapterLLMClient(ILLMClient):
             max_chunks = int(inference_opts.get('stream_max_chunks', 2000))
 
             chunks = []
-            chunk_count = 0
 
             print(">>> LLM Stream: ", end="", flush=True)
 
             if isinstance(response_or_stream, Generator):
-                for chunk in response_or_stream:
-                    print(chunk, end="", flush=True)
-                    chunks.append(chunk)
+                # >>>>> "Кардиомонитор" <<<<<
 
-                    # 2. Проверяем счетчик на каждой итерации
-                    chunk_count += 1
-                    if chunk_count >= max_chunks:
-                        log.warning("ПРЕДУПРЕЖДЕНИЕ: Превышен лимит на количество потоковых чанков (%d). Поток принудительно остановлен.", max_chunks)
-                        print("...[STREAM TRUNCATED]...", flush=True) # Сообщаем пользователю
-                        break # Выходим из цикла
+                # Получаем итератор из генератора
+                stream_iterator = iter(response_or_stream)
+                last_heartbeat_time = time.time()
+
+                while True:
+                    try:
+                        # Пытаемся получить следующий чанк с небольшим таймаутом
+                        chunk = next(stream_iterator)
+                        chunks.append(chunk)
+                        # Сбрасываем таймер "пульса", так как мы получили данные
+                        last_heartbeat_time = time.time()
+                    except StopIteration:
+                        # Генератор закончился - это нормальное завершение
+                        log.info("Поток завершен.")
+                        break
+                    except Exception as e:
+                        log.error("Ошибка при итерации по потоку: %s", e)
+                        break
+
+                    # "Пульс": если мы давно не получали данных, но цикл еще не завершился,
+                    # сообщаем, что мы все еще ждем.
+                    if time.time() - last_heartbeat_time > 10.0: # Каждые 10 секунд
+                        log.info("...ожидание следующего чанка от модели...")
+                        last_heartbeat_time = time.time()
 
                 final_response_str = "".join(chunks)
-                print()
-                log.info("Потоковый ответ полностью получен (или прерван). Собрано %d чанков, %d символов.", chunk_count, len(final_response_str))
+                log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
             else:
                 log.warning("Ожидался генератор (stream=True), но получен тип %s.", type(response_or_stream).__name__)
                 final_response_str = str(response_or_stream)
-
-            # >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
-
         else: # не-потоковый режим
             if isinstance(response_or_stream, str):
                 final_response_str = response_or_stream

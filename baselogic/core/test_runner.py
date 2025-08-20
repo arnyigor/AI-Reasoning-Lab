@@ -13,9 +13,10 @@ from .adapter import AdapterLLMClient
 from .GeminiClient import GeminiClient
 # --- ИЗМЕНЕНИЕ 1: Обновляем импорты для новой архитектуры ---
 # Импортируем старый интерфейс, который ожидает TestRunner
-from .interfaces import ILLMClient, LLMClientError
+from .interfaces import ILLMClient, LLMClientError, ProviderClient
 # Импортируем компоненты новой архитектуры
 from .llm_client import LLMClient
+from .ollama_client import OllamaClient
 from .openai_client import OpenAICompatibleClient
 from .plugin_manager import PluginManager
 from .progress_tracker import ProgressTracker
@@ -163,7 +164,24 @@ class TestRunner:
         log.info("📊 ИТОГОВЫЙ ОТЧЕТ:")
         # ...
 
-    # >>>>> ИЗМЕНЕНИЕ 2: Фабрика клиентов теперь создает и оборачивает провайдеров в адаптер <<<<<
+    @staticmethod
+    def create_provider(model_config: Dict[str, Any]) -> ProviderClient:
+        client_type = model_config.get('client_type', 'openai_compatible')
+
+        if client_type == "ollama":
+            # Создаем наш новый, чистый нативный клиент
+            return OllamaClient()
+        elif client_type == "openai_compatible":
+            return OpenAICompatibleClient(
+                api_key=model_config.get('api_key'),
+                base_url=model_config.get('api_base')
+            )
+        elif client_type == "gemini":
+            return GeminiClient(api_key=model_config.get('api_key'))
+        else:
+            raise ValueError(f"Неизвестный тип клиента: {client_type}")
+
+    # >>>>> Фабрика клиентов теперь создает и оборачивает провайдеров в адаптер <<<<<
     def _create_client_safely(self, model_config: Dict[str, Any]) -> Optional[ILLMClient]:
         """
         Создает конкретного провайдера, оборачивает его в LLMClient,
@@ -174,16 +192,7 @@ class TestRunner:
         log.info("  🔧 Создаем провайдера типа '%s' для модели '%s'...", client_type, model_name)
 
         try:
-            if client_type == "openai_compatible":
-                provider = OpenAICompatibleClient(
-                    api_key=model_config.get('api_key'),
-                    base_url=model_config.get('api_base')
-                )
-            elif client_type == "gemini":
-                provider = GeminiClient(api_key=model_config.get('api_key'))
-            else:
-                log.error("  ❌ Неизвестный тип провайдера: %s", client_type)
-                return None
+            provider = self.create_provider(model_config)
 
             new_llm_client = LLMClient(provider=provider, model_config=model_config)
             adapter = AdapterLLMClient(
