@@ -127,8 +127,6 @@ class Reporter:
 
         return verbosity_index.fillna(0).rename("Verbosity_Index")
 
-
-
     def _calculate_comprehensiveness(self, df: pd.DataFrame) -> pd.Series:
         if 'category' not in df.columns or df['category'].nunique() == 0:
             return pd.Series(0.0, index=df['model_name'].unique(), name="Comprehensiveness")
@@ -140,7 +138,7 @@ class Reporter:
 
         return comprehensiveness_index.rename("Comprehensiveness")
 
-    # >>>>> НОВЫЙ МЕТОД 1: Сводная таблица по контексту <<<<<
+    # >>>>> Сводная таблица по контексту <<<<<
     def _generate_context_performance_report(self) -> str:
         """Генерирует Markdown-отчет о производительности моделей на длинных контекстах."""
         if self.context_stress_results.empty:
@@ -180,7 +178,7 @@ class Reporter:
         report_md += self._to_markdown_table(pivot)
         return report_md
 
-    # >>>>> НОВЫЙ МЕТОД 2: Тепловая карта "Потерянной середины" <<<<<
+    # >>>>> Тепловая карта "Потерянной середины" <<<<<
     def _generate_heatmap_report(self) -> str:
         """Генерирует "тепловую карту" в виде Markdown таблицы для анализа проблемы 'потерянной середины'."""
         if self.context_stress_results.empty:
@@ -214,7 +212,7 @@ class Reporter:
         report_md += self._to_markdown_table(heatmap_emoji)
         return report_md
 
-    # >>>>> НОВЫЙ МЕТОД: Выносим логику расчета лидерборда <<<<<
+    # >>>>> Выносим логику расчета лидерборда <<<<<
     def _calculate_leaderboard(self, df: pd.DataFrame) -> pd.DataFrame:
         # --- Этап 1: Агрегация всех метрик ---
         metrics = df.groupby('model_name').agg(

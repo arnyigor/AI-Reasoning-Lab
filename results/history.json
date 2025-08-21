@@ -20,9 +20,14 @@
         "Total_Runs":17
     },
     "jan-v1-4b":{
-        "Trust_Score":0.6073991577,
-        "Accuracy":0.7040816327,
-        "Total_Runs":98
+        "Trust_Score":0.5999149981,
+        "Accuracy":0.6979166667,
+        "Total_Runs":96
+    },
+    "qwen\/qwen3-30b-a3b-2507":{
+        "Trust_Score":0.5958499732,
+        "Accuracy":0.9,
+        "Total_Runs":10
     },
     "google\/gemma-3n-e4b":{
         "Trust_Score":0.5301029714,
@@ -39,12 +44,12 @@
         "Accuracy":0.5625,
         "Total_Runs":240
     },
-    "deepseek\/deepseek-r1:free":{
+    "qwen3:8b-q4_K_M":{
         "Trust_Score":0.3967781475,
         "Accuracy":0.7,
         "Total_Runs":10
     },
-    "qwen3:8b-q4_K_M":{
+    "deepseek\/deepseek-r1:free":{
         "Trust_Score":0.3967781475,
         "Accuracy":0.7,
         "Total_Runs":10
@@ -54,15 +59,15 @@
         "Accuracy":0.6,
         "Total_Runs":10
     },
+    "deepseek\/deepseek-r1-0528-qwen3-8b":{
+        "Trust_Score":0.283440061,
+        "Accuracy":0.4761904762,
+        "Total_Runs":21
+    },
     "openai\/gpt-oss-20b":{
         "Trust_Score":0.2365930905,
         "Accuracy":0.5,
         "Total_Runs":10
-    },
-    "deepseek\/deepseek-r1-0528-qwen3-8b":{
-        "Trust_Score":0.1848123256,
-        "Accuracy":0.375,
-        "Total_Runs":16
     },
     "tngtech\/deepseek-r1t-chimera:free":{
         "Trust_Score":0.1517632444,
@@ -94,12 +99,12 @@
         "Accuracy":0.2,
         "Total_Runs":10
     },
-    "meta-llama-3-8b-instruct":{
+    "moonshotai\/kimi-k2:free":{
         "Trust_Score":0.0566821515,
         "Accuracy":0.2,
         "Total_Runs":10
     },
-    "moonshotai\/kimi-k2:free":{
+    "meta-llama-3-8b-instruct":{
         "Trust_Score":0.0566821515,
         "Accuracy":0.2,
         "Total_Runs":10

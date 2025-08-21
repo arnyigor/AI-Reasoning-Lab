@@ -5,6 +5,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from baselogic.core.config_loader import EnvConfigLoader
+from baselogic.core.judge_reporter import JudgeReporter
 from baselogic.core.logger import setup_logging
 from baselogic.core.test_runner import TestRunner
 
@@ -84,8 +85,10 @@ def main():
         try:
             from baselogic.core.reporter import Reporter
 
+
             results_dir = project_root / "results" / "raw"
             reporter = Reporter(results_dir=results_dir)
+            judge_reporter = JudgeReporter(results_dir)
 
             # Проверяем, есть ли данные для отчета
             if reporter.all_results.empty:
@@ -96,10 +99,18 @@ def main():
             # Confidence Threshold можно вынести в config.yaml, если нужно
             report_content = reporter.generate_leaderboard_report()
 
+            # Генерация только рейтинга судей
+            judge_leaderboard = judge_reporter.generate_judge_leaderboard()
+
             # Сохраняем отчет в главный файл LEADERBOARD.md в корне проекта
             report_file = project_root / "BASE_LOGIC_BENCHMARK_REPORT.md"
             with open(report_file, 'w', encoding='utf-8') as f:
                 f.write(report_content)
+
+            # Сохранение в файл
+            judge_report_file = project_root / "JUDGE_LEADERBOARD.md"
+            with open(judge_report_file, "w", encoding="utf-8") as f:
+                f.write(judge_leaderboard)
 
             logging.info("✅ Комплексный отчет обновлен/создан: %s", report_file)
         except Exception as e:
