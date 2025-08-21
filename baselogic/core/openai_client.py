@@ -1,5 +1,6 @@
 import json
 from collections.abc import Iterable, Generator
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 import requests
 import logging
@@ -72,37 +73,40 @@ class OpenAICompatibleClient(ProviderClient):
 
     def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Извлекает метаданные из финального ответа или чанка.
-        Поддерживает различные форматы провайдеров.
+        Извлекает метаданные, предоставленные сервером в API-ответе.
+        Реализует логику "Приоритет и Фолбэк": сначала ищутся прямые
+        (Ollama-style) поля, и только при их отсутствии используется блок 'usage' (OpenAI-style).
         """
         try:
             metadata = {}
 
-            # OpenAI-style usage
-            usage_stats = response.get("usage", {})
-            if usage_stats:
-                metadata.update({
-                    "prompt_eval_count": usage_stats.get("prompt_tokens"),
-                    "eval_count": usage_stats.get("completion_tokens"),
-                    "total_tokens": usage_stats.get("total_tokens"),
-                })
-
-            # Ollama-style метаданные
-            ollama_fields = [
+            # --- ШАГ 1: Прямое извлечение (Приоритетный источник) ---
+            # Собираем все поля, которые могут лежать на верхнем уровне ответа.
+            # Это включает и Ollama-специфичные, и общие поля.
+            direct_fields = [
+                "model", "created", "id", "object", "system_fingerprint",
                 "total_duration", "load_duration", "prompt_eval_count",
                 "prompt_eval_duration", "eval_count", "eval_duration"
             ]
-            for field in ollama_fields:
+            for field in direct_fields:
                 if field in response:
                     metadata[field] = response[field]
 
-            # Дополнительные поля
-            additional_fields = ["model", "created", "id", "object", "system_fingerprint"]
-            for field in additional_fields:
-                if field in response:
-                    metadata[field] = response[field]
+            # --- ШАГ 2: Логика фолбэка для количества токенов ---
+            # Если после первого шага у нас нет данных о токенах, ищем их в 'usage'.
+            # Используем `or {}` для безопасного доступа, даже если ключ 'usage' отсутствует.
+            usage_stats = response.get("usage") or {}
 
-            # Убираем None значения
+            # Ищем токены промпта, только если не нашли 'prompt_eval_count' напрямую
+            if 'prompt_eval_count' not in metadata and 'prompt_tokens' in usage_stats:
+                metadata['prompt_eval_count'] = usage_stats['prompt_tokens']
+
+            # Ищем токены ответа, только если не нашли 'eval_count' напрямую
+            if 'eval_count' not in metadata and 'completion_tokens' in usage_stats:
+                metadata['eval_count'] = usage_stats['completion_tokens']
+
+            # --- ШАГ 3: Финальная очистка ---
+            # Убираем ключи, значения которых None, чтобы избежать ошибок далее.
             return {k: v for k, v in metadata.items() if v is not None}
 
         except Exception as e:
@@ -110,9 +114,24 @@ class OpenAICompatibleClient(ProviderClient):
             return {}
 
     def extract_metadata_from_chunk(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        choice = chunk.get("choices", [{}])[0]
-        if choice.get("finish_reason") is not None:
-            if "usage" in chunk:
-                return self.extract_metadata_from_response(chunk)
-            return {}
+        """
+        Проверяет, является ли чанк финальным, и если да, извлекает из него метаданные.
+        Возвращает словарь с метаданными для финального чанка или None для промежуточных.
+        """
+
+        # Признак №1: OpenAI-style (наличие finish_reason)
+        is_final_openai = False
+        choices = chunk.get("choices")
+        if choices and isinstance(choices, list) and len(choices) > 0:
+            if choices[0].get("finish_reason") is not None:
+                is_final_openai = True
+
+        # --- ШАГ 2: Если чанк финальный, делегируем извлечение ---
+        if is_final_openai:
+            # Мы не гадаем, что внутри чанка. Мы просто передаем его дальше.
+            # Наша универсальная функция extract_metadata_from_response сама разберется,
+            # есть ли там 'usage', поля Ollama или что-то еще.
+            return self.extract_metadata_from_response(chunk)
+
+        # --- ШАГ 3: Если это обычный чанк с контентом, возвращаем None ---
         return None

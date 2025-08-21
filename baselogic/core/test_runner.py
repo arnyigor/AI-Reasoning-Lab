@@ -9,14 +9,12 @@ from typing import Dict, Any, List, Optional
 
 import psutil
 
-from .GeminiClient import GeminiClient
 from .adapter import AdapterLLMClient
 from .client_factory import LLMClientFactory
 # --- ИЗМЕНЕНИЕ 1: Обновляем импорты для новой архитектуры ---
 # Импортируем старый интерфейс, который ожидает TestRunner
-from .interfaces import ILLMClient, LLMClientError, ProviderClient
+from .interfaces import ILLMClient, LLMClientError
 from .llm_client import LLMClient
-from .openai_client import OpenAICompatibleClient
 # Импортируем компоненты новой архитектуры
 from .plugin_manager import PluginManager
 from .progress_tracker import ProgressTracker
@@ -114,6 +112,7 @@ class TestRunner:
         successful_models, failed_models = [], []
         # Расчет общего числа тест-кейсов для прогресс-бара
         num_runs = self.config.get('runs_per_test', 1)
+        raw_save = self.config.get('runs_raw_save', 1)
         total_test_cases = len(self.test_generators) * num_runs * len(self.config['models_to_test'])
 
         progress = ProgressTracker(total_test_cases)
@@ -145,8 +144,9 @@ class TestRunner:
                     log.info("🧪 ЭТАП 3: Выполнение тестов...")
                     model_results = self._run_tests_for_model(client, model_name, model_details, progress)
 
-                    log.info("💾 ЭТАП 4: Сохранение результатов...")
-                    self._save_results(model_name, model_results)
+                    if raw_save:
+                        log.info("💾 ЭТАП 4: Сохранение результатов...")
+                        self._save_results(model_name, model_results)
 
                     if not model_results:
                         failed_models.append((model_name, "Нет результатов от модели"))
@@ -159,10 +159,8 @@ class TestRunner:
                     continue
         finally:
             progress.close()
-
-        # ... (Итоговый отчет в консоли)
-        log.info("📊 ИТОГОВЫЙ ОТЧЕТ:")
-        # ...
+        if raw_save:
+            log.info("📊 ИТОГОВЫЙ ОТЧЕТ:")
 
     def _create_client_safely(self, model_config: Dict[str, Any]) -> Optional[ILLMClient]:
         """
@@ -263,14 +261,12 @@ class TestRunner:
                 # Заголовок теперь нейтральный
                 log.info("      --- Детали верификации ---")
                 for key, value in details.items():
-                    log.info("      - %s: %s", key, str(value)[:200]) # Обрезаем длинные строки
+                    log.info("      - %s: %s", key, str(value)[:200])  # Обрезаем длинные строки
                 log.info("      --------------------------")
 
             # 3. ВСЕГДА выводим метрики производительности, если они есть
             if performance_metrics:
                 self.log_performance_metrics(performance_metrics)
-
-            # >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
 
             # Сборка итогового результата для JSON (остается без изменений)
             return {
@@ -348,7 +344,8 @@ class TestRunner:
         log.info("      🖨️  Генерация ответа (%d токенов): %.2f мс → %.2f ток/с",
                  eval_count, eval_time_ms, output_tps)
 
-        log.info("      🕐 Общее время обработки: %.2f мс (по таймеру: %.2f мс)", total_time_ms, total_latency_ms or total_time_ms)
+        log.info("      🕐 Общее время обработки: %.2f мс (по таймеру: %.2f мс)", total_time_ms,
+                 total_latency_ms or total_time_ms)
 
         if peak_ram_mb is not None:
             log.info("      📈 Пиковое потребление RAM: %.1f МБ", peak_ram_mb)

@@ -12,6 +12,7 @@ from baselogic.core.test_runner import TestRunner
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
+
 # Импортируем только функцию для настройки файлового логера
 
 
@@ -46,7 +47,7 @@ def main():
 
         # >>>>> ИЗМЕНЕНИЕ: Передаем ВЕСЬ конфиг <<<<<
         setup_logging(config)
-        log = logging.getLogger(__name__) # Получаем логгер после настройки
+        log = logging.getLogger(__name__)  # Получаем логгер после настройки
 
         log.info("🚀 Запуск платформы 'Базовый Контроль'...")
         log.info("   - Модели для тестирования: %s", config.get('models_to_test', 'не указаны'))
@@ -77,32 +78,32 @@ def main():
     runner = TestRunner(config)
     runner.run()
 
-    # 5. Генерация единого комплексного отчета
-    logging.info("[ЭТАП 3: Генерация отчета]")
-    try:
-        from baselogic.core.reporter import Reporter
+    if config.get("runs_raw_save"):
+        # 5. Генерация единого комплексного отчета
+        logging.info("[ЭТАП 3: Генерация отчета]")
+        try:
+            from baselogic.core.reporter import Reporter
 
-        results_dir = project_root / "results" / "raw"
-        reporter = Reporter(results_dir=results_dir)
+            results_dir = project_root / "results" / "raw"
+            reporter = Reporter(results_dir=results_dir)
 
-        # Проверяем, есть ли данные для отчета
-        if reporter.all_results.empty:
-            logging.warning("Нет данных для генерации отчета. Завершение работы.")
-            return
+            # Проверяем, есть ли данные для отчета
+            if reporter.all_results.empty:
+                logging.warning("Нет данных для генерации отчета. Завершение работы.")
+                return
 
-        # Вызываем ОДИН метод, который генерирует весь отчет
-        # Confidence Threshold можно вынести в config.yaml, если нужно
-        report_content = reporter.generate_leaderboard_report()
+            # Вызываем ОДИН метод, который генерирует весь отчет
+            # Confidence Threshold можно вынести в config.yaml, если нужно
+            report_content = reporter.generate_leaderboard_report()
 
-        # Сохраняем отчет в главный файл LEADERBOARD.md в корне проекта
-        report_file = project_root / "BASE_LOGIC_BENCHMARK_REPORT.md"
-        with open(report_file, 'w', encoding='utf-8') as f:
-            f.write(report_content)
+            # Сохраняем отчет в главный файл LEADERBOARD.md в корне проекта
+            report_file = project_root / "BASE_LOGIC_BENCHMARK_REPORT.md"
+            with open(report_file, 'w', encoding='utf-8') as f:
+                f.write(report_content)
 
-        logging.info("✅ Комплексный отчет обновлен/создан: %s", report_file)
-
-    except Exception as e:
-        logging.error("❌ Произошла ошибка при генерации отчета: %s", e, exc_info=True)
+            logging.info("✅ Комплексный отчет обновлен/создан: %s", report_file)
+        except Exception as e:
+            logging.error("❌ Произошла ошибка при генерации отчета: %s", e, exc_info=True)
 
     logging.info("✅ Работа платформы успешно завершена.")
 
