@@ -74,39 +74,44 @@ class OpenAICompatibleClient(ProviderClient):
     def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
         """
         Извлекает метаданные, предоставленные сервером в API-ответе.
-        Реализует логику "Приоритет и Фолбэк": сначала ищутся прямые
-        (Ollama-style) поля, и только при их отсутствии используется блок 'usage' (OpenAI-style).
+        Реализует логику "Приоритет и Фолбэк" и поддерживает расширенный набор полей.
         """
         try:
             metadata = {}
 
             # --- ШАГ 1: Прямое извлечение (Приоритетный источник) ---
-            # Собираем все поля, которые могут лежать на верхнем уровне ответа.
-            # Это включает и Ollama-специфичные, и общие поля.
+            # Расширяем список полей, которые могут лежать на верхнем уровне ответа.
             direct_fields = [
+                # Стандартные/Общие поля
                 "model", "created", "id", "object", "system_fingerprint",
+
+                # Ollama-специфичные поля
                 "total_duration", "load_duration", "prompt_eval_count",
-                "prompt_eval_duration", "eval_count", "eval_duration"
+                "prompt_eval_duration", "eval_count", "eval_duration",
+
+                # НОВЫЕ ПОЛЯ, обнаруженные в логах от "Chutes"
+                "provider",
+                "native_finish_reason" # Может быть внутри 'choices', но проверим и здесь
             ]
             for field in direct_fields:
                 if field in response:
                     metadata[field] = response[field]
 
-            # --- ШАГ 2: Логика фолбэка для количества токенов ---
-            # Если после первого шага у нас нет данных о токенах, ищем их в 'usage'.
-            # Используем `or {}` для безопасного доступа, даже если ключ 'usage' отсутствует.
-            usage_stats = response.get("usage") or {}
+            # Также проверим 'native_finish_reason' внутри 'choices', где он чаще всего бывает
+            if 'native_finish_reason' not in metadata:
+                choices = response.get("choices")
+                if choices and isinstance(choices, list) and len(choices) > 0:
+                    if 'native_finish_reason' in choices[0]:
+                        metadata['native_finish_reason'] = choices[0]['native_finish_reason']
 
-            # Ищем токены промпта, только если не нашли 'prompt_eval_count' напрямую
+            # --- ШАГ 2: Логика фолбэка для количества токенов (OpenAI-style) ---
+            usage_stats = response.get("usage") or {}
             if 'prompt_eval_count' not in metadata and 'prompt_tokens' in usage_stats:
                 metadata['prompt_eval_count'] = usage_stats['prompt_tokens']
-
-            # Ищем токены ответа, только если не нашли 'eval_count' напрямую
             if 'eval_count' not in metadata and 'completion_tokens' in usage_stats:
                 metadata['eval_count'] = usage_stats['completion_tokens']
 
             # --- ШАГ 3: Финальная очистка ---
-            # Убираем ключи, значения которых None, чтобы избежать ошибок далее.
             return {k: v for k, v in metadata.items() if v is not None}
 
         except Exception as e:
@@ -120,14 +125,14 @@ class OpenAICompatibleClient(ProviderClient):
         """
 
         # Признак №1: OpenAI-style (наличие finish_reason)
-        is_final_openai = False
+        is_final = False
         choices = chunk.get("choices")
         if choices and isinstance(choices, list) and len(choices) > 0:
             if choices[0].get("finish_reason") is not None:
-                is_final_openai = True
+                is_final = True
 
         # --- ШАГ 2: Если чанк финальный, делегируем извлечение ---
-        if is_final_openai:
+        if is_final:
             # Мы не гадаем, что внутри чанка. Мы просто передаем его дальше.
             # Наша универсальная функция extract_metadata_from_response сама разберется,
             # есть ли там 'usage', поля Ollama или что-то еще.

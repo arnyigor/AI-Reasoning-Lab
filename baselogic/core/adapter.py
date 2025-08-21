@@ -52,11 +52,106 @@ class AdapterLLMClient(ILLMClient):
             # Не логируем здесь, чтобы не спамить, если токенизатор не настроен
             return self._estimate_tokens_heuristic(text)
 
+    # Эти методы должны быть внутри вашего класса Adapter
+    def _handle_stream_response(self, response_generator: Generator) -> tuple[
+        str, dict, float | None, float]:
+        """Обрабатывает потоковый ответ, собирает текст и метаданные."""
+        log.info("Начало получения потокового ответа...")
+        print(">>> LLM Stream: ", end="", flush=True)
+
+        chunks_text = []
+        server_metadata = {}
+        ttft_time: float | None = None
+        first_chunk = True
+
+        for chunk_dict in response_generator:
+            # log.debug("RAW CHUNK RECEIVED: %s", chunk_dict)
+            if first_chunk:
+                ttft_time = time.perf_counter()
+                first_chunk = False
+
+            delta = self.new_client.provider.extract_delta_from_chunk(chunk_dict)
+            if delta:
+                print(delta, end="", flush=True)
+                chunks_text.append(delta)
+
+            chunk_metadata = self.new_client.provider.extract_metadata_from_chunk(chunk_dict)
+            if chunk_metadata:
+                server_metadata.update(chunk_metadata)
+
+        end_time = time.perf_counter()
+        print("\n")
+        final_response_str = "".join(chunks_text)
+        log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
+
+        return final_response_str, server_metadata, ttft_time, end_time
+
+    def _handle_non_stream_response(self, response_dict: dict) -> tuple[str, dict, float, float]:
+        """Обрабатывает непотоковый (полный) ответ."""
+        end_time = ttft_time = time.perf_counter()
+
+        choices = self.new_client.provider.extract_choices(response_dict)
+        final_response_str = "".join(self.new_client.provider.extract_content_from_choice(c) for c in choices)
+        server_metadata = self.new_client.provider.extract_metadata_from_response(response_dict)
+        print(">>> LLM response: ", end="", flush=True)
+        print(final_response_str)
+        return final_response_str, server_metadata, ttft_time, end_time
+
+    def _build_final_metrics(self, server_metadata: dict, prompt_token_count: int, final_response_str: str,
+                             start_time: float, ttft_time: float | None, end_time: float) -> dict:
+        """Собирает итоговые метрики, комбинируя серверные данные и клиентские замеры."""
+        # Начинаем с того, что дал сервер
+        final_metrics = server_metadata.copy()
+
+        # Считаем токены ответа на клиенте (как фолбэк)
+        if 'eval_count' not in final_metrics:
+            eval_token_count_client = self._count_tokens_client(final_response_str)
+            log.info(f"Клиентская оценка токенов ответа: {eval_token_count_client}")
+            final_metrics['eval_count'] = eval_token_count_client
+
+        # Используем подсчет токенов промпта как фолбэк
+        if 'prompt_eval_count' not in final_metrics:
+            final_metrics['prompt_eval_count'] = prompt_token_count
+
+        # Если сервер не дал тайминги, считаем их сами
+        if 'prompt_eval_duration' not in final_metrics:
+            log.debug("Сервер не вернул детальные тайминги. Расчет на стороне клиента.")
+            total_duration_ns = int((end_time - start_time) * 1e9)
+            final_metrics['total_duration'] = total_duration_ns
+            if ttft_time:
+                final_metrics['prompt_eval_duration'] = int((ttft_time - start_time) * 1e9)
+                final_metrics['eval_duration'] = int((end_time - ttft_time) * 1e9)
+            else:
+                final_metrics['prompt_eval_duration'] = total_duration_ns
+                final_metrics['eval_duration'] = 0
+            final_metrics['load_duration'] = 0
+
+        # Безусловно добавляем уникальные клиентские метрики полного цикла
+        total_latency_ms = (end_time - start_time) * 1000
+        final_metrics['total_latency_ms'] = total_latency_ms
+        if ttft_time:
+            final_metrics['time_to_first_token_ms'] = round((ttft_time - start_time) * 1000, 2)
+        else:
+            final_metrics['time_to_first_token_ms'] = round(total_latency_ms, 2)
+
+        return {k: v for k, v in final_metrics.items() if v is not None}
+
+    def _build_error_response(self, error: Exception, start_time: float) -> Dict[str, Any]:
+        """Формирует стандартизированный ответ об ошибке."""
+        log.error("Произошла ошибка API при запросе к LLM: %s", error)
+        total_time_ms = (time.perf_counter() - start_time) * 1000
+        return {
+            "final_response": f"ERROR: API call failed. Reason: {error}",
+            "parsed_response": None,
+            "performance_metrics": {
+                "model": self.model_config.get('model_name', 'unknown'),
+                "total_latency_ms": total_time_ms,
+                "error": str(error)
+            }
+        }
+
     def query(self, user_prompt: str) -> Dict[str, Any]:
         log.info("Adapter получил промпт (длина: %d символов).", len(user_prompt))
-
-        # --- БЛОК КЛИЕНТСКОГО ПОДСЧЕТА ТОКЕНОВ ---
-        # 1. Всегда считаем токены промпта на клиенте (как фолбэк)
         prompt_token_count = self._count_tokens_client(user_prompt)
         log.info(f"Клиентская оценка токенов промпта: {prompt_token_count}")
 
@@ -66,115 +161,35 @@ class AdapterLLMClient(ILLMClient):
         generation_opts = self.model_config.get('generation', {})
 
         start_time = time.perf_counter()
-        ttft_time: float | None = None
-        end_time: float | None = None
 
         try:
             response_or_stream = self.new_client.chat(
                 messages, stream=use_stream, **generation_opts
             )
 
-            final_response_str: str = ""
-            # Это будут метаданные, полученные ИСКЛЮЧИТЕЛЬНО от сервера
-            server_metadata: Dict[str, Any] = {}
-
-            if use_stream:
-                if isinstance(response_or_stream, Generator):
-                    log.info("Начало получения потокового ответа...")
-                    print(">>> LLM Stream: ", end="", flush=True)
-
-                    chunks_text = []
-                    first_chunk = True
-                    for chunk_dict in response_or_stream:
-                        if first_chunk:
-                            # Фиксируем метку времени, а не длительность
-                            ttft_time = time.perf_counter()
-                            first_chunk = False
-
-                        delta = self.new_client.provider.extract_delta_from_chunk(chunk_dict)
-                        if delta:
-                            print(delta, end="", flush=True)
-                            chunks_text.append(delta)
-
-                        chunk_metadata = self.new_client.provider.extract_metadata_from_chunk(chunk_dict)
-                        if chunk_metadata:
-                            # Используем update для безопасного слияния (на случай нескольких чанков с мета)
-                            server_metadata.update(chunk_metadata)
-
-                    end_time = time.perf_counter()  # Фиксируем конец после последнего чанка
-                    print("\n")
-                    final_response_str = "".join(chunks_text)
-                    log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
-            else:  # Не-потоковый
-                if isinstance(response_or_stream, dict):
-                    log.info(f" Ответ: {response_or_stream}")
-                    # Для непотокового ответа время до "первого токена" равно времени получения всего ответа
-                    end_time = ttft_time = time.perf_counter()
-
-                    choices = self.new_client.provider.extract_choices(response_or_stream)
-                    final_response_str = "".join(
-                        self.new_client.provider.extract_content_from_choice(c) for c in choices)
-                    server_metadata = self.new_client.provider.extract_metadata_from_response(response_or_stream)
-
-            # Защита от непредвиденных ошибок, если end_time не установился
-            if end_time is None:
-                end_time = time.perf_counter()
-
-            # --- НОВАЯ, УМНАЯ ЛОГИКА ОБЪЕДИНЕНИЯ МЕТРИК ---
-
-            # Начинаем с того, что дал сервер
-            final_metrics = server_metadata.copy()
-
-            # 2. Считаем токены ответа на клиенте (как фолбэк)
-            eval_token_count_client = self._count_tokens_client(final_response_str)
-            log.info(f"Клиентская оценка токенов ответа: {eval_token_count_client}")
-
-            # 3. УМНОЕ ОБЪЕДИНЕНИЕ МЕТРИК
-            final_metrics = server_metadata.copy()
-
-            # Используем наши подсчеты токенов как фолбэк
-            if 'prompt_eval_count' not in final_metrics: final_metrics['prompt_eval_count'] = prompt_token_count
-            if 'eval_count' not in final_metrics: final_metrics['eval_count'] = eval_token_count_client
-
-            # Если сервер не дал тайминги, считаем их сами
-            if 'prompt_eval_duration' not in final_metrics:
-                log.debug("Сервер не вернул детальные тайминги. Расчет на стороне клиента.")
-                total_duration_ns = int((end_time - start_time) * 1e9)
-                final_metrics['total_duration'] = total_duration_ns
-                if ttft_time:
-                    final_metrics['prompt_eval_duration'] = int((ttft_time - start_time) * 1e9)
-                    final_metrics['eval_duration'] = int((end_time - ttft_time) * 1e9)
-                else:
-                    final_metrics['prompt_eval_duration'] = total_duration_ns
-                    final_metrics['eval_duration'] = 0
-                final_metrics['load_duration'] = 0
-
-            # Безусловно добавляем уникальные клиентские метрики полного цикла
-            total_latency_ms = (end_time - start_time) * 1000
-            final_metrics['total_latency_ms'] = total_latency_ms
-            if ttft_time:
-                final_metrics['time_to_first_token_ms'] = round((ttft_time - start_time) * 1000, 2)
+            if use_stream and isinstance(response_or_stream, Generator):
+                final_response_str, server_metadata, ttft_time, end_time = self._handle_stream_response(
+                    response_or_stream)
+            elif not use_stream and isinstance(response_or_stream, dict):
+                final_response_str, server_metadata, ttft_time, end_time = self._handle_non_stream_response(
+                    response_or_stream)
             else:
-                final_metrics['time_to_first_token_ms'] = round(total_latency_ms, 2)
+                # Обработка неожиданного типа ответа
+                raise TypeError(
+                    f"Получен неожиданный тип ответа: {type(response_or_stream)} для use_stream={use_stream}")
+
+            final_metrics = self._build_final_metrics(
+                server_metadata=server_metadata,
+                prompt_token_count=prompt_token_count,
+                final_response_str=final_response_str,
+                start_time=start_time,
+                ttft_time=ttft_time,
+                end_time=end_time
+            )
 
             parsed_struct = self._parse_think_response(final_response_str)
-            parsed_struct['performance_metrics'] = {k: v for k, v in final_metrics.items() if v is not None}
+            parsed_struct['performance_metrics'] = final_metrics
             return parsed_struct
 
-        except LLMClientError as e:
-            # ЭТО КЛЮЧЕВОЙ БЛОК
-            log.error("Произошла ошибка API при запросе к LLM: %s", e)
-            # Мы можем сформировать "пустой" ответ со специальными метаданными об ошибке
-            total_time_ms = (time.perf_counter() - start_time) * 1000
-
-            error_response = {
-                "final_response": f"ERROR: API call failed. Reason: {e}",
-                "parsed_response": None,
-                "performance_metrics": {
-                    "model": self.model_config.get('model_name', 'unknown'),
-                    "total_latency_ms": total_time_ms,
-                    "error": str(e)
-                    # Остальные метрики будут отсутствовать, что явно укажет на сбой
-                }
-            }
-            return error_response
+        except LLMClientError as e:  # Замените на ваше реальное исключение
+            return self._build_error_response(e, start_time)
