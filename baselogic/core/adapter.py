@@ -77,7 +77,7 @@ class AdapterLLMClient(ILLMClient):
                     if chunk_metadata is not None: # Может быть пустым словарем {}
                         metadata = chunk_metadata
 
-                print() # Перевод строки в конце стрима
+                print("\n") # Перевод строки в конце стрима
                 final_response_str = "".join(chunks_text)
                 log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
         else: # Не-потоковый

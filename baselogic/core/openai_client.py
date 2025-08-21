@@ -71,14 +71,43 @@ class OpenAICompatibleClient(ProviderClient):
         return chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
 
     def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
-        usage_stats = response.get("usage", {})
-        if not usage_stats:
+        """
+        Извлекает метаданные из финального ответа или чанка.
+        Поддерживает различные форматы провайдеров.
+        """
+        try:
+            metadata = {}
+
+            # OpenAI-style usage
+            usage_stats = response.get("usage", {})
+            if usage_stats:
+                metadata.update({
+                    "prompt_eval_count": usage_stats.get("prompt_tokens"),
+                    "eval_count": usage_stats.get("completion_tokens"),
+                    "total_tokens": usage_stats.get("total_tokens"),
+                })
+
+            # Ollama-style метаданные
+            ollama_fields = [
+                "total_duration", "load_duration", "prompt_eval_count",
+                "prompt_eval_duration", "eval_count", "eval_duration"
+            ]
+            for field in ollama_fields:
+                if field in response:
+                    metadata[field] = response[field]
+
+            # Дополнительные поля
+            additional_fields = ["model", "created", "id", "object", "system_fingerprint"]
+            for field in additional_fields:
+                if field in response:
+                    metadata[field] = response[field]
+
+            # Убираем None значения
+            return {k: v for k, v in metadata.items() if v is not None}
+
+        except Exception as e:
+            log.warning(f"Ошибка при извлечении метаданных из ответа: {e}")
             return {}
-        return {
-            "prompt_eval_count": usage_stats.get("prompt_tokens"),
-            "eval_count": usage_stats.get("completion_tokens"),
-            "total_tokens": usage_stats.get("total_tokens"),
-        }
 
     def extract_metadata_from_chunk(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         choice = chunk.get("choices", [{}])[0]
