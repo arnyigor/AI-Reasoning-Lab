@@ -74,8 +74,6 @@ class AdapterLLMClient(ILLMClient):
         """
 
         log.info("Adapter получил промпт (длина: %d символов).", len(user_prompt))
-        log.debug("--- Входящий промпт ---\n%s\n-----------------------", user_prompt)
-
         messages = [{"role": "user", "content": user_prompt}]
 
         # Определяем, нужно ли использовать потоковый режим, на основе конфига
@@ -92,7 +90,6 @@ class AdapterLLMClient(ILLMClient):
             **generation_opts
         )
 
-        final_response_str: str = ""
         if use_stream:
             log.info("Начало получения потокового ответа...")
 

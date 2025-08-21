@@ -29,6 +29,7 @@ class OllamaClient(ProviderClient):
         self.session.headers.update({"Content-Type": "application/json"})
         log.info("Нативный Ollama HTTP клиент инициализирован. Endpoint: %s", self.endpoint)
 
+
     def prepare_payload(
             self,
             messages: List[Dict[str, str]],
@@ -38,28 +39,31 @@ class OllamaClient(ProviderClient):
             **kwargs: Any
     ) -> Dict[str, Any]:
         """
-        Собирает payload для /api/chat.
+        Собирает payload для /api/chat или /api/generate.
         """
+
         # Аргументы верхнего уровня для /api/chat
         top_level_args = {'format', 'keep_alive', 'think'}
 
-        payload = {
+        payload: Dict[str, Any] = {
             "model": model,
             "messages": messages,
             "stream": stream,
         }
 
-        options = {}
+        options: Dict[str, Any] = {}
         for key, value in kwargs.items():
-            if value is None: continue
+            if value is None:
+                continue
             if key in top_level_args:
                 payload[key] = value
             else:
                 options[key] = value
 
         if options:
-            payload['options'] = options
+            payload["options"] = options  # <-- dict, как требует API
 
+        # Убираем None
         return {k: v for k, v in payload.items() if v is not None}
 
     def send_request(
@@ -108,17 +112,24 @@ class OllamaClient(ProviderClient):
 
     def extract_choices(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
-        Оборачивает единичный ответ от /api/chat в список.
+        Преобразует единичный ответ Ollama в список из одного "choice".
+        "Choice" в нашем стандарте - это словарь, содержащий 'message'.
         """
+        # Ответ Ollama уже является тем, что мы считаем "choice".
+        # Просто оборачиваем его в список.
         return [response] if 'message' in response else []
 
     def extract_content_from_choice(self, choice: Dict[str, Any]) -> str:
-        """Извлекает контент из полного ответа /api/chat."""
+        """
+        Извлекает контент из "choice" (который является полным ответом Ollama).
+        """
         return choice.get("message", {}).get("content", "")
 
     def extract_delta_from_chunk(self, chunk: Dict[str, Any]) -> str:
         """
-        Извлекает текстовую дельту из чанка /api/chat, включая 'thinking'.
+        Извлекает дельту из чанка Ollama. Структура чанка Ollama похожа на
+        структуру "choice" в OpenAI: он содержит ключ 'message',
+        внутри которого есть 'content' и 'thinking'.
         """
         message = chunk.get("message", {})
 
@@ -128,3 +139,24 @@ class OllamaClient(ProviderClient):
 
         content_part = message.get("content")
         return content_part if content_part is not None else ""
+
+    def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Извлекает метаданные из полного ответа Ollama.
+        """
+        return {
+            "total_duration_ns": response.get("total_duration"),
+            "load_duration_ns": response.get("load_duration"),
+            "prompt_eval_count": response.get("prompt_eval_count"),
+            "prompt_eval_duration_ns": response.get("prompt_eval_duration"),
+            "eval_count": response.get("eval_count"),
+            "eval_duration_ns": response.get("eval_duration"),
+        }
+
+    def extract_metadata_from_chunk(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Проверяет, является ли чанк финальным, и извлекает метаданные.
+        """
+        if chunk.get("done", False) is True:
+            return self.extract_metadata_from_response(chunk)
+        return None

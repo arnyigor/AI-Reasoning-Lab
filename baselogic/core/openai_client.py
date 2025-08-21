@@ -67,3 +67,33 @@ class OpenAICompatibleClient(ProviderClient):
 
     def extract_delta_from_chunk(self, chunk: Dict[str, Any]) -> str:
         return chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+
+    def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Извлекает статистику использования ('usage') из полного не-потокового ответа.
+        """
+        usage_stats = response.get("usage", {})
+        if not usage_stats:
+            log.debug("Поле 'usage' не найдено в не-потоковом ответе.")
+            return {}
+
+        return {
+            # Приводим к нашему стандартизированному формату
+            "prompt_eval_count": usage_stats.get("prompt_tokens"),
+            "eval_count": usage_stats.get("completion_tokens"),
+            "total_tokens": usage_stats.get("total_tokens"),
+        }
+
+    def extract_metadata_from_chunk(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        В потоковом режиме OpenAI-совместимые серверы обычно НЕ присылают
+        метаданные 'usage'. Поэтому этот метод просто проверяет, является
+        ли чанк финальным, и возвращает пустой словарь, если это так,
+        чтобы сигнализировать о завершении потока.
+        """
+        choice = chunk.get("choices", [{}])[0]
+        if choice.get("finish_reason") is not None:
+            # Поток завершен. Возвращаем пустой словарь, так как usage недоступен.
+            log.debug("Обнаружен финальный чанк потока (finish_reason: %s).", choice.get("finish_reason"))
+            return {}
+        return None

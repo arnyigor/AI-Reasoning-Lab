@@ -266,7 +266,8 @@ class TestRunner:
             # Извлекаем уже распарсенные "мысли" и чистый "ответ"
             thinking_response = response_struct.get("thinking_response", "")
             llm_response = response_struct.get("llm_response", "")
-
+            performance_metrics = response_struct.get("performance_metrics", {})
+            performance_metrics['ram_usage_mb'] = ram_usage_mb
             # Верифицируем только чистый ответ
             verification_result = generator_instance.verify(llm_response, expected_output)
             is_correct = verification_result.get('is_correct', False)
@@ -282,6 +283,27 @@ class TestRunner:
                         log.info("      - %s: %s", key, str(value)[:200])
                     log.info("      ---------------------------------")
 
+
+            # Логируем метрики производительности, если они есть
+            if performance_metrics:
+                log.info("      --- Метрики производительности ---")
+                log.debug("      --- Метрики %s ---", performance_metrics)
+                # Форматируем TPS для красивого вывода, если он есть
+                if 'tokens_per_second' in performance_metrics:
+                    tps = performance_metrics['tokens_per_second']
+                    log.info("      - Токенов/сек: %.2f", tps)
+
+                # Форматируем TTFT
+                if 'time_to_first_token_ms' in performance_metrics and performance_metrics['time_to_first_token_ms'] > 0:
+                    ttft = performance_metrics['time_to_first_token_ms']
+                    log.info("      - Время до первого токена: %.0f мс", ttft)
+
+                # Выводим остальные метрики "как есть"
+                for key, value in performance_metrics.items():
+                    if key not in ['tokens_per_second', 'time_to_first_token_ms'] and value is not None:
+                        log.info("      - %s: %s", key.replace('_ns', ' (ns)').replace('_', ' ').title(), value)
+                log.info("      ---------------------------------")
+
             # Собираем результат
             return {
                 "test_id": test_id,
@@ -295,7 +317,7 @@ class TestRunner:
                 "is_correct": is_correct,
                 "execution_time_ms": exec_time_ms,
                 "verification_details": verification_result.get('details', {}),
-                "performance_metrics": {"peak_ram_usage_mb": round(ram_usage_mb, 2)}
+                "performance_metrics": performance_metrics
             }
         except LLMClientError as e:
             log.error("      ❌ Ошибка LLM клиента: %s", e)

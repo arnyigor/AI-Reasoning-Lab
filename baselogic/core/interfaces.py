@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Iterable, Union, List
+from typing import Dict, Any, Iterable, Union, List, Optional
 
 
 class ILLMClient(ABC):
@@ -135,6 +135,19 @@ class ProviderClient(ABC):
 
         Returns:
             Строка с фрагментом текста.
+        """
+        ...
+
+    @abstractmethod
+    def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
+        """Извлекает метаданные (статистику) из полного не-потокового ответа."""
+        ...
+
+    @abstractmethod
+    def extract_metadata_from_chunk(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Извлекает метаданные, если они пришли в финальном чанке потока.
+        Возвращает словарь или None, если это не финальный чанк.
         """
         ...
 

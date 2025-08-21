@@ -34,6 +34,7 @@ class LLMClient:
         payload = self.provider.prepare_payload(
             messages, self.model, stream=stream, **all_opts # Передаем все опции
         )
+        log.info("--- Параметры %s", payload)
 
         raw_response_or_stream = self.provider.send_request(payload)
 
