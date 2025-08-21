@@ -1,30 +1,33 @@
 import logging
+import json
+import requests
 from typing import Any, Dict, List, Optional, Union
 from collections.abc import Iterable, Generator
-import ollama
 
-# Импортируем наш стандартизированный интерфейс
-from .interfaces import ProviderClient
+from .interfaces import (
+    ProviderClient,
+    LLMResponseError,
+    LLMConfigurationError,
+    LLMConnectionError
+)
 
 log = logging.getLogger(__name__)
 
 class OllamaClient(ProviderClient):
     """
     Чистая реализация ProviderClient для нативного API Ollama.
-    Этот клиент напрямую использует библиотеку `ollama` и корректно
-    обрабатывает ее специфические параметры, такие как `options` и `think`.
+
+    Эта версия использует эндпоинт /api/chat, который поддерживает
+    диалоговый формат и параметр `think`.
+    Клиент написан с использованием requests для полного контроля.
     """
-    def __init__(self):
-        """
-        Инициализирует нативный клиент Ollama.
-        """
-        try:
-            self.client = ollama.Client()
-            log.info("Нативный Ollama клиент успешно инициализирован.")
-        except Exception as e:
-            log.error("Не удалось подключиться к Ollama. Убедитесь, что сервис запущен. Ошибка: %s", e)
-            # Пробрасываем исключение, чтобы TestRunner мог его поймать
-            raise
+    def __init__(self, base_url: str = "http://localhost:11434"):
+        self.base_url = base_url.rstrip('/')
+        # >>>>> ГЛАВНОЕ ИЗМЕНЕНИЕ: Возвращаем правильный эндпоинт <<<<<
+        self.endpoint = f"{self.base_url}/api/chat"
+        self.session = requests.Session()
+        self.session.headers.update({"Content-Type": "application/json"})
+        log.info("Нативный Ollama HTTP клиент инициализирован. Endpoint: %s", self.endpoint)
 
     def prepare_payload(
             self,
@@ -35,88 +38,93 @@ class OllamaClient(ProviderClient):
             **kwargs: Any
     ) -> Dict[str, Any]:
         """
-        Собирает payload для вызова `ollama.chat`, правильно разделяя
-        аргументы верхнего уровня и параметры вложенного словаря `options`.
+        Собирает payload для /api/chat.
         """
-        # Определяем аргументы, которые `ollama.chat` принимает напрямую
-        top_level_args = {'think', 'format', 'keep_alive'}
+        # Аргументы верхнего уровня для /api/chat
+        top_level_args = {'format', 'keep_alive', 'think'}
 
-        # Собираем базовый payload
         payload = {
             "model": model,
             "messages": messages,
             "stream": stream,
         }
 
-        # Собираем словарь 'options' для всех остальных параметров
         options = {}
-
         for key, value in kwargs.items():
-            if value is None:
-                continue
-
+            if value is None: continue
             if key in top_level_args:
-                # 'think' и другие специальные аргументы добавляем на верхний уровень
                 payload[key] = value
             else:
-                # Все остальное (temperature, num_ctx, top_p, stop и т.д.) идет в options
                 options[key] = value
 
         if options:
             payload['options'] = options
 
-        log.debug("Payload для Ollama API сформирован: %s", payload)
-        return payload
+        return {k: v for k, v in payload.items() if v is not None}
 
     def send_request(
             self,
             payload: Dict[str, Any]
     ) -> Union[Dict[str, Any], Iterable[Dict[str, Any]]]:
         """
-        Отправляет запрос через библиотеку `ollama`, которая сама
-        обрабатывает HTTP-взаимодействие.
+        Отправляет HTTP-запрос на эндпоинт /api/chat.
         """
-        model_name = payload.get('model', 'unknown')
-        log.info("Отправка запроса к модели '%s' через нативный Ollama клиент...", model_name)
+        is_stream = payload.get("stream", False)
+        log.info("Отправка запроса на %s (stream=%s)...", self.endpoint, is_stream)
         try:
-            response = self.client.chat(**payload)
+            resp = self.session.post(self.endpoint, json=payload, stream=is_stream, timeout=180)
+            resp.raise_for_status()
             log.info("Запрос к Ollama успешно выполнен.")
-            return response
-        except ollama.ResponseError as e:
-            log.error("Ollama API Error (Status %d): %s", e.status_code, e.error)
-            raise
-        except TypeError as e:
-            log.error("Ошибка в типах аргументов для ollama.chat: %s. Payload: %s", e, payload)
-            raise
-        except Exception as e:
-            log.error("Неожиданная ошибка при работе с Ollama: %s", e, exc_info=True)
-            raise
+
+            if is_stream:
+                return (json.loads(line) for line in resp.iter_lines() if line)
+            else:
+                return resp.json()
+
+        except requests.exceptions.HTTPError as e:
+            error_body = ""
+            if e.response is not None:
+                try:
+                    error_data = e.response.json()
+                    error_body = error_data.get('error', e.response.text)
+                except json.JSONDecodeError:
+                    error_body = e.response.text
+
+            # --- Улучшенная обработка ошибок ---
+            if "does not support thinking" in str(error_body).lower():
+                user_friendly_error = (
+                    f"Модель '{payload.get('model')}' не поддерживает режим 'think'. "
+                    "Отключите BC_MODELS_..._INFERENCE_THINK=\"true\" в .env или обновите модель."
+                )
+                log.error(user_friendly_error)
+                raise LLMConfigurationError(user_friendly_error) from e
+            else:
+                log.error("HTTP ошибка при запросе к Ollama (%s): %s", e.response.status_code, error_body)
+                raise LLMResponseError(f"HTTP ошибка Ollama: {error_body}") from e
+
+        except requests.exceptions.RequestException as e:
+            log.error("Сетевая ошибка при запросе к Ollama: %s", e)
+            raise LLMConnectionError(f"Сетевая ошибка Ollama: {e}") from e
 
     def extract_choices(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
         """
-        Ollama в не-потоковом режиме возвращает один объект ответа.
-        Мы оборачиваем его в список для совместимости с интерфейсом.
+        Оборачивает единичный ответ от /api/chat в список.
         """
-        return [response] if response else []
+        return [response] if 'message' in response else []
 
     def extract_content_from_choice(self, choice: Dict[str, Any]) -> str:
-        """Извлекает основной контент из полного ответа Ollama."""
+        """Извлекает контент из полного ответа /api/chat."""
         return choice.get("message", {}).get("content", "")
 
     def extract_delta_from_chunk(self, chunk: Dict[str, Any]) -> str:
         """
-        Извлекает текстовую дельту из чанка Ollama.
-        Корректно обрабатывает "мысли" (`thinking`) и основной контент.
+        Извлекает текстовую дельту из чанка /api/chat, включая 'thinking'.
         """
         message = chunk.get("message", {})
 
-        # Сначала проверяем, есть ли поле "thinking"
         thinking_part = message.get("thinking")
         if thinking_part:
-            # Сразу оборачиваем "мысли" в теги.
-            # AdapterLLMClient затем сможет их отделить.
             return f"<think>{thinking_part}</think>"
 
-        # Если это не "мысли", извлекаем основной контент
         content_part = message.get("content")
         return content_part if content_part is not None else ""

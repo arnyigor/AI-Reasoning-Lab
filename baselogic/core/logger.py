@@ -120,6 +120,6 @@ def setup_logging(config: Optional[Dict[str, Any]] = None):
         llm_handler.setLevel(log_llm_level)
         llm_handler.setFormatter(StructuredFormatter(log_llm_format))
         llm_logger.addHandler(llm_handler)
-
+    logging.getLogger('matplotlib').setLevel(logging.WARNING)
     # Получаем логгер этого модуля и сообщаем об успешной настройке
     logging.getLogger(__name__).info("✅ Система логирования успешно настроена.")

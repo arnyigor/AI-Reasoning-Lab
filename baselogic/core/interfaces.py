@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, Iterable, Union, List
+from typing import Dict, Any, Iterable, Union, List
 
 
 class ILLMClient(ABC):
@@ -141,6 +141,11 @@ class ProviderClient(ABC):
 
 class LLMClientError(Exception):
     """Базовое исключение для ошибок LLM клиентов"""
+    pass
+
+
+class LLMConfigurationError(LLMClientError):
+    """Ошибка, связанная с неверной конфигурацией или несовместимыми параметрами."""
     pass
 
 

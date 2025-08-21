@@ -1,6 +1,5 @@
 import logging
 import re
-import time
 from typing import Dict, Any, Generator
 
 # Импортируем интерфейс, которому должен соответствовать адаптер
@@ -71,77 +70,54 @@ class AdapterLLMClient(ILLMClient):
     def query(self, user_prompt: str) -> Dict[str, Any]:
         """
         Реализует основной метод интерфейса ILLMClient.
-        Устойчив к "мыслительным циклам" моделей благодаря ограничению на количество чанков.
+        Вызывается TestRunner'ом.
         """
+
         log.info("Adapter получил промпт (длина: %d символов).", len(user_prompt))
         log.debug("--- Входящий промпт ---\n%s\n-----------------------", user_prompt)
 
-        is_ollama_native = self.model_config.get('client_type') == 'ollama'
-
-        if is_ollama_native:
-            # Ollama иногда лучше работает с таким "затравочным" промптом
-            user_prompt += "\nassistant:"
         messages = [{"role": "user", "content": user_prompt}]
 
+        # Определяем, нужно ли использовать потоковый режим, на основе конфига
         inference_opts = self.model_config.get('inference', {})
         use_stream = str(inference_opts.get('stream', 'false')).lower() == 'true'
 
+        # Получаем остальные параметры генерации из конфига
         generation_opts = self.model_config.get('generation', {})
 
+        # Вызываем наш новый клиент
         response_or_stream = self.new_client.chat(
             messages,
             stream=use_stream,
             **generation_opts
         )
 
+        final_response_str: str = ""
         if use_stream:
             log.info("Начало получения потокового ответа...")
 
-            # 1. Получаем лимит из конфига или используем значение по умолчанию
-            max_chunks = int(inference_opts.get('stream_max_chunks', 2000))
-
-            chunks = []
-
+            # Используем print() для немедленного вывода в консоль "на лету"
             print(">>> LLM Stream: ", end="", flush=True)
 
+            chunks = []
             if isinstance(response_or_stream, Generator):
-                # >>>>> "Кардиомонитор" <<<<<
-
-                # Получаем итератор из генератора
-                stream_iterator = iter(response_or_stream)
-                last_heartbeat_time = time.time()
-
-                while True:
-                    try:
-                        # Пытаемся получить следующий чанк с небольшим таймаутом
-                        chunk = next(stream_iterator)
-                        chunks.append(chunk)
-                        # Сбрасываем таймер "пульса", так как мы получили данные
-                        last_heartbeat_time = time.time()
-                    except StopIteration:
-                        # Генератор закончился - это нормальное завершение
-                        log.info("Поток завершен.")
-                        break
-                    except Exception as e:
-                        log.error("Ошибка при итерации по потоку: %s", e)
-                        break
-
-                    # "Пульс": если мы давно не получали данных, но цикл еще не завершился,
-                    # сообщаем, что мы все еще ждем.
-                    if time.time() - last_heartbeat_time > 10.0: # Каждые 10 секунд
-                        log.info("...ожидание следующего чанка от модели...")
-                        last_heartbeat_time = time.time()
+                for chunk in response_or_stream:
+                    print(chunk, end="", flush=True)  # Печатаем каждый чанк
+                    chunks.append(chunk)
 
                 final_response_str = "".join(chunks)
+                print()  # Перевод строки в конце, чтобы не смешивать с логами
                 log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
             else:
                 log.warning("Ожидался генератор (stream=True), но получен тип %s.", type(response_or_stream).__name__)
                 final_response_str = str(response_or_stream)
-        else: # не-потоковый режим
+
+        else:  # не-потоковый режим
             if isinstance(response_or_stream, str):
                 final_response_str = response_or_stream
             else:
                 log.warning("Ожидалась строка (stream=False), но получен тип %s.", type(response_or_stream).__name__)
                 final_response_str = str(response_or_stream)
 
+        # Возвращаем результат в формате, который ожидает TestRunner
         return self._parse_think_response(final_response_str)
