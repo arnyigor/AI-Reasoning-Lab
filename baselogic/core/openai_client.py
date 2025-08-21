@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import requests
 import logging
 
-from .interfaces import ProviderClient # Импортируем чистый интерфейс
+from .interfaces import ProviderClient, LLMResponseError, LLMConnectionError
 
 log = logging.getLogger(__name__)
 
@@ -30,9 +30,11 @@ class OpenAICompatibleClient(ProviderClient):
 
     def send_request(self, payload: Dict[str, Any]) -> Union[Dict[str, Any], Iterable[Dict[str, Any]]]:
         is_stream = payload.get("stream", False)
+        timeout = payload.pop('timeout', 180) # Используем и удаляем, чтобы не отправлять в API
+
         log.info("Отправка запроса на %s (stream=%s)...", self.endpoint, is_stream)
         try:
-            resp = self.session.post(self.endpoint, json=payload, stream=is_stream, timeout=180)
+            resp = self.session.post(self.endpoint, json=payload, stream=is_stream, timeout=timeout)
             resp.raise_for_status()
             log.info("Запрос успешно выполнен.")
             if is_stream:
@@ -41,7 +43,7 @@ class OpenAICompatibleClient(ProviderClient):
                 return resp.json()
         except requests.exceptions.RequestException as e:
             log.error("Сетевая ошибка при запросе к %s: %s", self.endpoint, e)
-            raise
+            raise LLMConnectionError(f"Сетевая ошибка: {e}") from e
 
     def _handle_stream(self, response: requests.Response) -> Generator[Dict[str, Any], None, None]:
         for line in response.iter_lines():
@@ -69,31 +71,19 @@ class OpenAICompatibleClient(ProviderClient):
         return chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
 
     def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Извлекает статистику использования ('usage') из полного не-потокового ответа.
-        """
         usage_stats = response.get("usage", {})
         if not usage_stats:
-            log.debug("Поле 'usage' не найдено в не-потоковом ответе.")
             return {}
-
         return {
-            # Приводим к нашему стандартизированному формату
             "prompt_eval_count": usage_stats.get("prompt_tokens"),
             "eval_count": usage_stats.get("completion_tokens"),
             "total_tokens": usage_stats.get("total_tokens"),
         }
 
     def extract_metadata_from_chunk(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        В потоковом режиме OpenAI-совместимые серверы обычно НЕ присылают
-        метаданные 'usage'. Поэтому этот метод просто проверяет, является
-        ли чанк финальным, и возвращает пустой словарь, если это так,
-        чтобы сигнализировать о завершении потока.
-        """
         choice = chunk.get("choices", [{}])[0]
         if choice.get("finish_reason") is not None:
-            # Поток завершен. Возвращаем пустой словарь, так как usage недоступен.
-            log.debug("Обнаружен финальный чанк потока (finish_reason: %s).", choice.get("finish_reason"))
+            if "usage" in chunk:
+                return self.extract_metadata_from_response(chunk)
             return {}
         return None

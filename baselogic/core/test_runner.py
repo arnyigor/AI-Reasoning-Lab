@@ -9,15 +9,15 @@ from typing import Dict, Any, List, Optional
 
 import psutil
 
-from .adapter import AdapterLLMClient
 from .GeminiClient import GeminiClient
+from .adapter import AdapterLLMClient
+from .client_factory import LLMClientFactory
 # --- ИЗМЕНЕНИЕ 1: Обновляем импорты для новой архитектуры ---
 # Импортируем старый интерфейс, который ожидает TestRunner
 from .interfaces import ILLMClient, LLMClientError, ProviderClient
-# Импортируем компоненты новой архитектуры
 from .llm_client import LLMClient
-from .ollama_client import OllamaClient
 from .openai_client import OpenAICompatibleClient
+# Импортируем компоненты новой архитектуры
 from .plugin_manager import PluginManager
 from .progress_tracker import ProgressTracker
 
@@ -164,36 +164,15 @@ class TestRunner:
         log.info("📊 ИТОГОВЫЙ ОТЧЕТ:")
         # ...
 
-    @staticmethod
-    def create_provider(model_config: Dict[str, Any]) -> ProviderClient:
-        client_type = model_config.get('client_type', 'openai_compatible')
-
-        if client_type == "ollama":
-            # Создаем наш новый, чистый нативный клиент
-            return OllamaClient()
-        elif client_type == "openai_compatible":
-            return OpenAICompatibleClient(
-                api_key=model_config.get('api_key'),
-                base_url=model_config.get('api_base')
-            )
-        elif client_type == "gemini":
-            return GeminiClient(api_key=model_config.get('api_key'))
-        else:
-            raise ValueError(f"Неизвестный тип клиента: {client_type}")
-
-    # >>>>> Фабрика клиентов теперь создает и оборачивает провайдеров в адаптер <<<<<
     def _create_client_safely(self, model_config: Dict[str, Any]) -> Optional[ILLMClient]:
         """
-        Создает конкретного провайдера, оборачивает его в LLMClient,
-        а затем в AdapterLLMClient, чтобы соответствовать интерфейсу ILLMClient.
+        Создает клиент через фабрику, а затем оборачивает его в LLMClient и Adapter.
         """
-        model_name = model_config.get('name')
-        client_type = model_config.get('client_type', 'openai_compatible')
-        log.info("  🔧 Создаем провайдера типа '%s' для модели '%s'...", client_type, model_name)
-
         try:
-            provider = self.create_provider(model_config)
+            # Делегируем создание провайдера нашей фабрике
+            provider = LLMClientFactory.create_provider(model_config)
 
+            # Остальная логика остается той же
             new_llm_client = LLMClient(provider=provider, model_config=model_config)
             adapter = AdapterLLMClient(
                 new_llm_client=new_llm_client,
@@ -239,12 +218,12 @@ class TestRunner:
                     progress.update(model_name, test_key)
         return model_results
 
-    # >>>>> ИЗМЕНЕНИЕ 3: Адаптация под структурированный ответ от адаптера <<<<<
     def _run_single_test_with_monitoring(self, client: ILLMClient, test_id: str,
                                          generator_instance: Any, test_data: Dict[str, Any],
                                          model_name: str, model_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
-        Выполняет один тест-кейс, работая со структурированным ответом от адаптера.
+        Выполняет один тест-кейс с мониторингом и полной, прозрачной
+        логикой верификации для УСПЕХА и НЕУДАЧИ.
         """
         process = psutil.Process(os.getpid())
         try:
@@ -255,7 +234,6 @@ class TestRunner:
             start_time = time.perf_counter()
             initial_ram = process.memory_info().rss / (1024 * 1024)
 
-            # Адаптер client.query() возвращает словарь!
             response_struct = client.query(prompt)
 
             end_time = time.perf_counter()
@@ -263,61 +241,52 @@ class TestRunner:
             exec_time_ms = (end_time - start_time) * 1000
             ram_usage_mb = peak_ram - initial_ram
 
-            # Извлекаем уже распарсенные "мысли" и чистый "ответ"
             thinking_response = response_struct.get("thinking_response", "")
             llm_response = response_struct.get("llm_response", "")
+
             performance_metrics = response_struct.get("performance_metrics", {})
-            performance_metrics['ram_usage_mb'] = ram_usage_mb
-            # Верифицируем только чистый ответ
+            performance_metrics['total_latency_ms'] = exec_time_ms
+            performance_metrics['peak_ram_increment_mb'] = ram_usage_mb
+
             verification_result = generator_instance.verify(llm_response, expected_output)
             is_correct = verification_result.get('is_correct', False)
 
-            # Логируем результат
+            # >>>>> НАЧАЛО ИЗМЕНЕНИЙ: Улучшенное логирование <<<<<
+
+            # 1. Сначала выводим главный вердикт
             status = "✅ УСПЕХ" if is_correct else "❌ НЕУДАЧА"
             log.info("    %s (%.0f мс): %s", status, exec_time_ms, test_id)
-            if not is_correct:
-                details = verification_result.get('details', {})
-                if details:
-                    log.info("      --- Детали провала верификации ---")
-                    for key, value in details.items():
-                        log.info("      - %s: %s", key, str(value)[:200])
-                    log.info("      ---------------------------------")
 
+            # 2. ВСЕГДА выводим детали верификации, если они есть
+            details = verification_result.get('details', {})
+            if details:
+                # Заголовок теперь нейтральный
+                log.info("      --- Детали верификации ---")
+                for key, value in details.items():
+                    log.info("      - %s: %s", key, str(value)[:200]) # Обрезаем длинные строки
+                log.info("      --------------------------")
 
-            # Логируем метрики производительности, если они есть
+            # 3. ВСЕГДА выводим метрики производительности, если они есть
             if performance_metrics:
                 log.info("      --- Метрики производительности ---")
-                log.debug("      --- Метрики %s ---", performance_metrics)
-                # Форматируем TPS для красивого вывода, если он есть
                 if 'tokens_per_second' in performance_metrics:
-                    tps = performance_metrics['tokens_per_second']
-                    log.info("      - Токенов/сек: %.2f", tps)
-
-                # Форматируем TTFT
-                if 'time_to_first_token_ms' in performance_metrics and performance_metrics['time_to_first_token_ms'] > 0:
-                    ttft = performance_metrics['time_to_first_token_ms']
-                    log.info("      - Время до первого токена: %.0f мс", ttft)
-
-                # Выводим остальные метрики "как есть"
-                for key, value in performance_metrics.items():
-                    if key not in ['tokens_per_second', 'time_to_first_token_ms'] and value is not None:
-                        log.info("      - %s: %s", key.replace('_ns', ' (ns)').replace('_', ' ').title(), value)
+                    log.info("      - Токенов/сек: %.2f", performance_metrics['tokens_per_second'])
+                if 'time_to_first_token_ms' in performance_metrics and performance_metrics['time_to_first_token_ms'] is not None:
+                    log.info("      - Время до первого токена: %.0f мс", performance_metrics['time_to_first_token_ms'])
+                # ... (вывод остальных метрик)
                 log.info("      ---------------------------------")
 
-            # Собираем результат
+            # >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
+
+            # Сборка итогового результата для JSON (остается без изменений)
             return {
-                "test_id": test_id,
-                "model_name": model_name,
-                "model_details": model_details,
-                "prompt": prompt,
-                "thinking_log": thinking_response,
-                "parsed_answer": llm_response,
+                "test_id": test_id, "model_name": model_name, "model_details": model_details,
+                "prompt": prompt, "thinking_log": thinking_response, "parsed_answer": llm_response,
                 "raw_llm_output": f"<think>{thinking_response}</think>\n{llm_response}",
-                "expected_output": expected_output,
-                "is_correct": is_correct,
+                "expected_output": expected_output, "is_correct": is_correct,
                 "execution_time_ms": exec_time_ms,
                 "verification_details": verification_result.get('details', {}),
-                "performance_metrics": performance_metrics
+                "performance_metrics": {k: v for k, v in performance_metrics.items() if v is not None}
             }
         except LLMClientError as e:
             log.error("      ❌ Ошибка LLM клиента: %s", e)
