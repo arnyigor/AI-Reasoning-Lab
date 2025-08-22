@@ -1,23 +1,27 @@
-from collections.abc import Iterable, Generator
-from typing import Any, Dict, List, Union
 import logging
+from collections.abc import Iterable
+from typing import Any, Dict, List, Union
 
 from .interfaces import ProviderClient
 
 log = logging.getLogger(__name__)
+
 
 class LLMClient:
     """
     Универсальный клиент-фасад. Его задача - взять запрос, передать его
     правильному провайдеру и вернуть "сырой" ответ от API.
     """
-    def __init__(self, provider: ProviderClient, model_config: Dict[str, Any]):
+
+    def __init__(self, provider: ProviderClient, model_config: Dict[str, Any], show_payload = True):
         self.provider = provider
         self.model_config = model_config
+        self.show_payload = show_payload
         self.model = model_config.get('name', 'unknown_model')
         log.info("LLMClient создан для модели '%s' с провайдером %s", self.model, provider.__class__.__name__)
 
-    def chat(self, messages: List[Dict[str, str]], *, stream: bool = False, **kwargs: Any) -> Union[Dict[str, Any], Iterable[Dict[str, Any]]]:
+    def chat(self, messages: List[Dict[str, str]], *, stream: bool = False, **kwargs: Any) -> Union[
+        Dict[str, Any], Iterable[Dict[str, Any]]]:
         """
         Отправляет запрос к LLM и возвращает "сырой" ответ от провайдера.
 
@@ -35,6 +39,7 @@ class LLMClient:
         payload = self.provider.prepare_payload(
             messages, self.model, stream=stream, **all_opts
         )
-        log.debug("--- Финальный Payload ---\n%s", payload)
+        if self.show_payload:
+            log.debug("--- Финальный Payload ---\n%s", payload)
 
         return self.provider.send_request(payload)

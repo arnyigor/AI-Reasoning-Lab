@@ -2,17 +2,14 @@ import heapq
 import random
 import time
 import tracemalloc
-from multiprocessing import Process, Queue
-from typing import List
-
-from collections import defaultdict, Counter
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from typing import List, Tuple, Dict, Optional
 from dataclasses import dataclass
-import warnings
+from multiprocessing import Process, Queue
+from typing import List, Tuple, Dict
+
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.optimize import curve_fit
+
 
 # ==============================================================================
 # --- Основной код — реализация бизнес-логики ---
@@ -203,6 +200,7 @@ def generate_test_data(num_tasks: int, num_types: int, max_time: int = 10 ** 7, 
     print("Генерация завершена.")
     return tasks
 
+
 def run_solve_in_process(q: Queue, tasks_data: List[List[int]], num_types_data: int):
     """Целевая функция для дочернего процесса."""
     try:
@@ -213,6 +211,7 @@ def run_solve_in_process(q: Queue, tasks_data: List[List[int]], num_types_data: 
         q.put({'result': result_val, 'peak_mem': peak_mem_val, 'status': 'success'})
     except Exception as e:
         q.put({'status': 'error', 'error': str(e)})
+
 
 def run_test_in_subprocess(tasks_data, num_types_data, time_limit):
     """Запускает solve_hybrid_cloud в дочернем процессе с надежным тайм-аутом."""
@@ -234,6 +233,7 @@ def run_test_in_subprocess(tasks_data, num_types_data, time_limit):
             return output
         else:
             return {'status': 'error', 'error': 'Process exited without result.', 'duration': duration}
+
 
 def run_benchmark(params):
     """Обертка для запуска одного теста производительности и вывода результатов."""
@@ -262,6 +262,7 @@ def run_benchmark(params):
             print(f"\033[91mТест по памяти ПРОВАЛЕН.\033[0m")
         return duration, peak_mem_gb
 
+
 @dataclass
 class ModelFit:
     """Класс для хранения результатов подгонки модели."""
@@ -280,7 +281,7 @@ def linear_model(x: np.ndarray, a: float, b: float) -> np.ndarray:
 
 def quadratic_model(x: np.ndarray, a: float, b: float, c: float) -> np.ndarray:
     """Квадратичная модель: y = a * x^2 + b * x + c"""
-    return a * x**2 + b * x + c
+    return a * x ** 2 + b * x + c
 
 
 def logarithmic_model(x: np.ndarray, a: float, b: float) -> np.ndarray:
@@ -436,9 +437,9 @@ def analyze_curve_complexity(results: List[Dict]) -> None:
     x_memory = [r['tasks'] for r in results]
     y_memory = [r['memory'] for r in results]
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("ДЕТАЛЬНЫЙ АНАЛИЗ ПРОИЗВОДИТЕЛЬНОСТИ")
-    print("="*60)
+    print("=" * 60)
 
     # Анализ времени выполнения
     print("\n📊 АНАЛИЗ ВРЕМЕНИ ВЫПОЛНЕНИЯ:")
@@ -690,9 +691,11 @@ if __name__ == '__main__':
                 print(f"Тест #{i + 1} ({test['name']}): \033[92mПРОЙДЕН\033[0m")
             else:
                 print(
-                    f"Тест #{i + 1} ({test['name']}): \033[91mПРОВАЛЕН\033[0m. Ожидалось: {test['expected']}, получено: {result}."); all_passed = False
+                    f"Тест #{i + 1} ({test['name']}): \033[91mПРОВАЛЕН\033[0m. Ожидалось: {test['expected']}, получено: {result}.");
+                all_passed = False
         except Exception as e:
-            print(f"Тест #{i + 1} ({test['name']}): \033[91mОШИБКА\033[0m. {e}"); all_passed = False
+            print(f"Тест #{i + 1} ({test['name']}): \033[91mОШИБКА\033[0m. {e}");
+            all_passed = False
     print("-" * 20)
 
     # --- ЭТАП 2: Тесты производительности (запускаются только если корректность подтверждена) ---

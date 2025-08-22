@@ -1,6 +1,9 @@
 # baselogic/tests/test_generators.py
+import os
 
 import pytest
+
+from baselogic.tests.plugins.t_context_stress import ContextStressTestGenerator
 from baselogic.tests.t01_simple_logic import SimpleLogicTestGenerator
 
 @pytest.fixture
@@ -80,3 +83,81 @@ def test_generate_returns_valid_data(logic_test_generator):
 
     print(f"\nСгенерированный промпт для проверки:\n---\n{result['prompt']}\n---")
     print(f"\nОтвет:\n---\n{result['expected_output']}\n---")
+
+@pytest.fixture()
+def context_stress_generator():
+    """Фикстура, создающая генератор один раз для всего класса тестов."""
+    os.environ['CST_CONTEXT_LENGTHS_K'] = "1"
+    os.environ['CST_NEEDLE_DEPTH_PERCENTAGES'] = "50"
+    return ContextStressTestGenerator(test_id="verification_test")
+
+# --- Позитивные сценарии (тест должен проходить) ---
+
+def test_exact_match_passes(context_stress_generator):
+    """Тест: Ответ модели полностью совпадает с ожидаемым."""
+    llm_output = "лежит на дне колодца"
+    expected_output = "лежит на дне колодца"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is True, "Должен проходить при точном совпадении"
+
+def test_synonym_verb_passes(context_stress_generator):
+    """Тест: Глагол из списка стоп-слов заменен на синоним."""
+    llm_output = "Золотой ключ находится на дне колодца."
+    expected_output = "лежит на дне колодца"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is True, "Должен проходить, т.к. глаголы 'лежит' и 'находится' в стоп-листе"
+
+def test_extra_details_passes(context_stress_generator):
+    """Тест: Ответ содержит лишнюю, но не противоречащую информацию."""
+    llm_output = "Согласно найденному секретному факту, древний свиток хранится в высокой башне мага."
+    expected_output = "хранится в башне мага"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is True, "Должен проходить, если ответ содержит доп. детали"
+
+def test_word_order_insensitivity_passes(context_stress_generator):
+    """Тест: Порядок слов в ответе изменен, но все ключевые слова на месте."""
+    llm_output = "В башне мага свиток древний хранится."
+    expected_output = "хранится древний свиток в башне мага"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is True, "Должен проходить при смене порядка слов"
+
+def test_case_and_punctuation_insensitivity_passes(context_stress_generator):
+    """Тест: Регистр и пунктуация в ответе не влияют на результат."""
+    llm_output = "Золотой КЛЮЧ, лежит на ДНЕ КОЛОДЦА!!!"
+    expected_output = "золотой ключ лежит на дне колодца"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is True, "Проверка должна быть нечувствительна к регистру и пунктуации"
+
+# --- Негативные сценарии (тест должен проваливаться) ---
+
+def test_mismatched_keyword_fails(context_stress_generator):
+    """Тест: Ключевое слово в ответе не совпадает с ожидаемым (мага vs ага)."""
+    llm_output = "Свиток хранится в башне мага."
+    expected_output = "хранится в башне ага"  # Намеренная опечатка
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is False, "Должен падать, если ключевое слово не совпадает"
+    assert 'ага' in result['details']['keywords_missing']
+
+def test_missing_keyword_fails(context_stress_generator):
+    """Тест: В ответе отсутствует одно из ключевых слов."""
+    llm_output = "Он лежит на дне"  # Пропущено слово "колодца"
+    expected_output = "лежит на дне колодца"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is False, "Должен падать, если не хватает ключевых слов"
+    assert 'колодец' in result['details']['keywords_missing']
+
+def test_mismatched_preposition_fails(context_stress_generator):
+    """Тест: Логика должна отлавливать смысловую ошибку в предлоге (в vs у)."""
+    llm_output = "Древний свиток находится в башне мага."
+    expected_output = "стоит у башни мага"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is False, "Ответ с неверным предлогом должен проваливать тест"
+    assert 'у' in result['details']['keywords_missing']
+    assert 'в' not in result['details']['keywords_missing'] # 'в' есть в ответе, но его нет в 'expected'
+
+def test_empty_llm_output_fails(context_stress_generator):
+    """Тест: Пустой ответ от модели должен приводить к провалу теста."""
+    llm_output = ""
+    expected_output = "лежит на дне колодца"
+    result = context_stress_generator.verify(llm_output, expected_output)
+    assert result['is_correct'] is False, "Пустой ответ должен всегда проваливать тест"

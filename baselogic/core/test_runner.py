@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 import psutil
+from msgspec.inspect import BoolType
 
 from .adapter import AdapterLLMClient
 from .client_factory import LLMClientFactory
@@ -112,6 +113,7 @@ class TestRunner:
         successful_models, failed_models = [], []
         # Расчет общего числа тест-кейсов для прогресс-бара
         num_runs = self.config.get('runs_per_test', 1)
+        show_payload = self.config.get('show_payload', True)
         raw_save = self.config.get('runs_raw_save', 1)
         total_test_cases = len(self.test_generators) * num_runs * len(self.config['models_to_test'])
 
@@ -130,7 +132,7 @@ class TestRunner:
 
                 try:
                     log.info("🔧 ЭТАП 1: Создание клиента...")
-                    client = self._create_client_safely(model_config)
+                    client = self._create_client_safely(model_config, show_payload)
                     if client is None:
                         failed_models.append((model_name, "Ошибка создания клиента"))
                         # Пропускаем все тесты для этой модели в прогресс-баре
@@ -162,7 +164,7 @@ class TestRunner:
         if raw_save:
             log.info("📊 ИТОГОВЫЙ ОТЧЕТ:")
 
-    def _create_client_safely(self, model_config: Dict[str, Any]) -> Optional[ILLMClient]:
+    def _create_client_safely(self, model_config: Dict[str, Any], show_payload = True) -> Optional[ILLMClient]:
         """
         Создает клиент через фабрику, а затем оборачивает его в LLMClient и Adapter.
         """
@@ -171,7 +173,7 @@ class TestRunner:
             provider = LLMClientFactory.create_provider(model_config)
 
             # Остальная логика остается той же
-            new_llm_client = LLMClient(provider=provider, model_config=model_config)
+            new_llm_client = LLMClient(provider=provider, model_config=model_config, show_payload=show_payload)
             adapter = AdapterLLMClient(
                 new_llm_client=new_llm_client,
                 model_config=model_config
