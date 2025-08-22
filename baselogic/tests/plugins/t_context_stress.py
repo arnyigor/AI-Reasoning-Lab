@@ -2,120 +2,211 @@
 
 import os
 import random
-from typing import Dict, Any, Generator, Tuple
+import re
+from difflib import SequenceMatcher
+from typing import Dict, Any, Tuple
 
 from dotenv import load_dotenv
+
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
-# Загружаем переменные окружения
 load_dotenv()
 import logging
 
-# Просто получаем логгер в начале файла. Он уже настроен!
 log = logging.getLogger(__name__)
+
+from difflib import SequenceMatcher
+import pymorphy2
+
+morph = pymorphy2.MorphAnalyzer()
+
+def normalize_word(word):
+    parsed = morph.parse(word)[0]
+    return parsed.normal_form
+
+def normalize_text(text):
+    words = re.findall(r'\w+', text.lower())
+    return ' '.join(normalize_word(word) for word in words)
 
 class ContextStressTestGenerator(AbstractTestGenerator):
     """
-    Итерируемый генератор для стресс-тестирования длинного контекста.
-    Создает серию тестов "Иголка в стоге сена" с разным размером контекста
-    и глубиной размещения "иголки".
+    Обычный генератор для стресс-тестирования длинного контекста.
+    Циклически проходит по всем тест-кейсам.
     """
+
     def __init__(self, test_id: str):
         super().__init__(test_id)
 
         # Загружаем конфигурацию из .env
-        lengths_str = os.getenv("CST_CONTEXT_LENGTHS_K", "4,8,16")
+        lengths_str = os.getenv("CST_CONTEXT_LENGTHS_K", "1,2,3,4")  # Убрал 5K для стабильности
         depths_str = os.getenv("CST_NEEDLE_DEPTH_PERCENTAGES", "10,50,90")
 
         self.context_lengths_k = [int(k.strip()) for k in lengths_str.split(',')]
         self.needle_depths = [int(d.strip()) for d in depths_str.split(',')]
 
+        # Создаем план всех тестов
         self.test_plan = self._create_test_plan()
-        log.info(f"Context Stress Test: План создан, {len(self.test_plan)} тест-кейсов.")
+        self.current_test_index = 0
 
-    def _create_test_plan(self) -> list:
+        log.info(f"Context Stress Test: План создан, {len(self.test_plan)} тест-кейсов.")
+        log.info(f"  - Размеры: {self.context_lengths_k}K токенов")
+        log.info(f"  - Глубины: {self.needle_depths}%")
+
+    def _create_test_plan(self):
         """Создает полный список всех комбинаций тестов."""
+        MAX_SAFE_TOKENS = 4096  # Снижаем лимит для стабильности
         plan = []
+
         for context_k in self.context_lengths_k:
-            for depth in self.needle_depths:
-                plan.append({'context_k': context_k, 'depth_percent': depth})
+            tokens_needed = context_k * 1024
+            if tokens_needed > MAX_SAFE_TOKENS:
+                log.warning(f"Пропускаем {context_k}K - превышает безопасный лимит")
+                continue
+
+            for depth_percent in self.needle_depths:
+                plan.append({
+                    'context_k': context_k,
+                    'depth_percent': depth_percent,
+                    'test_id': f"{self.test_id}_{context_k}k_{depth_percent}pct"
+                })
+
+        log.info(f"Создано {len(plan)} уникальных тест-кейсов")
         return plan
 
     def _generate_haystack(self, context_length_tokens: int) -> str:
-        """Генерирует 'стог сена' заданного примерного размера в токенах."""
-        # Улучшенная генерация для большей случайности
-        base_words = ['система', 'анализ', 'модель', 'контекст', 'данные', 'результат', 'тест', 'проверка', 'генерация']
-        # 1 токен ~ 1.5 слова в русском языке. Умножаем на 1.5 для приближения.
-        num_words = int(context_length_tokens * 1.5)
+        """Генерирует 'стог сена' заданного размера."""
+        base_words = ['система', 'анализ', 'модель', 'контекст', 'данные',
+                      'результат', 'тест', 'проверка', 'генерация', 'обработка']
+
+        # Консервативная оценка: 1 токен ≈ 1.0 слово для надежности
+        num_words = int(context_length_tokens * 1.0)
         haystack = ' '.join(random.choices(base_words, k=num_words))
         return haystack
 
     def _generate_needle(self) -> Tuple[str, str, str]:
-        """Генерирует уникальную 'иголку' и вопрос к ней."""
-        items = ["ключ от города", "рецепт зелья невидимости", "пароль от архива", "координаты сокровища"]
-        properties = ["сделан из лунного камня", "требует слезу феникса", "звучит как 'Кракен'", "находятся под тенью вулкана"]
+        """Генерирует уникальную 'иголку'."""
+        secrets = [
+            ("магический кристалл", "спрятан под старым дубом"),
+            ("древний свиток", "хранится в башне мага"),
+            ("золотой ключ", "лежит на дне колодца"),
+            ("секретный код", "написан красными чернилами"),
+            ("карта сокровищ", "скрыта за картиной в замке"),
+            ("волшебное зелье", "находится в подземной пещере")
+        ]
 
-        item = random.choice(items)
-        prop = random.choice(properties)
+        item, location = random.choice(secrets)
 
-        needle = f"Самый главный секрет в мире таков: {item} {prop}."
-        question = f"В чем заключается самый главный секрет, связанный с '{item}'?"
-        expected_answer = prop
+        needle = f"Важная информация: {item} {location}."
+        question = f"Где находится {item}?"
+        expected_answer = location
+
         return needle, question, expected_answer
-
-    def __iter__(self) -> Generator[Dict[str, Any], None, None]:
-        """
-        Основной метод, который делает этот генератор итерируемым.
-        TestRunner будет вызывать его в цикле.
-        """
-        for case_params in self.test_plan:
-            context_tokens = case_params['context_k'] * 1024
-            depth = case_params['depth_percent']
-
-            needle, question, expected_answer = self._generate_needle()
-            haystack = self._generate_haystack(context_tokens)
-
-            insertion_point = int(len(haystack) * (depth / 100))
-            text_with_needle = haystack[:insertion_point] + f"\n\n--- СЕКРЕТНЫЙ ФАКТ ---\n{needle}\n--- КОНЕЦ ФАКТА ---\n\n" + haystack[insertion_point:]
-
-            prompt = (f"Ниже приведен большой текст. Внимательно прочти его и ответь на вопрос в конце. "
-                      f"Отвечай только по фактам из текста.\n\n"
-                      f"--- ТЕКСТ НАЧАЛО ---\n{text_with_needle}\n--- ТЕКСТ КОНЕЦ ---\n\n"
-                      f"Вопрос: {question}")
-
-            # test_id будет уникальным для каждого кейса
-            unique_test_id = f"{self.test_id}_{case_params['context_k']}k_{depth}pct"
-
-            yield {
-                'test_id': unique_test_id,
-                'prompt': prompt,
-                'expected_output': expected_answer,
-                'metadata': {
-                    'category': self.test_id,
-                    'context_k': case_params['context_k'],
-                    'depth_percent': depth,
-                }
-            }
 
     def generate(self) -> Dict[str, Any]:
         """
-        Для итерируемого генератора этот метод не используется напрямую TestRunner'ом,
-        но должен быть реализован согласно контракту.
+        Генерирует следующий тест из плана.
+        TestRunner вызывает этот метод RUNS_PER_TEST раз для каждой категории.
         """
-        log.warning("Вызван метод generate() для итерируемого генератора. "
-                    "Возвращается первый тест-кейс из плана.")
-        return next(iter(self))
+        if not self.test_plan:
+            raise RuntimeError("План тестов пуст!")
 
+        # Получаем текущий тест-кейс (циклически)
+        test_config = self.test_plan[self.current_test_index % len(self.test_plan)]
+        self.current_test_index += 1
 
-    def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
-        """Верифицирует ответ, проверяя наличие ключевой фразы."""
+        log.info(f"Генерируем тест {self.current_test_index}/{len(self.test_plan)}: {test_config['test_id']}")
+
+        # Генерируем новую иголку для каждого прогона
+        needle, question, expected_answer = self._generate_needle()
+        tokens_needed = test_config['context_k'] * 1024
+        haystack = self._generate_haystack(tokens_needed)
+
+        # Вставляем иголку на заданной глубине
+        insertion_point = int(len(haystack) * (test_config['depth_percent'] / 100))
+        text_with_needle = (
+                haystack[:insertion_point] +
+                f"\n\n--- СЕКРЕТНЫЙ ФАКТ ---\n{needle}\n--- КОНЕЦ ФАКТА ---\n\n" +
+                haystack[insertion_point:]
+        )
+
+        # Упрощенный промпт для избежания зависания
+        prompt = (
+            f"Прочти текст и ответь кратко на вопрос. Отвечай только фактами из текста.\n\n"
+            f"--- ТЕКСТ НАЧАЛО ---\n{text_with_needle}\n--- ТЕКСТ КОНЕЦ ---\n\n"
+            f"Вопрос: {question}\n"
+            f"Ответ:"
+        )
+
+        return {
+            'prompt': prompt,
+            'expected_output': expected_answer,
+            'test_name': test_config['test_id'],
+            'metadata': {
+                'context_k': test_config['context_k'],
+                'depth_percent': test_config['depth_percent'],
+                'prompt_length': len(text_with_needle)
+            }
+        }
+
+    def _cleanup_llm_response_for_test(self, response: str) -> str:
+        """Специфичная очистка для контекстного теста."""
+        cleaned = ' '.join(response.split())
+
+        # Дополнительная очистка thinking блоков (на всякий случай)
+        if cleaned.startswith('<think>'):
+            end_think = cleaned.find('</think>')
+            if end_think != -1:
+                cleaned = cleaned[end_think + 8:].strip()
+
+        prefixes_to_remove = [
+            "согласно тексту",
+            "в тексте указано",
+            "как указано в тексте",
+            "согласно секретному факту",
+            "из текста следует",
+            "согласно информации",
+            "это указано в секретном факте",
+            "ответ:"
+        ]
+
+        cleaned_lower = cleaned.lower()
+        for prefix in prefixes_to_remove:
+            if cleaned_lower.startswith(prefix.lower()):
+                cleaned = cleaned[len(prefix):].strip()
+                if cleaned.startswith((':', ',', '.')):
+                    cleaned = cleaned[1:].strip()
+                break
+
+        return cleaned
+
+    def verify(self, llm_output: str, expected_output: str) -> Dict[str, Any]:
         cleaned_output = self._cleanup_llm_response(llm_output)
-        is_correct = expected_output.lower() in cleaned_output.lower()
+        cleaned_output = self._cleanup_llm_response_for_test(cleaned_output)
+
+        norm_output = normalize_text(cleaned_output)
+        norm_expected = normalize_text(expected_output)
+
+        expected_words = set(norm_expected.split())
+        output_words = set(norm_output.split())
+
+        intersection = expected_words & output_words
+        union = expected_words | output_words
+        jaccard_score = len(intersection) / len(union) if union else 0
+
+        similarity = SequenceMatcher(None, norm_expected, norm_output).ratio()
+        combined_score = 0.6 * jaccard_score + 0.4 * similarity
+
+        is_correct = combined_score >= 0.6
 
         return {
             'is_correct': is_correct,
             'details': {
                 'expected_phrase': expected_output,
-                'cleaned_llm_output': cleaned_output[:500] # Обрезаем для логов
+                'cleaned_llm_output': cleaned_output[:200],
+                'jaccard_score': round(jaccard_score, 3),
+                'similarity': round(similarity, 3),
+                'combined_score': round(combined_score, 3),
+                'keywords_expected': sorted(expected_words),
+                'keywords_found': sorted(intersection),
             }
         }

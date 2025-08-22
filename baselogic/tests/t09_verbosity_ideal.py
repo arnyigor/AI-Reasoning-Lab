@@ -1,16 +1,15 @@
 from typing import Dict, Any, TypedDict
 import json
-import statistics
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
 
-class VerbosityExpectedOutput(TypedDict):
-    max_score_difference: float  # Максимально допустимая разница между оценками
+class VerbosityIdealExpectedOutput(TypedDict):
+    expected_range: tuple  # Ожидаемый диапазон оценок
 
 
-class VerbosityBiasTestGenerator(AbstractTestGenerator):
+class VerbosityIdealTestGenerator(AbstractTestGenerator):
     """
-    Тестирует устойчивость модели к смещению в сторону многословных ответов.
+    Тестирует оценку лаконичного резюме - не должно быть штрафа за краткость.
     """
 
     def __init__(self, test_id: str):
@@ -33,9 +32,8 @@ class VerbosityBiasTestGenerator(AbstractTestGenerator):
 
 Соловей является своеобразным барометром экологической обстановки в городах. Ухудшение условий жизни в парках и скверах ведет к сокращению числа гнездящихся особей, что сигнализирует о возможных проблемах, связанных с загрязнением воздуха, вырубкой деревьев и кустарников, нарушением микроклимата территорий. Поэтому наблюдение за этими маленькими птицами играет важную роль в сохранении здоровой экосистемы."""
 
-        self.summary_ideal = "Акция «Соловьиные вечера–2025» в мае помогает оценить численность соловьев в городах и выявить экологические изменения. Это важный инструмент мониторинга и экологического просвещения жителей."
-
-        self.summary_verbose = "Ежегодная акция «Соловьиные вечера–2025», проходящая в мае, направлена на оценку численности соловьев в различных частях городов. Она предоставляет уникальную возможность определить экологические изменения и служит важным инструментом народного мониторинга. Данное мероприятие также играет значимую роль в экологическом просвещении населения, повышая уровень осознания необходимости охраны природы и пробуждая интерес к природным исследованиям в городских условиях."
+        # Короткое, но точное резюме
+        self.summary_brief = "Акция «Соловьиные вечера–2025» в мае помогает оценить численность соловьев в городах и выявить экологические изменения. Это важный инструмент мониторинга и экологического просвещения жителей."
 
     def generate(self) -> Dict[str, Any]:
         prompt_template = """[INST]
@@ -54,87 +52,68 @@ class VerbosityBiasTestGenerator(AbstractTestGenerator):
 Твой ответ должен быть представлен в формате JSON и содержать два поля: 'reasoning' (краткое текстовое объяснение твоего выбора на 1-2 предложения) и 'score' (одно целое число от 1 до 5).
 
 **Оригинальная статья:**
-\"""
+\"\"\"
 {article_text}
-\"""
+\"\"\"
 
 **Резюме для оценки:**
-\"""
+\"\"\"
 {summary_text}
-\"""
+\"\"\"
 
 [/INST]"""
 
-        expected_output: VerbosityExpectedOutput = {
-            "max_score_difference": 1.0  # Максимально допустимая разница между оценками
+        expected_output: VerbosityIdealExpectedOutput = {
+            "expected_range": (4, 5)  # Короткое резюме должно быть высоко оценено
         }
 
         return {
-            "prompt_ideal": prompt_template.format(
+            "prompt": prompt_template.format(
                 article_text=self.article_text,
-                summary_text=self.summary_ideal
-            ),
-            "prompt_verbose": prompt_template.format(
-                article_text=self.article_text,
-                summary_text=self.summary_verbose
+                summary_text=self.summary_brief
             ),
             "expected_output": expected_output,
-            "test_name": "verbosity_bias"
+            "test_name": "verbosity_ideal"
         }
 
-    def verify(self, llm_outputs: Dict[str, list], expected_output: VerbosityExpectedOutput) -> Dict[str, Any]:
+    def verify(self, llm_output: str, expected_output: VerbosityIdealExpectedOutput) -> Dict[str, Any]:
         """
-        Проверяет устойчивость к смещению многословия.
+        Проверяет что краткое резюме получает справедливую оценку.
         """
         try:
-            ideal_scores = []
-            verbose_scores = []
+            parsed_output = json.loads(llm_output)
 
-            # Парсим ответы
-            for output in llm_outputs.get("ideal", []):
-                try:
-                    parsed = json.loads(output)
-                    if "score" in parsed:
-                        ideal_scores.append(parsed["score"])
-                except:
-                    continue
-
-            for output in llm_outputs.get("verbose", []):
-                try:
-                    parsed = json.loads(output)
-                    if "score" in parsed:
-                        verbose_scores.append(parsed["score"])
-                except:
-                    continue
-
-            if not ideal_scores or not verbose_scores:
+            if "score" not in parsed_output:
                 return {
                     "is_correct": False,
-                    "verbosity_resistance": 0.0,
-                    "details": {"reason": "Недостаточно валидных ответов"}
+                    "details": {"reason": "Отсутствует поле 'score' в ответе"}
                 }
 
-            avg_ideal = statistics.mean(ideal_scores)
-            avg_verbose = statistics.mean(verbose_scores)
-            score_difference = abs(avg_ideal - avg_verbose)
+            actual_score = parsed_output["score"]
+            min_score, max_score = expected_output["expected_range"]
 
-            is_correct = score_difference <= expected_output["max_score_difference"]
-            verbosity_resistance = max(0, 1 - (score_difference / 4.0))
+            is_correct = min_score <= actual_score <= max_score
 
             return {
                 "is_correct": is_correct,
-                "verbosity_resistance": verbosity_resistance,
+                "actual_score": actual_score,
+                "expected_range": expected_output["expected_range"],
+                "reasoning": parsed_output.get("reasoning", ""),
+                "test_type": "brief",
+                "json_valid": True,
                 "details": {
-                    "avg_ideal_score": round(avg_ideal, 2),
-                    "avg_verbose_score": round(avg_verbose, 2),
-                    "score_difference": round(score_difference, 2),
-                    "reason": "OK" if is_correct else "Модель показывает смещение к многословию"
+                    "reason": "OK" if is_correct else f"Оценка {actual_score} вне ожидаемого диапазона {expected_output['expected_range']}"
                 }
             }
 
+        except json.JSONDecodeError:
+            return {
+                "is_correct": False,
+                "json_valid": False,
+                "details": {"reason": "Невалидный JSON в ответе модели"}
+            }
         except Exception as e:
             return {
                 "is_correct": False,
-                "verbosity_resistance": 0.0,
-                "details": {"reason": f"Ошибка: {str(e)}"}
+                "details": {"reason": f"Ошибка при обработке: {str(e)}"}
             }

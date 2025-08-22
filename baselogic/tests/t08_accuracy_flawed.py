@@ -1,11 +1,15 @@
-from typing import Dict, Any, TypedDict
 import json
+import re
+from typing import Dict, Any, TypedDict
+
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
+
 
 class AccuracyExpectedOutput(TypedDict):
     expected_score_range: tuple[int, int]
     test_type: str
     summary_text: str
+
 
 class AccuracyFlawedTestGenerator(AbstractTestGenerator):
     """Тест оценки ОШИБОЧНОГО резюме (ожидается 1-2 балла)"""
@@ -77,8 +81,48 @@ class AccuracyFlawedTestGenerator(AbstractTestGenerator):
 
     def verify(self, llm_output: str, expected_output: AccuracyExpectedOutput) -> Dict[str, Any]:
         try:
-            cleaned_output = llm_output.strip()
-            parsed_response = json.loads(cleaned_output)
+            clean_output = self._cleanup_llm_response(llm_output)
+
+            # Улучшенная обработка JSON с резервными вариантами
+            try:
+                parsed_response = json.loads(clean_output.strip())
+            except json.JSONDecodeError:
+                # Если простой парсинг не удался, пробуем извлечь JSON более агрессивно
+                try:
+                    # 1. Ищем JSON в markdown блоках
+                    json_match = re.search(r'``````', clean_output, re.DOTALL)
+                    if json_match:
+                        parsed_response = json.loads(json_match.group(1))
+                    else:
+                        # 2. Ищем любой JSON-объект в тексте
+                        json_match = re.search(r'(\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})', clean_output, re.DOTALL)
+                        if json_match:
+                            parsed_response = json.loads(json_match.group(1))
+                        else:
+                            # 3. Аварийное извлечение по ключевым полям
+                            score_match = re.search(r'"score":\s*(\d+)', clean_output)
+                            reasoning_match = re.search(r'"reasoning":\s*"([^"]*(?:\\.[^"]*)*)"', clean_output)
+
+                            if score_match:
+                                parsed_response = {
+                                    "score": int(score_match.group(1)),
+                                    "reasoning": reasoning_match.group(1) if reasoning_match else ""
+                                }
+                            else:
+                                raise json.JSONDecodeError("Не удалось извлечь JSON", clean_output, 0)
+
+                except (json.JSONDecodeError, AttributeError):
+                    return {
+                        "is_correct": False,
+                        "details": {
+                            "reason": "Невалидный JSON даже после агрессивной очистки",
+                            "raw_response": llm_output[:200],
+                            "cleaned_response": clean_output[:200],
+                            "test_type": "flawed",
+                            "test_id": self.test_id,
+                            "json_valid": False
+                        }
+                    }
 
             if 'score' not in parsed_response:
                 return {
@@ -112,7 +156,7 @@ class AccuracyFlawedTestGenerator(AbstractTestGenerator):
             is_correct = min_score <= score <= max_score
 
             details = {
-                "reason": "OK" if is_correct else f"Оценка {score} не в диапазоне {min_score}-{max_score}",
+                "reason": "OK" if is_correct else f"Оценка {score} не в диапазоне {min_score}-{max_score} для ошибочного резюме",
                 "actual_score": score,
                 "expected_range": expected_output['expected_score_range'],
                 "reasoning": reasoning[:200] if reasoning else "",
@@ -126,28 +170,18 @@ class AccuracyFlawedTestGenerator(AbstractTestGenerator):
                 "details": details
             }
 
-        except json.JSONDecodeError as e:
-            return {
-                "is_correct": False,
-                "details": {
-                    "reason": f"Невалидный JSON: {str(e)}",
-                    "raw_response": llm_output[:200],
-                    "test_type": "flawed",
-                    "test_id": self.test_id,
-                    "json_valid": False
-                }
-            }
         except Exception as e:
             return {
                 "is_correct": False,
                 "details": {
-                    "reason": f"Ошибка обработки: {str(e)}",
+                    "reason": f"Критическая ошибка обработки: {str(e)}",
                     "raw_response": llm_output[:200],
                     "test_type": "flawed",
                     "test_id": self.test_id,
                     "json_valid": False
                 }
             }
+
 
 def get_generator():
     return AccuracyFlawedTestGenerator

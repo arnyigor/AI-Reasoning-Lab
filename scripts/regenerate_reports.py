@@ -1,4 +1,9 @@
-# /scripts/regenerate_reports.py
+#!/usr/bin/env python3
+"""
+Перегенерация комплексных отчётов:
+  • BASE_LOGIC_BENCHMARK_REPORT.md — общий лидерборд моделей
+  • JUDGE_LEADERBOARD.md          — специализированный рейтинг LLM-судей
+"""
 
 import sys
 import argparse
@@ -6,68 +11,76 @@ from pathlib import Path
 
 from baselogic.core.logger import setup_logging
 
-# --- Настройка ---
-# Добавляем корень проекта в sys.path для надежных импортов
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
+# --- Пути и импорты ----------------------------------------------------------
+project_root = Path(__file__).resolve().parent.parent
+sys.path.append(str(project_root))         # надёжные относительные импорты
 
-# Импортируем наш обновленный Reporter
-from baselogic.core.reporter import Reporter
+from baselogic.core.reporter import Reporter, log          # основной Reporter
+from baselogic.core.judge_reporter import JudgeReporter     # спец-репортёр
 
-def main():
-    """
-    Главная функция для перегенерации единого, комплексного отчета
-    из существующих JSON-файлов результатов, с учетом файла истории.
-    """
+# -----------------------------------------------------------------------------
 
+
+def main() -> None:
+    """CLI-точка входа."""
     setup_logging()
-    # 1. Настройка парсера аргументов командной строки
+
+    # --- CLI аргументы -------------------------------------------------------
     parser = argparse.ArgumentParser(
-        description="Перегенерация комплексного отчета из существующих JSON-результатов с учетом истории.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description="Перегенерация всех отчётов из существующих JSON-результатов.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    # Аргумент --ct больше не нужен, так как используется доверительный интервал Уилсона
     parser.add_argument(
-        '--output-file', '-o',
-        type=str,
+        "-o",
+        "--output-file",
         default="BASE_LOGIC_BENCHMARK_REPORT.md",
-        help="Имя файла для сохранения сгенерированного отчета в корне проекта."
+        help="Имя файла для общего отчёта (в корне репозитория).",
+    )
+    parser.add_argument(
+        "--judge-file",
+        default="JUDGE_LEADERBOARD.md",
+        help="Имя файла для рейтинга LLM-судей (в корне репозитория).",
     )
     args = parser.parse_args()
 
-    log.info("🚀 Запуск перегенерации отчета...")
+    log.info("🚀 Запуск перегенерации отчётов…")
 
-    # 2. Инициализация Reporter
-    # Он автоматически загрузит все .json файлы из папки raw
+    # --- Подготовка данных ---------------------------------------------------
     results_dir = project_root / "results" / "raw"
-    reporter = Reporter(results_dir=results_dir)
-
-    # Проверяем, есть ли данные для работы
-    if reporter.all_results.empty:
-        log.warning("В директории '%s' не найдено валидных файлов с результатами. Работа завершена.", results_dir)
-        return
-
-    # 3. Генерация и сохранение единого комплексного отчета
-    try:
-        log.info("Генерация комплексного отчета с учетом истории...")
-
-        # Вызываем метод без аргументов. Вся логика, включая работу с историей,
-        # инкапсулирована внутри самого Reporter.
-        report_content = reporter.generate_leaderboard_report()
-
-        # Сохраняем отчет в файл, указанный пользователем
-        report_file = project_root / args.output_file
-        with open(report_file, 'w', encoding='utf-8') as f:
-            f.write(report_content)
-
-        log.info("✅ Комплексный отчет успешно сгенерирован и сохранен в: %s", report_file)
-        log.info("   Файл истории 'results/history.json' также был обновлен.")
-
-    except Exception as e:
-        log.critical("❌ Произошла критическая ошибка при генерации отчета: %s", e, exc_info=True)
+    if not results_dir.exists():
+        log.error("❌ Директория с результатами не найдена: %s", results_dir)
         sys.exit(1)
 
-    log.info("\n🎉 Работа успешно завершена!")
+    reporter = Reporter(results_dir=results_dir)
+    judge_reporter = JudgeReporter(results_dir)
+
+    if reporter.all_results.empty:
+        log.warning("⚠️  В '%s' нет валидных JSON-файлов — отчёт не будет создан.", results_dir)
+        return
+
+    # --- Генерация и сохранение ---------------------------------------------
+    try:
+        # 1) Общий лидерборд
+        log.info("📊 Генерируем общий лидерборд…")
+        leaderboard_md = reporter.generate_leaderboard_report()
+
+        leaderboard_path = project_root / args.output_file
+        leaderboard_path.write_text(leaderboard_md, encoding="utf-8")
+        log.info("✅ Сохранён: %s (%d символов)", leaderboard_path, len(leaderboard_md))
+
+        # 2) Рейтинг судей
+        log.info("⚖️  Генерируем рейтинг LLM-судей…")
+        judge_md = judge_reporter.generate_judge_leaderboard()
+
+        judge_path = project_root / args.judge_file
+        judge_path.write_text(judge_md, encoding="utf-8")
+        log.info("✅ Сохранён: %s (%d символов)", judge_path, len(judge_md))
+
+        log.info("🎉 Отчёты успешно обновлены!")
+
+    except Exception as exc:  # pylint: disable=broad-except
+        log.critical("❌ Критическая ошибка при генерации отчётов: %s", exc, exc_info=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

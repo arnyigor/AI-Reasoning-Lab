@@ -1,13 +1,13 @@
 {
-    "qwen\/qwen3-4b-thinking-2507":{
-        "Trust_Score":0.8769228272,
-        "Accuracy":0.9493670886,
-        "Total_Runs":79
-    },
     "gemini-2.5-flash":{
         "Trust_Score":0.7820195416,
         "Accuracy":0.9545454545,
         "Total_Runs":22
+    },
+    "qwen\/qwen3-4b-thinking-2507":{
+        "Trust_Score":0.7264443832,
+        "Accuracy":0.7912087912,
+        "Total_Runs":182
     },
     "tngtech\/deepseek-r1t2-chimera:free":{
         "Trust_Score":0.6989663548,
@@ -54,15 +54,15 @@
         "Accuracy":0.7,
         "Total_Runs":10
     },
+    "deepseek\/deepseek-r1-0528-qwen3-8b":{
+        "Trust_Score":0.3838404689,
+        "Accuracy":0.5405405405,
+        "Total_Runs":37
+    },
     "deepseek\/deepseek-r1-0528-qwen3-8b:free":{
         "Trust_Score":0.3126737697,
         "Accuracy":0.6,
         "Total_Runs":10
-    },
-    "deepseek\/deepseek-r1-0528-qwen3-8b":{
-        "Trust_Score":0.283440061,
-        "Accuracy":0.4761904762,
-        "Total_Runs":21
     },
     "openai\/gpt-oss-20b":{
         "Trust_Score":0.2365930905,

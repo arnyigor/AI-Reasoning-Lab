@@ -84,35 +84,55 @@ def main():
         logging.info("[ЭТАП 3: Генерация отчета]")
         try:
             from baselogic.core.reporter import Reporter
-
+            from baselogic.core.judge_reporter import JudgeReporter  # если отдельный файл
 
             results_dir = project_root / "results" / "raw"
+
+            # Проверяем, что директория существует
+            if not results_dir.exists():
+                logging.error(f"Директория {results_dir} не существует")
+                return
+
             reporter = Reporter(results_dir=results_dir)
             judge_reporter = JudgeReporter(results_dir)
 
             # Проверяем, есть ли данные для отчета
             if reporter.all_results.empty:
-                logging.warning("Нет данных для генерации отчета. Завершение работы.")
-                return
+                logging.warning("Нет данных для генерации основного отчета")
+            else:
+                # Генерация основного отчета
+                report_content = reporter.generate_leaderboard_report()
+                report_file = project_root / "BASE_LOGIC_BENCHMARK_REPORT.md"
 
-            # Вызываем ОДИН метод, который генерирует весь отчет
-            # Confidence Threshold можно вынести в config.yaml, если нужно
-            report_content = reporter.generate_leaderboard_report()
+                if report_content:  # Проверяем, что контент не пустой
+                    with open(report_file, 'w', encoding='utf-8') as f:
+                        f.write(report_content)
+                    logging.info("✅ Основной отчет создан: %s", report_file)
+                else:
+                    logging.warning("Основной отчет пустой")
 
-            # Генерация только рейтинга судей
-            judge_leaderboard = judge_reporter.generate_judge_leaderboard()
+            # Проверяем данные для отчета судей
+            if judge_reporter.judge_results.empty:
+                logging.warning("Нет данных для генерации отчета судей")
+                # Создаем файл с сообщением об отсутствии данных
+                judge_leaderboard = "# 🏛️ Рейтинг LLM-Судей\n\nНе найдено данных для оценки судей."
+            else:
+                # Генерация отчета судей
+                judge_leaderboard = judge_reporter.generate_judge_leaderboard()
 
-            # Сохраняем отчет в главный файл LEADERBOARD.md в корне проекта
-            report_file = project_root / "BASE_LOGIC_BENCHMARK_REPORT.md"
-            with open(report_file, 'w', encoding='utf-8') as f:
-                f.write(report_content)
-
-            # Сохранение в файл
+            # Сохранение отчета судей
             judge_report_file = project_root / "JUDGE_LEADERBOARD.md"
-            with open(judge_report_file, "w", encoding="utf-8") as f:
-                f.write(judge_leaderboard)
 
-            logging.info("✅ Комплексный отчет обновлен/создан: %s", report_file)
+            if judge_leaderboard:  # Проверяем, что контент не пустой
+                with open(judge_report_file, "w", encoding="utf-8") as f:
+                    f.write(judge_leaderboard)
+                logging.info("✅ Отчет судей создан: %s (размер: %d символов)",
+                             judge_report_file, len(judge_leaderboard))
+            else:
+                logging.warning("Отчет судей пустой")
+
+        except ImportError as e:
+            logging.error("❌ Ошибка импорта: %s", e)
         except Exception as e:
             logging.error("❌ Произошла ошибка при генерации отчета: %s", e, exc_info=True)
 
