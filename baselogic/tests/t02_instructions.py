@@ -117,21 +117,3 @@ class InstructionsTestGenerator(AbstractTestGenerator):
             'is_correct': is_correct,
             'details': details
         }
-
-    def _cleanup_llm_response(self, llm_output: str) -> str:
-        """Вспомогательный метод для очистки ответа модели."""
-        # Удаляем известные спецтокены
-        known_tokens = [
-            r"<\|im_start\|>", r"<\|im_end\|>", r"<\|endoftext\|>",
-            r"<s>", r"</s>", r"<\|eot_id\|>", r"assistant" # часто добавляется после <|im_start|>
-        ]
-        tokens_pattern = re.compile("|".join(known_tokens), re.IGNORECASE)
-        clean_output = tokens_pattern.sub("", llm_output)
-
-        # Удаляем Markdown
-        clean_output = re.sub(r'[*_`~]', '', clean_output)
-        clean_output = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', clean_output)
-        clean_output = re.sub(r'^\s{0,3}#{1,6}\s*', '', clean_output, flags=re.MULTILINE)
-        clean_output = re.sub(r'^[*\-\+]\s+', '', clean_output, flags=re.MULTILINE)
-
-        return clean_output.strip()
