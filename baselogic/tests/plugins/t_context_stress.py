@@ -175,35 +175,43 @@ class ContextStressTestGenerator(AbstractTestGenerator):
     def verify(self, llm_output: str, expected_output: str) -> Dict[str, Any]:
         """
         Финальная, наиболее надежная логика верификации.
-        Сравнивает наборы ключевых слов, полученных после удаления стоп-глаголов.
+        Использует двухстороннюю проверку:
+        1. На отсутствие недостающих слов в ответе.
+        2. На отсутствие большого количества лишних слов в ответе.
         """
-        # Сначала очищаем унаследованным методом, потом специфичным для этого теста
         cleaned_output = self._cleanup_llm_response(llm_output)
         cleaned_output = self._cleanup_llm_response_for_test(cleaned_output)
 
-        # Получаем наборы ключевых слов
         expected_keywords = self._get_keywords(expected_output)
         output_keywords = self._get_keywords(cleaned_output)
 
-        if not expected_keywords:
-            is_correct = bool(cleaned_output)
-            missing_words = set()
-        else:
-            # Проверка проста: все ли ключевые слова из эталона есть в ответе модели?
-            missing_words = expected_keywords - output_keywords
-            is_correct = not missing_words
+        # 1. Проверка на недостающие слова (как и раньше)
+        missing_words = expected_keywords - output_keywords
+        is_missing_words = bool(missing_words)
 
-        found_keywords = expected_keywords - missing_words
-        score = len(found_keywords) / len(expected_keywords) if expected_keywords else float(is_correct)
+        # 2. Новая проверка: на избыточные слова
+        # Находим слова, которые есть в ответе, но нет в эталоне.
+        extra_words = output_keywords - expected_keywords
+
+        # Считаем тест проваленным, если лишних слов БОЛЬШЕ, чем слов в эталоне.
+        # Это позволяет модели добавлять 1-2 слова (например, "высокая башня" вместо "башня"),
+        # но проваливает тест, если ответ содержит много "отсебятины".
+        is_too_many_extra_words = len(extra_words) > len(expected_keywords)
+
+        # Итоговое решение: тест пройден, только если НЕТ недостающих слов И НЕТ избыточности.
+        is_correct = not is_missing_words and not is_too_many_extra_words
+
+        score = 1.0 if is_correct else 0.0
 
         return {
             'is_correct': is_correct,
             'details': {
                 'expected_phrase': expected_output,
-                'cleaned_llm_output': cleaned_output[:200], # Ограничиваем для читаемости логов
+                'cleaned_llm_output': cleaned_output[:200],
                 'verification_score': round(score, 3),
                 'keywords_expected': sorted(list(expected_keywords)),
-                'keywords_found': sorted(list(found_keywords)),
-                'keywords_missing': sorted(list(missing_words)),
+                'keywords_found_in_output': sorted(list(expected_keywords - missing_words)),
+                'keywords_missing_from_output': sorted(list(missing_words)),
+                'keywords_extra_in_output': sorted(list(extra_words)),
             }
         }
