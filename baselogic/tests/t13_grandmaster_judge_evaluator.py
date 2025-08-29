@@ -20,8 +20,8 @@ class GrandmasterJudgeEvaluatorTestGenerator(AbstractTestGenerator):
         self.size = puzzle_size
         self.puzzle = self._load_file(f"grandmaster/puzzles/{self.size}x{self.size}.txt")
         self.solution = self._load_file(f"grandmaster/solutions/{self.size}x{self.size}_solution.txt")
-        self.correct_answer = "Бургер"
-        self.incorrect_answer = "Пицца"
+        self.correct_answer = "Фантастика"
+        self.incorrect_answer = "Хоррор"
 
     def generate(self) -> Dict[str, Any]:
         # Тут грузим файлы и считываем вопрос/ответ

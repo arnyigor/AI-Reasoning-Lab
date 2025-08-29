@@ -1,9 +1,11 @@
 import json
 import logging
+import os
 from collections.abc import Iterable
 from typing import Any, Dict, List, Optional, Union
 
 import requests
+from dotenv import load_dotenv
 
 from .interfaces import (
     ProviderClient,
@@ -18,12 +20,41 @@ class OllamaClient(ProviderClient):
     Чистая реализация ProviderClient для нативного API Ollama,
     использующая эндпоинт /api/chat.
     """
-
     def __init__(self):
+        # Правильная последовательность:
+        self._load_env_file()           # 1. Загружаем .env файл
+        self._load_ollama_environment() # 2. Дефолты для отсутствующих переменных
+
         self.endpoint = "http://localhost:11434/api/chat"
         self.session = requests.Session()
         self.session.headers.update({"Content-Type": "application/json"})
-        log.info("Нативный Ollama HTTP клиент инициализирован. Endpoint: %s", self.endpoint)
+        log.info("Ollama клиент инициализирован с настройками из .env")
+
+    def _load_env_file(self):
+        """Загрузка переменных из .env файла"""
+        try:
+            load_dotenv()  # Загружает .env в os.environ
+            log.info("✅ .env файл загружен")
+        except Exception as e:
+            log.warning(f"⚠️ Не удалось загрузить .env файл: {e}")
+
+    def _load_ollama_environment(self):
+        """Установка дефолтных значений для отсутствующих переменных"""
+        ollama_settings = {
+            'OLLAMA_NUM_PARALLEL': '1',
+            'OLLAMA_MAX_LOADED_MODELS': '1',
+            'OLLAMA_CPU_THREADS': '6',
+            'OLLAMA_FLASH_ATTENTION': 'false',
+            'OLLAMA_KEEP_ALIVE': '5m',
+        }
+
+        for key, default_value in ollama_settings.items():
+            current_value = os.environ.get(key)
+            if current_value is None:
+                os.environ[key] = default_value
+                log.info(f"🔧 Установлен дефолт {key}={default_value}")
+            else:
+                log.info(f"✅ Используется из .env: {key}={current_value}")
 
     def prepare_payload(self, messages: List[Dict[str, str]], model: str, *, stream: bool = False, **kwargs: Any) -> \
     Dict[str, Any]:

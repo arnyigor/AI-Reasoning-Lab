@@ -88,17 +88,15 @@ class ContextStressTestGenerator(AbstractTestGenerator):
     def _generate_needle(self) -> Tuple[str, str, str]:
         """Генерирует уникальную 'иголку' (факт), вопрос и ожидаемый ответ."""
         secrets = [
-            ("магический кристалл", "спрятан под старым дубом"),
-            ("древний свиток", "хранится в башне мага"),
-            ("золотой ключ", "лежит на дне колодца"),
-            ("секретный код", "написан красными чернилами"),
-            ("карта сокровищ", "скрыта за картиной в замке"),
-            ("волшебное зелье", "находится в подземной пещере")
+            ("магический кристалл", "под старым дубом", "спрятан под старым дубом"),
+            ("древний свиток", "в башне мага", "хранится в башне мага"),
+            ("золотой ключ", "на дне колодца", "лежит на дне колодца"),
+            ("карта сокровищ", "за картиной в замке", "скрыта за картиной в замке"),
         ]
-        item, location = random.choice(secrets)
-        needle = f"Важная информация: {item} {location}."
+        item, location, full_description = random.choice(secrets)
+        needle = f"Важная информация: {item} {full_description}."
         question = f"Где находится {item}?"
-        expected_answer = location
+        expected_answer = location  # ← Только местоположение без глагола
         return needle, question, expected_answer
 
     def generate(self) -> Dict[str, Any]:

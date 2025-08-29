@@ -57,10 +57,19 @@ class OpenAICompatibleClient(ProviderClient):
                     try:
                         chunk = json.loads(content)
                         yield chunk
-                        if chunk.get("choices", [{}])[0].get("finish_reason") is not None:
-                            break
+
+                        choices = chunk.get("choices", [])
+                        if choices:
+                            finish_reason = choices[0].get("finish_reason")
+                            # Завершаем только при определенных типах finish_reason
+                            if finish_reason in ["stop", "length", "content_filter"]:
+                                break
+                            # Или более простой вариант - убрать эту проверку совсем
+                            # и полагаться только на "[DONE]"
+
                     except json.JSONDecodeError:
                         log.warning("Не удалось декодировать JSON-чанк: %s", content)
+
 
     def extract_choices(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
         return response.get("choices", [])

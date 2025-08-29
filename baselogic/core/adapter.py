@@ -57,7 +57,11 @@ class AdapterLLMClient(ILLMClient):
         str, dict, float | None, float]:
         """Обрабатывает потоковый ответ, собирает текст и метаданные."""
         log.info("Начало получения потокового ответа...")
-        print(">>> LLM Stream: ", end="", flush=True)
+
+        # Добавляем время начала стрима
+        start_time = time.perf_counter()
+        start_time_formatted = time.strftime("%H:%M:%S", time.localtime())
+        print(f">>> LLM Stream [{start_time_formatted}]: ", end="", flush=True)
 
         chunks_text = []
         server_metadata = {}
@@ -65,7 +69,6 @@ class AdapterLLMClient(ILLMClient):
         first_chunk = True
 
         for chunk_dict in response_generator:
-            # log.debug("RAW CHUNK RECEIVED: %s", chunk_dict)
             if first_chunk:
                 ttft_time = time.perf_counter()
                 first_chunk = False
@@ -80,11 +83,12 @@ class AdapterLLMClient(ILLMClient):
                 server_metadata.update(chunk_metadata)
 
         end_time = time.perf_counter()
-        print("\n")
+        print()  # Переход на новую строку
         final_response_str = "".join(chunks_text)
         log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
 
         return final_response_str, server_metadata, ttft_time, end_time
+
 
     def _handle_non_stream_response(self, response_dict: dict) -> tuple[str, dict, float, float]:
         """Обрабатывает непотоковый (полный) ответ."""
