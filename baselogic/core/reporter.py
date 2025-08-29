@@ -5,7 +5,7 @@ import time
 from pathlib import Path
 from typing import Tuple
 import pandas as pd
-
+import pandas as pd
 log = logging.getLogger(__name__)
 
 
@@ -61,26 +61,6 @@ class Reporter:
         log.info("Всего записей для анализа: %d", len(combined_data))
         return combined_data
 
-    def _load_history(self) -> pd.DataFrame:
-        if not self.history_path.exists():
-            log.info("Файл истории '%s' не найден. Сравнение проводиться не будет.", self.history_path.name)
-            return pd.DataFrame()
-        try:
-            history_df = pd.read_json(self.history_path, orient='index')
-            log.info("✅ Файл истории '%s' успешно загружен для сравнения.", self.history_path.name)
-            return history_df
-        except Exception as e:
-            log.warning("Не удалось прочитать файл истории %s: %s", self.history_path, e)
-            return pd.DataFrame()
-
-    def _save_history(self, metrics: pd.DataFrame):
-        history_data = metrics[['Trust_Score', 'Accuracy', 'Total_Runs']].copy()
-        try:
-            history_data.to_json(self.history_path, orient='index', indent=4)
-            log.info("✅ Файл истории '%s' обновлен актуальными данными.", self.history_path.name)
-        except Exception as e:
-            log.error("Не удалось сохранить файл истории %s: %s", self.history_path, e)
-
     def _to_markdown_table(self, df: pd.DataFrame) -> str:
         if df.empty:
             return "Нет данных для отображения.\n"
@@ -92,51 +72,75 @@ class Reporter:
 
     def _calculate_verbosity(self, df: pd.DataFrame) -> pd.Series:
         """
-        Рассчитывает универсальный "Индекс Болтливости".
-        Метрика показывает, какую долю от общего вывода модели занимают
-        рассуждения ("мысли"), а не прямой ответ.
-        Работает, если в данных есть поле 'thinking_response'.
+        Корректный расчет Индекса Болтливости для thinking-моделей.
+
+        Извлекает рассуждения из:
+        1. Отдельного поля 'thinking_response'
+        2. <think>...</think> блоков внутри 'llm_response'
+
+        Возвращает долю thinking текста от общего объема вывода модели.
         """
-        # Работаем с копией, чтобы избежать SettingWithCopyWarning
-        df_copy = df.copy()
+        if df.empty:
+            return pd.Series(dtype=float, name='Verbosity_Index')
 
-        # Убедимся, что колонки существуют, иначе создадим пустые
-        if 'thinking_response' not in df_copy.columns:
-            df_copy['thinking_response'] = ""
-        if 'llm_response' not in df_copy.columns:
-            df_copy['llm_response'] = ""
+        df_work = df.copy()
 
-        # Заполняем пропуски пустыми строками для безопасного .str.len()
-        df_copy.loc[:, 'thinking_response'] = df_copy['thinking_response'].fillna("")
-        df_copy.loc[:, 'llm_response'] = df_copy['llm_response'].fillna("")
+        # Убеждаемся, что нужные колонки существуют
+        required_columns = ['llm_response', 'thinking_response']
+        for col in required_columns:
+            if col not in df_work.columns:
+                df_work[col] = ""
 
-        # Рассчитываем длины
-        df_copy['thinking_len'] = df_copy['thinking_response'].str.len()
-        df_copy['answer_len'] = df_copy['llm_response'].str.len()
-        df_copy['total_len'] = df_copy['thinking_len'] + df_copy['answer_len']
+        # Заполняем пропуски пустыми строками
+        df_work['llm_response'] = df_work['llm_response'].fillna("")
+        df_work['thinking_response'] = df_work['thinking_response'].fillna("")
 
-        # Группируем и суммируем длины для каждой модели
-        grouped = df_copy.groupby('model_name')
-        sums = grouped[['thinking_len', 'total_len']].sum()
+        def extract_thinking_and_answer_lengths(row) -> tuple:
+            """
+            Извлекает длины thinking и чистого ответа из строки датафрейма.
+            Возвращает (thinking_length, clean_answer_length).
+            """
+            llm_resp = str(row['llm_response'])
+            thinking_resp = str(row['thinking_response'])
 
-        # Рассчитываем индекс болтливости
-        # Используем .loc для безопасного деления, чтобы избежать деления на ноль
-        verbosity_index = pd.Series(0.0, index=sums.index, dtype=float)
-        non_zero_total = sums['total_len'] > 0
-        verbosity_index.loc[non_zero_total] = sums.loc[non_zero_total, 'thinking_len'] / sums.loc[non_zero_total, 'total_len']
+            # Собираем весь thinking текст
+            total_thinking = thinking_resp
 
-        return verbosity_index.fillna(0).rename("Verbosity_Index")
+            # Находим все <think>...</think> блоки в llm_response
+            think_blocks = re.findall(r'<think>(.*?)</think>', llm_resp, re.DOTALL | re.IGNORECASE)
+            for block in think_blocks:
+                total_thinking += block
 
-    def _calculate_comprehensiveness(self, df: pd.DataFrame) -> pd.Series:
-        if 'category' not in df.columns or df['category'].nunique() == 0:
-            return pd.Series(0.0, index=df['model_name'].unique(), name="Comprehensiveness")
+            # Удаляем thinking блоки из llm_response для получения чистого ответа
+            clean_answer = re.sub(r'<think>.*?</think>', '', llm_resp, flags=re.DOTALL | re.IGNORECASE)
+            clean_answer = clean_answer.strip()
 
-        model_categories_count = df.groupby('model_name')['category'].nunique()
-        total_unique_categories = df['category'].nunique()
+            return len(total_thinking), len(clean_answer)
 
-        comprehensiveness_index = model_categories_count / total_unique_categories
+        # Применяем функцию к каждой строке
+        lengths = df_work.apply(extract_thinking_and_answer_lengths, axis=1, result_type='expand')
+        lengths.columns = ['thinking_len', 'answer_len']
 
-        return comprehensiveness_index.rename("Comprehensiveness")
+        # Добавляем колонки с длинами
+        df_work['thinking_len'] = lengths['thinking_len']
+        df_work['answer_len'] = lengths['answer_len']
+        df_work['total_len'] = df_work['thinking_len'] + df_work['answer_len']
+
+        # Группируем по моделям и суммируем длины
+        model_totals = df_work.groupby('model_name')[['thinking_len', 'total_len']].sum()
+
+        # Рассчитываем индекс болтливости (защищаемся от деления на ноль)
+        verbosity_index = pd.Series(0.0, index=model_totals.index, name='Verbosity_Index')
+
+        non_empty_models = model_totals['total_len'] > 0
+        if non_empty_models.any():
+            verbosity_index.loc[non_empty_models] = (
+                    model_totals.loc[non_empty_models, 'thinking_len'] /
+                    model_totals.loc[non_empty_models, 'total_len']
+            )
+
+        return verbosity_index
+
 
     # >>>>> Сводная таблица по контексту <<<<<
     def _generate_context_performance_report(self) -> str:
@@ -212,59 +216,145 @@ class Reporter:
         report_md += self._to_markdown_table(heatmap_emoji)
         return report_md
 
-    # >>>>> Выносим логику расчета лидерборда <<<<<
     def _calculate_leaderboard(self, df: pd.DataFrame) -> pd.DataFrame:
-        # --- Этап 1: Агрегация всех метрик ---
+        """
+        ПОЛНАЯ ИСПРАВЛЕННАЯ версия расчета лидерборда.
+        Исправляет проблемы с Coverage, добавляет работу с историей и улучшает форматирование.
+        """
+
+        # --- Этап 1: Агрегация базовых метрик ---
         metrics = df.groupby('model_name').agg(
             Successes=('is_correct', 'sum'),
             Total_Runs=('is_correct', 'count'),
             Avg_Time_ms=('execution_time_ms', 'mean')
         )
+
+        # --- Этап 2: Расчет дополнительных метрик ---
         verbosity = self._calculate_verbosity(df)
-        comprehensiveness = self._calculate_comprehensiveness(df)
+        comprehensiveness = self._calculate_comprehensiveness(df)  # Теперь использует исправленную версию
 
-        # >>>>> ИЗМЕНЕНИЕ: Используем .join() для надежного объединения по индексу <<<<<
-        metrics = metrics.join(verbosity).join(comprehensiveness)
+        # Безопасное объединение метрик по индексу
+        metrics = metrics.join(verbosity, how='left').join(comprehensiveness, how='left')
 
-        # --- Этап 2: Расчет ключевых показателей ---
+        # Заполняем пропуски нулями для отсутствующих метрик
+        metrics['Verbosity_Index'] = metrics['Verbosity_Index'].fillna(0.0)
+        metrics['Comprehensiveness'] = metrics['Comprehensiveness'].fillna(0.0)
+
+        # --- Этап 3: Расчет ключевых показателей ---
         metrics['Accuracy'] = (metrics['Successes'] / metrics['Total_Runs']).fillna(0)
         metrics['Trust_Score'] = metrics.apply(
             lambda row: wilson_score_interval(int(row['Successes']), int(row['Total_Runs']))[0],
             axis=1
         )
 
-        # --- Этап 3: Работа с историей ---
+        # --- Этап 4: Работа с историческими данными ---
         history_df = self._load_history()
         metrics['Accuracy_Change'] = 0.0
-        if not history_df.empty:
-            metrics = metrics.join(history_df.add_suffix('_prev'))
-            metrics['Accuracy_Change'] = (metrics['Accuracy'] - metrics['Accuracy_prev']).fillna(0)
 
-        # --- Этап 4: Форматирование таблицы ---
+        if not history_df.empty:
+            # Объединяем с историческими данными
+            metrics = metrics.join(history_df.add_suffix('_prev'), how='left')
+
+            # Рассчитываем изменения в точности
+            metrics['Accuracy_Change'] = (
+                    metrics['Accuracy'] - metrics['Accuracy_prev'].fillna(metrics['Accuracy'])
+            ).fillna(0)
+
+        # --- Этап 5: Сортировка по Trust Score ---
+        metrics.sort_values(by='Trust_Score', ascending=False, inplace=True)
+        metrics.reset_index(inplace=True)  # Сбрасываем индекс для добавления ранга
+        metrics.insert(0, 'Rank', range(1, len(metrics) + 1))
+        metrics.set_index('model_name', inplace=True)
+
+        # --- Этап 6: Функция форматирования с индикаторами изменений ---
         def format_with_indicator(value, change, format_str):
+            """Форматирует значение с индикатором изменения (▲▼▬)."""
             indicator, change_str = "", ""
             threshold = 0.001
-            if change > threshold: indicator, change_str = " ▲", f" (+{change:.1%})"
-            elif change < -threshold: indicator, change_str = " ▼", f" ({change:.1%})"
-            elif 'Accuracy_prev' in metrics.columns: indicator = " ▬"
-            return f"{value:{format_str}}{indicator}{change_str}"
 
-        metrics.sort_values(by='Trust_Score', ascending=False, inplace=True)
-        metrics.insert(0, 'Ранг', range(1, len(metrics) + 1))
+            if change > threshold:
+                indicator, change_str = " ▲", f" (+{change:.1%})"
+            elif change < -threshold:
+                indicator, change_str = " ▼", f" ({change:.1%})"
+            elif not history_df.empty:  # Показываем стабильность только если есть история
+                indicator = " ▬"
 
+            return f"{value:{format_str}}{indicator}{change_str}".strip()
+
+        # --- Этап 7: Создание финальной таблицы лидерборда ---
         leaderboard_df = pd.DataFrame()
-        leaderboard_df['Ранг'] = metrics['Ранг']
+        leaderboard_df['Ранг'] = metrics['Rank']
         leaderboard_df['Модель'] = metrics.index
         leaderboard_df['Trust Score'] = metrics['Trust_Score'].map(lambda x: f"{x:.3f}")
-        leaderboard_df['Accuracy'] = metrics.apply(lambda row: format_with_indicator(row['Accuracy'], row['Accuracy_Change'], '.1%'), axis=1)
+        leaderboard_df['Accuracy'] = metrics.apply(
+            lambda row: format_with_indicator(row['Accuracy'], row['Accuracy_Change'], '.1%'),
+            axis=1
+        )
         leaderboard_df['Coverage'] = metrics['Comprehensiveness'].map(lambda x: f"{x:.0%}")
         leaderboard_df['Verbosity'] = metrics['Verbosity_Index'].map(lambda x: f"{x:.1%}")
         leaderboard_df['Avg Time'] = metrics['Avg_Time_ms'].map(lambda x: f"{x:,.0f} мс")
-        leaderboard_df['Runs'] = metrics['Total_Runs']
+        leaderboard_df['Runs'] = metrics['Total_Runs'].astype(int)
+
+        # Устанавливаем ранг как индекс для красивого отображения
         leaderboard_df.set_index('Ранг', inplace=True)
 
-        self._save_history(metrics)
+        # --- Этап 8: Сохранение текущих результатов в историю ---
+        self._save_history(metrics[['Trust_Score', 'Accuracy', 'Total_Runs']])
+
         return leaderboard_df
+
+    def _load_history(self) -> pd.DataFrame:
+        """Загружает исторические данные для сравнения."""
+        if not self.history_path.exists():
+            log.info("Файл истории '%s' не найден. Сравнение проводиться не будет.", self.history_path.name)
+            return pd.DataFrame()
+
+        try:
+            history_df = pd.read_json(self.history_path, orient='index')
+            log.info("✅ Файл истории '%s' успешно загружен для сравнения.", self.history_path.name)
+            return history_df
+        except Exception as e:
+            log.warning("Не удалось прочитать файл истории %s: %s", self.history_path, e)
+            return pd.DataFrame()
+
+    def _save_history(self, metrics: pd.DataFrame):
+        """Сохраняет текущие метрики в файл истории."""
+        history_data = metrics[['Trust_Score', 'Accuracy', 'Total_Runs']].copy()
+
+        try:
+            history_data.to_json(self.history_path, orient='index', indent=4)
+            log.info("✅ Файл истории '%s' обновлен актуальными данными.", self.history_path.name)
+        except Exception as e:
+            log.error("Не удалось сохранить файл истории %s: %s", self.history_path, e)
+
+    def _calculate_comprehensiveness(self, df: pd.DataFrame) -> pd.Series:
+        """
+        ИСПРАВЛЕННАЯ версия расчета Coverage.
+        Теперь корректно учитывает все категории из полного датасета.
+        """
+        if 'category' not in df.columns or df['category'].nunique() == 0:
+            return pd.Series(0.0, index=df['model_name'].unique(), name="Comprehensiveness")
+
+        # ИСПРАВЛЕНИЕ: Считаем категории от полного датасета, а не отфильтрованного
+        total_unique_categories = self.all_results['category'].nunique()
+
+        # ИСПРАВЛЕНИЕ: Учитываем категории для каждой модели из полного датасета
+        all_models_coverage = self.all_results.groupby('model_name')['category'].nunique()
+
+        # Получаем модели из текущей выборки
+        filtered_models = df['model_name'].unique()
+
+        # Создаем серию для результата
+        comprehensiveness_index = pd.Series(0.0, index=filtered_models, name="Comprehensiveness")
+
+        # Рассчитываем покрытие для каждой модели
+        for model in filtered_models:
+            if model in all_models_coverage.index:
+                comprehensiveness_index[model] = all_models_coverage[model] / total_unique_categories
+            else:
+                comprehensiveness_index[model] = 0.0
+
+        return comprehensiveness_index
 
     def generate_leaderboard_report(self) -> str:
         if self.all_results.empty:

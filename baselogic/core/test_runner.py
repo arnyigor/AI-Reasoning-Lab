@@ -199,7 +199,7 @@ class TestRunner:
                 generator_instance = generator_class(test_id=test_key)
                 for run_num in range(1, num_runs + 1):
                     test_id = f"{test_key}_{run_num}"
-                    log.info("    🔍 Тест %d/%d: %s", run_num, num_runs, test_id)
+                    log.info("    🔍 Тест %d/%d: %s", run_num, num_runs, test_id, test_key)
 
                     test_data = generator_instance.generate()
                     result = self._run_single_test_with_monitoring(
@@ -220,7 +220,9 @@ class TestRunner:
 
     def _run_single_test_with_monitoring(self, client: ILLMClient, test_id: str,
                                          generator_instance: Any, test_data: Dict[str, Any],
-                                         model_name: str, model_details: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+                                         model_name: str, model_details: Dict[str, Any],
+                                         test_category: str
+                                         ) -> Optional[Dict[str, Any]]:
         """
         Выполняет один тест-кейс с мониторингом и полной, прозрачной
         логикой верификации для УСПЕХА и НЕУДАЧИ.
@@ -251,7 +253,7 @@ class TestRunner:
             verification_result = generator_instance.verify(llm_response, expected_output)
             is_correct = verification_result.get('is_correct', False)
 
-            # >>>>> НАЧАЛО ИЗМЕНЕНИЙ: Улучшенное логирование <<<<<
+            # >>>>> Улучшенное логирование <<<<<
 
             # 1. Сначала выводим главный вердикт
             status = "✅ УСПЕХ" if is_correct else "❌ НЕУДАЧА"
@@ -273,6 +275,7 @@ class TestRunner:
             # Сборка итогового результата для JSON (остается без изменений)
             return {
                 "test_id": test_id, "model_name": model_name, "model_details": model_details,
+                "category": test_category,
                 "prompt": prompt, "thinking_log": thinking_response, "parsed_answer": llm_response,
                 "raw_llm_output": f"<think>{thinking_response}</think>\n{llm_response}",
                 "expected_output": expected_output, "is_correct": is_correct,

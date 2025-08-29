@@ -61,8 +61,6 @@ if __name__ == '__main__':
 
         log.info("КОНЕЦ ПОТОКОВОГО ВЫВОДА. (Собрано %d символов)", len(full_streamed_response))
 
-        # >>>>> КОНЕЦ ИСПРАВЛЕНИЙ <<<<<
-
         log.info("=" * 40)
 
     except requests.exceptions.ConnectionError:
