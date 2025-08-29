@@ -33,6 +33,7 @@ MANIFEST
 *.log*
 
 results/reports
+results/*.md
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

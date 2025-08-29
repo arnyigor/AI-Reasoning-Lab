@@ -1,14 +1,16 @@
+import json
 import logging
 import math
 import re
 import time
-import json
 from pathlib import Path
 from typing import Tuple, Dict, Any, Optional
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 log = logging.getLogger(__name__)
+
 
 def wilson_score_interval(
         successes: int,
@@ -27,6 +29,7 @@ def wilson_score_interval(
     upper_bound = (part1 + part2) / denominator
     return lower_bound, upper_bound
 
+
 def safe_get_hardware_tier(hardware_tier) -> Optional[str]:
     """Безопасное получение hardware_tier с обработкой NaN и неправильных типов."""
     if hardware_tier is None:
@@ -37,11 +40,13 @@ def safe_get_hardware_tier(hardware_tier) -> Optional[str]:
         return str(hardware_tier)
     return None
 
+
 def safe_get_dict(obj: Any, key: str, default: Any = None) -> Any:
     """Безопасное получение значения из словаря с проверкой типа."""
     if isinstance(obj, dict):
         return obj.get(key, default)
     return default
+
 
 class Reporter:
     """
@@ -155,7 +160,8 @@ class Reporter:
         if len(valid_tiers) >= 1:
             selected_tier = valid_tiers[0]
             if len(valid_tiers) > 1:
-                log.warning(f"Найдено несколько уровней оборудования: {valid_tiers}. Используется первый: {selected_tier}")
+                log.warning(
+                    f"Найдено несколько уровней оборудования: {valid_tiers}. Используется первый: {selected_tier}")
             return selected_tier
 
         log.warning("Не найдено валидных уровней оборудования в данных.")
@@ -375,83 +381,6 @@ class Reporter:
         except Exception as e:
             log.error("Не удалось сохранить файл истории %s: %s", self.history_path, e)
 
-    def _generate_system_info_report(self) -> str:
-        """ИСПРАВЛЕННАЯ генерация отчета о системной конфигурации."""
-        if not self.system_info_summary or not isinstance(self.system_info_summary, dict):
-            log.warning("Системная информация отсутствует или имеет неправильный формат.")
-            return ""
-
-        system = self.system_info_summary
-        report_md = "## 🖥️ Конфигурация тестовой системы\n\n"
-
-        # ИСПРАВЛЕНИЕ: Безопасное получение информации с проверкой типов
-        os_info = safe_get_dict(system, 'os', {})
-        cpu_info = safe_get_dict(system, 'cpu', {})
-        memory_info = safe_get_dict(system, 'memory', {})
-        gpus = safe_get_dict(system, 'gpus', [])
-
-        # ОС
-        os_platform = safe_get_dict(os_info, 'platform', 'Unknown')
-        os_release = safe_get_dict(os_info, 'platform_release', '')
-        report_md += f"**Операционная система:** {os_platform} {os_release}\n\n"
-
-        # CPU информация с умным выбором наилучшего названия
-        cpu_name = self._get_best_cpu_name(cpu_info, os_platform)
-        cpu_cores = safe_get_dict(cpu_info, 'physical_cores', 'Unknown')
-        cpu_threads = safe_get_dict(cpu_info, 'logical_cores', 'Unknown')
-        report_md += f"**Процессор:** {cpu_name}\n"
-        report_md += f"**Ядра CPU:** {cpu_cores} физических, {cpu_threads} логических\n"
-
-        # Частота процессора
-        cpu_frequency = self._get_best_cpu_frequency(cpu_info)
-        if cpu_frequency:
-            report_md += f"**Частота CPU:** {cpu_frequency}\n"
-
-        report_md += "\n"
-
-        # Память
-        ram_gb = safe_get_dict(memory_info, 'total_ram_gb', 0)
-        available_ram = safe_get_dict(memory_info, 'available_ram_gb', 0)
-        report_md += f"**Оперативная память:** {ram_gb} GB"
-        if available_ram > 0:
-            report_md += f" (доступно: {available_ram} GB)"
-        report_md += "\n\n"
-
-        # GPU информация
-        if gpus and isinstance(gpus, list):
-            report_md += "**Графические процессоры:**\n"
-            for i, gpu in enumerate(gpus):
-                if isinstance(gpu, dict):
-                    gpu_name = safe_get_dict(gpu, 'name', 'Unknown GPU')
-                    gpu_vendor = safe_get_dict(gpu, 'vendor', 'Unknown')
-                    vram = safe_get_dict(gpu, 'memory_total_gb', 'N/A')
-                    gpu_type = safe_get_dict(gpu, 'type', 'unknown')
-                    report_md += f"- {gpu_vendor} {gpu_name}"
-                    if vram != 'N/A':
-                        report_md += f" ({vram} GB VRAM)"
-                    report_md += f" ({gpu_type})\n"
-        else:
-            report_md += "**Графические процессоры:** Не обнаружено дискретных GPU\n"
-
-        report_md += "\n"
-
-        # Установленные библиотеки
-        env_info = safe_get_dict(system, 'environment', {})
-        if env_info and isinstance(env_info, dict):
-            report_md += "**Ключевые библиотеки:**\n"
-            key_libs = ['torch', 'transformers', 'ollama', 'pandas', 'numpy']
-            for lib in key_libs:
-                if lib in env_info:
-                    version = env_info[lib]
-                    if version not in ['not_installed', 'import_failed', 'timeout']:
-                        status = "✅"
-                    else:
-                        status = "❌"
-                    report_md += f"- {lib}: {version} {status}\n"
-
-        report_md += "\n---\n\n"
-        return report_md
-
     def _get_best_cpu_name(self, cpu_info: Dict[str, Any], platform: str) -> str:
         """Выбирает наиболее информативное название процессора."""
         if not isinstance(cpu_info, dict):
@@ -514,170 +443,6 @@ class Reporter:
                 return f"{cpu_mhz:.0f} MHz"
 
         return None
-
-    def _generate_hardware_compatibility_report(self) -> str:
-        """Генерирует отчет с рекомендациями моделей для оборудования."""
-        if self.all_results.empty:
-            return ""
-
-        # ИСПРАВЛЕНИЕ: Используем безопасное получение hardware_tier
-        hardware_tier = safe_get_hardware_tier(self.hardware_tier) or 'unknown'
-
-        report_md = "## 🎯 Рекомендации моделей для данного оборудования\n\n"
-        report_md += f"**Категория оборудования:** `{hardware_tier}`\n\n"
-
-        # Анализируем производительность протестированных моделей
-        main_results = self.all_results[self.all_results['category'] != 't_context_stress'] if 'category' in self.all_results.columns else self.all_results
-
-        if not main_results.empty:
-            model_performance = main_results.groupby('model_name').agg({
-                'is_correct': 'mean',
-                'execution_time_ms': 'mean'
-            }).round(3)
-
-            model_performance = model_performance.sort_values('is_correct', ascending=False)
-
-            # Создаем таблицу рекомендаций
-            recommendations_df = pd.DataFrame()
-            recommendations_df['Модель'] = model_performance.index
-            recommendations_df['Точность'] = model_performance['is_correct'].apply(lambda x: f"{x:.1%}")
-            recommendations_df['Ср. время (мс)'] = model_performance['execution_time_ms'].apply(lambda x: f"{x:,.0f}")
-
-            # Добавляем рекомендации
-            def get_recommendation(accuracy, avg_time):
-                if accuracy >= 0.9:
-                    if avg_time <= 5000:
-                        return "🏆 Отлично"
-                    elif avg_time <= 15000:
-                        return "✅ Хорошо"
-                    else:
-                        return "⚠️ Медленно"
-                elif accuracy >= 0.7:
-                    if avg_time <= 10000:
-                        return "✅ Приемлемо"
-                    else:
-                        return "⚠️ Медленно"
-                else:
-                    return "❌ Неподходящая"
-
-            recommendations_df['Рекомендация'] = [
-                get_recommendation(acc, time)
-                for acc, time in zip(model_performance['is_correct'], model_performance['execution_time_ms'])
-            ]
-
-            report_md += "### Производительность протестированных моделей\n\n"
-            report_md += self._to_markdown_table(recommendations_df.reset_index(drop=True))
-
-        # Добавляем общие рекомендации для категории оборудования
-        compatibility_matrix = self._generate_hardware_compatibility_matrix()
-        if hardware_tier in compatibility_matrix:
-            tier_info = compatibility_matrix[hardware_tier]
-
-            report_md += f"\n### Общие рекомендации для категории `{hardware_tier}`\n\n"
-            report_md += f"**Ожидаемая производительность:** {tier_info.get('performance', 'Unknown')}\n\n"
-
-            if 'recommended' in tier_info:
-                report_md += "**Рекомендуемые модели для данного оборудования:**\n"
-                for model in tier_info['recommended']:
-                    report_md += f"- {model}\n"
-                report_md += "\n"
-
-            if 'notes' in tier_info:
-                report_md += f"**Примечания:** {tier_info['notes']}\n\n"
-
-        report_md += "---\n\n"
-        return report_md
-
-    def _generate_hardware_compatibility_matrix(self) -> Dict[str, Dict[str, Any]]:
-        """Генерирует матрицу совместимости моделей и оборудования."""
-        return {
-            'enterprise': {
-                'recommended': [
-                    'llama-3.1-70b', 'qwen2.5-72b', 'deepseek-v3',
-                    'mixtral-8x22b', 'claude-3-opus-20240229'
-                ],
-                'performance': 'optimal',
-                'notes': 'Все модели работают на полной скорости с максимальным качеством'
-            },
-
-            'high_end': {
-                'recommended': [
-                    'llama-3.1-8b', 'qwen2.5-14b', 'mistral-7b-v0.3',
-                    'deepseek-coder-v2-16b', 'gemma-2-9b'
-                ],
-                'performance': 'high',
-                'notes': 'Отличная производительность для большинства задач, возможен запуск больших моделей с квантизацией'
-            },
-
-            'workstation_mac': {
-                'recommended': [
-                    'llama-3.1-8b', 'qwen2.5-14b', 'llama-3.1-70b-q4'
-                ],
-                'performance': 'very_good',
-                'notes': 'Превосходная производительность благодаря unified memory архитектуре Apple Silicon'
-            },
-
-            'high_end_mac': {
-                'recommended': [
-                    'llama-3.1-8b', 'qwen2.5-7b', 'mistral-7b'
-                ],
-                'performance': 'good',
-                'notes': 'Хорошая производительность для профессиональных задач и разработки'
-            },
-
-            'desktop_mac': {
-                'recommended': [
-                    'llama-3.1-8b-q4', 'qwen2.5-7b', 'phi-3.5-mini',
-                    'mistral-7b-q4'
-                ],
-                'performance': 'acceptable',
-                'notes': 'Подходит для повседневных задач, рекомендуется квантизация для больших моделей'
-            },
-
-            'mid_range': {
-                'recommended': [
-                    'llama-3.1-8b-q4', 'qwen2.5-7b', 'phi-3.5-mini-3.8b',
-                    'gemma-2-9b-q4'
-                ],
-                'performance': 'good',
-                'notes': 'Хороший баланс скорости и качества для большинства применений'
-            },
-
-            'entry_level': {
-                'recommended': [
-                    'phi-3.5-mini-3.8b', 'qwen2.5-7b-q4', 'llama-3.2-3b',
-                    'tinyllama-1.1b', 'mobilellm-1.5b'
-                ],
-                'performance': 'acceptable',
-                'notes': 'Подходит для изучения и простых задач, ограниченная производительность'
-            },
-
-            'workstation_cpu': {
-                'recommended': [
-                    'llama-3.1-8b-q4', 'qwen2.5-7b-q4', 'phi-3.5-mini',
-                    'mistral-7b-q4'
-                ],
-                'performance': 'slow',
-                'notes': 'CPU-only inference, медленнее GPU но возможен запуск средних моделей'
-            },
-
-            'mobile_cpu': {
-                'recommended': [
-                    'phi-3.5-mini', 'tinyllama-1.1b', 'qwen2.5-1.5b',
-                    'mobilellm-1.5b'
-                ],
-                'performance': 'limited',
-                'notes': 'Только для легких задач, сильно ограниченная производительность'
-            },
-
-            'unknown': {
-                'recommended': [
-                    'phi-3.5-mini', 'qwen2.5-7b-q4', 'llama-3.1-8b-q4'
-                ],
-                'performance': 'varies',
-                'notes': 'Универсальные модели для неопределенного оборудования'
-            }
-        }
 
     def _generate_context_performance_report(self) -> str:
         """Генерирует отчет о производительности на длинных контекстах."""
@@ -757,35 +522,35 @@ class Reporter:
 
     def generate_leaderboard_report(self) -> str:
         """
-        ГЛАВНЫЙ МЕТОД: генерирует полный отчет с системной информацией и рекомендациями.
+        ИСПРАВЛЕННЫЙ метод: генерирует отчет с фокусом на производительность моделей.
+        Убраны: системная информация, рекомендации по оборудованию, сложные таблицы совместимости.
+        Добавлено: простая сводка производительности с латентностью и пропускной способностью.
         """
         if self.all_results.empty:
             return "# 🏆 Таблица Лидеров\n\nНе найдено данных для анализа."
+
+        # # ОТЛАДКА: Анализируем качество данных
+        # exec_time_stats = self.all_results['execution_time_ms'].describe()
+        # nan_count = self.all_results['execution_time_ms'].isna().sum()
+        # zero_count = (self.all_results['execution_time_ms'] == 0).sum()
+        #
+        # log.info("=== ДИАГНОСТИКА ДАННЫХ ===")
+        # log.info(f"Статистика execution_time_ms:\n{exec_time_stats}")
+        # log.info(f"NaN значений: {nan_count}")
+        # log.info(f"Нулевых значений: {zero_count}")
+        # log.info(f"Валидных значений: {len(self.all_results) - nan_count - zero_count}")
+
+        time_cols = [col for col in self.all_results.columns if 'time' in col.lower()]
+        log.info("Найденные колонки со временем: %s", time_cols)
 
         # Заголовок отчета
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
         report_md = f"# 🏆 Отчет по тестированию LLM моделей\n\n"
         report_md += f"*Последнее обновление: {timestamp}*\n\n"
 
-        # НОВОЕ: Добавляем системную информацию в начало отчета
-        try:
-            system_report = self._generate_system_info_report()
-            if system_report:
-                report_md += system_report
-        except Exception as e:
-            log.error(f"Ошибка генерации системного отчета: {e}")
-            report_md += "## 🖥️ Конфигурация тестовой системы\n\n*Информация недоступна*\n\n---\n\n"
-
-        # НОВОЕ: Добавляем рекомендации для оборудования
-        try:
-            hardware_report = self._generate_hardware_compatibility_report()
-            if hardware_report:
-                report_md += hardware_report
-        except Exception as e:
-            log.error(f"Ошибка генерации отчета совместимости: {e}")
-
         # Основная таблица лидеров (исключаем стресс-тесты)
-        main_results = self.all_results[self.all_results['category'] != 't_context_stress'] if 'category' in self.all_results.columns else self.all_results
+        main_results = self.all_results[self.all_results[
+                                            'category'] != 't_context_stress'] if 'category' in self.all_results.columns else self.all_results
 
         if not main_results.empty:
             try:
@@ -800,6 +565,27 @@ class Reporter:
             report_md += "## 🏆 Основной рейтинг моделей\n\nНет данных для основной таблицы лидеров.\n"
 
         report_md += "\n---\n"
+
+        # НОВОЕ: Добавляем простую сводку производительности (KISS)
+        try:
+            performance_report = self._generate_performance_summary()
+            if performance_report:
+                report_md += performance_report
+                report_md += "\n---\n"
+        except Exception as e:
+            log.error(f"Ошибка генерации сводки производительности: {e}")
+
+        # После секции "⚡ Сводка производительности"
+        report_md += "\n---\n"
+
+        # НОВОЕ: Добавляем рейтинг локальных провайдеров
+        try:
+            local_providers_report = self._generate_local_providers_report()
+            if local_providers_report:
+                report_md += local_providers_report
+                report_md += "\n---\n"
+        except Exception as e:
+            log.error(f"Ошибка генерации рейтинга локальных провайдеров: {e}")
 
         # Отчеты по стресс-тестам контекста
         try:
@@ -841,14 +627,236 @@ class Reporter:
         report_md += "**Accuracy** - простая доля правильных ответов. Индикаторы: ▲ рост, ▼ падение, ▬ стабильность.\n\n"
         report_md += "**Coverage** - доля тестовых категорий, в которых модель участвовала.\n\n"
         report_md += "**Verbosity** - доля thinking-рассуждений от общего объема вывода модели.\n\n"
+        report_md += "**Средняя латентность** - среднее время выполнения запроса в миллисекундах.\n\n"
+        report_md += "**p95 латентность** - 95-й перцентиль времени отклика (95% запросов выполняются быстрее).\n\n"
+        report_md += "**QPS** - приблизительная пропускная способность (запросов в секунду).\n\n"
 
         return report_md
+
+    def _generate_performance_summary(self) -> str:
+        """
+        ИСПРАВЛЕННЫЙ метод: генерирует простую сводку производительности по KISS-принципу.
+        """
+        if self.all_results.empty:
+            return ""
+
+        # Фильтруем основные результаты (без стресс-тестов)
+        main_results = self.all_results[self.all_results['category'] != 't_context_stress'] if 'category' in self.all_results.columns else self.all_results
+
+        if main_results.empty:
+            log.warning("Нет основных результатов после фильтрации стресс-тестов")
+            return ""
+
+        # Проверяем наличие нужных полей
+        if 'execution_time_ms' not in main_results.columns:
+            log.warning("Поле 'execution_time_ms' отсутствует в данных")
+            return ""
+
+        # Убираем строки с NaN/None/нулевыми значениями времени
+        valid_results = main_results[
+            (main_results['execution_time_ms'].notna()) &
+            (main_results['execution_time_ms'] > 0)
+            ].copy()
+
+        if valid_results.empty:
+            log.warning("Нет валидных данных о времени выполнения (все NaN/None/0)")
+            return ""
+
+        log.info(f"Валидных записей для анализа производительности: {len(valid_results)}")
+
+        try:
+            # Агрегируем метрики по моделям
+            perf_summary = valid_results.groupby('model_name').agg({
+                'execution_time_ms': [
+                    'mean',
+                    'count',
+                    lambda x: np.percentile(x, 95) if len(x) > 0 else 0
+                ]
+            }).round(1)
+
+            # Упрощаем колонки
+            perf_summary.columns = ['avg_latency_ms', 'total_runs', 'p95_latency_ms']
+
+            # Рассчитываем приблизительную пропускную способность
+            perf_summary['approx_qps'] = (1000 / perf_summary['avg_latency_ms']).round(2)
+
+            # Создаем итоговую таблицу
+            summary_df = pd.DataFrame({
+                'Модель': perf_summary.index,
+                'Средняя латентность (мс)': perf_summary['avg_latency_ms'].astype(int),
+                'p95 латентность (мс)': perf_summary['p95_latency_ms'].astype(int),
+                'Примерн. QPS': perf_summary['approx_qps'],
+                'Всего запусков': perf_summary['total_runs'].astype(int)
+            })
+
+            # Сортируем по p95 латентности
+            summary_df = summary_df.sort_values('p95 латентность (мс)').reset_index(drop=True)
+
+            report_md = "## ⚡ Сводка производительности\n\n"
+            report_md += f"> _Базовые метрики скорости по {len(summary_df)} моделям. Модели отсортированы по p95 латентности._\n\n"
+            report_md += self._to_markdown_table(summary_df)
+
+            return report_md
+
+        except Exception as e:
+            log.error(f"Ошибка при агрегации метрик производительности: {e}", exc_info=True)
+            return ""
+
+    def _generate_local_providers_report(self) -> str:
+        """
+        ИСПРАВЛЕННЫЙ метод: определение локальных провайдеров через model_details.provider и hardware_tier.
+        """
+        if self.all_results.empty:
+            return ""
+
+        main_results = self.all_results[self.all_results['category'] != 't_context_stress'] if 'category' in self.all_results.columns else self.all_results
+
+        if main_results.empty:
+            return ""
+
+        def get_local_provider(row) -> str:
+            """
+            Определяет локальный провайдер с учетом model_details.provider и hardware_tier.
+            """
+            # Извлекаем данные
+            model_name = row.get('model_name', '').lower()
+            hardware_tier = row.get('hardware_tier', '').lower()
+
+            # Извлекаем provider из model_details
+            model_details = row.get('model_details', {})
+            if isinstance(model_details, dict):
+                provider_type = model_details.get('provider', '').lower()
+            else:
+                provider_type = ''
+
+            # 1. Приоритет: явный provider из model_details
+            if provider_type == 'ollamaclient':
+                return 'ollama'
+            elif provider_type in ['janclient', 'localclient']:
+                return 'jan'
+            elif provider_type == 'lmstudioclient':
+                return 'lmstudio'
+
+            # 2. OpenAICompatibleClient может быть и локальным, и API
+            elif provider_type == 'openaicompatibleclient':
+                # Проверяем hardware_tier для локальности
+                local_tiers = ['entry_level', 'mid_range', 'desktop_mac', 'high_end_mac', 'workstation_mac', 'workstation_cpu', 'mobile_cpu']
+
+                if hardware_tier in local_tiers:
+                    # Локальная модель через OpenAI-совместимый API
+                    if model_name.startswith('jan-'):
+                        return 'jan'
+                    elif any(model_name.startswith(prefix) for prefix in ['qwen', 'llama', 'gemma', 'phi', 'mistral']):
+                        return 'ollama'
+                    else:
+                        return 'local'
+                else:
+                    # Внешний API
+                    return 'api'
+
+            # 3. Другие API провайдеры
+            elif provider_type in ['geminiclient', 'openai', 'anthropic']:
+                return 'api'
+
+            # 4. Резервная логика по имени модели и hardware_tier
+            local_tiers = ['entry_level', 'mid_range', 'desktop_mac', 'high_end_mac', 'workstation_mac']
+
+            if hardware_tier in local_tiers:
+                # Скорее всего локальная модель
+                if model_name.startswith('jan-'):
+                    return 'jan'
+                elif ':' in model_name or any(prefix in model_name for prefix in ['qwen', 'llama', 'gemma', 'deepseek-r1:']):
+                    return 'ollama'
+                else:
+                    return 'local'
+
+            # 5. Явно внешние API (по слэшам и провайдерам)
+            api_patterns = ['google/', 'openai/', 'anthropic/', 'gemini-', 'deepseek/', 'tngtech/', 'meta-llama/', 'moonshotai/']
+            if any(pattern in model_name for pattern in api_patterns):
+                return 'api'
+
+            return 'unknown'
+
+        # Применяем категоризацию
+        main_results = main_results.copy()
+        main_results['provider'] = main_results.apply(get_local_provider, axis=1)
+
+        # Фильтруем только локальные провайдеры
+        local_results = main_results[main_results['provider'].isin(['jan', 'ollama', 'lmstudio', 'local'])]
+
+        if local_results.empty:
+            log.info("Не найдено локальных моделей для анализа")
+            return ""
+
+        log.info(f"Найдено {len(local_results)} записей от локальных провайдеров")
+
+        try:
+            # Агрегируем метрики
+            model_agg = local_results.groupby(['provider', 'model_name']).agg({
+                'is_correct': ['sum', 'count'],
+                'execution_time_ms': ['mean', lambda x: np.percentile(x, 95)]
+            }).round(1)
+
+            model_agg.columns = ['successes', 'total_runs', 'avg_latency_ms', 'p95_latency_ms']
+            model_agg = model_agg.reset_index()
+
+            # Рассчитываем ключевые метрики
+            model_agg['accuracy'] = model_agg['successes'] / model_agg['total_runs']
+            model_agg['trust_score'] = model_agg.apply(
+                lambda row: wilson_score_interval(int(row['successes']), int(row['total_runs']))[0],
+                axis=1
+            )
+            model_agg['qps'] = (1000 / model_agg['avg_latency_ms']).round(2)
+
+            # Сортируем по Trust Score
+            model_agg = model_agg.sort_values(
+                by=['trust_score', 'accuracy', 'avg_latency_ms'],
+                ascending=[False, False, True]
+            )
+
+            # Создаем итоговую таблицу
+            local_table = pd.DataFrame({
+                'Провайдер': model_agg['provider'].str.upper(),
+                'Модель': model_agg['model_name'],
+                'Trust Score': model_agg['trust_score'].round(3),
+                'Точность': model_agg['accuracy'].apply(lambda x: f"{x:.1%}"),
+                'Средняя латентность (мс)': model_agg['avg_latency_ms'].astype(int),
+                'p95 латентность (мс)': model_agg['p95_latency_ms'].astype(int),
+                'QPS': model_agg['qps'],
+                'Запусков': model_agg['total_runs'].astype(int)
+            })
+
+            report_md = "## 🏠 Лидеры локальных провайдеров\n\n"
+            report_md += f"> _Все {len(local_table)} локальных моделей отсортированы по Trust Score. Определение через model_details.provider и hardware_tier._\n\n"
+            report_md += self._to_markdown_table(local_table.reset_index(drop=True))
+
+            # Анализ по провайдерам
+            provider_stats = model_agg.groupby('provider').agg({
+                'trust_score': 'max',
+                'accuracy': 'max',
+                'avg_latency_ms': 'min'
+            }).round(3)
+
+            report_md += f"\n### 📊 Статистика по провайдерам:\n\n"
+            for provider, stats in provider_stats.iterrows():
+                best_model = model_agg[model_agg['provider'] == provider].iloc[0]
+                report_md += f"**{provider.upper()}**: лучшая модель `{best_model['model_name']}` — "
+                report_md += f"Trust Score {stats['trust_score']:.3f}, {stats['accuracy']:.1%} точность\n\n"
+
+            return report_md
+
+        except Exception as e:
+            log.error(f"Ошибка при генерации рейтинга локальных провайдеров: {e}", exc_info=True)
+            return ""
+
+
 
     def save_report_to_file(self, filename: Optional[str] = None) -> Path:
         """Сохраняет отчет в Markdown файл."""
         if filename is None:
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            hardware_suffix = f"_{safe_get_hardware_tier(self.hardware_tier)}" if safe_get_hardware_tier(self.hardware_tier) else ""
+            hardware_suffix = f"_{safe_get_hardware_tier(self.hardware_tier)}" if safe_get_hardware_tier(
+                self.hardware_tier) else ""
             filename = f"llm_benchmark_report{hardware_suffix}_{timestamp}.md"
 
         report_content = self.generate_leaderboard_report()

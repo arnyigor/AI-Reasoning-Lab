@@ -14,6 +14,8 @@ from .interfaces import (
 
 log = logging.getLogger(__name__)
 
+def str_to_bool(value: str) -> bool:
+    return value.lower() in ("true", "1", "yes", "on")
 
 class OllamaClient(ProviderClient):
     """
@@ -23,7 +25,10 @@ class OllamaClient(ProviderClient):
     def __init__(self):
         # Правильная последовательность:
         self._load_env_file()           # 1. Загружаем .env файл
-        self._load_ollama_environment() # 2. Дефолты для отсутствующих переменных
+        self.use_params = str_to_bool(os.environ.get("OLLAMA_USE_PARAMS", "false"))
+
+        if self.use_params:
+            self._load_ollama_environment() # 2. Дефолты для отсутствующих переменных
 
         self.endpoint = "http://localhost:11434/api/chat"
         self.session = requests.Session()
