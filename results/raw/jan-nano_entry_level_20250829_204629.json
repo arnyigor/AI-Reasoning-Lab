@@ -1,0 +1,2507 @@
+[
+    {
+        "test_id": "t02_instructions_1",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "thinking_log": "",
+        "parsed_answer": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "raw_llm_output": "<think></think>\nШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "expected_output": {
+            "phrase": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ",
+            "count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 815.1786000235006,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482376,
+            "id": "chatcmpl-322tv4t85m58cjrlqr08ji",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 12,
+            "prompt_eval_count": 81,
+            "total_duration": 813840599,
+            "prompt_eval_duration": 488744799,
+            "eval_duration": 325095799,
+            "load_duration": 0,
+            "total_latency_ms": 815.1786000235006,
+            "time_to_first_token_ms": 488.74,
+            "peak_ram_increment_mb": 0.19921875
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_2",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'корова молоко'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "КОРОВА МОЛОКО  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "КОРОВА МОЛОКО  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nКОРОВА МОЛОКО  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "КОРОВА МОЛОКО",
+            "count": "6"
+        },
+        "is_correct": false,
+        "execution_time_ms": 306.82110000634566,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "КОРОВА МОЛОКО  \nГЛАСНЫХ: 6"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482377,
+            "id": "chatcmpl-vkhgzsm9fpjh7tpqq6sdgp",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 7,
+            "prompt_eval_count": 76,
+            "total_duration": 305699699,
+            "prompt_eval_duration": 184236700,
+            "eval_duration": 121462999,
+            "load_duration": 0,
+            "total_latency_ms": 306.82110000634566,
+            "time_to_first_token_ms": 184.24,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_3",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'мама мыла раму'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "МАМА МЫЛА РАМУ  \nГЛАСНЫХ: 7",
+        "thinking_log": "",
+        "parsed_answer": "МАМА МЫЛА РАМУ  \nГЛАСНЫХ: 7",
+        "raw_llm_output": "<think></think>\nМАМА МЫЛА РАМУ  \nГЛАСНЫХ: 7",
+        "expected_output": {
+            "phrase": "МАМА МЫЛА РАМУ",
+            "count": "6"
+        },
+        "is_correct": false,
+        "execution_time_ms": 339.90999998059124,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "МАМА МЫЛА РАМУ  \nГЛАСНЫХ: 7"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482377,
+            "id": "chatcmpl-4o3xvk2o3w74ixonws9gg7",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 7,
+            "prompt_eval_count": 76,
+            "total_duration": 338780200,
+            "prompt_eval_duration": 190509000,
+            "eval_duration": 148271200,
+            "load_duration": 0,
+            "total_latency_ms": 339.90999998059124,
+            "time_to_first_token_ms": 190.51,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_4",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "HELLO WORLD",
+            "count": "3"
+        },
+        "is_correct": true,
+        "execution_time_ms": 344.3898999830708,
+        "verification_details": {
+            "reason": "OK",
+            "expected_phrase": "HELLO WORLD",
+            "extracted_phrase": "HELLO WORLD",
+            "phrase_match": true,
+            "expected_count": "3",
+            "extracted_count": "3",
+            "count_match": true
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482378,
+            "id": "chatcmpl-d8snkcvfddel02c92a366",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 10,
+            "prompt_eval_count": 76,
+            "total_duration": 343299400,
+            "prompt_eval_duration": 181601899,
+            "eval_duration": 161697500,
+            "load_duration": 0,
+            "total_latency_ms": 344.3898999830708,
+            "time_to_first_token_ms": 181.6,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_5",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ШЛА САША ПО ШОССЕ И СОСАЛА СУЩКУ  \nГЛАСНЫХ: 12",
+        "thinking_log": "",
+        "parsed_answer": "ШЛА САША ПО ШОССЕ И СОСАЛА СУЩКУ  \nГЛАСНЫХ: 12",
+        "raw_llm_output": "<think></think>\nШЛА САША ПО ШОССЕ И СОСАЛА СУЩКУ  \nГЛАСНЫХ: 12",
+        "expected_output": {
+            "phrase": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ",
+            "count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 498.68550000246614,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ШЛА САША ПО ШОССЕ И СОСАЛА СУЩКУ  \nГЛАСНЫХ: 12"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482378,
+            "id": "chatcmpl-u9cvd7m9hkh27qzmsjstp",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 12,
+            "prompt_eval_count": 81,
+            "total_duration": 497557699,
+            "prompt_eval_duration": 172961500,
+            "eval_duration": 324596199,
+            "load_duration": 0,
+            "total_latency_ms": 498.68550000246614,
+            "time_to_first_token_ms": 172.96,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_6",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ехали медведи на велосипеде'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ",
+            "count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 483.0919000087306,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 10"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482378,
+            "id": "chatcmpl-4m7bxsc71ewbpjgh3dct5p",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 11,
+            "prompt_eval_count": 80,
+            "total_duration": 481943799,
+            "prompt_eval_duration": 195852199,
+            "eval_duration": 286091600,
+            "load_duration": 0,
+            "total_latency_ms": 483.0919000087306,
+            "time_to_first_token_ms": 195.85,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_7",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ехали медведи на велосипеде'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 12",
+        "thinking_log": "",
+        "parsed_answer": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 12",
+        "raw_llm_output": "<think></think>\nЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 12",
+        "expected_output": {
+            "phrase": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ",
+            "count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 468.83829997386783,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ЕХАЛИ МЕДВЕДИ НА ВЕЛОСИПЕДЕ  \nГЛАСНЫХ: 12"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482379,
+            "id": "chatcmpl-mrv6ziiix18dydeugcyp3n",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 11,
+            "prompt_eval_count": 80,
+            "total_duration": 467589699,
+            "prompt_eval_duration": 179158099,
+            "eval_duration": 288431599,
+            "load_duration": 0,
+            "total_latency_ms": 468.83829997386783,
+            "time_to_first_token_ms": 179.16,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_8",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "PUSH BUTTON",
+            "count": "3"
+        },
+        "is_correct": false,
+        "execution_time_ms": 224.09720002906397,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ПUSH BUTTON  \nГЛАСНЫХ: 3"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482379,
+            "id": "chatcmpl-nivzeelqtncvcci5owntz9",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 7,
+            "prompt_eval_count": 76,
+            "total_duration": 222870300,
+            "prompt_eval_duration": 91243300,
+            "eval_duration": 131626999,
+            "load_duration": 0,
+            "total_latency_ms": 224.09720002906397,
+            "time_to_first_token_ms": 91.24,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_9",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ученье свет, не ученье как свет так на работу'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15",
+        "thinking_log": "",
+        "parsed_answer": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15",
+        "raw_llm_output": "<think></think>\nУЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15",
+        "expected_output": {
+            "phrase": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ",
+            "count": "15"
+        },
+        "is_correct": false,
+        "execution_time_ms": 671.8157000141218,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482380,
+            "id": "chatcmpl-1yoyfb2na2ameivkuky25g",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 15,
+            "prompt_eval_count": 84,
+            "total_duration": 670651099,
+            "prompt_eval_duration": 198098800,
+            "eval_duration": 472552299,
+            "load_duration": 0,
+            "total_latency_ms": 671.8157000141218,
+            "time_to_first_token_ms": 198.1,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_10",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "HELLO WORLD",
+            "count": "3"
+        },
+        "is_correct": true,
+        "execution_time_ms": 331.5498000010848,
+        "verification_details": {
+            "reason": "OK",
+            "expected_phrase": "HELLO WORLD",
+            "extracted_phrase": "HELLO WORLD",
+            "phrase_match": true,
+            "expected_count": "3",
+            "extracted_count": "3",
+            "count_match": true
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482380,
+            "id": "chatcmpl-y3ihrmg89bikqdaci6vvg",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 10,
+            "prompt_eval_count": 76,
+            "total_duration": 330351900,
+            "prompt_eval_duration": 160380000,
+            "eval_duration": 169971900,
+            "load_duration": 0,
+            "total_latency_ms": 331.5498000010848,
+            "time_to_first_token_ms": 160.38,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_11",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "thinking_log": "",
+        "parsed_answer": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "raw_llm_output": "<think></think>\nШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "expected_output": {
+            "phrase": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ",
+            "count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 513.5728000313975,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482381,
+            "id": "chatcmpl-1lvgak4g3jbuvhxz3vfsu",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 12,
+            "prompt_eval_count": 81,
+            "total_duration": 512429399,
+            "prompt_eval_duration": 186234200,
+            "eval_duration": 326195199,
+            "load_duration": 0,
+            "total_latency_ms": 513.5728000313975,
+            "time_to_first_token_ms": 186.23,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_12",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "PUSH BUTTON",
+            "count": "3"
+        },
+        "is_correct": false,
+        "execution_time_ms": 244.09200000809506,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ПUSH BUTTON  \nГЛАСНЫХ: 3"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482381,
+            "id": "chatcmpl-d4lwqi0lafcq8las7fy53j",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 7,
+            "prompt_eval_count": 76,
+            "total_duration": 242712400,
+            "prompt_eval_duration": 110549600,
+            "eval_duration": 132162800,
+            "load_duration": 0,
+            "total_latency_ms": 244.09200000809506,
+            "time_to_first_token_ms": 110.55,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_13",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ученье свет, не ученье как свет так на работу'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 14",
+        "thinking_log": "",
+        "parsed_answer": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 14",
+        "raw_llm_output": "<think></think>\nУЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 14",
+        "expected_output": {
+            "phrase": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ",
+            "count": "15"
+        },
+        "is_correct": false,
+        "execution_time_ms": 685.6295000179671,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 14"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482382,
+            "id": "chatcmpl-acpe4opksxlm9gvm5a1n4k",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 15,
+            "prompt_eval_count": 84,
+            "total_duration": 684459400,
+            "prompt_eval_duration": 212328099,
+            "eval_duration": 472131300,
+            "load_duration": 0,
+            "total_latency_ms": 685.6295000179671,
+            "time_to_first_token_ms": 212.33,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_14",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "HELLO WORLD",
+            "count": "3"
+        },
+        "is_correct": true,
+        "execution_time_ms": 355.1453999825753,
+        "verification_details": {
+            "reason": "OK",
+            "expected_phrase": "HELLO WORLD",
+            "extracted_phrase": "HELLO WORLD",
+            "phrase_match": true,
+            "expected_count": "3",
+            "extracted_count": "3",
+            "count_match": true
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482382,
+            "id": "chatcmpl-ej9bstmkcsqm59i9fm4tx",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 10,
+            "prompt_eval_count": 76,
+            "total_duration": 354017800,
+            "prompt_eval_duration": 183759400,
+            "eval_duration": 170258399,
+            "load_duration": 0,
+            "total_latency_ms": 355.1453999825753,
+            "time_to_first_token_ms": 183.76,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_15",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "HELLO WORLD",
+            "count": "3"
+        },
+        "is_correct": true,
+        "execution_time_ms": 324.2818000144325,
+        "verification_details": {
+            "reason": "OK",
+            "expected_phrase": "HELLO WORLD",
+            "extracted_phrase": "HELLO WORLD",
+            "phrase_match": true,
+            "expected_count": "3",
+            "extracted_count": "3",
+            "count_match": true
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482383,
+            "id": "chatcmpl-yotqgclsqtmzgtaebonhl",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 10,
+            "prompt_eval_count": 76,
+            "total_duration": 323126200,
+            "prompt_eval_duration": 157817500,
+            "eval_duration": 165308700,
+            "load_duration": 0,
+            "total_latency_ms": 324.2818000144325,
+            "time_to_first_token_ms": 157.82,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_16",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "thinking_log": "",
+        "parsed_answer": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "raw_llm_output": "<think></think>\nШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "expected_output": {
+            "phrase": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ",
+            "count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 517.3267000354826,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482383,
+            "id": "chatcmpl-f9bx7uafizfhmz33ljz11n",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 12,
+            "prompt_eval_count": 81,
+            "total_duration": 516196699,
+            "prompt_eval_duration": 191736300,
+            "eval_duration": 324460399,
+            "load_duration": 0,
+            "total_latency_ms": 517.3267000354826,
+            "time_to_first_token_ms": 191.74,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_17",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'ученье свет, не ученье как свет так на работу'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15",
+        "thinking_log": "",
+        "parsed_answer": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15",
+        "raw_llm_output": "<think></think>\nУЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15",
+        "expected_output": {
+            "phrase": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ",
+            "count": "15"
+        },
+        "is_correct": false,
+        "execution_time_ms": 693.157900008373,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "УЧЕНЬЕ СВЕТ, НЕ УЧЕНЬЕ КАК СВЕТ ТАК НА РАБОТУ  \nГЛАСНЫХ: 15"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482384,
+            "id": "chatcmpl-g5uizbgbr0dlqzimou9jur",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 15,
+            "prompt_eval_count": 84,
+            "total_duration": 692065899,
+            "prompt_eval_duration": 220161699,
+            "eval_duration": 471904199,
+            "load_duration": 0,
+            "total_latency_ms": 693.157900008373,
+            "time_to_first_token_ms": 220.16,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_18",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello world'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HELLO WORLD  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "HELLO WORLD",
+            "count": "3"
+        },
+        "is_correct": true,
+        "execution_time_ms": 330.12160001089796,
+        "verification_details": {
+            "reason": "OK",
+            "expected_phrase": "HELLO WORLD",
+            "extracted_phrase": "HELLO WORLD",
+            "phrase_match": true,
+            "expected_count": "3",
+            "extracted_count": "3",
+            "count_match": true
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482384,
+            "id": "chatcmpl-tm2vkcjgkz9xtigf05xiy",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 10,
+            "prompt_eval_count": 76,
+            "total_duration": 328929000,
+            "prompt_eval_duration": 160834499,
+            "eval_duration": 168094500,
+            "load_duration": 0,
+            "total_latency_ms": 330.12160001089796,
+            "time_to_first_token_ms": 160.83,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_19",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'push button'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "thinking_log": "",
+        "parsed_answer": "ПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "raw_llm_output": "<think></think>\nПUSH BUTTON  \nГЛАСНЫХ: 3",
+        "expected_output": {
+            "phrase": "PUSH BUTTON",
+            "count": "3"
+        },
+        "is_correct": false,
+        "execution_time_ms": 247.555400012061,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ПUSH BUTTON  \nГЛАСНЫХ: 3"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482385,
+            "id": "chatcmpl-qzebfx8vicuceh43yy8wf",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 7,
+            "prompt_eval_count": 76,
+            "total_duration": 246391299,
+            "prompt_eval_duration": 121728199,
+            "eval_duration": 124663099,
+            "load_duration": 0,
+            "total_latency_ms": 247.555400012061,
+            "time_to_first_token_ms": 121.73,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    },
+    {
+        "test_id": "t02_instructions_20",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'шла саша по шоссе и сосала сушку'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай количество гласных букв в исходной фразе.\n4. Выведи результат СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "thinking_log": "",
+        "parsed_answer": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "raw_llm_output": "<think></think>\nШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12",
+        "expected_output": {
+            "phrase": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ",
+            "count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 510.86929999291897,
+        "verification_details": {
+            "error": "Keywords not found in response",
+            "cleaned_response_snippet": "ШЛА САША ПО ШОССЕ И СОСАЛА СУШКУ  \nГЛАСНЫХ: 12"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756482385,
+            "id": "chatcmpl-aysx4hqywzkclwol2vsc",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 12,
+            "prompt_eval_count": 81,
+            "total_duration": 509702500,
+            "prompt_eval_duration": 173865400,
+            "eval_duration": 335837099,
+            "load_duration": 0,
+            "total_latency_ms": 510.86929999291897,
+            "time_to_first_token_ms": 173.87,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.47,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.41
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756482389.0145223
+    }
+]

@@ -1,0 +1,3932 @@
+[
+    {
+        "test_id": "t01_simple_logic_1",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор быстрее Алексей.\n- Алексей быстрее Дмитрий.\n\nВопрос: Кто из них самый медленный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Дмитрий",
+        "thinking_log": "",
+        "parsed_answer": "Дмитрий",
+        "raw_llm_output": "<think></think>\nДмитрий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Виктор",
+                "Алексей"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 370.7397999824025,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Дмитрий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481686,
+            "id": "chatcmpl-29zafxy6uwyo8wxe1a754f",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 54,
+            "total_duration": 369483699,
+            "prompt_eval_duration": 368477599,
+            "eval_duration": 1006099,
+            "load_duration": 0,
+            "total_latency_ms": 370.7397999824025,
+            "time_to_first_token_ms": 368.48,
+            "peak_ram_increment_mb": 0.2421875
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_2",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей выше Дмитрий.\n- Дмитрий выше Виктор.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Алексей",
+        "thinking_log": "",
+        "parsed_answer": "Алексей",
+        "raw_llm_output": "<think></think>\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Дмитрий",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 99.09889998380095,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Алексей"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481686,
+            "id": "chatcmpl-0mu8bvme6c1jio9230jlji",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 98036500,
+            "prompt_eval_duration": 97253300,
+            "eval_duration": 783200,
+            "load_duration": 0,
+            "total_latency_ms": 99.09889998380095,
+            "time_to_first_token_ms": 97.25,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_3",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина выше Алексей.\n- Елена выше Ирина.\n\nВопрос: Кто из них самый низкий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Алексей",
+        "thinking_log": "",
+        "parsed_answer": "Алексей",
+        "raw_llm_output": "<think></think>\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Елена",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 98.5954999923706,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Алексей"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481686,
+            "id": "chatcmpl-8iskzw39mcbolibzpc69sf",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 51,
+            "total_duration": 97475600,
+            "prompt_eval_duration": 96665700,
+            "eval_duration": 809899,
+            "load_duration": 0,
+            "total_latency_ms": 98.5954999923706,
+            "time_to_first_token_ms": 96.67,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_4",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина старше Елена.\n- Дмитрий старше Ирина.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Дмитрий",
+        "thinking_log": "",
+        "parsed_answer": "Дмитрий",
+        "raw_llm_output": "<think></think>\nДмитрий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Ирина",
+                "Елена"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 129.64780000038445,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Дмитрий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481687,
+            "id": "chatcmpl-dcsaql0rmoeh6f72mtsn6",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 128519399,
+            "prompt_eval_duration": 127513699,
+            "eval_duration": 1005699,
+            "load_duration": 0,
+            "total_latency_ms": 129.64780000038445,
+            "time_to_first_token_ms": 127.51,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_5",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна выше Наталья.\n- Елена выше Жанна.\n\nВопрос: Кто из них самый низкий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Наталья",
+        "thinking_log": "",
+        "parsed_answer": "Наталья",
+        "raw_llm_output": "<think></think>\nНаталья",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Елена",
+                "Жанна"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 110.4852000134997,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Наталья"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481687,
+            "id": "chatcmpl-e9ae51exva5y26yjp3agq",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 51,
+            "total_duration": 109335999,
+            "prompt_eval_duration": 108343300,
+            "eval_duration": 992699,
+            "load_duration": 0,
+            "total_latency_ms": 110.4852000134997,
+            "time_to_first_token_ms": 108.34,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_6",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей выше Жанна.\n- Виктор выше Алексей.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Виктор",
+        "thinking_log": "",
+        "parsed_answer": "Виктор",
+        "raw_llm_output": "<think></think>\nВиктор",
+        "expected_output": {
+            "correct": "Виктор",
+            "incorrect": [
+                "Алексей",
+                "Жанна"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 100.7114999811165,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Виктор",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Виктор"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481687,
+            "id": "chatcmpl-khxoo0256oa2tvz85pof77",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 99600500,
+            "prompt_eval_duration": 98758700,
+            "eval_duration": 841800,
+            "load_duration": 0,
+            "total_latency_ms": 100.7114999811165,
+            "time_to_first_token_ms": 98.76,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_7",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей быстрее Виктор.\n- Григорий быстрее Алексей.\n\nВопрос: Кто из них самый быстрый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Григорий",
+        "thinking_log": "",
+        "parsed_answer": "Григорий",
+        "raw_llm_output": "<think></think>\nГригорий",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Алексей",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 104.58290000678971,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Григорий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481687,
+            "id": "chatcmpl-8rke0olfcpwhw68o8df7k",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 3,
+            "prompt_eval_count": 54,
+            "total_duration": 103474100,
+            "prompt_eval_duration": 102453000,
+            "eval_duration": 1021099,
+            "load_duration": 0,
+            "total_latency_ms": 104.58290000678971,
+            "time_to_first_token_ms": 102.45,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_8",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий старше Жанна.\n- Жанна старше Григорий.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Григорий",
+        "thinking_log": "",
+        "parsed_answer": "Григорий",
+        "raw_llm_output": "<think></think>\nГригорий",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Дмитрий",
+                "Жанна"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 128.12489998759702,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Григорий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481687,
+            "id": "chatcmpl-cea45t4cdwbpj07g8w2h1f",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 3,
+            "prompt_eval_count": 53,
+            "total_duration": 126865300,
+            "prompt_eval_duration": 125953899,
+            "eval_duration": 911400,
+            "load_duration": 0,
+            "total_latency_ms": 128.12489998759702,
+            "time_to_first_token_ms": 125.95,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_9",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Борис быстрее Ирина.\n- Ирина быстрее Григорий.\n\nВопрос: Кто из них самый медленный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Григорий",
+        "thinking_log": "",
+        "parsed_answer": "Григорий",
+        "raw_llm_output": "<think></think>\nГригорий",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Борис",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 100.39299994241446,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Григорий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481687,
+            "id": "chatcmpl-2bzi5v40ydd2ai551i7kus",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 3,
+            "prompt_eval_count": 53,
+            "total_duration": 99262700,
+            "prompt_eval_duration": 98399400,
+            "eval_duration": 863299,
+            "load_duration": 0,
+            "total_latency_ms": 100.39299994241446,
+            "time_to_first_token_ms": 98.4,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_10",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена старше Наталья.\n- Жанна старше Елена.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Жанна",
+        "thinking_log": "",
+        "parsed_answer": "Жанна",
+        "raw_llm_output": "<think></think>\nЖанна",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Елена",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 104.993499990087,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанна"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481687,
+            "id": "chatcmpl-33ds11swavs39avh6nn2nd",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 103898699,
+            "prompt_eval_duration": 103188899,
+            "eval_duration": 709799,
+            "load_duration": 0,
+            "total_latency_ms": 104.993499990087,
+            "time_to_first_token_ms": 103.19,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_11",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена выше Виктор.\n- Наталья выше Елена.\n\nВопрос: Кто из них самый низкий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Виктор",
+        "thinking_log": "",
+        "parsed_answer": "Виктор",
+        "raw_llm_output": "<think></think>\nВиктор",
+        "expected_output": {
+            "correct": "Виктор",
+            "incorrect": [
+                "Наталья",
+                "Елена"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 84.27150000352412,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Виктор",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Виктор"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-fipi60kjnv7qij8fa71lyn",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 51,
+            "total_duration": 83073900,
+            "prompt_eval_duration": 82220100,
+            "eval_duration": 853799,
+            "load_duration": 0,
+            "total_latency_ms": 84.27150000352412,
+            "time_to_first_token_ms": 82.22,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.8389516
+    },
+    {
+        "test_id": "t01_simple_logic_12",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина старше Григорий.\n- Мария старше Ирина.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Григорий",
+        "thinking_log": "",
+        "parsed_answer": "Григорий",
+        "raw_llm_output": "<think></think>\nГригорий",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Мария",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 120.4518000013195,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Григорий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-xi5uj1uyv9djnzm22m34ik",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 3,
+            "prompt_eval_count": 52,
+            "total_duration": 119321400,
+            "prompt_eval_duration": 118534500,
+            "eval_duration": 786899,
+            "load_duration": 0,
+            "total_latency_ms": 120.4518000013195,
+            "time_to_first_token_ms": 118.53,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_13",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Григорий быстрее Алексей.\n- Борис быстрее Григорий.\n\nВопрос: Кто из них самый быстрый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Борис",
+        "thinking_log": "",
+        "parsed_answer": "Борис",
+        "raw_llm_output": "<think></think>\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Григорий",
+                "Алексей"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 87.49710000120103,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Борис"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-ibmps63qr1r8mgnnirlr3",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 54,
+            "total_duration": 86399600,
+            "prompt_eval_duration": 85601000,
+            "eval_duration": 798599,
+            "load_duration": 0,
+            "total_latency_ms": 87.49710000120103,
+            "time_to_first_token_ms": 85.6,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_14",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Григорий быстрее Дмитрий.\n- Алексей быстрее Григорий.\n\nВопрос: Кто из них самый медленный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Дмитрий",
+        "thinking_log": "",
+        "parsed_answer": "Дмитрий",
+        "raw_llm_output": "<think></think>\nДмитрий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Алексей",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 134.60659998236224,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Дмитрий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-da6ky6ledii4tzlrxi2kfx",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 55,
+            "total_duration": 133284499,
+            "prompt_eval_duration": 132305299,
+            "eval_duration": 979200,
+            "load_duration": 0,
+            "total_latency_ms": 134.60659998236224,
+            "time_to_first_token_ms": 132.31,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_15",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Григорий сильнее Жанна.\n- Ирина сильнее Григорий.\n\nВопрос: Кто из них самый слабый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Жанн",
+        "thinking_log": "",
+        "parsed_answer": "Жанн",
+        "raw_llm_output": "<think></think>\nЖанн",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Ирина",
+                "Григорий"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 88.00379995955154,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе.",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанн"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-w5d79wjqhgd1piagsqeyed",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 53,
+            "total_duration": 86430500,
+            "prompt_eval_duration": 85412200,
+            "eval_duration": 1018300,
+            "load_duration": 0,
+            "total_latency_ms": 88.00379995955154,
+            "time_to_first_token_ms": 85.41,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_16",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина выше Елена.\n- Елена выше Григорий.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Ирина",
+        "thinking_log": "",
+        "parsed_answer": "Ирина",
+        "raw_llm_output": "<think></think>\nИрина",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Елена",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 105.32870003953576,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Ирина"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-1o9j2gh6g8ci6wgld9bkc8",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 51,
+            "total_duration": 104067600,
+            "prompt_eval_duration": 103362200,
+            "eval_duration": 705400,
+            "load_duration": 0,
+            "total_latency_ms": 105.32870003953576,
+            "time_to_first_token_ms": 103.36,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_17",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария старше Елена.\n- Елена старше Жанна.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Жанн",
+        "thinking_log": "",
+        "parsed_answer": "Жанн",
+        "raw_llm_output": "<think></think>\nЖанн",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Мария",
+                "Елена"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 87.34329999424517,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе.",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанн"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-ch1u5kka3tgqz4ret9jbhn",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 86265299,
+            "prompt_eval_duration": 85593900,
+            "eval_duration": 671399,
+            "load_duration": 0,
+            "total_latency_ms": 87.34329999424517,
+            "time_to_first_token_ms": 85.59,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_18",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий старше Мария.\n- Мария старше Наталья.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Наталья",
+        "thinking_log": "",
+        "parsed_answer": "Наталья",
+        "raw_llm_output": "<think></think>\nНаталья",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Дмитрий",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 120.95899996347725,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Наталья"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481688,
+            "id": "chatcmpl-prqk5vlohqk271c4woq7aw",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 53,
+            "total_duration": 119801199,
+            "prompt_eval_duration": 118966200,
+            "eval_duration": 834999,
+            "load_duration": 0,
+            "total_latency_ms": 120.95899996347725,
+            "time_to_first_token_ms": 118.97,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_19",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий старше Ирина.\n- Ирина старше Борис.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Борис",
+        "thinking_log": "",
+        "parsed_answer": "Борис",
+        "raw_llm_output": "<think></think>\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Дмитрий",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 82.69399998243898,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Борис"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-gc4l1j5hoiqgllxr4b1whk",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 81578299,
+            "prompt_eval_duration": 80870000,
+            "eval_duration": 708299,
+            "load_duration": 0,
+            "total_latency_ms": 82.69399998243898,
+            "time_to_first_token_ms": 80.87,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_20",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор выше Ирина.\n- Борис выше Виктор.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Борис",
+        "thinking_log": "",
+        "parsed_answer": "Борис",
+        "raw_llm_output": "<think></think>\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Виктор",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 97.40850003436208,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Борис"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-ypax4szta4op4aorqf5aj",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 51,
+            "total_duration": 96147299,
+            "prompt_eval_duration": 95476199,
+            "eval_duration": 671099,
+            "load_duration": 0,
+            "total_latency_ms": 97.40850003436208,
+            "time_to_first_token_ms": 95.48,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_21",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария быстрее Алексей.\n- Алексей быстрее Ирина.\n\nВопрос: Кто из них самый медленный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Ирина",
+        "thinking_log": "",
+        "parsed_answer": "Ирина",
+        "raw_llm_output": "<think></think>\nИрина",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Мария",
+                "Алексей"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 89.96439998736605,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Ирина"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-3qbv085cq2jw3q1f0nipw",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 54,
+            "total_duration": 88798400,
+            "prompt_eval_duration": 88029500,
+            "eval_duration": 768899,
+            "load_duration": 0,
+            "total_latency_ms": 89.96439998736605,
+            "time_to_first_token_ms": 88.03,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_22",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена выше Григорий.\n- Жанна выше Елена.\n\nВопрос: Кто из них самый низкий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Григорий",
+        "thinking_log": "",
+        "parsed_answer": "Григорий",
+        "raw_llm_output": "<think></think>\nГригорий",
+        "expected_output": {
+            "correct": "Григорий",
+            "incorrect": [
+                "Жанна",
+                "Елена"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 113.99949999758974,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Григорий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Григорий"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-a6443ojl5ow5m7wwe40mor",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 3,
+            "prompt_eval_count": 51,
+            "total_duration": 112788100,
+            "prompt_eval_duration": 111760500,
+            "eval_duration": 1027600,
+            "load_duration": 0,
+            "total_latency_ms": 113.99949999758974,
+            "time_to_first_token_ms": 111.76,
+            "peak_ram_increment_mb": 0.0078125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_23",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Наталья выше Елена.\n- Жанна выше Наталья.\n\nВопрос: Кто из них самый низкий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Елена",
+        "thinking_log": "",
+        "parsed_answer": "Елена",
+        "raw_llm_output": "<think></think>\nЕлена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Жанна",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 109.99039997113869,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Елена"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-vp1klvaofznokfi2u0eenr",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 51,
+            "total_duration": 108842300,
+            "prompt_eval_duration": 107987800,
+            "eval_duration": 854499,
+            "load_duration": 0,
+            "total_latency_ms": 109.99039997113869,
+            "time_to_first_token_ms": 107.99,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_24",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор сильнее Дмитрий.\n- Дмитрий сильнее Борис.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Виктор",
+        "thinking_log": "",
+        "parsed_answer": "Виктор",
+        "raw_llm_output": "<think></think>\nВиктор",
+        "expected_output": {
+            "correct": "Виктор",
+            "incorrect": [
+                "Дмитрий",
+                "Борис"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 87.20910002011806,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Виктор",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Виктор"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-t7y5mhzbmvigeceufdug7",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 53,
+            "total_duration": 86049200,
+            "prompt_eval_duration": 85247900,
+            "eval_duration": 801299,
+            "load_duration": 0,
+            "total_latency_ms": 87.20910002011806,
+            "time_to_first_token_ms": 85.25,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_25",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена старше Дмитрий.\n- Дмитрий старше Борис.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Борис",
+        "thinking_log": "",
+        "parsed_answer": "Борис",
+        "raw_llm_output": "<think></think>\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Елена",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 110.96110002836213,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Борис"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-w7egsydinpqkm1va3u0ot",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 53,
+            "total_duration": 109839899,
+            "prompt_eval_duration": 109093500,
+            "eval_duration": 746399,
+            "load_duration": 0,
+            "total_latency_ms": 110.96110002836213,
+            "time_to_first_token_ms": 109.09,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_26",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Григорий быстрее Наталья.\n- Алексей быстрее Григорий.\n\nВопрос: Кто из них самый быстрый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Алексей",
+        "thinking_log": "",
+        "parsed_answer": "Алексей",
+        "raw_llm_output": "<think></think>\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Григорий",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 98.28119998564944,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Алексей"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481689,
+            "id": "chatcmpl-cfk5g4z8t7btyzq7vkh4j",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 55,
+            "total_duration": 97150599,
+            "prompt_eval_duration": 96385499,
+            "eval_duration": 765100,
+            "load_duration": 0,
+            "total_latency_ms": 98.28119998564944,
+            "time_to_first_token_ms": 96.39,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_27",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна быстрее Алексей.\n- Алексей быстрее Ирина.\n\nВопрос: Кто из них самый медленный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Ирин",
+        "thinking_log": "",
+        "parsed_answer": "Ирин",
+        "raw_llm_output": "<think></think>\nИрин",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Жанна",
+                "Алексей"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 71.04220002656803,
+        "verification_details": {
+            "reason": "Неверное имя или упоминание неверного имени в финальном ответе.",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": false,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Ирин"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481690,
+            "id": "chatcmpl-tz7h6e6893b13sk68flryh",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 54,
+            "total_duration": 69980399,
+            "prompt_eval_duration": 69298999,
+            "eval_duration": 681400,
+            "load_duration": 0,
+            "total_latency_ms": 71.04220002656803,
+            "time_to_first_token_ms": 69.3,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_28",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина старше Алексей.\n- Мария старше Ирина.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Алексей",
+        "thinking_log": "",
+        "parsed_answer": "Алексей",
+        "raw_llm_output": "<think></think>\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Мария",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 85.35519998986274,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Алексей"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481690,
+            "id": "chatcmpl-su0vxnv3mqg6uvxb82hqj",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 84266300,
+            "prompt_eval_duration": 83563100,
+            "eval_duration": 703199,
+            "load_duration": 0,
+            "total_latency_ms": 85.35519998986274,
+            "time_to_first_token_ms": 83.56,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_29",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор выше Алексей.\n- Ирина выше Виктор.\n\nВопрос: Кто из них самый низкий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Алексей",
+        "thinking_log": "",
+        "parsed_answer": "Алексей",
+        "raw_llm_output": "<think></think>\nАлексей",
+        "expected_output": {
+            "correct": "Алексей",
+            "incorrect": [
+                "Ирина",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 95.27999995043501,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Алексей",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Алексей"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481690,
+            "id": "chatcmpl-otqyfgifn3dbhdnynsk5y4",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 51,
+            "total_duration": 94113900,
+            "prompt_eval_duration": 93334600,
+            "eval_duration": 779299,
+            "load_duration": 0,
+            "total_latency_ms": 95.27999995043501,
+            "time_to_first_token_ms": 93.33,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    },
+    {
+        "test_id": "t01_simple_logic_30",
+        "model_name": "jan-nano",
+        "model_details": {
+            "model_name": "jan-nano",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена старше Мария.\n- Наталья старше Елена.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Наталья",
+        "thinking_log": "",
+        "parsed_answer": "Наталья",
+        "raw_llm_output": "<think></think>\nНаталья",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Елена",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 101.10299999359995,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Наталья"
+        },
+        "performance_metrics": {
+            "model": "jan-nano",
+            "created": 1756481690,
+            "id": "chatcmpl-fyuxln0rzfpx5gvhi3z3x",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "jan-nano",
+            "eval_count": 2,
+            "prompt_eval_count": 52,
+            "total_duration": 99848199,
+            "prompt_eval_duration": 99036899,
+            "eval_duration": 811300,
+            "load_duration": 0,
+            "total_latency_ms": 101.10299999359995,
+            "time_to_first_token_ms": 99.04,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 30.48,
+                "used_ram_gb": 25.45,
+                "ram_percentage": 45.5,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.1
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.7700",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 3060 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 364.09,
+                "disk_used_gb": 567.4
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1756481693.839953
+    }
+]

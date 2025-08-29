@@ -830,19 +830,6 @@ class Reporter:
             report_md += f"> _Все {len(local_table)} локальных моделей отсортированы по Trust Score. Определение через model_details.provider и hardware_tier._\n\n"
             report_md += self._to_markdown_table(local_table.reset_index(drop=True))
 
-            # Анализ по провайдерам
-            provider_stats = model_agg.groupby('provider').agg({
-                'trust_score': 'max',
-                'accuracy': 'max',
-                'avg_latency_ms': 'min'
-            }).round(3)
-
-            report_md += f"\n### 📊 Статистика по провайдерам:\n\n"
-            for provider, stats in provider_stats.iterrows():
-                best_model = model_agg[model_agg['provider'] == provider].iloc[0]
-                report_md += f"**{provider.upper()}**: лучшая модель `{best_model['model_name']}` — "
-                report_md += f"Trust Score {stats['trust_score']:.3f}, {stats['accuracy']:.1%} точность\n\n"
-
             return report_md
 
         except Exception as e:
