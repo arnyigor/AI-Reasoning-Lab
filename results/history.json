@@ -64,6 +64,11 @@
         "Accuracy":0.6,
         "Total_Runs":10
     },
+    "gemma3:4b":{
+        "Trust_Score":0.3086938711,
+        "Accuracy":0.46875,
+        "Total_Runs":32
+    },
     "openai\/gpt-oss-20b":{
         "Trust_Score":0.2365930905,
         "Accuracy":0.5,
@@ -73,11 +78,6 @@
         "Trust_Score":0.1517632444,
         "Accuracy":0.3333333333,
         "Total_Runs":15
-    },
-    "gemma3:4b":{
-        "Trust_Score":0.1254861604,
-        "Accuracy":0.2608695652,
-        "Total_Runs":23
     },
     "qwen3:8b":{
         "Trust_Score":0.1077912674,

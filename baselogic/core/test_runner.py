@@ -19,8 +19,9 @@ from .llm_client import LLMClient
 # Импортируем компоненты новой архитектуры
 from .plugin_manager import PluginManager
 from .progress_tracker import ProgressTracker
-from system_checker import log_system_info, get_hardware_tier, SystemProfiler
-# И импортируем "переходник" между ними
+from .reporter import Reporter
+from .system_checker import SystemProfiler, get_hardware_tier
+
 # Просто получаем логгер в начале файла. Он уже настроен!
 log = logging.getLogger(__name__)
 
@@ -104,14 +105,38 @@ class TestRunner:
 
     def run(self):
         """
-        Запускает полный цикл тестирования для всех сконфигурированных моделей.
+        ИСПРАВЛЕННЫЙ запуск с интеграцией системной информации.
         """
         if not self.config.get('models_to_test'):
             log.error("В 'config.yaml' не найден или пуст список моделей 'models_to_test'. Запуск отменен.")
             return
 
+        # НОВОЕ: Собираем системную информацию в начале
+        profiler = SystemProfiler()
+        system_info = profiler.get_system_info()
+        hardware_tier = get_hardware_tier(system_info)
+
+        log.info("=" * 80)
+        log.info("🖥️  СИСТЕМНАЯ ИНФОРМАЦИЯ")
+        log.info("=" * 80)
+        log.info(f"🏷️  Уровень оборудования: {hardware_tier}")
+
+        # Отображаем системную информацию как в main() функции system_checker
+        cpu_info = system_info['cpu']
+        cpu_name = cpu_info.get('cpu_brand', cpu_info.get('model_name', cpu_info.get('processor_name', 'Unknown CPU')))
+        log.info(f"🧠 CPU: {cpu_name}")
+        log.info(f"💾 RAM: {system_info['memory']['total_ram_gb']} GB")
+
+        for i, gpu in enumerate(system_info['gpus']):
+            vram = gpu.get('memory_total_gb', 'N/A')
+            gpu_type = gpu.get('type', 'unknown')
+            log.info(f"🎮 GPU {i}: {gpu['vendor']} {gpu['name']} ({vram} GB VRAM, {gpu_type})")
+
+        if not system_info['gpus']:
+            log.info("🎮 GPU: Не обнаружено дискретных GPU")
+
+        # Остальной код запуска тестирования...
         successful_models, failed_models = [], []
-        # Расчет общего числа тест-кейсов для прогресс-бара
         num_runs = self.config.get('runs_per_test', 1)
         show_payload = self.config.get('show_payload', True)
         raw_save = self.config.get('runs_raw_save', 1)
@@ -162,7 +187,19 @@ class TestRunner:
         finally:
             progress.close()
         if raw_save:
-            log.info("📊 ИТОГОВЫЙ ОТЧЕТ:")
+            log.info("📊 ГЕНЕРАЦИЯ ОТЧЕТА С СИСТЕМНОЙ ИНФОРМАЦИЕЙ:")
+            try:
+                reporter = Reporter(self.results_dir)
+                report_content = reporter.generate_leaderboard_report()
+
+                report_file = self.results_dir.parent / f"report_{hardware_tier}_{time.strftime('%Y%m%d_%H%M%S')}.md"
+                with open(report_file, 'w', encoding='utf-8') as f:
+                    f.write(report_content)
+
+                log.info(f"✅ Отчет сохранен: {report_file}")
+            except Exception as e:
+                log.error(f"❌ Ошибка генерации отчета: {e}")
+
 
     def _create_client_safely(self, model_config: Dict[str, Any], show_payload = True) -> Optional[ILLMClient]:
         """
@@ -199,12 +236,15 @@ class TestRunner:
                 generator_instance = generator_class(test_id=test_key)
                 for run_num in range(1, num_runs + 1):
                     test_id = f"{test_key}_{run_num}"
-                    log.info("    🔍 Тест %d/%d: %s", run_num, num_runs, test_id, test_key)
+                    log.info("    🔍 Тест %d/%d: %s", run_num, num_runs, test_id)
 
                     test_data = generator_instance.generate()
+
                     result = self._run_single_test_with_monitoring(
-                        client, test_id, generator_instance, test_data, model_name, model_details
+                        client, test_id, generator_instance, test_data,
+                        model_name, model_details, test_key
                     )
+
                     if result:
                         model_results.append(result)
 
@@ -213,19 +253,18 @@ class TestRunner:
 
             except Exception as e:
                 log.error("    ❌ Критическая ошибка при обработке категории %s: %s", test_key, e, exc_info=True)
-                # Пропускаем оставшиеся запуски этой категории в прогресс-баре
                 for _ in range(num_runs - len(model_results) % num_runs):
                     progress.update(model_name, test_key)
+
         return model_results
+
 
     def _run_single_test_with_monitoring(self, client: ILLMClient, test_id: str,
                                          generator_instance: Any, test_data: Dict[str, Any],
                                          model_name: str, model_details: Dict[str, Any],
-                                         test_category: str
-                                         ) -> Optional[Dict[str, Any]]:
+                                         test_category: str) -> Optional[Dict[str, Any]]:
         """
-        Выполняет один тест-кейс с мониторингом и полной, прозрачной
-        логикой верификации для УСПЕХА и НЕУДАЧИ.
+        ИСПРАВЛЕННАЯ версия с правильными полями для system_info.
         """
         process = psutil.Process(os.getpid())
         try:
@@ -253,36 +292,44 @@ class TestRunner:
             verification_result = generator_instance.verify(llm_response, expected_output)
             is_correct = verification_result.get('is_correct', False)
 
-            # >>>>> Улучшенное логирование <<<<<
-
-            # 1. Сначала выводим главный вердикт
+            # Логирование результатов
             status = "✅ УСПЕХ" if is_correct else "❌ НЕУДАЧА"
             log.info("    %s (%.0f мс): %s", status, exec_time_ms, test_id)
 
-            # 2. ВСЕГДА выводим детали верификации, если они есть
             details = verification_result.get('details', {})
             if details:
-                # Заголовок теперь нейтральный
                 log.info("      --- Детали верификации ---")
                 for key, value in details.items():
-                    log.info("      - %s: %s", key, str(value)[:200])  # Обрезаем длинные строки
+                    log.info("      - %s: %s", key, str(value)[:200])
                 log.info("      --------------------------")
 
-            # 3. ВСЕГДА выводим метрики производительности, если они есть
             if performance_metrics:
                 self.log_performance_metrics(performance_metrics)
 
-            # Сборка итогового результата для JSON (остается без изменений)
+            # ИСПРАВЛЕННЫЙ возврат результата с правильными полями
             return {
-                "test_id": test_id, "model_name": model_name, "model_details": model_details,
-                "category": test_category,
-                "prompt": prompt, "thinking_log": thinking_response, "parsed_answer": llm_response,
+                "test_id": test_id,
+                "model_name": model_name,
+                "model_details": model_details,
+                "category": test_category,  # ← КРИТИЧЕСКИ ВАЖНОЕ ПОЛЕ
+                "prompt": prompt,
+
+                # Правильные поля для Verbosity (Reporter ищет именно эти)
+                "thinking_response": thinking_response,  # ← Для _calculate_verbosity
+                "llm_response": llm_response,           # ← Для _calculate_verbosity
+
+                # Дополнительные поля для обратной совместимости
+                "thinking_log": thinking_response,
+                "parsed_answer": llm_response,
                 "raw_llm_output": f"<think>{thinking_response}</think>\n{llm_response}",
-                "expected_output": expected_output, "is_correct": is_correct,
+
+                "expected_output": expected_output,
+                "is_correct": is_correct,
                 "execution_time_ms": exec_time_ms,
                 "verification_details": verification_result.get('details', {}),
                 "performance_metrics": {k: v for k, v in performance_metrics.items() if v is not None}
             }
+
         except LLMClientError as e:
             log.error("      ❌ Ошибка LLM клиента: %s", e)
             return None
@@ -290,20 +337,39 @@ class TestRunner:
             log.error("      ❌ Критическая ошибка в тест-кейсе %s: %s", test_id, e, exc_info=True)
             return None
 
+
     def _save_results(self, model_name: str, results: List[Dict[str, Any]]):
+        """ИСПРАВЛЕННОЕ сохранение результатов с системной информацией."""
         if not results:
             log.warning("  ⚠️ Нет результатов для сохранения для модели '%s'", model_name)
             return
+
+        # ДОБАВЛЕНИЕ: Собираем системную информацию
+        profiler = SystemProfiler()
+        system_info = profiler.get_system_info()
+        hardware_tier = get_hardware_tier(system_info)
+
+        # Добавляем системную информацию к каждому результату
+        enhanced_results = []
+        for result in results:
+            enhanced_result = result.copy()
+            enhanced_result['system_info'] = system_info
+            enhanced_result['hardware_tier'] = hardware_tier
+            enhanced_result['benchmark_timestamp'] = time.time()
+            enhanced_results.append(enhanced_result)
+
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         safe_model_name = model_name.replace(":", "_").replace("/", "_")
-        filename = self.results_dir / f"{safe_model_name}_{timestamp}.json"
+        filename = self.results_dir / f"{safe_model_name}_{hardware_tier}_{timestamp}.json"
+
         try:
             log.info("  💾 Сохраняем в файл: %s", filename.name)
             with open(filename, 'w', encoding='utf-8') as f:
-                json.dump(results, f, ensure_ascii=False, indent=4, default=str)
-            log.info("  ✅ Файл сохранен (%d записей)", len(results))
+                json.dump(enhanced_results, f, ensure_ascii=False, indent=4, default=str)
+            log.info("  ✅ Файл сохранен (%d записей)", len(enhanced_results))
         except Exception as e:
             log.error("  ❌ Ошибка сохранения: %s", e, exc_info=True)
+
 
     def log_performance_metrics(self, performance_metrics: Dict[str, Any]):
         if not performance_metrics:
@@ -359,7 +425,6 @@ class TestRunner:
             log.info("      🚀 Средняя скорость генерации: %.2f ток/с (по общему времени)", total_tps)
 
         log.info("      ---------------------------------")
-
 
     def run_benchmarks_with_system_info(self):
         """

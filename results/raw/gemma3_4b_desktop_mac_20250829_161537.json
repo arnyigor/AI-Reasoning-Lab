@@ -1,0 +1,311 @@
+[
+    {
+        "test_id": "t01_simple_logic_1",
+        "model_name": "gemma3:4b",
+        "model_details": {
+            "model_name": "gemma3:4b",
+            "provider": "OllamaClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Борис сильнее Виктор.\n- Дмитрий сильнее Борис.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Дмитрий\n",
+        "thinking_log": "",
+        "parsed_answer": "Дмитрий\n",
+        "raw_llm_output": "<think></think>\nДмитрий\n",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Борис",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3075.736004000646,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Дмитрий"
+        },
+        "performance_metrics": {
+            "total_duration": 3057567853,
+            "load_duration": 182460418,
+            "prompt_eval_count": 69,
+            "prompt_eval_duration": 2327588579,
+            "eval_count": 5,
+            "eval_duration": 546903209,
+            "model": "gemma3:4b",
+            "total_latency_ms": 3075.736004000646,
+            "time_to_first_token_ms": 2529.07,
+            "peak_ram_increment_mb": 0.90625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Darwin",
+                "platform_release": "21.6.0",
+                "platform_version": "Darwin Kernel Version 21.6.0: Wed Apr 24 06:02:02 PDT 2024; root:xnu-8020.240.18.708.4~1/RELEASE_X86_64",
+                "architecture": "x86_64",
+                "hostname": "mac-00039250",
+                "processor": "i386",
+                "python_executable": "/usr/local/opt/python@3.10/bin/python3.10"
+            },
+            "cpu": {
+                "physical_cores": 6,
+                "logical_cores": 12,
+                "processor_name": "i386",
+                "max_frequency_mhz": 3200,
+                "current_frequency_mhz": 3200,
+                "real_architecture": "x86_64",
+                "cpu_brand": "Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz",
+                "cpu_frequency_hz": 3200000000
+            },
+            "memory": {
+                "total_ram_gb": 32.0,
+                "available_ram_gb": 12.93,
+                "used_ram_gb": 15.98,
+                "ram_percentage": 59.6,
+                "total_swap_gb": 3.0,
+                "swap_percentage": 48.0
+            },
+            "gpus": [],
+            "macos_details": {
+                "macos_version": "12.7.5",
+                "build_version": "21H1222",
+                "real_architecture": "x86_64"
+            },
+            "system": {
+                "python_version": "3.10.17",
+                "python_implementation": "CPython",
+                "python_executable": "/usr/local/opt/python@3.10/bin/python3.10",
+                "disk_total_gb": 233.47,
+                "disk_free_gb": 24.82,
+                "disk_used_gb": 14.36
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.2.2",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "desktop_mac",
+        "benchmark_timestamp": 1756473337.7094212
+    },
+    {
+        "test_id": "t01_simple_logic_2",
+        "model_name": "gemma3:4b",
+        "model_details": {
+            "model_name": "gemma3:4b",
+            "provider": "OllamaClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна выше Мария.\n- Мария выше Елена.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Жанна\n",
+        "thinking_log": "",
+        "parsed_answer": "Жанна\n",
+        "raw_llm_output": "<think></think>\nЖанна\n",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Мария",
+                "Елена"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 2557.255850999354,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанна"
+        },
+        "performance_metrics": {
+            "total_duration": 2554722717,
+            "load_duration": 172063836,
+            "prompt_eval_count": 68,
+            "prompt_eval_duration": 1877738695,
+            "eval_count": 5,
+            "eval_duration": 504212313,
+            "model": "gemma3:4b",
+            "total_latency_ms": 2557.255850999354,
+            "time_to_first_token_ms": 2053.99,
+            "peak_ram_increment_mb": 0.0078125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Darwin",
+                "platform_release": "21.6.0",
+                "platform_version": "Darwin Kernel Version 21.6.0: Wed Apr 24 06:02:02 PDT 2024; root:xnu-8020.240.18.708.4~1/RELEASE_X86_64",
+                "architecture": "x86_64",
+                "hostname": "mac-00039250",
+                "processor": "i386",
+                "python_executable": "/usr/local/opt/python@3.10/bin/python3.10"
+            },
+            "cpu": {
+                "physical_cores": 6,
+                "logical_cores": 12,
+                "processor_name": "i386",
+                "max_frequency_mhz": 3200,
+                "current_frequency_mhz": 3200,
+                "real_architecture": "x86_64",
+                "cpu_brand": "Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz",
+                "cpu_frequency_hz": 3200000000
+            },
+            "memory": {
+                "total_ram_gb": 32.0,
+                "available_ram_gb": 12.93,
+                "used_ram_gb": 15.98,
+                "ram_percentage": 59.6,
+                "total_swap_gb": 3.0,
+                "swap_percentage": 48.0
+            },
+            "gpus": [],
+            "macos_details": {
+                "macos_version": "12.7.5",
+                "build_version": "21H1222",
+                "real_architecture": "x86_64"
+            },
+            "system": {
+                "python_version": "3.10.17",
+                "python_implementation": "CPython",
+                "python_executable": "/usr/local/opt/python@3.10/bin/python3.10",
+                "disk_total_gb": 233.47,
+                "disk_free_gb": 24.82,
+                "disk_used_gb": 14.36
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.2.2",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "desktop_mac",
+        "benchmark_timestamp": 1756473337.709502
+    },
+    {
+        "test_id": "t01_simple_logic_3",
+        "model_name": "gemma3:4b",
+        "model_details": {
+            "model_name": "gemma3:4b",
+            "provider": "OllamaClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена быстрее Жанна.\n- Жанна быстрее Ирина.\n\nВопрос: Кто из них самый быстрый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Елена\n",
+        "thinking_log": "",
+        "parsed_answer": "Елена\n",
+        "raw_llm_output": "<think></think>\nЕлена\n",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Жанна",
+                "Ирина"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 2447.139281001,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Елена"
+        },
+        "performance_metrics": {
+            "total_duration": 2445091140,
+            "load_duration": 204970408,
+            "prompt_eval_count": 71,
+            "prompt_eval_duration": 1903988507,
+            "eval_count": 4,
+            "eval_duration": 335462189,
+            "model": "gemma3:4b",
+            "total_latency_ms": 2447.139281001,
+            "time_to_first_token_ms": 2112.55,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Darwin",
+                "platform_release": "21.6.0",
+                "platform_version": "Darwin Kernel Version 21.6.0: Wed Apr 24 06:02:02 PDT 2024; root:xnu-8020.240.18.708.4~1/RELEASE_X86_64",
+                "architecture": "x86_64",
+                "hostname": "mac-00039250",
+                "processor": "i386",
+                "python_executable": "/usr/local/opt/python@3.10/bin/python3.10"
+            },
+            "cpu": {
+                "physical_cores": 6,
+                "logical_cores": 12,
+                "processor_name": "i386",
+                "max_frequency_mhz": 3200,
+                "current_frequency_mhz": 3200,
+                "real_architecture": "x86_64",
+                "cpu_brand": "Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz",
+                "cpu_frequency_hz": 3200000000
+            },
+            "memory": {
+                "total_ram_gb": 32.0,
+                "available_ram_gb": 12.93,
+                "used_ram_gb": 15.98,
+                "ram_percentage": 59.6,
+                "total_swap_gb": 3.0,
+                "swap_percentage": 48.0
+            },
+            "gpus": [],
+            "macos_details": {
+                "macos_version": "12.7.5",
+                "build_version": "21H1222",
+                "real_architecture": "x86_64"
+            },
+            "system": {
+                "python_version": "3.10.17",
+                "python_implementation": "CPython",
+                "python_executable": "/usr/local/opt/python@3.10/bin/python3.10",
+                "disk_total_gb": 233.47,
+                "disk_free_gb": 24.82,
+                "disk_used_gb": 14.36
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.2.2",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "desktop_mac",
+        "benchmark_timestamp": 1756473337.7095082
+    }
+]

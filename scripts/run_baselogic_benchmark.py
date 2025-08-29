@@ -5,7 +5,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from baselogic.core.config_loader import EnvConfigLoader
-from baselogic.core.judge_reporter import JudgeReporter
 from baselogic.core.logger import setup_logging
 from baselogic.core.test_runner import TestRunner
 

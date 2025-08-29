@@ -10,7 +10,7 @@ from datetime import datetime
 # --- Вспомогательные Enum'ы для типизации ---
 class LogLevel(Enum):
     """Перечисление для уровней логирования."""
-    DEBUG = logging.DEBUG
+    DEBUG = logging.INFO
     INFO = logging.INFO
     WARNING = logging.WARNING
     ERROR = logging.ERROR
