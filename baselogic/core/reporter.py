@@ -3,9 +3,12 @@ import math
 import re
 import time
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Dict, Any
 import pandas as pd
 import pandas as pd
+
+from baselogic.core.system_checker import get_hardware_tier
+
 log = logging.getLogger(__name__)
 
 
@@ -141,6 +144,105 @@ class Reporter:
 
         return verbosity_index
 
+    def generate_hardware_compatibility_matrix(self):
+        """
+        Генерирует матрицу совместимости моделей и оборудования.
+        """
+
+        compatibility_matrix = {
+            'enterprise': {  # H100, A100, 80GB+ VRAM
+                'recommended': [
+                    'llama-3.1-70b', 'qwen2.5-72b', 'deepseek-v3',
+                    'mixtral-8x22b', 'claude-3-opus-20240229'
+                ],
+                'supported': 'all_models',
+                'performance': 'optimal'
+            },
+
+            'high_end': {  # RTX 4090, 4080, 16-24GB VRAM
+                'recommended': [
+                    'llama-3.1-8b', 'qwen2.5-14b', 'mistral-7b-v0.3',
+                    'deepseek-coder-v2-16b', 'gemma-2-9b'
+                ],
+                'supported_with_quantization': [
+                    'llama-3.1-70b-q4', 'qwen2.5-72b-q4'
+                ],
+                'performance': 'high'
+            },
+
+            'mid_range': {  # RTX 4070, 3080, 8-16GB VRAM
+                'recommended': [
+                    'llama-3.1-8b-q4', 'qwen2.5-7b', 'mistral-7b-v0.3-q4',
+                    'phi-3.5-mini-3.8b', 'gemma-2-9b-q4'
+                ],
+                'performance': 'good'
+            },
+
+            'entry_level': {  # RTX 4060, 3060, 6-12GB VRAM
+                'recommended': [
+                    'phi-3.5-mini-3.8b', 'qwen2.5-7b-q4', 'llama-3.2-3b',
+                    'tinyllama-1.1b', 'mobilellm-1.5b'
+                ],
+                'performance': 'acceptable'
+            },
+
+            'workstation_cpu': {  # High-end CPU, 64-128GB RAM
+                'recommended': [
+                    'llama-3.1-8b-q4', 'qwen2.5-7b-q4', 'phi-3.5-mini',
+                    'mistral-7b-q4'
+                ],
+                'note': 'CPU-only inference, slower but possible',
+                'performance': 'slow'
+            },
+
+            'mobile_cpu': {  # Laptops, <32GB RAM
+                'recommended': [
+                    'phi-3.5-mini', 'tinyllama-1.1b', 'qwen2.5-1.5b',
+                    'mobilellm-1.5b'
+                ],
+                'performance': 'limited'
+            }
+        }
+
+        return compatibility_matrix
+
+    # def recommend_model_for_hardware(system_info: Dict[str, Any],
+    #                                  use_case: str = 'general') -> Dict[str, Any]:
+    #     """
+    #     Рекомендует оптимальную модель для конкретного оборудования.
+    #     """
+    #     hardware_tier = get_hardware_tier(system_info)
+    #     matrix = generate_hardware_compatibility_matrix()
+    #
+    #     recommendations = matrix.get(hardware_tier, {})
+    #
+    #     # Специфические рекомендации по use case
+    #     use_case_adjustments = {
+    #         'coding': {
+    #             'models': ['deepseek-coder-v2', 'codellama', 'phi-3.5-mini'],
+    #             'priority': 'code_generation_accuracy'
+    #         },
+    #         'multilingual': {
+    #             'models': ['qwen2.5', 'llama-3.1'],
+    #             'priority': 'language_support'
+    #         },
+    #         'creative': {
+    #             'models': ['claude-3', 'llama-3.1', 'mistral'],
+    #             'priority': 'creativity_coherence'
+    #         }
+    #     }
+    #
+    #     return {
+    #         'hardware_tier': hardware_tier,
+    #         'recommended_models': recommendations.get('recommended', []),
+    #         'performance_expectation': recommendations.get('performance', 'unknown'),
+    #         'use_case_optimized': use_case_adjustments.get(use_case, {}),
+    #         'system_specs': {
+    #             'total_vram_gb': sum(gpu.get('memory_total_gb', 0) for gpu in system_info.get('gpus', [])),
+    #             'total_ram_gb': system_info.get('memory', {}).get('total_ram_gb', 0),
+    #             'cpu_cores': system_info.get('cpu', {}).get('logical_cores', 0)
+    #         }
+    #     }
 
     # >>>>> Сводная таблица по контексту <<<<<
     def _generate_context_performance_report(self) -> str:

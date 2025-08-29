@@ -19,7 +19,7 @@ from .llm_client import LLMClient
 # Импортируем компоненты новой архитектуры
 from .plugin_manager import PluginManager
 from .progress_tracker import ProgressTracker
-
+from system_checker import log_system_info, get_hardware_tier, SystemProfiler
 # И импортируем "переходник" между ними
 # Просто получаем логгер в начале файла. Он уже настроен!
 log = logging.getLogger(__name__)
@@ -359,3 +359,36 @@ class TestRunner:
             log.info("      🚀 Средняя скорость генерации: %.2f ток/с (по общему времени)", total_tps)
 
         log.info("      ---------------------------------")
+
+
+    def run_benchmarks_with_system_info(self):
+        """
+        Основная функция запуска benchmark'ов с логированием системы.
+        """
+
+        # Создаем профилер и получаем информацию о системе
+        profiler = SystemProfiler()
+        system_info = profiler.get_system_info()
+
+        # Определяем уровень оборудования
+        hardware_tier = get_hardware_tier(system_info)
+
+        log.info(f"🖥️  Обнаружено оборудование уровня: {hardware_tier}")
+        log.info(f"🧠 CPU: {system_info['cpu']['processor_name']}")
+        log.info(f"💾 RAM: {system_info['memory']['total_ram_gb']} GB")
+
+        for gpu in system_info['gpus']:
+            vram = gpu.get('memory_total_gb', 'N/A')
+            log.info(f"🎮 GPU: {gpu['vendor']} {gpu['name']} ({vram} GB VRAM)")
+
+        # # Запускаем benchmark'и
+        # results = run_benchmarks(models, tasks)
+        #
+        # # Добавляем системную информацию к результатам
+        # results = log_system_info(results)
+        # results['hardware_tier'] = hardware_tier
+        #
+        # # Сохраняем результаты с системной информацией
+        # save_results(results, f'results_{hardware_tier}.json')
+        #
+        # return results

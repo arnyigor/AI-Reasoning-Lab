@@ -5,15 +5,33 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "AI-Reasoning-Lab"
 version = "0.1.0"
-description = "Grandmaster AI Logical Tests Generator + BaseLogic Core Library"
+description = "Grandmaster AI Logical Tests Generator + BaseLogic Core Library with Hardware-Aware Benchmarking"
 readme = "README.md"
 authors = [
     { name = "arny", email = "arnyigor@gmail.com" }
 ]
 license = { text = "MIT" }
 requires-python = ">=3.8"
+keywords = ["ai", "llm", "benchmark", "testing", "hardware", "reasoning", "logic"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Benchmark",
+    "Topic :: System :: Hardware"
+]
+
 dependencies = [
-    "pandas>=1.3.0",
+    # Core dependencies
+    "pandas>=1.3.0,<2.0",  # Фиксируем для стабильности
+    "numpy>=1.21.0,<2.0",  # Избегаем проблем совместимости с PyTorch
     "ollama>=0.5.3",
     "PyYAML>=6.0",
     "requests>=2.25.0",
@@ -21,23 +39,92 @@ dependencies = [
     "pymorphy2>=0.9.1",
     "python-dotenv>=1.0.0",
     "tqdm>=4.60.0",
+    "Levenshtein>=0.27.1",
+
+    # System profiling and monitoring
     "psutil>=5.8.0",
-    "Levenshtein>=0.27.1"
+    "pynvml>=11.4.1",  # NVIDIA GPU monitoring
+    "GPUtil>=1.4.0",   # Alternative GPU utilities
+
+    # ML and data processing
+    "scikit-learn>=1.0.0",
+    "scipy>=1.7.0",
+
+    # Visualization and reporting
+    "matplotlib>=3.5.0",
+    "plotly>=5.0.0",
+    "streamlit>=1.28.0",  # For web dashboard
+
+    # API and web clients
+    "httpx>=0.24.0",
+    "aiohttp>=3.8.0",
+
+    # Configuration and utilities
+    "click>=8.0.0",  # CLI interface
+    "rich>=12.0.0",  # Beautiful terminal output
+    "loguru>=0.6.0", # Enhanced logging
 ]
 
 [project.optional-dependencies]
+# Development dependencies
 dev = [
     "pytest>=7.0",
-    "pytest-cov>=4.0"
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "flake8>=4.0.0",
+    "mypy>=0.991",
+    "pre-commit>=2.20.0"
+]
+
+# ML and AI dependencies (optional due to size and compatibility issues)
+ml = [
+    "torch>=1.13.0",
+    "transformers>=4.21.0",
+    "datasets>=2.0.0",
+    "accelerate>=0.20.0",
+    "bitsandbytes>=0.39.0",  # Quantization
+    "optimum>=1.8.0"
+]
+
+# Cloud and enterprise features
+cloud = [
+    "boto3>=1.26.0",  # AWS
+    "google-cloud-storage>=2.7.0",  # GCP
+    "azure-storage-blob>=12.14.0",  # Azure
+    "kubernetes>=24.2.0"
+]
+
+# Advanced analytics
+analytics = [
+    "jupyter>=1.0.0",
+    "seaborn>=0.11.0",
+    "bokeh>=2.4.0",
+    "dash>=2.10.0",
+    "statsmodels>=0.13.0"
+]
+
+# Documentation
+docs = [
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "myst-parser>=0.18.0",
+    "sphinx-autodoc-typehints>=1.19.0"
+]
+
+# Full installation with all features
+all = [
+    "AI-Reasoning-Lab[dev,ml,cloud,analytics,docs]"
 ]
 
 [project.urls]
 Homepage = "https://github.com/arnyigor/AI-Reasoning-Lab"
 Documentation = "https://github.com/arnyigor/AI-Reasoning-Lab/blob/master/README.md"
+Repository = "https://github.com/arnyigor/AI-Reasoning-Lab.git"
+"Bug Tracker" = "https://github.com/arnyigor/AI-Reasoning-Lab/issues"
+Changelog = "https://github.com/arnyigor/AI-Reasoning-Lab/blob/master/CHANGELOG.md"
 
-[tool.setuptools.package-dir]
-"" = "."
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["grandmaster*", "baselogic*"]
+[project.scripts]
+ai-reasoning-lab = "baselogic.cli:main"
+baselogic-benchmark = "baselogic.core.test_runner:cli
