@@ -100,7 +100,7 @@ class ContextStressTestGenerator(AbstractTestGenerator):
 
     def _create_test_plan(self):
         """Создает полный список всех комбинаций тестов."""
-        MAX_SAFE_TOKENS = 1024 * 512  # Безопасный лимит для предотвращения сбоев
+        MAX_SAFE_TOKENS = 1024 * 1024  # Безопасный лимит для предотвращения сбоев
         plan = []
 
         for context_k in self.context_lengths_k:
