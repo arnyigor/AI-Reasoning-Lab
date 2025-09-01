@@ -85,7 +85,7 @@ class OllamaClient(ProviderClient):
         timeout = payload.pop('timeout', 180)
 
         log.info("Отправка запроса на %s (stream=%s)...", self.endpoint, is_stream)
-        # log.debug("Payload: %s", json.dumps(payload, indent=2, ensure_ascii=False))
+        log.info("Payload: %s", json.dumps(payload, indent=2, ensure_ascii=False))
 
         try:
             resp = self.session.post(self.endpoint, json=payload, stream=is_stream, timeout=timeout)

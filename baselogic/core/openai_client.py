@@ -34,6 +34,8 @@ class OpenAICompatibleClient(ProviderClient):
         timeout = payload.pop('timeout', 180) # Используем и удаляем, чтобы не отправлять в API
 
         log.info("Отправка запроса на %s (stream=%s)...", self.endpoint, is_stream)
+        log.info("Payload: %s", json.dumps(payload, indent=2, ensure_ascii=False))
+
         try:
             resp = self.session.post(self.endpoint, json=payload, stream=is_stream, timeout=timeout)
             resp.raise_for_status()

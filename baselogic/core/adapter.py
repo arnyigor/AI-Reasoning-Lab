@@ -52,7 +52,6 @@ class AdapterLLMClient(ILLMClient):
             # Не логируем здесь, чтобы не спамить, если токенизатор не настроен
             return self._estimate_tokens_heuristic(text)
 
-    # Эти методы должны быть внутри вашего класса Adapter
     def _handle_stream_response(self, response_generator: Generator) -> tuple[
         str, dict, float | None, float]:
         """Обрабатывает потоковый ответ, собирает текст и метаданные."""
