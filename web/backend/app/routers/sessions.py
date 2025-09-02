@@ -125,6 +125,8 @@ async def run_session_tests(session_id: str, session: Session):
 
         # Выполняем тесты
         logger.info(f"Запуск execute_test_session для сессии {session_id}")
+        logger.info(f"Тесты для выполнения: {session.test_ids}")
+        logger.info(f"Конфигурация сессии: {session.config}")
 
         # Конвертируем конфигурацию в словарь для совместимости
         config_dict = {

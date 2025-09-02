@@ -78,7 +78,13 @@ class EnvConfigLoader:
                     models_data[index][path_str] = self._convert_type(value)
 
             elif key.upper() == "TESTS_TO_RUN":
-                config["tests_to_run"] = [item.strip() for item in value.split(',')]
+                # Сначала попробуем распарсить как JSON, если не получится - как строку с разделителями
+                converted_value = self._convert_type(value)
+                if isinstance(converted_value, list):
+                    config["tests_to_run"] = converted_value
+                else:
+                    # Fallback для старого формата
+                    config["tests_to_run"] = [item.strip() for item in value.split(',')]
             else:
                 config[key.lower()] = self._convert_type(value)
 

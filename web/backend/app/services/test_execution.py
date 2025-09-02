@@ -25,14 +25,8 @@ class TestExecutionService:
         self.grandmaster_script = self.project_root / "scripts" / "run_grandmaster_benchmark.py"
         self.test_discovery = TestDiscoveryService()
 
-        # Путь к Python в виртуальном окружении backend
-        self.backend_venv_python = self.project_root / "web" / "backend" / "venv" / "bin" / "python"
-        if not self.backend_venv_python.exists():
-            # Для Windows
-            self.backend_venv_python = self.project_root / "web" / "backend" / "venv" / "Scripts" / "python.exe"
-        if not self.backend_venv_python.exists():
-            # Fallback на системный Python
-            self.backend_venv_python = Path(sys.executable)
+        # Используем системный Python с правильным PYTHONPATH
+        self.backend_venv_python = Path(sys.executable)
 
     def _determine_test_categories(self, test_ids: list) -> Dict[str, list]:
         """Определяет категории тестов и группирует их"""
@@ -65,12 +59,17 @@ class TestExecutionService:
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """Выполняет сессию тестирования и стримит результаты"""
 
+        logger.info(f"STARTING execute_test_session for session {session_id}")
+        logger.info(f"Test IDs: {test_ids}")
+        logger.info(f"Config: {config}")
+
         try:
             # Определяем категории тестов
             test_categories = self._determine_test_categories(test_ids)
             logger.info(f"Test categories for session {session_id}: {test_categories}")
 
             # Запускаем процесс тестирования
+            logger.info(f"Yielding session_started for session {session_id}")
             yield {"type": "session_started", "session_id": session_id, "timestamp": datetime.now().isoformat()}
 
             # Запускаем тесты по категориям
@@ -103,11 +102,17 @@ class TestExecutionService:
         websocket_manager: Any = None
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """Запускает BaseLogic тесты"""
+        logger.info(f"STARTING _run_baselogic_tests for session {session_id}")
+        logger.info(f"Test IDs: {test_ids}")
+
         try:
             # Создаем временный .env файл с конфигурацией сессии
+            logger.info(f"Creating env file for session {session_id}")
             env_file = await self._create_session_env_file(session_id, test_ids, config)
+            logger.info(f"Env file created: {env_file}")
 
             # Запускаем процесс тестирования
+            logger.info(f"Yielding baselogic_started for session {session_id}")
             yield {"type": "baselogic_started", "session_id": session_id, "timestamp": datetime.now().isoformat()}
 
             async for event in self._run_test_process(session_id, env_file, websocket_manager, script_type="baselogic"):
@@ -261,17 +266,26 @@ BC_JUDGE_TEMPERATURE=0.3
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """Запускает процесс тестирования и парсит вывод"""
 
+        logger.info(f"STARTING _run_test_process for session {session_id}")
+        logger.info(f"Env file: {env_file}")
+        logger.info(f"Script type: {script_type}")
+
         # Выбираем скрипт в зависимости от типа
         if script_type == "grandmaster":
             script_path = self.grandmaster_script
         else:
             script_path = self.baselogic_script
 
+        logger.info(f"Script path: {script_path}")
+
         # Команда для запуска с использованием Python из виртуального окружения backend
         cmd = [
             str(self.backend_venv_python),
             str(script_path)
         ]
+
+        logger.info(f"Command: {cmd}")
+        logger.info(f"Python executable: {self.backend_venv_python}")
 
         # Используем системные переменные окружения
         env = os.environ.copy()
@@ -282,6 +296,9 @@ BC_JUDGE_TEMPERATURE=0.3
             env['PYTHONPATH'] = f"{python_path}:{env['PYTHONPATH']}"
         else:
             env['PYTHONPATH'] = python_path
+
+        logger.info(f"PYTHONPATH: {env.get('PYTHONPATH')}")
+        logger.info(f"Working directory: {self.project_root}")
 
         try:
             logger.info(f"Запуск команды: {' '.join(cmd)}")
