@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict
 from app.models.test import TestResult
+from app.services.test_execution import TestExecutionService
 
 router = APIRouter()
+test_executor = TestExecutionService()
 
 # Временное хранилище результатов (в продакшене использовать DB)
 _results = {}
@@ -10,9 +12,18 @@ _results = {}
 @router.get("/{session_id}")
 async def get_session_results(session_id: str):
     """Получение результатов сессии"""
-    if session_id not in _results:
-        return []
-    return _results[session_id]
+    # Сначала проверяем кэш результатов
+    if session_id in _results:
+        return _results[session_id]
+
+    # Если нет в кэше, пытаемся получить из файловой системы
+    try:
+        results = await test_executor.get_session_results(session_id)
+        # Кэшируем результаты
+        _results[session_id] = results
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving results: {str(e)}")
 
 @router.get("/history/")
 async def get_results_history():
