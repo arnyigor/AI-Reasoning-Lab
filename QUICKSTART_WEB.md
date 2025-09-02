@@ -6,47 +6,134 @@
 
 ## 🏃‍♂️ Быстрый запуск
 
-### Вариант 1: Docker Compose (рекомендуется)
+### 🚀 Вариант 1: Один файл (самый простой!)
+
+#### С Docker (рекомендуется для production):
 
 ```bash
-# Клонирование репозитория
-git clone https://github.com/your-org/AI-Reasoning-Lab.git
-cd AI-Reasoning-Lab
+# Linux/Mac
+./start-web.sh
 
-# Запуск всех сервисов
-docker-compose up -d
+# Windows
+start-web.bat
+
+# Универсальный (Python)
+python start-web.py
+```
+
+#### БЕЗ Docker (рекомендуется для development):
+
+```bash
+# Linux/Mac
+./start-no-docker.sh
+
+# Windows
+start-no-docker.bat
+
+# Универсальный (Python)
+python start-no-docker.py
+```
+
+**Что делают эти файлы:**
+- ✅ Автоматическая проверка всех зависимостей
+- ✅ Создание виртуального окружения (без Docker)
+- ✅ Установка всех зависимостей (backend + frontend)
+- ✅ Запуск backend и frontend в фоне
+- ✅ Вывод всех полезных ссылок и команд управления
+
+📖 **Инструкции по установке Docker:** [DOCKER_INSTALL.md](DOCKER_INSTALL.md)
+📖 **Запуск БЕЗ Docker:** [NO_DOCKER_SETUP.md](NO_DOCKER_SETUP.md)
+
+### Вариант 2: Docker Compose (ручной)
+
+```bash
+# Development режим
+docker compose up -d
+
+# Production с мониторингом
+docker compose -f docker-compose.prod.yml --profile monitoring up -d
 
 # Доступ к сервисам:
 # - Frontend: http://localhost:5173
 # - Backend API: http://localhost:8000
 # - API Docs: http://localhost:8000/docs
+# - Prometheus: http://localhost:9090 (production only)
+# - Grafana: http://localhost:3000 (production only)
 ```
 
 ### Вариант 2: Ручная установка
 
-#### Backend (FastAPI)
+#### 🚀 Быстрый старт без Docker (рекомендуется для новичков)
+
+**Backend + Frontend в двух терминалах:**
+
+```bash
+# Terminal 1: Backend
+cd web/backend
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# или: venv\Scripts\activate  # Windows
+pip install poetry
+poetry install
+poetry run python -m app.main
+
+# Terminal 2: Frontend
+cd web/frontend
+npm install
+npm run dev
+```
+
+**Результат:**
+- 🌐 Frontend: http://localhost:5173
+- 🔌 Backend: http://localhost:8000
+
+#### 🔧 Полная настройка без Docker
+
+##### Backend (FastAPI)
 
 ```bash
 cd web/backend
 
-# Установка зависимостей
+# Создать виртуальное окружение
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+
+# Установить зависимости
 pip install poetry
 poetry install
 
-# Запуск сервера
+# Создать .env файл
+echo "PROJECT_ROOT=../.." > .env
+echo "BC_MODELS_0_NAME=gpt-4" >> .env
+echo "BC_MODELS_0_PROVIDER=openai" >> .env
+
+# Запустить
 poetry run python -m app.main
 ```
 
-#### Frontend (React)
+##### Frontend (React)
 
 ```bash
 cd web/frontend
 
-# Установка зависимостей
+# Установить зависимости
 npm install
 
-# Запуск dev сервера
+# Создать .env файл (опционально)
+echo "VITE_API_BASE=http://localhost:8000" > .env.local
+
+# Запустить
 npm run dev
+```
+
+#### ⚡ Гибридный вариант
+
+```bash
+# Backend без Docker
+cd web/backend && poetry run python -m app.main
+
+# Frontend в Docker (если есть Docker)
+docker run -p 5173:5173 -v $(pwd)/web/frontend:/app node:18 sh -c "npm install && npm run dev"
 ```
 
 ## 🎯 Использование веб-интерфейса
@@ -68,8 +155,31 @@ npm run dev
 ### 3. Просмотр результатов
 
 - **Интерактивные таблицы**: Детальные результаты по тестам
-- **Графики производительности**: Accuracy, execution time
-- **Экспорт данных**: JSON/CSV форматы
+- **Графики производительности**: Accuracy, execution time, trends
+- **Leaderboard моделей**: Сравнение производительности всех моделей
+- **Экспорт данных**: JSON/CSV форматы с background processing
+- **История сессий**: Поиск и фильтрация по моделям, датам
+
+### 4. Работа с профилями конфигурации
+
+1. Перейдите в раздел "Profiles"
+2. Выберите предустановленный профиль или создайте новый
+3. Настройте параметры модели (temperature, tokens, API keys)
+4. Сохраните профиль для повторного использования
+
+### 5. Grandmaster - Логические головоломки
+
+1. Перейдите в раздел "Grandmaster"
+2. Выберите тему и размер пазла
+3. Сгенерируйте новую головоломку
+4. Решите пазл с помощью выбранной LLM
+
+### 6. LLM Judge System
+
+1. Перейдите в раздел "Judges"
+2. Создайте или выберите конфигурацию судьи
+3. Запустите оценку результатов несколькими судьями
+4. Просмотрите сравнение оценок и метрики качества
 
 ## 🔧 Конфигурация
 
@@ -102,6 +212,7 @@ docker-compose up backend frontend redis
 
 ## 📊 API Endpoints
 
+### Основные endpoints
 | Метод | Endpoint | Описание |
 |-------|----------|----------|
 | `GET` | `/api/tests` | Список доступных тестов |
@@ -110,6 +221,34 @@ docker-compose up backend frontend redis
 | `GET` | `/api/sessions/{id}` | Статус сессии |
 | `GET` | `/api/results/{session_id}` | Результаты сессии |
 | `WS` | `/ws/{session_id}` | WebSocket для real-time логов |
+
+### Профили конфигурации
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `GET` | `/api/config/profiles` | Все профили конфигурации |
+| `POST` | `/api/config/profiles` | Создать новый профиль |
+| `GET` | `/api/config/profiles/{id}` | Получить профиль по ID |
+| `PUT` | `/api/config/profiles/{id}` | Обновить профиль |
+| `DELETE` | `/api/config/profiles/{id}` | Удалить профиль |
+
+### Аналитика и результаты
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `GET` | `/api/results/history/` | История сессий с фильтрами |
+| `GET` | `/api/results/analytics/leaderboard` | Таблица лидеров моделей |
+| `GET` | `/api/results/analytics/comparison` | Сравнение моделей |
+| `POST` | `/api/results/export` | Экспорт результатов |
+
+### Grandmaster и LLM-судьи
+| Метод | Endpoint | Описание |
+|-------|----------|----------|
+| `POST` | `/api/grandmaster/puzzles/generate` | Генерировать пазл |
+| `GET` | `/api/grandmaster/puzzles` | Список пазлов |
+| `GET` | `/api/grandmaster/puzzles/{id}` | Получить пазл по ID |
+| `POST` | `/api/grandmaster/puzzles/{id}/solve` | Решить пазл |
+| `GET` | `/api/grandmaster/judges` | Конфигурации судей |
+| `POST` | `/api/grandmaster/judges` | Создать конфигурацию судьи |
+| `POST` | `/api/grandmaster/evaluate` | Оценить результаты судьями |
 
 ## 🐳 Docker команды
 
@@ -143,40 +282,62 @@ curl http://localhost:5173
 
 ```bash
 # Логи backend
-docker-compose logs backend
+docker compose logs backend
+# или: docker-compose logs backend
 
 # Логи frontend
-docker-compose logs frontend
+docker compose logs frontend
+# или: docker-compose logs frontend
 
 # Все логи
-docker-compose logs
+docker compose logs
+# или: docker-compose logs
 ```
 
 ## 🚀 Продакшн развертывание
 
-### С использованием Docker Compose
+### Production конфигурация
+
+Для production развертывания используйте подготовленную конфигурацию:
 
 ```bash
-# Production режим
-docker-compose -f docker-compose.prod.yml up -d
+# Полная production установка с мониторингом
+docker compose -f docker-compose.prod.yml --profile monitoring up -d
 
-# С SSL/TLS
-docker-compose -f docker-compose.ssl.yml up -d
+# С SSL/TLS поддержкой
+docker compose -f docker-compose.prod.yml --profile monitoring --profile ssl up -d
+
+# С логированием
+docker compose -f docker-compose.prod.yml --profile monitoring --profile ssl --profile logging up -d
 ```
 
-### Ручное развертывание
+### Production сервисы
+
+- **Frontend**: http://localhost:80 (или HTTPS с SSL)
+- **Backend API**: http://localhost:8000
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3000 (admin/admin)
+
+### Переменные окружения
+
+Создайте `.env.prod` файл:
 
 ```bash
-# Backend
-cd web/backend
-poetry install --no-dev
-poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
+# Database
+DB_PASSWORD=your_secure_db_password
 
-# Frontend (production build)
-cd web/frontend
-npm run build
-# Serve dist/ with nginx or any static server
+# Redis
+REDIS_PASSWORD=your_secure_redis_password
+
+# Grafana
+GRAFANA_PASSWORD=your_secure_grafana_password
+
+# SSL (опционально)
+SSL_CERT_PATH=/path/to/cert.pem
+SSL_KEY_PATH=/path/to/key.pem
 ```
+
+📖 **Подробная документация**: См. [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) для полного руководства по production развертыванию.
 
 ## 🆘 Устранение неполадок
 
@@ -224,9 +385,28 @@ curl -I -N -H "Connection: Upgrade" -H "Upgrade: websocket" http://localhost:800
 
 - [Полная спецификация API](docs/web_interface_spec.md)
 - [Архитектура системы](docs/GLOBAL_SPECIFICATION.MD)
+- [Production развертывание](PRODUCTION_DEPLOYMENT.md)
 - [Руководство по развертыванию](docs/DEPLOYMENT.md)
 - [Troubleshooting guide](docs/TROUBLESHOOTING.md)
+- [API Integration Tests](web/backend/tests/test_api_integration.py)
+
+## 🎯 Новые возможности (Stage 2)
+
+### ✅ Расширенный функционал
+- **🔧 Профили конфигурации** — Создание, управление и дублирование профилей для разных сценариев
+- **📊 Продвинутая аналитика** — Leaderboard моделей, сравнение производительности, тренды
+- **🎯 Grandmaster Integration** — Генерация и решение логических головоломок
+- **⚖️ LLM Judge System** — Оценка качества ответов независимыми судьями
+- **📈 Экспорт результатов** — Background processing для больших объемов данных
+
+### ✅ Production-ready
+- **🐳 Docker Production** — PostgreSQL, Redis, Nginx, monitoring
+- **📊 Prometheus/Grafana** — Полный стек мониторинга
+- **🔒 Security** — SSL/TLS, rate limiting, secure headers
+- **📈 Scaling** — Horizontal scaling и load balancing
 
 ---
 
-🎉 **Готово!** Ваш веб-интерфейс AI-Reasoning-Lab запущен и готов к работе.
+🎉 **Готово!** Ваш веб-интерфейс AI-Reasoning-Lab с полным Stage 2 функционалом запущен и готов к работе!
+
+**Следующие шаги**: Stage 3 - Multi-user support, authentication, advanced monitoring

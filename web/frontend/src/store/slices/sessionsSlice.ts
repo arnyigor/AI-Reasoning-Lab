@@ -26,8 +26,16 @@ export const fetchSessions = createAsyncThunk(
 
 export const createSession = createAsyncThunk(
   'sessions/createSession',
-  async () => {
-    const response = await axios.post('/api/sessions/')
+  async (sessionData: { test_ids: string[], model_configuration: any, session_name?: string }) => {
+    const response = await axios.post('/api/sessions/', sessionData)
+    return response.data
+  }
+)
+
+export const startSession = createAsyncThunk(
+  'sessions/startSession',
+  async (sessionId: string) => {
+    const response = await axios.post(`/api/sessions/${sessionId}/start`)
     return response.data
   }
 )
@@ -66,6 +74,20 @@ const sessionsSlice = createSlice({
       .addCase(createSession.rejected, (state, action) => {
         state.loading = false
         state.error = action.error.message || 'Failed to create session'
+      })
+      .addCase(startSession.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(startSession.fulfilled, (state, action) => {
+        state.loading = false
+        if (state.currentSession) {
+          state.currentSession = action.payload
+        }
+      })
+      .addCase(startSession.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || 'Failed to start session'
       })
   },
 })

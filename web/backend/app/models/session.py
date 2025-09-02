@@ -22,3 +22,8 @@ class Session(BaseModel):
     progress: float = 0.0
     current_test: Optional[str]
     results: List[dict] = []
+
+class CreateSessionRequest(BaseModel):
+    test_ids: List[str]
+    model_configuration: dict
+    session_name: Optional[str] = None

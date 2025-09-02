@@ -60,11 +60,10 @@ class TestExecutionService:
         # Базовая конфигурация
         env_content = f"""# Temporary config for session {session_id}
 BC_MODELS_0_NAME={config.get('model_name', 'gpt-4')}
-BC_MODELS_0_PROVIDER={config.get('provider', 'openai')}
-BC_MODELS_0_INFERENCE_STREAM={config.get('stream', 'true')}
-BC_MODELS_0_INFERENCE_MAX_CHUNKS={config.get('max_chunks', '1000')}
-BC_MODELS_0_GENERATION_MAX_TOKENS={config.get('max_tokens', '1000')}
-BC_MODELS_0_GENERATION_STOP={json.dumps(config.get('stop_tokens', ['\\n']))}
+BC_MODELS_0_CLIENT_TYPE={config.get('client_type', 'openai')}
+BC_MODELS_0_API_BASE={config.get('api_base', '')}
+BC_MODELS_0_GENERATION_TEMPERATURE={config.get('temperature', 0.7)}
+BC_MODELS_0_GENERATION_MAX_TOKENS={config.get('max_tokens', 1000)}
 
 BC_TESTS_TO_RUN={json.dumps(test_ids)}
 BC_RUNS_RAW_SAVE=true
@@ -79,8 +78,8 @@ BC_JUDGE_TEMPERATURE=0.3
         if config.get('api_key'):
             env_content += f"OPENAI_API_KEY={config['api_key']}\n"
 
-        # Создаем временный файл
-        temp_env_file = self.project_root / f".env.session.{session_id}"
+        # Создаем временный файл с именем .env (как ожидает run_baselogic_benchmark.py)
+        temp_env_file = self.project_root / ".env"
         with open(temp_env_file, 'w') as f:
             f.write(env_content)
 
@@ -100,11 +99,14 @@ BC_JUDGE_TEMPERATURE=0.3
             str(self.baselogic_script)
         ]
 
-        # Устанавливаем переменную окружения для .env файла
+        # Используем системные переменные окружения
         env = os.environ.copy()
-        env['DOTENV_PATH'] = str(env_file)
 
         try:
+            logger.info(f"Запуск команды: {' '.join(cmd)}")
+            logger.info(f"Рабочая директория: {self.project_root}")
+            logger.info(f"Переменные окружения установлены для сессии {session_id}")
+
             # Запускаем процесс
             process = await asyncio.create_subprocess_exec(
                 *cmd,
@@ -113,6 +115,8 @@ BC_JUDGE_TEMPERATURE=0.3
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
+
+            logger.info(f"Процесс запущен с PID: {process.pid}")
 
             # Читаем stdout построчно
             if process.stdout:

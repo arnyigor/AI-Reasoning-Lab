@@ -6,7 +6,8 @@ import json
 import asyncio
 from typing import Dict
 
-from app.routers import tests, sessions, results, config
+from app.routers import tests, sessions, results, config, models
+from app.routers.grandmaster import router as grandmaster_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -53,6 +54,8 @@ app.include_router(tests.router, prefix="/api/tests", tags=["tests"])
 app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
 app.include_router(results.router, prefix="/api/results", tags=["results"])
 app.include_router(config.router, prefix="/api/config", tags=["config"])
+app.include_router(models.router, prefix="/api/models", tags=["models"])
+app.include_router(grandmaster_router, prefix="/api/grandmaster", tags=["grandmaster"])
 
 @app.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):

@@ -49,3 +49,25 @@ export interface LogEvent {
   session_id?: string
   test_id?: string
 }
+
+export interface Model {
+  id: string
+  name: string
+  client_type: string
+  api_base: string
+  temperature: number
+  max_tokens: number
+  description: string
+}
+
+export interface CreateSessionRequest {
+  test_ids: string[]
+  model_configuration: {
+    model_name: string
+    client_type: string
+    api_base: string
+    temperature: number
+    max_tokens: number
+  }
+  session_name?: string
+}

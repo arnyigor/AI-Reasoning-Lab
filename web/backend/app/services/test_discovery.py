@@ -127,13 +127,18 @@ class TestDiscoveryService:
             max_tokens=1000
         )
 
+        try:
+            relative_path = file_path.relative_to(self.project_root)
+        except ValueError:
+            relative_path = file_path
+
         return Test(
             id=filename,
             name=self._format_test_name(filename),
             description=description or f"Test {filename}",
             category=category,
             difficulty=difficulty,
-            file_path=str(file_path.relative_to(self.project_root)),
+            file_path=str(relative_path),
             config_template=config_template
         )
 
@@ -147,13 +152,18 @@ class TestDiscoveryService:
             max_tokens=2000
         )
 
+        try:
+            relative_path = file_path.relative_to(self.project_root)
+        except ValueError:
+            relative_path = file_path
+
         return Test(
             id=f"grandmaster_{filename}",
             name=f"Grandmaster: {filename.replace('_', ' ').title()}",
             description="Логическая головоломка Grandmaster уровня",
             category="Grandmaster",
             difficulty="expert",
-            file_path=str(file_path.relative_to(self.project_root)),
+            file_path=str(relative_path),
             config_template=config_template
         )
 
@@ -170,13 +180,18 @@ class TestDiscoveryService:
             max_tokens=data.get("max_tokens", 1000)
         )
 
+        try:
+            relative_path = file_path.relative_to(self.project_root)
+        except ValueError:
+            relative_path = file_path
+
         return Test(
             id=filename,
             name=data.get("name", filename),
             description=data.get("description", f"Custom test {filename}"),
             category=data.get("category", "Custom"),
             difficulty=data.get("difficulty", "intermediate"),
-            file_path=str(file_path.relative_to(self.project_root)),
+            file_path=str(relative_path),
             config_template=config_template
         )
 
