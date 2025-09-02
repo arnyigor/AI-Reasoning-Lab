@@ -26,7 +26,7 @@ export const fetchSessions = createAsyncThunk(
 
 export const createSession = createAsyncThunk(
   'sessions/createSession',
-  async (sessionData: { test_ids: string[], model_configuration: any, session_name?: string }) => {
+  async (sessionData: any) => {
     const response = await axios.post('/api/sessions/', sessionData)
     return response.data
   }
@@ -70,6 +70,7 @@ const sessionsSlice = createSlice({
         state.loading = false
         state.currentSession = action.payload
         state.sessions.push(action.payload)
+        console.log('Redux: createSession.fulfilled - currentSession set to:', action.payload)
       })
       .addCase(createSession.rejected, (state, action) => {
         state.loading = false
@@ -83,6 +84,9 @@ const sessionsSlice = createSlice({
         state.loading = false
         if (state.currentSession) {
           state.currentSession = action.payload
+          console.log('Redux: startSession.fulfilled - currentSession updated to:', action.payload)
+        } else {
+          console.log('Redux: startSession.fulfilled - no currentSession to update')
         }
       })
       .addCase(startSession.rejected, (state, action) => {

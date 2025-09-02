@@ -11,16 +11,50 @@ from datetime import datetime
 from app.core.config import settings
 from app.models.session import Session, SessionStatus
 from app.models.test import TestResult
+from app.services.test_discovery import TestDiscoveryService
 
 logger = logging.getLogger(__name__)
 
 class TestExecutionService:
-    """Сервис для выполнения тестов через существующий движок run.py"""
+    """Сервис для выполнения тестов через соответствующие движки"""
 
     def __init__(self):
         self.project_root = settings.project_root
         self.run_script = self.project_root / "run.py"
         self.baselogic_script = self.project_root / "scripts" / "run_baselogic_benchmark.py"
+        self.grandmaster_script = self.project_root / "scripts" / "run_grandmaster_benchmark.py"
+        self.test_discovery = TestDiscoveryService()
+
+        # Путь к Python в виртуальном окружении backend
+        self.backend_venv_python = self.project_root / "web" / "backend" / "venv" / "bin" / "python"
+        if not self.backend_venv_python.exists():
+            # Для Windows
+            self.backend_venv_python = self.project_root / "web" / "backend" / "venv" / "Scripts" / "python.exe"
+        if not self.backend_venv_python.exists():
+            # Fallback на системный Python
+            self.backend_venv_python = Path(sys.executable)
+
+    def _determine_test_categories(self, test_ids: list) -> Dict[str, list]:
+        """Определяет категории тестов и группирует их"""
+        categories = {"BaseLogic": [], "Grandmaster": [], "Custom": []}
+
+        # Получаем информацию о всех доступных тестах
+        all_tests = self.test_discovery.discover_tests()
+
+        for test_id in test_ids:
+            if test_id in all_tests:
+                test = all_tests[test_id]
+                categories[test.category].append(test_id)
+            else:
+                # Если тест не найден, пробуем определить по ID
+                if test_id.startswith("grandmaster_"):
+                    categories["Grandmaster"].append(test_id)
+                elif test_id.startswith("t"):
+                    categories["BaseLogic"].append(test_id)
+                else:
+                    categories["Custom"].append(test_id)
+
+        return categories
 
     async def execute_test_session(
         self,
@@ -32,18 +66,25 @@ class TestExecutionService:
         """Выполняет сессию тестирования и стримит результаты"""
 
         try:
-            # Создаем временный .env файл с конфигурацией сессии
-            env_file = await self._create_session_env_file(session_id, test_ids, config)
+            # Определяем категории тестов
+            test_categories = self._determine_test_categories(test_ids)
+            logger.info(f"Test categories for session {session_id}: {test_categories}")
 
             # Запускаем процесс тестирования
             yield {"type": "session_started", "session_id": session_id, "timestamp": datetime.now().isoformat()}
 
-            async for event in self._run_test_process(session_id, env_file, websocket_manager):
-                yield event
+            # Запускаем тесты по категориям
+            if test_categories["BaseLogic"]:
+                async for event in self._run_baselogic_tests(session_id, test_categories["BaseLogic"], config, websocket_manager):
+                    yield event
 
-            # Удаляем временный файл
-            if env_file.exists():
-                env_file.unlink()
+            if test_categories["Grandmaster"]:
+                async for event in self._run_grandmaster_tests(session_id, test_categories["Grandmaster"], config, websocket_manager):
+                    yield event
+
+            if test_categories["Custom"]:
+                async for event in self._run_custom_tests(session_id, test_categories["Custom"], config, websocket_manager):
+                    yield event
 
         except Exception as e:
             logger.error(f"Error executing test session {session_id}: {e}")
@@ -54,21 +95,141 @@ class TestExecutionService:
                 "timestamp": datetime.now().isoformat()
             }
 
+    async def _run_baselogic_tests(
+        self,
+        session_id: str,
+        test_ids: list,
+        config: Dict[str, Any],
+        websocket_manager: Any = None
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """Запускает BaseLogic тесты"""
+        try:
+            # Создаем временный .env файл с конфигурацией сессии
+            env_file = await self._create_session_env_file(session_id, test_ids, config)
+
+            # Запускаем процесс тестирования
+            yield {"type": "baselogic_started", "session_id": session_id, "timestamp": datetime.now().isoformat()}
+
+            async for event in self._run_test_process(session_id, env_file, websocket_manager, script_type="baselogic"):
+                yield event
+
+            # Удаляем временный файл
+            if env_file.exists():
+                env_file.unlink()
+
+        except Exception as e:
+            logger.error(f"Error running baselogic tests for session {session_id}: {e}")
+            yield {
+                "type": "baselogic_error",
+                "session_id": session_id,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+
+    async def _run_grandmaster_tests(
+        self,
+        session_id: str,
+        test_ids: list,
+        config: Dict[str, Any],
+        websocket_manager: Any = None
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """Запускает Grandmaster тесты"""
+        try:
+            # Создаем временный .env файл с конфигурацией сессии
+            env_file = await self._create_session_env_file(session_id, test_ids, config)
+
+            # Запускаем процесс тестирования
+            yield {"type": "grandmaster_started", "session_id": session_id, "timestamp": datetime.now().isoformat()}
+
+            async for event in self._run_test_process(session_id, env_file, websocket_manager, script_type="grandmaster"):
+                yield event
+
+            # Удаляем временный файл
+            if env_file.exists():
+                env_file.unlink()
+
+        except Exception as e:
+            logger.error(f"Error running grandmaster tests for session {session_id}: {e}")
+            yield {
+                "type": "grandmaster_error",
+                "session_id": session_id,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+
+    async def _run_custom_tests(
+        self,
+        session_id: str,
+        test_ids: list,
+        config: Dict[str, Any],
+        websocket_manager: Any = None
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """Запускает кастомные тесты"""
+        # Пока что просто пропускаем кастомные тесты
+        yield {"type": "custom_skipped", "session_id": session_id, "timestamp": datetime.now().isoformat()}
+
     async def _create_session_env_file(self, session_id: str, test_ids: list, config: Dict[str, Any]) -> Path:
         """Создает временный .env файл для сессии"""
 
         # Базовая конфигурация
         env_content = f"""# Temporary config for session {session_id}
+
+# === ОСНОВНЫЕ ПАРАМЕТРЫ ТЕСТИРОВАНИЯ ===
+BC_RUNS_PER_TEST={config.get('runs_per_test', 2)}
+BC_SHOW_PAYLOAD={config.get('show_payload', 'false')}
+BC_RUNS_RAW_SAVE={config.get('raw_save', 'false')}
+
+# === НАБОР ТЕСТОВ ДЛЯ ЗАПУСКА ===
+BC_TESTS_TO_RUN={json.dumps(test_ids)}
+
+# === НАСТРОЙКИ ЛОГИРОВАНИЯ ===
+BC_LOGGING_LEVEL={config.get('logging_level', 'INFO')}
+BC_LOGGING_FORMAT={config.get('logging_format', 'DETAILED')}
+BC_LOGGING_DIRECTORY={config.get('logging_directory', 'logs')}
+
+# === СПИСОК МОДЕЛЕЙ ДЛЯ ТЕСТИРОВАНИЯ ===
+# --- Модель №0 ---
 BC_MODELS_0_NAME={config.get('model_name', 'gpt-4')}
 BC_MODELS_0_CLIENT_TYPE={config.get('client_type', 'openai')}
 BC_MODELS_0_API_BASE={config.get('api_base', '')}
+
+# Общие опции, которые читает TestRunner/Adapter
+BC_MODELS_0_OPTIONS_QUERY_TIMEOUT={config.get('query_timeout', 600)}
+BC_MODELS_0_INFERENCE_STREAM={config.get('stream', 'false')}
+BC_MODELS_0_INFERENCE_THINK={config.get('think', 'true')}
+
+# Опции, которые передаются напрямую в API модели
+BC_MODELS_0_PROMPTING_SYSTEM_PROMPT={config.get('system_prompt', '')}
 BC_MODELS_0_GENERATION_TEMPERATURE={config.get('temperature', 0.7)}
+BC_MODELS_0_GENERATION_NUM_CTX={config.get('num_ctx', 4096)}
 BC_MODELS_0_GENERATION_MAX_TOKENS={config.get('max_tokens', 1000)}
+BC_MODELS_0_GENERATION_TOP_P={config.get('top_p', 0.9)}
+BC_MODELS_0_GENERATION_REPEAT_PENALTY={config.get('repeat_penalty', 1.1)}
+BC_MODELS_0_GENERATION_NUM_GPU={config.get('num_gpu', 1)}
+BC_MODELS_0_GENERATION_NUM_THREAD={config.get('num_thread', 6)}
+BC_MODELS_0_GENERATION_NUM_PARALLEL={config.get('num_parallel', 1)}
+BC_MODELS_0_GENERATION_LOW_VRAM={config.get('low_vram', 'false')}
 
-BC_TESTS_TO_RUN={json.dumps(test_ids)}
-BC_RUNS_RAW_SAVE=true
+# === ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ ДЛЯ ГЕНЕРАЦИИ ===
+BC_MODELS_0_GENERATION_NUM_THREAD={config.get('num_thread', 6)}
+BC_MODELS_0_GENERATION_NUM_PARALLEL={config.get('num_parallel', 1)}
+BC_MODELS_0_GENERATION_LOW_VRAM={config.get('low_vram', 'false')}
+BC_MODELS_0_OPTIONS_QUERY_TIMEOUT={config.get('query_timeout', 300)}
 
-# LLM Judge configuration
+# === СТРЕСС-ТЕСТ КОНТЕКСТА (для плагина t_context_stress) ===
+CST_CONTEXT_LENGTHS_K={config.get('context_lengths_k', '')}
+CST_NEEDLE_DEPTH_PERCENTAGES={config.get('needle_depth_percentages', '')}
+
+# === OLLAMA КОНФИГУРАЦИЯ ===
+OLLAMA_USE_PARAMS={config.get('ollama_use_params', 'false')}
+OLLAMA_NUM_PARALLEL={config.get('ollama_num_parallel', 1)}
+OLLAMA_MAX_LOADED_MODELS={config.get('ollama_max_loaded_models', 1)}
+OLLAMA_CPU_THREADS={config.get('ollama_cpu_threads', 6)}
+OLLAMA_FLASH_ATTENTION={config.get('ollama_flash_attention', 'false')}
+OLLAMA_KEEP_ALIVE={config.get('ollama_keep_alive', '5m')}
+OLLAMA_HOST={config.get('ollama_host', '127.0.0.1:11434')}
+
+# === LLM JUDGE КОНФИГУРАЦИЯ ===
 BC_JUDGE_ENABLED=true
 BC_JUDGE_MODEL=gpt-4
 BC_JUDGE_TEMPERATURE=0.3
@@ -77,6 +238,12 @@ BC_JUDGE_TEMPERATURE=0.3
         # Добавляем API ключи если указаны
         if config.get('api_key'):
             env_content += f"OPENAI_API_KEY={config['api_key']}\n"
+
+        # Добавляем стоп-токены если указаны
+        stop_tokens = config.get('stop_tokens', [])
+        if stop_tokens:
+            for i, token in enumerate(stop_tokens):
+                env_content += f"BC_MODELS_0_GENERATION_STOP_{i}={token}\n"
 
         # Создаем временный файл с именем .env (как ожидает run_baselogic_benchmark.py)
         temp_env_file = self.project_root / ".env"
@@ -89,18 +256,32 @@ BC_JUDGE_TEMPERATURE=0.3
         self,
         session_id: str,
         env_file: Path,
-        websocket_manager: Any = None
+        websocket_manager: Any = None,
+        script_type: str = "baselogic"
     ) -> AsyncGenerator[Dict[str, Any], None]:
         """Запускает процесс тестирования и парсит вывод"""
 
-        # Команда для запуска
+        # Выбираем скрипт в зависимости от типа
+        if script_type == "grandmaster":
+            script_path = self.grandmaster_script
+        else:
+            script_path = self.baselogic_script
+
+        # Команда для запуска с использованием Python из виртуального окружения backend
         cmd = [
-            sys.executable,
-            str(self.baselogic_script)
+            str(self.backend_venv_python),
+            str(script_path)
         ]
 
         # Используем системные переменные окружения
         env = os.environ.copy()
+
+        # Добавляем путь к проекту в PYTHONPATH
+        python_path = str(self.project_root)
+        if 'PYTHONPATH' in env:
+            env['PYTHONPATH'] = f"{python_path}:{env['PYTHONPATH']}"
+        else:
+            env['PYTHONPATH'] = python_path
 
         try:
             logger.info(f"Запуск команды: {' '.join(cmd)}")
@@ -173,6 +354,33 @@ BC_JUDGE_TEMPERATURE=0.3
 
     def _parse_log_line(self, session_id: str, line: str) -> Optional[Dict[str, Any]]:
         """Парсит строку лога и возвращает событие"""
+
+        # Парсим сообщения о прогрессе
+        if line.startswith("PROGRESS:"):
+            # Формат: "PROGRESS: 1/5 (20.0%) - Model: gpt-4, Test: t01_simple_logic"
+            try:
+                # Извлекаем информацию о прогрессе
+                progress_info = line.replace("PROGRESS:", "").strip()
+
+                # Парсим текущий шаг и общее количество
+                if "/" in progress_info:
+                    current_total = progress_info.split("/")[0].strip()
+                    if current_total.isdigit():
+                        current_step = int(current_total)
+                        # Извлекаем процент
+                        percent_match = progress_info.split("(")[1].split(")")[0] if "(" in progress_info and ")" in progress_info else "0"
+                        progress_percent = float(percent_match.replace("%", "")) / 100.0 if percent_match.replace("%", "").replace(".", "").isdigit() else 0.0
+
+                        return {
+                            "type": "progress_update",
+                            "session_id": session_id,
+                            "current_step": current_step,
+                            "progress": progress_percent,
+                            "content": line,
+                            "timestamp": datetime.now().isoformat()
+                        }
+            except (IndexError, ValueError) as e:
+                logger.warning(f"Failed to parse progress line: {line}, error: {e}")
 
         # Парсим разные типы сообщений
         if "⏱️ Chunk" in line:

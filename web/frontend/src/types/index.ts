@@ -39,6 +39,14 @@ export interface Session {
   progress: number
   current_test?: string
   results: any[]
+  logs?: LogEntry[]
+}
+
+export interface LogEntry {
+  timestamp: string
+  level: string
+  message: string
+  type?: string
 }
 
 export interface LogEvent {
@@ -65,9 +73,35 @@ export interface CreateSessionRequest {
   model_configuration: {
     model_name: string
     client_type: string
-    api_base: string
-    temperature: number
-    max_tokens: number
+    api_base?: string
+    api_key?: string
+    temperature?: number
+    max_tokens?: number
+    top_p?: number
+    num_ctx?: number
+    repeat_penalty?: number
+    num_gpu?: number
+    num_thread?: number
+    num_parallel?: number
+    low_vram?: boolean
+    query_timeout?: number
+    stream?: boolean
+    think?: boolean
+    system_prompt?: string
+  }
+  test_configuration?: {
+    runs_per_test?: number
+    show_payload?: boolean
+    raw_save?: boolean
+  }
+  ollama_configuration?: {
+    use_params?: boolean
+    num_parallel?: number
+    max_loaded_models?: number
+    cpu_threads?: number
+    flash_attention?: boolean
+    keep_alive?: string
+    host?: string
   }
   session_name?: string
 }

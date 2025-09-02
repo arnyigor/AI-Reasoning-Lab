@@ -127,4 +127,4 @@ Changelog = "https://github.com/arnyigor/AI-Reasoning-Lab/blob/master/CHANGELOG.
 
 [project.scripts]
 ai-reasoning-lab = "baselogic.cli:main"
-baselogic-benchmark = "baselogic.core.test_runner:cli
+baselogic-benchmark = "baselogic.core.test_runner:cli"
