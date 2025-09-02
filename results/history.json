@@ -30,9 +30,9 @@
         "Total_Runs":60
     },
     "gemma3:4b":{
-        "Trust_Score":0.5630850284,
-        "Accuracy":0.6363636364,
-        "Total_Runs":176
+        "Trust_Score":0.5697658482,
+        "Accuracy":0.6413043478,
+        "Total_Runs":184
     },
     "deepseek-coder-v2-lite-instruct":{
         "Trust_Score":0.5576623297,

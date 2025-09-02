@@ -1,19 +1,30 @@
 from fastapi import APIRouter, HTTPException
-from typing import List, Dict, Any
-from app.services.model_discovery import ModelDiscoveryService
+from typing import Dict, List
+from app.services.model_history_service import ModelHistoryService
 
 router = APIRouter()
-model_discovery = ModelDiscoveryService()
+model_history = ModelHistoryService()
 
-@router.get("/", response_model=List[Dict[str, Any]])
-async def get_models():
-    """Получение списка доступных моделей"""
-    try:
-        return model_discovery.discover_models()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error discovering models: {str(e)}")
+@router.get("/history/{provider}")
+async def get_models_for_provider(provider: str) -> List[str]:
+    """Получить список сохраненных моделей для провайдера"""
+    return model_history.get_models_for_provider(provider)
 
-@router.get("/client-types", response_model=List[str])
-async def get_client_types():
-    """Получение списка доступных типов клиентов"""
-    return model_discovery.get_available_client_types()
+@router.get("/history")
+async def get_all_models() -> Dict[str, List[str]]:
+    """Получить все сохраненные модели по провайдерам"""
+    return model_history.get_all_models()
+
+@router.post("/history/{provider}/{model_name}")
+async def save_model(provider: str, model_name: str):
+    """Сохранить модель для провайдера"""
+    if not provider or not model_name:
+        raise HTTPException(status_code=400, detail="Provider and model_name are required")
+
+    model_history.save_model(provider, model_name)
+    return {"message": f"Model {model_name} saved for provider {provider}"}
+
+@router.get("/providers")
+async def get_providers() -> List[str]:
+    """Получить список всех провайдеров с сохраненными моделями"""
+    return model_history.get_all_providers()

@@ -2,7 +2,7 @@ import { Card, Button, Progress, Alert, Select, Form, InputNumber, Input, Divide
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from '../store/store'
-import { createSession, startSession } from '../store/slices/sessionsSlice'
+import { createSession, startSession, updateSessionLogs, updateSessionProgress, fetchModelsForProvider } from '../store/slices/sessionsSlice'
 import { fetchTests } from '../store/slices/testsSlice'
 
 const { Option } = Select
@@ -18,7 +18,7 @@ const PROVIDER_URLS = {
 
 export function TestRunner() {
   const dispatch = useDispatch<AppDispatch>()
-  const { currentSession, loading } = useSelector((state: RootState) => state.sessions)
+  const { currentSession, loading, savedModels } = useSelector((state: RootState) => state.sessions)
   const { tests } = useSelector((state: RootState) => state.tests)
 
   const [modelName, setModelName] = useState<string>('')
@@ -43,6 +43,7 @@ export function TestRunner() {
   const [runsPerTest, setRunsPerTest] = useState<number>(2)
   const [showPayload, setShowPayload] = useState<boolean>(false)
   const [rawSave, setRawSave] = useState<boolean>(false)
+  const [ws, setWs] = useState<WebSocket | null>(null)
 
   // Получаем выбранные тесты из TestNavigator через localStorage или props
   useEffect(() => {
@@ -74,13 +75,14 @@ export function TestRunner() {
     console.log('- modelName:', modelName)
     console.log('- provider:', provider)
     console.log('- selectedTestIds:', selectedTestIds)
+    console.log('- savedModels:', savedModels)
     console.log('- tests in store:', Object.keys(tests))
     console.log('- currentSession:', currentSession)
     console.log('- loading:', loading)
     console.log('- currentSession exists:', !!currentSession)
     console.log('- currentSession status:', currentSession?.status)
     console.log('- currentSession progress:', currentSession?.progress)
-  }, [modelName, provider, selectedTestIds, tests, currentSession, loading])
+  }, [modelName, provider, selectedTestIds, tests, currentSession, loading, savedModels])
 
   // Автоматическая подстановка URL при выборе провайдера
   useEffect(() => {
@@ -89,13 +91,88 @@ export function TestRunner() {
     }
   }, [provider])
 
+  // Загрузка сохраненных моделей при выборе провайдера
+  useEffect(() => {
+    if (provider) {
+      dispatch(fetchModelsForProvider(provider))
+    }
+  }, [provider, dispatch])
+
+  // WebSocket подключение для логов
+  useEffect(() => {
+    if (currentSession?.id && currentSession?.status === 'running') {
+      console.log('Connecting to WebSocket for session:', currentSession.id)
+      const websocket = new WebSocket(`ws://localhost:8000/ws/${currentSession.id}`)
+
+      websocket.onopen = () => {
+        console.log('WebSocket connected for session:', currentSession.id)
+        setWs(websocket)
+      }
+
+      websocket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data)
+          console.log('WebSocket message for session', currentSession.id, ':', data)
+
+          if (data.type === 'progress_update') {
+            dispatch(updateSessionProgress({
+              progress: data.progress,
+              current_test: data.content?.split('Test: ')[1] || null,
+              status: 'running'
+            }))
+          } else if (data.type === 'log_message' || data.type === 'chunk_processed' || data.type === 'model_completed') {
+            const logEntry = {
+              timestamp: data.timestamp,
+              level: data.level || 'info',
+              message: data.content || data.message || JSON.stringify(data),
+              type: data.type
+            }
+            // Добавляем лог в существующие логи
+            const currentLogs = currentSession.logs || []
+            dispatch(updateSessionLogs([...currentLogs, logEntry]))
+          } else if (data.type === 'session_completed') {
+            dispatch(updateSessionProgress({
+              progress: 1.0,
+              current_test: null,
+              status: 'completed'
+            }))
+          } else if (data.type === 'session_error') {
+            dispatch(updateSessionProgress({
+              progress: currentSession.progress,
+              current_test: null,
+              status: 'failed'
+            }))
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error)
+        }
+      }
+
+      websocket.onclose = () => {
+        console.log('WebSocket disconnected for session:', currentSession.id)
+        setWs(null)
+      }
+
+      websocket.onerror = (error) => {
+        console.error('WebSocket error for session:', currentSession.id, error)
+      }
+
+      return () => {
+        if (websocket.readyState === WebSocket.OPEN) {
+          console.log('Closing WebSocket for session:', currentSession.id)
+          websocket.close()
+        }
+      }
+    }
+  }, [currentSession?.id, currentSession?.status, dispatch])
+
   const handleStartSession = () => {
     console.log('handleStartSession called')
     console.log('modelName:', modelName)
     console.log('provider:', provider)
     console.log('selectedTestIds:', selectedTestIds)
 
-    if (!modelName || !provider || selectedTestIds.length === 0) {
+    if (!modelName.trim() || !provider || selectedTestIds.length === 0) {
       alert('Please enter model name, select provider and at least one test')
       return
     }
@@ -163,12 +240,23 @@ export function TestRunner() {
       <Card title="Test Configuration" style={{ marginBottom: '16px' }}>
         <Form layout="vertical">
           <Form.Item label="Model Name" required>
-            <Input
-              placeholder="Enter model name (e.g., gpt-4, llama2, jan-nano)"
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
+            <Select
+              placeholder="Enter or select model name"
+              value={modelName || undefined}
+              onChange={(value) => setModelName(value)}
               style={{ width: '100%' }}
-            />
+              showSearch
+              allowClear
+              filterOption={(input, option) =>
+                (option?.children as string)?.toLowerCase().includes(input.toLowerCase()) ?? false
+              }
+            >
+              {provider && savedModels[provider] && savedModels[provider].map((model: string) => (
+                <Option key={model} value={model}>
+                  {model}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item label="Provider" required>
@@ -398,7 +486,7 @@ export function TestRunner() {
             size="large"
             onClick={handleStartSession}
             loading={loading}
-            disabled={!modelName || !provider || selectedTestIds.length === 0}
+            disabled={!modelName?.trim() || !provider || selectedTestIds.length === 0}
           >
             Start Testing Session
           </Button>

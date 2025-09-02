@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import List
 from app.models.session import Session, SessionStatus, CreateSessionRequest, SessionConfiguration, ModelConfiguration, TestConfiguration, OllamaConfiguration
 from app.services.test_execution import TestExecutionService
+from app.services.model_history_service import ModelHistoryService
 import uuid
 from datetime import datetime
 import logging
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 test_executor = TestExecutionService()
+model_history = ModelHistoryService()
 
 # Временное хранилище сессий (в продакшене использовать Redis/DB)
 _sessions = {}
@@ -22,22 +24,11 @@ async def create_session(request: CreateSessionRequest):
     logger.info(f"Конфигурация модели: {request.model_configuration}")
     logger.info(f"Полный запрос: {request}")
 
-    # Создаем конфигурацию модели
-    model_config = ModelConfiguration(**request.model_configuration)
-
-    # Создаем конфигурацию тестирования (с дефолтными значениями если не указаны)
-    test_config_data = request.test_configuration or {}
-    test_config = TestConfiguration(**test_config_data)
-
-    # Создаем конфигурацию Ollama (с дефолтными значениями если не указаны)
-    ollama_config_data = request.ollama_configuration or {}
-    ollama_config = OllamaConfiguration(**ollama_config_data)
-
     # Создаем полную конфигурацию сессии
     session_config = SessionConfiguration(
-        model=model_config,
-        test=test_config,
-        ollama=ollama_config
+        model=request.model_configuration,
+        test=request.test_configuration or TestConfiguration(),
+        ollama=request.ollama_configuration or OllamaConfiguration()
     )
 
     session = Session(
@@ -91,6 +82,12 @@ async def start_session(
     session = _sessions[session_id]
     logger.info(f"Найдена сессия {session_id} со статусом {session.status}")
 
+    # Сохраняем модель в истории перед запуском
+    model_name = session.config.model.model_name
+    client_type = session.config.model.client_type
+    model_history.save_model(client_type, model_name)
+    logger.info(f"Модель {model_name} сохранена для провайдера {client_type}")
+
     # Обновляем статус сессии
     session.status = SessionStatus.RUNNING
     session.started_at = datetime.now()
@@ -130,41 +127,45 @@ async def run_session_tests(session_id: str, session: Session):
 
         # Конвертируем конфигурацию в словарь для совместимости
         config_dict = {
-            "model_name": session.config.model.model_name,
-            "client_type": session.config.model.client_type,
-            "api_base": session.config.model.api_base,
-            "api_key": session.config.model.api_key,
-            "temperature": session.config.model.temperature,
-            "max_tokens": session.config.model.max_tokens,
-            "top_p": session.config.model.top_p,
-            "num_ctx": session.config.model.num_ctx,
-            "repeat_penalty": session.config.model.repeat_penalty,
-            "num_gpu": session.config.model.num_gpu,
-            "num_thread": session.config.model.num_thread,
-            "num_parallel": session.config.model.num_parallel,
-            "low_vram": session.config.model.low_vram,
-            "query_timeout": session.config.model.query_timeout,
-            "stream": session.config.model.stream,
-            "think": session.config.model.think,
-            "system_prompt": session.config.model.system_prompt,
-            "stop_tokens": session.config.model.stop_tokens,
-            # Test configuration
-            "runs_per_test": session.config.test.runs_per_test,
-            "show_payload": session.config.test.show_payload,
-            "raw_save": session.config.test.raw_save,
-            "logging_level": session.config.test.logging_level,
-            "logging_format": session.config.test.logging_format,
-            "logging_directory": session.config.test.logging_directory,
-            "context_lengths_k": session.config.test.context_lengths_k,
-            "needle_depth_percentages": session.config.test.needle_depth_percentages,
-            # Ollama configuration
-            "ollama_use_params": session.config.ollama.use_params,
-            "ollama_num_parallel": session.config.ollama.num_parallel,
-            "ollama_max_loaded_models": session.config.ollama.max_loaded_models,
-            "ollama_cpu_threads": session.config.ollama.cpu_threads,
-            "ollama_flash_attention": session.config.ollama.flash_attention,
-            "ollama_keep_alive": session.config.ollama.keep_alive,
-            "ollama_host": session.config.ollama.host,
+            "model": {
+                "model_name": session.config.model.model_name,
+                "client_type": session.config.model.client_type,
+                "api_base": session.config.model.api_base,
+                "api_key": session.config.model.api_key,
+                "temperature": session.config.model.temperature,
+                "max_tokens": session.config.model.max_tokens,
+                "top_p": session.config.model.top_p,
+                "num_ctx": session.config.model.num_ctx,
+                "repeat_penalty": session.config.model.repeat_penalty,
+                "num_gpu": session.config.model.num_gpu,
+                "num_thread": session.config.model.num_thread,
+                "num_parallel": session.config.model.num_parallel,
+                "low_vram": session.config.model.low_vram,
+                "query_timeout": session.config.model.query_timeout,
+                "stream": session.config.model.stream,
+                "think": session.config.model.think,
+                "system_prompt": session.config.model.system_prompt,
+                "stop_tokens": session.config.model.stop_tokens,
+            },
+            "test": {
+                "runs_per_test": session.config.test.runs_per_test,
+                "show_payload": session.config.test.show_payload,
+                "raw_save": session.config.test.raw_save,
+                "logging_level": session.config.test.logging_level,
+                "logging_format": session.config.test.logging_format,
+                "logging_directory": session.config.test.logging_directory,
+                "context_lengths_k": session.config.test.context_lengths_k,
+                "needle_depth_percentages": session.config.test.needle_depth_percentages,
+            },
+            "ollama": {
+                "use_params": session.config.ollama.use_params,
+                "num_parallel": session.config.ollama.num_parallel,
+                "max_loaded_models": session.config.ollama.max_loaded_models,
+                "cpu_threads": session.config.ollama.cpu_threads,
+                "flash_attention": session.config.ollama.flash_attention,
+                "keep_alive": session.config.ollama.keep_alive,
+                "host": session.config.ollama.host,
+            }
         }
 
         async for event in test_executor.execute_test_session(

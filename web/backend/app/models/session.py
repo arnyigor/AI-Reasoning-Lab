@@ -85,7 +85,7 @@ class Session(BaseModel):
 
 class CreateSessionRequest(BaseModel):
     test_ids: List[str]
-    model_configuration: Dict[str, Any]
-    test_configuration: Optional[Dict[str, Any]] = None
-    ollama_configuration: Optional[Dict[str, Any]] = None
+    model_configuration: ModelConfiguration
+    test_configuration: Optional[TestConfiguration] = None
+    ollama_configuration: Optional[OllamaConfiguration] = None
     session_name: Optional[str] = None

@@ -1,0 +1,208 @@
+[
+    {
+        "test_id": "t01_simple_logic_1",
+        "model_name": "gemma3:4b",
+        "model_details": {
+            "model_name": "gemma3:4b",
+            "provider": "OllamaClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор сильнее Жанна.\n- Дмитрий сильнее Виктор.\n\nВопрос: Кто из них самый слабый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Жанна\n",
+        "thinking_log": "",
+        "parsed_answer": "Жанна\n",
+        "raw_llm_output": "<think></think>\nЖанна\n",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Дмитрий",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3147.1232840012817,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанна"
+        },
+        "performance_metrics": {
+            "total_duration": 3131765106,
+            "load_duration": 206130773,
+            "prompt_eval_count": 69,
+            "prompt_eval_duration": 2347436503,
+            "eval_count": 5,
+            "eval_duration": 577621869,
+            "model": "gemma3:4b",
+            "total_latency_ms": 3147.1232840012817,
+            "time_to_first_token_ms": 2572.64,
+            "peak_ram_increment_mb": 0.7734375
+        },
+        "system_info": {
+            "os": {
+                "platform": "Darwin",
+                "platform_release": "21.6.0",
+                "platform_version": "Darwin Kernel Version 21.6.0: Wed Apr 24 06:02:02 PDT 2024; root:xnu-8020.240.18.708.4~1/RELEASE_X86_64",
+                "architecture": "x86_64",
+                "hostname": "mac-00039250",
+                "processor": "i386",
+                "python_executable": "/Users/sedoyiyu/Desktop/Projects/StudioProjects/AI-Reasoning-Lab/web/backend/web/backend/venv/bin/python"
+            },
+            "cpu": {
+                "physical_cores": 6,
+                "logical_cores": 12,
+                "processor_name": "i386",
+                "max_frequency_mhz": 3200,
+                "current_frequency_mhz": 3200,
+                "real_architecture": "x86_64",
+                "cpu_brand": "Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz",
+                "cpu_frequency_hz": 3200000000
+            },
+            "memory": {
+                "total_ram_gb": 32.0,
+                "available_ram_gb": 12.9,
+                "used_ram_gb": 16.27,
+                "ram_percentage": 59.7,
+                "total_swap_gb": 4.0,
+                "swap_percentage": 76.3
+            },
+            "gpus": [],
+            "macos_details": {
+                "macos_version": "12.7.5",
+                "build_version": "21H1222",
+                "real_architecture": "x86_64"
+            },
+            "system": {
+                "python_version": "3.13.5",
+                "python_implementation": "CPython",
+                "python_executable": "/Users/sedoyiyu/Desktop/Projects/StudioProjects/AI-Reasoning-Lab/web/backend/web/backend/venv/bin/python",
+                "disk_total_gb": 233.47,
+                "disk_free_gb": 28.77,
+                "disk_used_gb": 14.36
+            },
+            "environment": {
+                "pandas": "2.3.2",
+                "numpy": "2.3.2",
+                "requests": "2.32.5",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "desktop_mac",
+        "benchmark_timestamp": 1756812989.1920588
+    },
+    {
+        "test_id": "t01_simple_logic_2",
+        "model_name": "gemma3:4b",
+        "model_details": {
+            "model_name": "gemma3:4b",
+            "provider": "OllamaClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна старше Алексей.\n- Алексей старше Елена.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "",
+        "llm_response": "Елена\n",
+        "thinking_log": "",
+        "parsed_answer": "Елена\n",
+        "raw_llm_output": "<think></think>\nЕлена\n",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Жанна",
+                "Алексей"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 2743.2298389976495,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Елена"
+        },
+        "performance_metrics": {
+            "total_duration": 2739594350,
+            "load_duration": 218566171,
+            "prompt_eval_count": 71,
+            "prompt_eval_duration": 2052647261,
+            "eval_count": 4,
+            "eval_duration": 467533957,
+            "model": "gemma3:4b",
+            "total_latency_ms": 2743.2298389976495,
+            "time_to_first_token_ms": 2277.35,
+            "peak_ram_increment_mb": -0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Darwin",
+                "platform_release": "21.6.0",
+                "platform_version": "Darwin Kernel Version 21.6.0: Wed Apr 24 06:02:02 PDT 2024; root:xnu-8020.240.18.708.4~1/RELEASE_X86_64",
+                "architecture": "x86_64",
+                "hostname": "mac-00039250",
+                "processor": "i386",
+                "python_executable": "/Users/sedoyiyu/Desktop/Projects/StudioProjects/AI-Reasoning-Lab/web/backend/web/backend/venv/bin/python"
+            },
+            "cpu": {
+                "physical_cores": 6,
+                "logical_cores": 12,
+                "processor_name": "i386",
+                "max_frequency_mhz": 3200,
+                "current_frequency_mhz": 3200,
+                "real_architecture": "x86_64",
+                "cpu_brand": "Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz",
+                "cpu_frequency_hz": 3200000000
+            },
+            "memory": {
+                "total_ram_gb": 32.0,
+                "available_ram_gb": 12.9,
+                "used_ram_gb": 16.27,
+                "ram_percentage": 59.7,
+                "total_swap_gb": 4.0,
+                "swap_percentage": 76.3
+            },
+            "gpus": [],
+            "macos_details": {
+                "macos_version": "12.7.5",
+                "build_version": "21H1222",
+                "real_architecture": "x86_64"
+            },
+            "system": {
+                "python_version": "3.13.5",
+                "python_implementation": "CPython",
+                "python_executable": "/Users/sedoyiyu/Desktop/Projects/StudioProjects/AI-Reasoning-Lab/web/backend/web/backend/venv/bin/python",
+                "disk_total_gb": 233.47,
+                "disk_free_gb": 28.77,
+                "disk_used_gb": 14.36
+            },
+            "environment": {
+                "pandas": "2.3.2",
+                "numpy": "2.3.2",
+                "requests": "2.32.5",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "desktop_mac",
+        "benchmark_timestamp": 1756812989.192068
+    }
+]
