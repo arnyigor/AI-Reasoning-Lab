@@ -2,8 +2,9 @@
 import json
 
 import pandas as pd
-from CoreGenerator import CorePuzzleGenerator
+from CoreGenerator import CoreGenerator
 from EinsteinPuzzle import EinsteinPuzzleDefinition
+from clue_types import Difficulty
 
 
 # --- Функция-загрузчик для чистоты кода ---
@@ -47,8 +48,8 @@ if __name__ == '__main__':
 
     # 1. Задаем желаемые параметры
     desired_theme_name = "Тайна в Школе номер 7"
-    desired_num_items = 4
-    desired_num_categories = 4
+    desired_num_items = 8
+    desired_num_categories = 8
 
     # 2. Проверяем, что наши желания выполнимы
     target_theme = EINSTEIN_THEMES[desired_theme_name]
@@ -70,5 +71,5 @@ if __name__ == '__main__':
         num_items=desired_num_items,
         num_categories=desired_num_categories
     )
-    core_gen_1 = CorePuzzleGenerator(puzzle_definition=puzzle_definition)
+    core_gen_1 = CoreGenerator(puzzle_definition=puzzle_definition, difficulty=Difficulty.EXPERT)
     core_gen_1.generate()

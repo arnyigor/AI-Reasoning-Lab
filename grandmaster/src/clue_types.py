@@ -2,6 +2,16 @@
 
 from enum import Enum, auto
 
+class Difficulty(Enum):
+    """
+    Перечисление уровней сложности для генератора головоломок.
+    """
+    CLASSIC = auto()
+    EASY = auto()
+    MEDIUM = auto()
+    HARD = auto()
+    EXPERT = auto()
+
 class ClueType(Enum):
     """
     Перечисление всех возможных типов подсказок в системе.
