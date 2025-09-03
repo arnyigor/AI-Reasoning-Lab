@@ -460,9 +460,7 @@
 
             // WebSocket подключение
             function connect() {
-                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                const host = window.location.host;
-                const wsUrl = `${protocol}//${host}/ws`;
+                const wsUrl = "ws://localhost:8000/ws";
 
                 console.log(`Подключение к ${wsUrl} (попытка ${reconnectAttempts + 1})`);
                 socket = new WebSocket(wsUrl);
@@ -511,30 +509,44 @@
             }
 
             function addLogMessage(content, type = 'log') {
-                const logEntry = document.createElement('div');
-                logEntry.className = 'log-entry';
+                // Разбиваем контент на строки, если он многострочный
+                const lines = content.split('\n');
 
-                let timestamp = '';
-                if (showTimestamps) {
-                    timestamp = `[${new Date().toLocaleTimeString()}] `;
-                }
+                lines.forEach((line, index) => {
+                    if (line.trim() === '') return; // Пропускаем пустые строки
 
-                logEntry.innerHTML = `${timestamp}${content}`;
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
 
-                // Стилизация в зависимости от типа сообщения
-                switch(type) {
-                    case 'error':
-                        logEntry.classList.add('log-error');
-                        break;
-                    case 'system':
-                        logEntry.classList.add('log-system');
-                        break;
-                    case 'success':
-                        logEntry.classList.add('log-success');
-                        break;
-                }
+                    let timestamp = '';
+                    if (showTimestamps && index === 0) { // Timestamp только для первой строки
+                        timestamp = `[${new Date().toLocaleTimeString()}] `;
+                    }
 
-                logContainer.appendChild(logEntry);
+                    // Экранируем HTML символы для безопасности
+                    const escapedLine = line.replace(/&/g, '&')
+                                          .replace(/</g, '<')
+                                          .replace(/>/g, '>')
+                                          .replace(/"/g, '"')
+                                          .replace(/'/g, '');
+
+                    logEntry.innerHTML = `${timestamp}${escapedLine}`;
+
+                    // Стилизация в зависимости от типа сообщения
+                    switch(type) {
+                        case 'error':
+                            logEntry.classList.add('log-error');
+                            break;
+                        case 'system':
+                            logEntry.classList.add('log-system');
+                            break;
+                        case 'success':
+                            logEntry.classList.add('log-success');
+                            break;
+                    }
+
+                    logContainer.appendChild(logEntry);
+                });
 
                 // Автопрокрутка
                 if (autoScroll) {

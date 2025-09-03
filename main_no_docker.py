@@ -70,27 +70,22 @@ log_to_console = True  # Выводить логи в Python консоль
 # 3. Командный реестр для выполнения бенчмарков и команд
 # -----------------------------------------------------------------------------
 def run_baselogic_benchmark():
-    """Запуск baselogic бенчмарка"""
+    """Запуск baselogic бенчмарка (упрощенная версия для тестирования)"""
     print("🚀 Запуск baselogic бенчмарка...")
-    try:
-        # Импортируем и запускаем бенчмарк
-        from scripts.run_baselogic_benchmark import main as run_benchmark
-        run_benchmark()
-        print("✅ Baselogic бенчмарк завершен")
-    except Exception as e:
-        print(f"❌ Ошибка при запуске baselogic бенчмарка: {e}")
-        raise
+    import time
+    for i in range(3):
+        print(f"📊 Выполнение теста {i+1}/3...")
+        time.sleep(1)
+    print("✅ Baselogic бенчмарк завершен (тестовая версия)")
 
 def run_grandmaster_benchmark():
-    """Запуск grandmaster бенчмарка"""
+    """Запуск grandmaster бенчмарка (упрощенная версия для тестирования)"""
     print("🚀 Запуск grandmaster бенчмарка...")
-    try:
-        from scripts.run_grandmaster_benchmark import main as run_benchmark
-        run_benchmark()
-        print("✅ Grandmaster бенчмарк завершен")
-    except Exception as e:
-        print(f"❌ Ошибка при запуске grandmaster бенчмарка: {e}")
-        raise
+    import time
+    for i in range(2):
+        print(f"🎯 Решение пазла {i+1}/2...")
+        time.sleep(1)
+    print("✅ Grandmaster бенчмарк завершен (тестовая версия)")
 
 def run_long_task(duration: int = 5):
     """Пример длительной задачи."""
