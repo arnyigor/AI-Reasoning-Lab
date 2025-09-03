@@ -13,6 +13,7 @@ from typing import List, Dict, Any, Optional
 import os
 import subprocess
 import json
+import signal
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -67,7 +68,65 @@ manager = ConnectionManager()
 log_to_console = True  # Выводить логи в Python консоль
 
 # -----------------------------------------------------------------------------
-# 3. Командный реестр для выполнения бенчмарков и команд
+# 3. Функции для управления процессами и зависимостями
+# -----------------------------------------------------------------------------
+def check_python_version():
+    """Проверка версии Python"""
+    if sys.version_info < (3, 9):
+        print("❌ Требуется Python 3.9 или выше")
+        print(f"Текущая версия: {sys.version}")
+        return False
+    print(f"✅ Python версия: {sys.version.split()[0]}")
+    return True
+
+def check_dependencies():
+    """Проверка наличия основных зависимостей"""
+    required_modules = ['fastapi', 'uvicorn', 'websockets']
+    missing = []
+
+    for module in required_modules:
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(module)
+
+    if missing:
+        print(f"❌ Отсутствуют модули: {', '.join(missing)}")
+        print("💡 Установите зависимости: pip install -r requirements.txt")
+        return False
+
+    print("✅ Основные зависимости найдены")
+    return True
+
+def kill_existing_server(port=8000):
+    """Завершает существующие процессы, слушающие указанный порт"""
+    try:
+        # Используем lsof для поиска процессов на порту
+        result = subprocess.run(['lsof', '-ti', f':{port}'],
+                              capture_output=True, text=True)
+        if result.returncode == 0 and result.stdout.strip():
+            pids = result.stdout.strip().split('\n')
+            for pid in pids:
+                if pid.strip():
+                    try:
+                        os.kill(int(pid), signal.SIGTERM)
+                        print(f"🛑 Завершен процесс {pid} на порту {port}")
+                        # Ждем немного, чтобы процесс завершился
+                        import time
+                        time.sleep(1)
+                    except ProcessLookupError:
+                        pass  # Процесс уже завершен
+                    except Exception as e:
+                        print(f"⚠️ Ошибка при завершении процесса {pid}: {e}")
+        else:
+            print(f"✅ Порт {port} свободен")
+    except FileNotFoundError:
+        print("⚠️ Команда lsof не найдена, пропускаем проверку порта")
+    except Exception as e:
+        print(f"⚠️ Ошибка при проверке порта {port}: {e}")
+
+# -----------------------------------------------------------------------------
+# 4. Командный реестр для выполнения бенчмарков и команд
 # -----------------------------------------------------------------------------
 def run_baselogic_benchmark():
     """Запуск baselogic бенчмарка (упрощенная версия для тестирования)"""
@@ -549,6 +608,13 @@ def get_fallback_html():
                     Очистить консоль
                 </button>
             </div>
+
+            <h2 class="text-xl font-semibold mb-4 mt-6">Управление сервером</h2>
+            <div class="space-y-2">
+                <button id="shutdown-server" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded">
+                    🛑 Остановить сервер
+                </button>
+            </div>
         </aside>
 
         <section class="flex-1 bg-black rounded-lg flex flex-col">
@@ -637,6 +703,22 @@ def get_fallback_html():
             addLogMessage('[SYSTEM] Консоль очищена', 'system');
         });
 
+        document.getElementById('shutdown-server').addEventListener('click', () => {
+            if (confirm('Вы действительно хотите остановить сервер?')) {
+                fetch('/api/shutdown', { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        addLogMessage('[SYSTEM] Сервер останавливается...', 'system');
+                        setTimeout(() => {
+                            addLogMessage('[SYSTEM] Сервер остановлен', 'error');
+                        }, 2000);
+                    })
+                    .catch(error => {
+                        addLogMessage('[ERROR] Ошибка при остановке сервера: ' + error, 'error');
+                    });
+            }
+        });
+
         // Подключение при загрузке
         connect();
     </script>
@@ -645,14 +727,28 @@ def get_fallback_html():
     """
 
 # -----------------------------------------------------------------------------
-# 11. Запуск сервера
+# 12. Запуск сервера
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     print("🚀 Запуск AI-Reasoning-Lab Web Interface (No Docker)")
-    print("📋 Доступные команды:")
+    print("=" * 60)
+
+    # Проверка версии Python
+    if not check_python_version():
+        sys.exit(1)
+
+    # Проверка зависимостей
+    if not check_dependencies():
+        sys.exit(1)
+
+    # Автозавершение старых процессов
+    kill_existing_server(8000)
+
+    print("\n📋 Доступные команды:")
     for cmd, desc in {
         "run_baselogic": "Запуск baselogic бенчмарка",
         "run_grandmaster": "Запуск grandmaster бенчмарка",
+        "run_tests": "Запуск тестов с параметрами",
         "long_task": "Пример длительной задачи",
         "error_task": "Тестовая команда с ошибкой",
         "echo": "Повторение сообщения",
@@ -662,5 +758,12 @@ if __name__ == "__main__":
 
     print("\n🌐 Откройте браузер и перейдите по адресу: http://localhost:8000")
     print("📊 API endpoints доступны по адресу: http://localhost:8000/docs")
+    print("🛑 Для остановки сервера используйте кнопку 'Shutdown' в веб-интерфейсе")
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    try:
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+    except KeyboardInterrupt:
+        print("\n🛑 Сервер остановлен пользователем")
+    except Exception as e:
+        print(f"\n❌ Ошибка запуска сервера: {e}")
+        sys.exit(1)
