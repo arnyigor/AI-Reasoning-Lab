@@ -1,0 +1,33 @@
+# AI-Reasoning-Lab Web Interface (No Docker) - Requirements
+# Основные веб-фреймворки
+fastapi==0.104.0
+uvicorn[standard]==0.24.0
+
+# WebSocket поддержка
+websockets==12.0
+
+# CORS middleware
+python-multipart==0.0.6
+
+# Асинхронная работа с файлами
+aiofiles==23.2.1
+
+# Логирование и утилиты
+pydantic==2.4.0
+pydantic-settings==2.0.0
+
+# Для работы с JSON
+orjson==3.9.0
+
+# Опционально: для работы с YAML конфигами (если нужно)
+PyYAML==6.0
+
+# Для работы с baselogic и grandmaster модулями
+# Эти зависимости могут потребоваться для запуска бенчмарков
+# Добавьте их по необходимости:
+# numpy
+# pandas
+# matplotlib
+# torch
+# transformers
+# и другие зависимости из baselogic и grandmaster

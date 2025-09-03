@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Reasoning-Lab Web Interface</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .log-container {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 2px 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .log-error {
+            color: #ff6b6b;
+        }
+
+        .log-system {
+            color: #74b9ff;
+        }
+
+        .log-success {
+            color: #a8e6cf;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        .status-connected {
+            background-color: #51cf66;
+        }
+
+        .status-disconnected {
+            background-color: #ff6b6b;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .test-item {
+            transition: all 0.2s ease;
+        }
+
+        .test-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Левая панель с выбором тестов и параметрами -->
+            <div class="col-md-4 col-lg-3 px-0">
+                <div class="sidebar p-3">
+                    <h4 class="text-white mb-4">
+                        <i class="bi bi-robot"></i> AI-Reasoning-Lab
+                    </h4>
+
+                    <!-- Навигация -->
+                    <nav class="nav flex-column mb-4">
+                        <a class="nav-link active" href="#tests" data-bs-toggle="tab">
+                            <i class="bi bi-list-check"></i> Тесты
+                        </a>
+                        <a class="nav-link" href="#model" data-bs-toggle="tab">
+                            <i class="bi bi-cpu"></i> Модель
+                        </a>
+                        <a class="nav-link" href="#commands" data-bs-toggle="tab">
+                            <i class="bi bi-terminal"></i> Команды
+                        </a>
+                        <a class="nav-link" href="#settings" data-bs-toggle="tab">
+                            <i class="bi bi-gear"></i> Настройки
+                        </a>
+                    </nav>
+
+                    <!-- Вкладки с содержимым -->
+                    <div class="tab-content">
+                        <!-- Вкладка Тесты -->
+                        <div class="tab-pane fade show active" id="tests">
+                            <div class="mb-3">
+                                <label class="form-label text-white">Выберите тесты:</label>
+                                <div id="tests-container" class="mb-3">
+                                    <!-- Тесты будут загружены динамически -->
+                                </div>
+                                <div class="text-white-50 small">
+                                    Выбрано: <span id="selected-count">0</span> тестов
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Вкладка Модель -->
+                        <div class="tab-pane fade" id="model">
+                            <div class="mb-3">
+                                <label for="model-name" class="form-label text-white">Имя модели:</label>
+                                <input type="text" class="form-control" id="model-name" placeholder="Введите имя модели">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="provider" class="form-label text-white">Провайдер:</label>
+                                <select class="form-select" id="provider">
+                                    <option value="">Выберите провайдер</option>
+                                    <option value="ollama">Ollama</option>
+                                    <option value="jan">Jan</option>
+                                    <option value="lmstudio">LM Studio</option>
+                                    <option value="openai_compatible">OpenAI Compatible</option>
+                                    <option value="gemini">Gemini</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="api-base" class="form-label text-white">API Base URL:</label>
+                                <input type="text" class="form-control" id="api-base" placeholder="API Base URL">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="api-key" class="form-label text-white">API Key:</label>
+                                <input type="password" class="form-control" id="api-key" placeholder="API Key (опционально)">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="temperature" class="form-label text-white">Temperature:</label>
+                                <input type="number" class="form-control" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="max-tokens" class="form-label text-white">Max Tokens:</label>
+                                <input type="number" class="form-control" id="max-tokens" min="1" max="10000" value="1000">
+                            </div>
+                        </div>
+
+                        <!-- Вкладка Команды -->
+                        <div class="tab-pane fade" id="commands">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" id="run-baselogic-btn">
+                                    <i class="bi bi-play-circle"></i> Baselogic Benchmark
+                                </button>
+                                <button class="btn btn-primary" id="run-grandmaster-btn">
+                                    <i class="bi bi-play-circle"></i> Grandmaster Benchmark
+                                </button>
+                                <button class="btn btn-info" id="long-task-btn">
+                                    <i class="bi bi-clock"></i> Длительная задача
+                                </button>
+                                <button class="btn btn-warning" id="list-models-btn">
+                                    <i class="bi bi-list"></i> Список моделей
+                                </button>
+                                <button class="btn btn-secondary" id="echo-btn">
+                                    <i class="bi bi-chat-dots"></i> Echo тест
+                                </button>
+                            </div>
+
+                            <div class="mt-3">
+                                <label for="echo-input" class="form-label text-white">Echo сообщение:</label>
+                                <input type="text" class="form-control" id="echo-input" placeholder="Введите текст...">
+                            </div>
+                        </div>
+
+                        <!-- Вкладка Настройки -->
+                        <div class="tab-pane fade" id="settings">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="auto-scroll">
+                                <label class="form-check-label text-white" for="auto-scroll">
+                                    Автопрокрутка логов
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="show-timestamps" checked>
+                                <label class="form-check-label text-white" for="show-timestamps">
+                                    Показывать время
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="log-to-console" checked>
+                                <label class="form-check-label text-white" for="log-to-console">
+                                    Выводить логи в Python консоль
+                                </label>
+                                <div class="form-text text-white-50">
+                                    Логи будут дублироваться в консоль сервера
+                                </div>
+                            </div>
+
+                            <button class="btn btn-danger w-100" id="shutdown-btn">
+                                <i class="bi bi-power"></i> Остановить сервер
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основная область -->
+            <div class="col-md-8 col-lg-9 px-3 py-3">
+                <!-- Заголовок -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="bi bi-display"></i> Консоль выполнения</h2>
+                    <div class="d-flex align-items-center">
+                        <span class="status-indicator status-disconnected me-2" id="status-dot"></span>
+                        <span id="status-text">Отключено</span>
+                    </div>
+                </div>
+
+                <!-- Панель управления -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-primary me-2" id="start-tests-btn" disabled>
+                                    <i class="bi bi-play-fill"></i> Запустить тестирование
+                                </button>
+                                <button class="btn btn-secondary" id="clear-log-btn">
+                                    <i class="bi bi-trash"></i> Очистить логи
+                                </button>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small class="text-muted">
+                                    WebSocket: <span id="connection-info">отключен</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Прогресс бар -->
+                <div class="card mb-4" id="progress-card" style="display: none;">
+                    <div class="card-body">
+                        <h6 class="card-title">Прогресс выполнения</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted" id="progress-text">Подготовка...</small>
+                    </div>
+                </div>
+
+                <!-- Консоль -->
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-terminal"></i> Вывод выполнения</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="log-container" class="log-container p-3">
+                            <div class="log-entry log-system">
+                                [SYSTEM] Добро пожаловать в AI-Reasoning-Lab Web Interface!
+                            </div>
+                            <div class="log-entry text-muted">
+                                [SYSTEM] Выберите тесты и настройте параметры модели для начала тестирования.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Элементы интерфейса
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            const connectionInfo = document.getElementById('connection-info');
+            const logContainer = document.getElementById('log-container');
+            const testsContainer = document.getElementById('tests-container');
+            const selectedCount = document.getElementById('selected-count');
+            const startTestsBtn = document.getElementById('start-tests-btn');
+            const progressCard = document.getElementById('progress-card');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            // Переменные состояния
+            let socket;
+            let reconnectAttempts = 0;
+            const maxReconnectAttempts = 5;
+            let availableTests = [];
+            let selectedTests = [];
+            let autoScroll = true;
+            let showTimestamps = true;
+
+            // Загрузка данных при инициализации
+            loadTests();
+            loadSettings();
+            loadServerSettings();
+
+            // WebSocket подключение
+            function connect() {
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const host = window.location.host;
+                const wsUrl = `${protocol}//${host}/ws`;
+
+                console.log(`Подключение к ${wsUrl} (попытка ${reconnectAttempts + 1})`);
+                socket = new WebSocket(wsUrl);
+
+                socket.onopen = () => {
+                    console.log('WebSocket connected');
+                    updateConnectionStatus(true);
+                    reconnectAttempts = 0;
+                    addLogMessage('Соединение с сервером установлено', 'system');
+                };
+
+                socket.onclose = () => {
+                    console.log('WebSocket disconnected');
+                    updateConnectionStatus(false);
+                    addLogMessage('Соединение потеряно', 'error');
+
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        setTimeout(connect, 3000);
+                    } else {
+                        addLogMessage('Превышено максимальное количество попыток переподключения', 'error');
+                    }
+                };
+
+                socket.onmessage = (event) => {
+                    const message = JSON.parse(event.data);
+                    addLogMessage(message.content, message.type);
+                };
+
+                socket.onerror = (error) => {
+                    console.error('WebSocket Error:', error);
+                    addLogMessage('Ошибка WebSocket. Убедитесь, что Python сервер запущен', 'error');
+                };
+            }
+
+            function updateConnectionStatus(connected) {
+                if (connected) {
+                    statusDot.className = 'status-indicator status-connected me-2';
+                    statusText.textContent = 'Подключено';
+                    connectionInfo.textContent = 'подключен';
+                } else {
+                    statusDot.className = 'status-indicator status-disconnected me-2';
+                    statusText.textContent = 'Отключено';
+                    connectionInfo.textContent = 'отключен';
+                }
+            }
+
+            function addLogMessage(content, type = 'log') {
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+
+                let timestamp = '';
+                if (showTimestamps) {
+                    timestamp = `[${new Date().toLocaleTimeString()}] `;
+                }
+
+                logEntry.innerHTML = `${timestamp}${content}`;
+
+                // Стилизация в зависимости от типа сообщения
+                switch(type) {
+                    case 'error':
+                        logEntry.classList.add('log-error');
+                        break;
+                    case 'system':
+                        logEntry.classList.add('log-system');
+                        break;
+                    case 'success':
+                        logEntry.classList.add('log-success');
+                        break;
+                }
+
+                logContainer.appendChild(logEntry);
+
+                // Автопрокрутка
+                if (autoScroll) {
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                }
+            }
+
+            function sendCommand(command, params = {}) {
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ command, params }));
+                    addLogMessage(`Отправлена команда: ${command}`, 'system');
+                } else {
+                    addLogMessage('Невозможно отправить команду. WebSocket не подключен', 'error');
+                }
+            }
+
+            // Загрузка тестов
+            async function loadTests() {
+                try {
+                    const response = await fetch('/api/tests');
+                    const data = await response.json();
+
+                    if (data.tests) {
+                        availableTests = data.tests;
+                        renderTests();
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки тестов:', error);
+                    addLogMessage('Ошибка загрузки списка тестов', 'error');
+                }
+            }
+
+            // Отрисовка тестов
+            function renderTests() {
+                testsContainer.innerHTML = '';
+
+                // Группировка по категориям
+                const testsByCategory = availableTests.reduce((acc, test) => {
+                    if (!acc[test.category]) {
+                        acc[test.category] = [];
+                    }
+                    acc[test.category].push(test);
+                    return acc;
+                }, {});
+
+                Object.entries(testsByCategory).forEach(([category, tests]) => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-3';
+
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'd-flex align-items-center mb-2';
+                    categoryHeader.innerHTML = `
+                        <input type="checkbox" class="form-check-input me-2 category-checkbox"
+                               data-category="${category}">
+                        <strong class="text-white">${category}</strong>
+                        <small class="text-white-50 ms-2">(${tests.length})</small>
+                    `;
+
+                    const testsList = document.createElement('div');
+                    testsList.className = 'ms-3';
+
+                    tests.forEach(test => {
+                        const testDiv = document.createElement('div');
+                        testDiv.className = 'test-item p-2';
+                        testDiv.innerHTML = `
+                            <div class="d-flex align-items-center">
+                                <input type="checkbox" class="form-check-input me-2 test-checkbox"
+                                       data-test-id="${test.id}" value="${test.id}">
+                                <div>
+                                    <div class="text-white">${test.name}</div>
+                                    <small class="text-white-50">${test.difficulty}</small>
+                                </div>
+                            </div>
+                        `;
+                        testsList.appendChild(testDiv);
+                    });
+
+                    categoryDiv.appendChild(categoryHeader);
+                    categoryDiv.appendChild(testsList);
+                    testsContainer.appendChild(categoryDiv);
+                });
+
+                // Навешиваем обработчики
+                setupTestHandlers();
+            }
+
+            function setupTestHandlers() {
+                // Обработчики для категорий
+                document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const category = e.target.dataset.category;
+                        const checked = e.target.checked;
+
+                        // Выбираем/снимаем все тесты в категории
+                        document.querySelectorAll(`.test-checkbox[data-category="${category}"]`).forEach(testCheckbox => {
+                            testCheckbox.checked = checked;
+                            updateTestSelection(testCheckbox.dataset.testId, checked);
+                        });
+
+                        updateSelectedCount();
+                    });
+                });
+
+                // Обработчики для отдельных тестов
+                document.querySelectorAll('.test-checkbox').forEach(checkbox => {
+                    checkbox.addEventListener('change', (e) => {
+                        const testId = e.target.dataset.testId;
+                        const checked = e.target.checked;
+                        updateTestSelection(testId, checked);
+                        updateSelectedCount();
+                    });
+                });
+            }
+
+            function updateTestSelection(testId, selected) {
+                if (selected && !selectedTests.includes(testId)) {
+                    selectedTests.push(testId);
+                } else if (!selected && selectedTests.includes(testId)) {
+                    selectedTests = selectedTests.filter(id => id !== testId);
+                }
+
+                // Обновляем состояние кнопки запуска
+                startTestsBtn.disabled = selectedTests.length === 0;
+            }
+
+            function updateSelectedCount() {
+                selectedCount.textContent = selectedTests.length;
+            }
+
+            // Загрузка настроек
+            function loadSettings() {
+                autoScroll = localStorage.getItem('autoScroll') !== 'false';
+                showTimestamps = localStorage.getItem('showTimestamps') !== 'false';
+
+                document.getElementById('auto-scroll').checked = autoScroll;
+                document.getElementById('show-timestamps').checked = showTimestamps;
+            }
+
+            // Загрузка настроек сервера
+            async function loadServerSettings() {
+                try {
+                    const response = await fetch('/api/settings');
+                    const data = await response.json();
+                    document.getElementById('log-to-console').checked = data.log_to_console;
+                } catch (error) {
+                    console.error('Ошибка загрузки настроек сервера:', error);
+                }
+            }
+
+            // Сохранение настроек
+            function saveSettings() {
+                localStorage.setItem('autoScroll', autoScroll.toString());
+                localStorage.setItem('showTimestamps', showTimestamps.toString());
+            }
+
+            // Обработчики событий
+            document.getElementById('start-tests-btn').addEventListener('click', () => {
+                if (selectedTests.length === 0) {
+                    alert('Выберите хотя бы один тест');
+                    return;
+                }
+
+                // Собираем параметры модели
+                const modelConfig = {
+                    model_name: document.getElementById('model-name').value,
+                    provider: document.getElementById('provider').value,
+                    api_base: document.getElementById('api-base').value,
+                    api_key: document.getElementById('api-key').value,
+                    temperature: parseFloat(document.getElementById('temperature').value),
+                    max_tokens: parseInt(document.getElementById('max-tokens').value)
+                };
+
+                // Показываем прогресс
+                progressCard.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = 'Запуск тестирования...';
+
+                // Отправляем команду запуска тестирования
+                sendCommand('run_tests', {
+                    test_ids: selectedTests,
+                    model_config: modelConfig
+                });
+            });
+
+            document.getElementById('run-baselogic-btn').addEventListener('click', () => {
+                if (confirm('Запустить baselogic бенчмарк? Это может занять некоторое время.')) {
+                    sendCommand('run_baselogic');
+                }
+            });
+
+            document.getElementById('run-grandmaster-btn').addEventListener('click', () => {
+                if (confirm('Запустить grandmaster бенчмарк? Это может занять некоторое время.')) {
+                    sendCommand('run_grandmaster');
+                }
+            });
+
+            document.getElementById('long-task-btn').addEventListener('click', () => {
+                sendCommand('long_task', { duration: 3 });
+            });
+
+            document.getElementById('list-models-btn').addEventListener('click', () => {
+                sendCommand('list_models');
+            });
+
+            document.getElementById('echo-btn').addEventListener('click', () => {
+                const message = document.getElementById('echo-input').value.trim();
+                if (message) {
+                    sendCommand('echo', { message: message, repeat: 2 });
+                    document.getElementById('echo-input').value = '';
+                } else {
+                    addLogMessage('Введите сообщение для команды Echo', 'system');
+                }
+            });
+
+            document.getElementById('clear-log-btn').addEventListener('click', () => {
+                logContainer.innerHTML = '';
+                addLogMessage('Консоль очищена', 'system');
+            });
+
+            document.getElementById('shutdown-btn').addEventListener('click', async () => {
+                if (confirm('Вы уверены, что хотите остановить сервер?')) {
+                    try {
+                        await fetch('/api/shutdown', { method: 'POST' });
+                        addLogMessage('Отправлен запрос на остановку сервера', 'system');
+                    } catch (error) {
+                        addLogMessage('Ошибка при отправке запроса на остановку', 'error');
+                    }
+                }
+            });
+
+            // Настройки
+            document.getElementById('auto-scroll').addEventListener('change', (e) => {
+                autoScroll = e.target.checked;
+                saveSettings();
+            });
+
+            document.getElementById('show-timestamps').addEventListener('change', (e) => {
+                showTimestamps = e.target.checked;
+                saveSettings();
+            });
+
+            document.getElementById('log-to-console').addEventListener('change', async (e) => {
+                const enabled = e.target.checked;
+                try {
+                    const response = await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ log_to_console: enabled })
+                    });
+                    const result = await response.json();
+                    addLogMessage(`Настройка логирования в консоль: ${enabled ? 'включена' : 'отключена'}`, 'system');
+                } catch (error) {
+                    console.error('Ошибка обновления настроек:', error);
+                    addLogMessage('Ошибка обновления настроек сервера', 'error');
+                    // Возвращаем чекбокс в предыдущее состояние
+                    e.target.checked = !enabled;
+                }
+            });
+
+            // Автоподстановка URL при выборе провайдера
+            document.getElementById('provider').addEventListener('change', (e) => {
+                const provider = e.target.value;
+                const providerUrls = {
+                    ollama: 'http://localhost:11434',
+                    jan: 'http://127.0.0.1:1337/v1',
+                    lmstudio: 'http://127.0.0.1:1234/v1',
+                    openai_compatible: 'http://localhost:8000/v1',
+                    gemini: ''
+                };
+
+                if (providerUrls[provider]) {
+                    document.getElementById('api-base').value = providerUrls[provider];
+                }
+            });
+
+            // Начинаем соединение при загрузке страницы
+            connect();
+
+            // Показываем информацию о доступных командах
+            setTimeout(() => {
+                addLogMessage('Интерфейс готов к работе. Выберите тесты и настройте параметры модели.', 'system');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
