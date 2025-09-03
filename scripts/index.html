@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Web Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Дополнительные стили для улучшения вида */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #log-container pre {
+            white-space: pre-wrap; /* Перенос строк в логах */
+            word-break: break-all; /* Перенос длинных строк без пробелов */
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+        .status-dot {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        .status-connected {
+            background-color: #34D399; /* green-400 */
+        }
+        .status-disconnected {
+            background-color: #F87171; /* red-400 */
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+    <link rel="preconnect" href="https://rsms.me/">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css">
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col h-screen antialiased">
+
+<!-- Заголовок -->
+<header class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-4 shadow-lg sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-white tracking-tight">Python Web Console</h1>
+        <div class="flex items-center space-x-2">
+            <span id="status-dot" class="status-dot status-disconnected"></span>
+            <span id="status-text" class="font-medium text-gray-400">Отключено</span>
+        </div>
+    </div>
+</header>
+
+<!-- Основное содержимое -->
+<main class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 gap-4 overflow-hidden">
+
+    <!-- Панель управления -->
+    <aside class="md:w-1/3 lg:w-1/4 bg-gray-800 rounded-lg shadow-xl p-6 flex flex-col space-y-6">
+        <h2 class="text-xl font-semibold border-b border-gray-600 pb-3">Панель управления</h2>
+
+        <!-- Команда Echo -->
+        <div class="space-y-3">
+            <label for="echo-input" class="font-medium">Команда "Echo"</label>
+            <input type="text" id="echo-input" placeholder="Введите текст..." class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
+            <button id="echo-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 transform hover:scale-105">
+                Отправить Echo
+            </button>
+        </div>
+
+        <!-- Другие команды -->
+        <div class="space-y-3">
+            <label class="font-medium">Задачи</label>
+            <button id="long-task-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 transform hover:scale-105">
+                Запустить долгую задачу (5с)
+            </button>
+            <button id="error-task-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 transform hover:scale-105">
+                Вызвать ошибку
+            </button>
+        </div>
+        <div class="flex-grow"></div>
+        <button id="clear-log-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+            Очистить консоль
+        </button>
+    </aside>
+
+    <!-- Окно консоли -->
+    <section id="log-container-wrapper" class="flex-1 bg-black rounded-lg shadow-xl flex flex-col overflow-hidden font-mono">
+        <div class="bg-gray-800 px-4 py-2 border-b border-gray-700 text-sm font-semibold">
+            Консольный вывод
+        </div>
+        <div id="log-container" class="flex-1 p-4 overflow-y-auto">
+            <!-- Сообщения будут появляться здесь -->
+        </div>
+    </section>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const logContainer = document.getElementById('log-container');
+
+        const echoInput = document.getElementById('echo-input');
+        const echoBtn = document.getElementById('echo-btn');
+        const longTaskBtn = document.getElementById('long-task-btn');
+        const errorTaskBtn = document.getElementById('error-task-btn');
+        const clearLogBtn = document.getElementById('clear-log-btn');
+
+        let socket;
+
+        function connect() {
+            // FIX: Возвращено к динамической генерации URL.
+            // Основная причина ошибки подключения была в политике безопасности браузера
+            // (mixed-content), блокирующей небезопасный WebSocket (ws://) с безопасной страницы (https://).
+            // Решение — отдавать HTML с самого Python-бэкенда, чтобы страница и WebSocket
+            // имели один и тот же источник (http://localhost:8000), что решает проблему.
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host; // например, "localhost:8000"
+            const wsUrl = `${protocol}//${host}/ws`;
+
+            console.log(`Попытка подключения к ${wsUrl}`);
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = () => {
+                console.log('WebSocket connected');
+                statusDot.classList.remove('status-disconnected');
+                statusDot.classList.add('status-connected');
+                statusText.textContent = 'Подключено';
+                addLogMessage('[SYSTEM] Соединение с сервером установлено.', 'system');
+            };
+
+            socket.onclose = (event) => {
+                console.log('WebSocket disconnected. Reconnecting...', event);
+                statusDot.classList.remove('status-connected');
+                statusDot.classList.add('status-disconnected');
+                statusText.textContent = 'Переподключение...';
+                addLogMessage('[SYSTEM] Соединение потеряно. Попытка переподключения через 3 секунды...', 'error');
+                setTimeout(connect, 3000); // Попытка переподключения через 3 сек
+            };
+
+            socket.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                addLogMessage(message.content, message.type);
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket Error:', error);
+                addLogMessage('[SYSTEM] Ошибка WebSocket. Убедитесь, что Python сервер запущен. Смотрите консоль браузера для деталей.', 'error');
+            };
+        }
+
+        function addLogMessage(content, type = 'log') {
+            const pre = document.createElement('pre');
+            pre.textContent = content;
+
+            // Стилизация в зависимости от типа сообщения
+            switch(type) {
+                case 'error':
+                    pre.className = 'text-red-400';
+                    break;
+                case 'system':
+                    pre.className = 'text-yellow-400';
+                    break;
+                case 'log':
+                default:
+                    pre.className = 'text-gray-300';
+                    break;
+            }
+
+            logContainer.appendChild(pre);
+
+            // Автоматическая прокрутка вниз
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function sendCommand(command, params = {}) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ command, params }));
+            } else {
+                addLogMessage('[SYSTEM] Невозможно отправить команду. WebSocket не подключен.', 'error');
+            }
+        }
+
+        // Навешиваем события на кнопки
+        echoBtn.addEventListener('click', () => {
+            const message = echoInput.value;
+            if (message) {
+                sendCommand('echo', { message: message, repeat: 2 });
+                echoInput.value = '';
+            } else {
+                addLogMessage('[SYSTEM] Введите сообщение для команды Echo.', 'system');
+            }
+        });
+
+        longTaskBtn.addEventListener('click', () => {
+            sendCommand('long_task', { duration: 5 });
+        });
+
+        errorTaskBtn.addEventListener('click', () => {
+            sendCommand('error_task');
+        });
+
+        clearLogBtn.addEventListener('click', () => {
+            logContainer.innerHTML = '';
+             addLogMessage('[SYSTEM] Консоль очищена.', 'system');
+        });
+
+        // Начинаем соединение при загрузке страницы
+        connect();
+    });
+</script>
+</body>
+</html>
+
