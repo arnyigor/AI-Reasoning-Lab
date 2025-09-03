@@ -146,6 +146,9 @@
                         <a class="nav-link" href="#model" data-bs-toggle="tab">
                             <i class="bi bi-cpu"></i> Модель
                         </a>
+                        <a class="nav-link" href="#params" data-bs-toggle="tab">
+                            <i class="bi bi-sliders"></i> Параметры
+                        </a>
                         <a class="nav-link" href="#commands" data-bs-toggle="tab">
                             <i class="bi bi-terminal"></i> Команды
                         </a>
@@ -206,6 +209,98 @@
                             <div class="mb-3">
                                 <label for="max-tokens" class="form-label text-white">Max Tokens:</label>
                                 <input type="number" class="form-control" id="max-tokens" min="1" max="10000" value="1000">
+                            </div>
+                        </div>
+
+                        <!-- Вкладка Параметры -->
+                        <div class="tab-pane fade" id="params">
+                            <div class="mb-3">
+                                <label for="runs-per-test" class="form-label text-white">Количество повторений теста:</label>
+                                <input type="number" class="form-control" id="runs-per-test" min="1" max="10" value="2">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="show-payload">
+                                    <label class="form-check-label text-white" for="show-payload">
+                                        Показывать payload запросов
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="raw-save">
+                                    <label class="form-check-label text-white" for="raw-save">
+                                        Сохранять сырые результаты
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="query-timeout" class="form-label text-white">Таймаут запроса (сек):</label>
+                                <input type="number" class="form-control" id="query-timeout" min="30" max="3600" value="600">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="stream" checked>
+                                    <label class="form-check-label text-white" for="stream">
+                                        Потоковый режим
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="think" checked>
+                                    <label class="form-check-label text-white" for="think">
+                                        Режим chain-of-thought
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="system-prompt" class="form-label text-white">System Prompt:</label>
+                                <textarea class="form-control" id="system-prompt" rows="3" placeholder="Системный промпт..."></textarea>
+                            </div>
+
+                            <hr class="text-white">
+
+                            <h6 class="text-white mb-3">Дополнительные параметры генерации</h6>
+
+                            <div class="mb-3">
+                                <label for="num-ctx" class="form-label text-white">Размер контекста:</label>
+                                <input type="number" class="form-control" id="num-ctx" min="512" max="32768" value="4096">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="repeat-penalty" class="form-label text-white">Repeat Penalty:</label>
+                                <input type="number" class="form-control" id="repeat-penalty" min="1" max="2" step="0.1" value="1.1">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="num-gpu" class="form-label text-white">Количество GPU:</label>
+                                <input type="number" class="form-control" id="num-gpu" min="0" max="8" value="1">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="num-thread" class="form-label text-white">CPU Threads:</label>
+                                <input type="number" class="form-control" id="num-thread" min="1" max="32" value="6">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="num-parallel" class="form-label text-white">Параллельные запросы:</label>
+                                <input type="number" class="form-control" id="num-parallel" min="1" max="10" value="1">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="low-vram">
+                                    <label class="form-check-label text-white" for="low-vram">
+                                        Low VRAM режим
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -609,7 +704,25 @@
                     api_base: document.getElementById('api-base').value,
                     api_key: document.getElementById('api-key').value,
                     temperature: parseFloat(document.getElementById('temperature').value),
-                    max_tokens: parseInt(document.getElementById('max-tokens').value)
+                    max_tokens: parseInt(document.getElementById('max-tokens').value),
+                    // Дополнительные параметры из вкладки "Параметры"
+                    num_ctx: parseInt(document.getElementById('num-ctx').value),
+                    repeat_penalty: parseFloat(document.getElementById('repeat-penalty').value),
+                    num_gpu: parseInt(document.getElementById('num-gpu').value),
+                    num_thread: parseInt(document.getElementById('num-thread').value),
+                    num_parallel: parseInt(document.getElementById('num-parallel').value),
+                    low_vram: document.getElementById('low-vram').checked,
+                    query_timeout: parseInt(document.getElementById('query-timeout').value),
+                    stream: document.getElementById('stream').checked,
+                    think: document.getElementById('think').checked,
+                    system_prompt: document.getElementById('system-prompt').value
+                };
+
+                // Собираем параметры тестирования
+                const testConfig = {
+                    runs_per_test: parseInt(document.getElementById('runs-per-test').value),
+                    show_payload: document.getElementById('show-payload').checked,
+                    raw_save: document.getElementById('raw-save').checked
                 };
 
                 // Показываем прогресс
@@ -620,7 +733,8 @@
                 // Отправляем команду запуска тестирования
                 sendCommand('run_tests', {
                     test_ids: selectedTests,
-                    model_config: modelConfig
+                    model_config: modelConfig,
+                    test_config: testConfig
                 });
             });
 

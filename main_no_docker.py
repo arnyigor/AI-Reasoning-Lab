@@ -140,10 +140,90 @@ def list_available_models():
 
     return "Список моделей получен"
 
+def run_tests(test_ids=None, model_config=None, test_config=None):
+    """Запуск тестов с выбранными параметрами"""
+    print("🚀 Запуск тестов с пользовательскими параметрами...")
+
+    if not test_ids:
+        print("❌ Не указаны тесты для запуска")
+        return "Ошибка: не указаны тесты"
+
+    if not model_config:
+        print("❌ Не указана конфигурация модели")
+        return "Ошибка: не указана конфигурация модели"
+
+    print(f"📋 Выбранные тесты: {', '.join(test_ids)}")
+    print(f"🤖 Модель: {model_config.get('model_name', 'не указана')}")
+    print(f"🔧 Провайдер: {model_config.get('provider', 'не указан')}")
+
+    # Устанавливаем переменные окружения для baselogic бенчмарка
+    test_names = []
+    for test_id in test_ids:
+        if test_id.startswith('t') and test_id.endswith('.py'):
+            test_names.append(test_id)
+        else:
+            # Преобразуем ID в имя файла
+            test_names.append(f"{test_id}.py")
+
+    # Устанавливаем переменные окружения - передаем как JSON массив
+    test_base_names = [name.replace('.py', '') for name in test_names]
+    os.environ['BC_TESTS_TO_RUN'] = json.dumps(test_base_names)
+
+    print(f"🔍 Поиск тестов: {test_base_names}")
+    print(f"📁 Папка поиска: baselogic/tests/")
+    os.environ['BC_MODELS_0_NAME'] = model_config.get('model_name', '')
+    os.environ['BC_MODELS_0_CLIENT_TYPE'] = model_config.get('provider', 'ollama')
+    os.environ['BC_MODELS_0_API_BASE'] = model_config.get('api_base', 'http://localhost:11434/v1')
+    os.environ['BC_MODELS_0_API_KEY'] = model_config.get('api_key', '')
+
+    # Параметры генерации
+    os.environ['BC_MODELS_0_GENERATION_TEMPERATURE'] = str(model_config.get('temperature', 0.7))
+    os.environ['BC_MODELS_0_GENERATION_MAX_TOKENS'] = str(model_config.get('max_tokens', 1000))
+    os.environ['BC_MODELS_0_GENERATION_TOP_P'] = str(model_config.get('top_p', 0.9))
+    os.environ['BC_MODELS_0_GENERATION_NUM_CTX'] = str(model_config.get('num_ctx', 4096))
+    os.environ['BC_MODELS_0_GENERATION_REPEAT_PENALTY'] = str(model_config.get('repeat_penalty', 1.1))
+    os.environ['BC_MODELS_0_GENERATION_NUM_GPU'] = str(model_config.get('num_gpu', 1))
+    os.environ['BC_MODELS_0_GENERATION_NUM_THREAD'] = str(model_config.get('num_thread', 6))
+    os.environ['BC_MODELS_0_GENERATION_NUM_PARALLEL'] = str(model_config.get('num_parallel', 1))
+    os.environ['BC_MODELS_0_GENERATION_LOW_VRAM'] = str(model_config.get('low_vram', False)).lower()
+
+    # Дополнительные параметры
+    if 'query_timeout' in model_config:
+        os.environ['BC_MODELS_0_OPTIONS_QUERY_TIMEOUT'] = str(model_config['query_timeout'])
+    if 'stream' in model_config:
+        os.environ['BC_MODELS_0_INFERENCE_STREAM'] = str(model_config['stream']).lower()
+    if 'think' in model_config:
+        os.environ['BC_MODELS_0_INFERENCE_THINK'] = str(model_config['think']).lower()
+    if 'system_prompt' in model_config:
+        os.environ['BC_MODELS_0_PROMPTING_SYSTEM_PROMPT'] = model_config['system_prompt']
+
+    # Параметры тестирования
+    if test_config:
+        if 'runs_per_test' in test_config:
+            os.environ['BC_RUNS_PER_TEST'] = str(test_config['runs_per_test'])
+        if 'show_payload' in test_config:
+            os.environ['BC_SHOW_PAYLOAD'] = str(test_config['show_payload']).lower()
+        if 'raw_save' in test_config:
+            os.environ['BC_RUNS_RAW_SAVE'] = str(test_config['raw_save']).lower()
+
+    print("⚙️ Переменные окружения установлены")
+    print("🏃 Запуск baselogic бенчмарка...")
+
+    try:
+        # Запускаем baselogic бенчмарк
+        from scripts.run_baselogic_benchmark import main as run_benchmark
+        run_benchmark()
+        print("✅ Тесты завершены успешно")
+        return "Тесты выполнены успешно"
+    except Exception as e:
+        print(f"❌ Ошибка при запуске тестов: {e}")
+        return f"Ошибка при запуске тестов: {e}"
+
 # Реестр команд
 COMMAND_REGISTRY = {
     "run_baselogic": run_baselogic_benchmark,
     "run_grandmaster": run_grandmaster_benchmark,
+    "run_tests": run_tests,
     "long_task": run_long_task,
     "error_task": cause_an_error,
     "echo": echo_message,
@@ -347,11 +427,13 @@ async def get_tests():
                 else:
                     category = 'Other'
 
+                # Для baselogic бенчмарка нужно передавать базовое имя без .py
                 tests.append({
-                    "id": test_id,
+                    "id": test_id,  # Базовое имя без .py для поиска
                     "name": test_file.replace('.py', '').replace('_', ' ').title(),
                     "category": category,
-                    "difficulty": "Medium"  # Можно улучшить определение сложности
+                    "difficulty": "Medium",  # Можно улучшить определение сложности
+                    "file": test_file  # Полное имя файла для отображения
                 })
 
             # Сортировка по категориям
