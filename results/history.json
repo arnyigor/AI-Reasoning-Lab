@@ -1,4 +1,9 @@
 {
+    "qwen\/qwen3-4b-2507":{
+        "Trust_Score":0.8666812628,
+        "Accuracy":0.8888888889,
+        "Total_Runs":900
+    },
     "qwen\/qwen3-4b-thinking-2507":{
         "Trust_Score":0.8076812687,
         "Accuracy":0.86875,

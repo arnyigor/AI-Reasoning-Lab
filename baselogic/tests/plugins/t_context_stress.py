@@ -146,8 +146,8 @@ class ContextStressTestGenerator(AbstractTestGenerator):
         """Генерирует структурированный осмысленный текст заданной длины."""
         themes = list(self.THEMES.keys())
 
-        # Консервативная оценка: 1 токен ≈ 0.7 слова для русского языка
-        target_words = int(context_length_tokens * 0.7)
+        # Консервативная оценка: 1 токен ≈ 0.35 слова для русского языка
+        target_words = int(context_length_tokens * 0.35)
         paragraphs = []
         current_words = 0
         chapter_num = 1

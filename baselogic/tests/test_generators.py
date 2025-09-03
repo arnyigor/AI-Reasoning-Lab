@@ -1,10 +1,13 @@
 # baselogic/tests/test_generators.py
+import json
 import os
 
 import pytest
 
 from baselogic.tests.plugins.t_context_stress import ContextStressTestGenerator
 from baselogic.tests.t01_simple_logic import SimpleLogicTestGenerator
+from baselogic.tests.t13_grandmaster_judge_evaluator import GrandmasterJudgeEvaluatorTestGenerator
+
 
 @pytest.fixture
 def logic_test_generator():
@@ -151,3 +154,164 @@ def test_hallucinated_details_fails(context_stress_generator):
     assert result['is_correct'] is False, "Должен падать, если модель добавила лишние детали"
     # ИСПРАВЛЕНО: используем правильный ключ 'keywords_extra_in_output'
     assert 'стена' in result['details']['keywords_extra_in_output']
+
+# --- Тестовые данные: мы копируем их сюда, чтобы тест был самодостаточным ---
+
+PUZZLE_TEXT = """
+============================================================
+ГЕНЕРАЦИЯ УСПЕШНО ЗАВЕРШЕНА.
+Итоговое число подсказок: 37
+Финальная сложность (ветвлений): 8
+Общее время генерации: 3.708 сек.
+============================================================
+
+**Сценарий: Тайна в сеттинге: Квест на 'Спасти принцессу'**
+
+Условия (37 подсказок):
+
+1. В локация №1 находится место_в_мир 'Столица Империи'.
+2. В локация №4 находится герой 'Элара'.
+... (здесь должны быть все 37 улик, для краткости опускаю) ...
+37. Утверждение «питомец 'Сокол' является характеристикой героя 'Гром'» истинно тогда и только тогда, когда истинно утверждение «питомец 'Сокол' является характеристикой оружия 'Священный молот'».
+
+========================================
+
+Вопрос: Какой питомец у ранг_в_гильдии по имени Платина?
+
+========================================
+
+Ответ для проверки: Виверна
+
+--- Скрытое Решение для самопроверки ---
+              Оружие    Герой       Питомец Ранг_в_гильдии        Место_в_мире
+1     Посох из лозы  Изольда       Виверна        Платина     Столица Империи
+2  Магический посох   Кайден          Волк      Адамантит       Драконьи горы
+3     Двуручный меч    Лиара         Дрейк        Эфириум  Волшебная академия
+4       Длинный лук    Элара        Грифон        Серебро       Болота нежити
+5      Боевой топор  Бриенна    Элементаль         Золото       Гномьи пещеры
+6    Сияющий клинок   Ричард  Боевой кабан         Бронза       Руины древних
+7   Священный молот     Гром         Сокол         Мифрил      Эльфийский лес
+8    Парные кинжалы   Селена       Призрак        Легенда      Портовый город
+"""
+
+# Пример РЕАЛЬНОГО ответа от LLM-решателя (неправильный ответ)
+SOLVER_RESPONSE_INCORRECT = """
+Ок, разберём задачу по шагам. Нам нужно определить: какой питомец связан с рангом "Платина".
+1. Смотрим прямые условия с "Платина":
+... (здесь полные рассуждения LLM, как в вашем примере) ...
+Чтобы не нарушить баланс, у "Платины" остаётся именно "Элементаль".
+✅ Ответ:
+У ранга "Платина" питомец — "Элементаль".
+"""
+
+# Пример ИДЕАЛЬНОГО ответа (мы пишем его сами для теста)
+SOLVER_RESPONSE_CORRECT = """
+Проанализировав улики, я пришел к выводу. Улика 1 говорит, что 'Столица Империи' в локации 1.
+Таблица-решение показывает, что в локации 1 находятся 'Виверна' и 'Платина'.
+Следовательно, питомец у ранга 'Платина' — 'Виверна'.
+Финальный ответ: Виверна
+"""
+
+@pytest.fixture
+def incorrect_solver_setup(tmp_path):
+    """Фикстура, которая готовит окружение для теста с НЕПРАВИЛЬНЫМ ответом решателя."""
+    puzzle_file = tmp_path / "puzzle.txt"
+    puzzle_file.write_text(PUZZLE_TEXT, encoding="utf-8")
+
+    solver_file = tmp_path / "solver_response.txt"
+    solver_file.write_text(SOLVER_RESPONSE_INCORRECT, encoding="utf-8")
+
+    return GrandmasterJudgeEvaluatorTestGenerator(
+        test_id="judge_eval_incorrect",
+        puzzle_filepath=str(puzzle_file),
+        solver_reasoning_filepath=str(solver_file)
+    )
+
+@pytest.fixture
+def correct_solver_setup(tmp_path):
+    """Фикстура, которая готовит окружение для теста с ПРАВИЛЬНЫМ ответом решателя."""
+    puzzle_file = tmp_path / "puzzle.txt"
+    puzzle_file.write_text(PUZZLE_TEXT, encoding="utf-8")
+
+    solver_file = tmp_path / "solver_response.txt"
+    solver_file.write_text(SOLVER_RESPONSE_CORRECT, encoding="utf-8")
+
+    return GrandmasterJudgeEvaluatorTestGenerator(
+        test_id="judge_eval_correct",
+        puzzle_filepath=str(puzzle_file),
+        solver_reasoning_filepath=str(solver_file)
+    )
+
+# --- Тесты ---
+
+def test_prompt_generation(correct_solver_setup):
+    """Проверяем, что промпт для судьи генерируется и содержит все ключевые секции."""
+    generator = correct_solver_setup
+    prompts = generator.generate()
+
+    assert "prompt_judge" in prompts
+    prompt = prompts["prompt_judge"]
+
+    assert "УСЛОВИЯ ГОЛОВОЛОМКИ" in prompt
+    assert "ВОПРОС К ЗАДАЧЕ" in prompt
+    assert "ПОЛНАЯ ТАБЛИЦА-РЕШЕНИЕ" in prompt
+    assert "ОБЪЕКТ ПРОВЕРКИ" in prompt
+    assert "Финальный ответ: Виверна" in prompt # Проверяем, что рассуждения решателя вставились
+
+def test_verify_judge_on_correct_solver_answer(correct_solver_setup):
+    """
+    Тест-кейс: Решатель ответил ПРАВИЛЬНО.
+    Мы проверяем, что наш `verify` правильно оценит вердикт судьи.
+    """
+    generator = correct_solver_setup
+
+    # 1. Судья согласен и ставит высокую оценку (правильное поведение)
+    judge_response_good = json.dumps({
+        "correct": True,
+        "score": 5,
+        "reasoning": "Решатель верно определил ответ, опираясь на данные из таблицы."
+    })
+    result = generator.verify(judge_response_good)
+    assert result['is_correct'] is True, "Верификатор должен был согласиться с адекватным вердиктом судьи"
+
+    # 2. Судья ОШИБОЧНО говорит, что ответ неверный (неправильное поведение)
+    judge_response_bad = json.dumps({
+        "correct": False,
+        "score": 1,
+        "reasoning": "Ответ неверный."
+    })
+    result = generator.verify(judge_response_bad)
+    assert result['is_correct'] is False, "Верификатор должен был отвергнуть неадекватный вердикт судьи"
+
+def test_verify_judge_on_incorrect_solver_answer(incorrect_solver_setup):
+    """
+    Тест-кейс: Решатель ответил НЕПРАВИЛЬНО.
+    Мы проверяем, что наш `verify` правильно оценит вердикт судьи.
+    """
+    generator = incorrect_solver_setup
+
+    # 1. Судья правильно определяет ошибку и ставит низкую оценку (правильное поведение)
+    judge_response_good = json.dumps({
+        "correct": False,
+        "score": 2,
+        "reasoning": "Решатель дал неверный ответ 'Элементаль', хотя в таблице указана 'Виверна'."
+    })
+    result = generator.verify(judge_response_good)
+    assert result['is_correct'] is True, "Верификатор должен был согласиться с адекватным вердиктом судьи"
+
+    # 2. Судья ОШИБОЧНО говорит, что ответ верный (неправильное поведение)
+    judge_response_bad = json.dumps({
+        "correct": True,
+        "score": 5,
+        "reasoning": "Все верно."
+    })
+    result = generator.verify(judge_response_bad)
+    assert result['is_correct'] is False, "Верификатор должен был отвергнуть неадекватный вердикт судьи"
+
+def test_verify_handles_bad_json(correct_solver_setup):
+    """Проверяем, что `verify` не падает на некорректном JSON."""
+    generator = correct_solver_setup
+    bad_json_string = 'Это не JSON, а просто текст. {"correct": true}'
+    result = generator.verify(bad_json_string)
+    assert result['is_correct'] is False
+    assert result['details']['error'] == "JSON not found"
