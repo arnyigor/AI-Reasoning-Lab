@@ -7,6 +7,7 @@ from .interfaces import ILLMClient, LLMClientError
 from .llm_client import LLMClient
 
 log = logging.getLogger(__name__)
+llm_logger = logging.getLogger('LLM_Interactions')
 
 
 class AdapterLLMClient(ILLMClient):
@@ -85,6 +86,8 @@ class AdapterLLMClient(ILLMClient):
         print()  # Переход на новую строку
         final_response_str = "".join(chunks_text)
         log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
+        # Логируем финальный ответ в LLM_Interactions логгер
+        llm_logger.info("LLM Stream Response: %s", final_response_str)
 
         return final_response_str, server_metadata, ttft_time, end_time
 
@@ -98,6 +101,8 @@ class AdapterLLMClient(ILLMClient):
         server_metadata = self.new_client.provider.extract_metadata_from_response(response_dict)
         print(">>> LLM response: ", end="", flush=True)
         print(final_response_str)
+        # Логируем финальный ответ в LLM_Interactions логгер
+        llm_logger.info("LLM Response: %s", final_response_str)
         return final_response_str, server_metadata, ttft_time, end_time
 
     def _build_final_metrics(self, server_metadata: dict, prompt_token_count: int, final_response_str: str,

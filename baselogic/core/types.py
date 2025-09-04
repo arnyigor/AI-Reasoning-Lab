@@ -46,7 +46,7 @@ class TestConfig(TypedDict):
 # Типы для результатов тестирования
 # ============================================================================
 
-class TestResult(TypedDict):
+class TestResult(TypedDict, total=False):
     """Результат одного теста"""
     test_id: str
     category: str
@@ -57,6 +57,7 @@ class TestResult(TypedDict):
     expected_output: Any
     is_correct: bool
     execution_time_ms: float
+    verification_details: Optional[Dict[str, Any]]  # Добавлено для расширенных метрик
 
 
 class ModelTestResults(TypedDict):
@@ -91,6 +92,24 @@ class CategoryMetrics(TypedDict):
     avg_time_ms: float
 
 
+class ExtendedCategoryMetrics(TypedDict, total=False):
+    """Расширенные метрики по категории для новых типов тестов"""
+    tests: int
+    correct: int
+    accuracy: float
+    avg_time_ms: float
+    # Специфические метрики для разных типов тестов
+    chain_length_avg: Optional[float]  # Средняя длина цепочки рассуждений
+    chain_retention_score: Optional[float]  # Оценка удержания цепочки
+    proof_verification_accuracy: Optional[float]  # Точность верификации доказательств
+    counterfactual_depth_score: Optional[float]  # Глубина контрфактуального анализа
+    constraint_awareness_score: Optional[float]  # Осведомленность об ограничениях
+    cross_domain_transfer_score: Optional[float]  # Перенос знаний между доменами
+    uncertainty_calibration_ece: Optional[float]  # Expected Calibration Error
+    working_memory_span: Optional[float]  # Размер рабочей памяти
+    analogical_reasoning_score: Optional[float]  # Качество аналогий
+
+
 class ModelStatistics(TypedDict):
     """Полная статистика модели"""
     model_name: str
@@ -103,6 +122,26 @@ class ModelStatistics(TypedDict):
     runs_count: int
     categories: List[str]
     category_stats: Dict[str, CategoryMetrics]
+
+
+class ExtendedModelStatistics(TypedDict, total=False):
+    """Расширенная статистика модели с новыми метриками"""
+    model_name: str
+    total_tests: int
+    correct_answers: int
+    accuracy: float
+    avg_time_ms: float
+    min_time_ms: float
+    max_time_ms: float
+    runs_count: int
+    categories: List[str]
+    category_stats: Dict[str, ExtendedCategoryMetrics]
+    # Специфические метрики для различных типов моделей
+    model_size_gb: Optional[float]  # Размер модели в GB
+    reasoning_complexity_score: Optional[float]  # Общая оценка reasoning способностей
+    domain_adaptation_score: Optional[float]  # Адаптация к различным доменам
+    consistency_score: Optional[float]  # Консистентность ответов
+    calibration_quality: Optional[float]  # Качество калибровки уверенности
 
 
 # ============================================================================

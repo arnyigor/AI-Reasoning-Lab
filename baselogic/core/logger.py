@@ -97,11 +97,11 @@ def setup_logging(config: Optional[Dict[str, Any]] = None):
     root_logger.addHandler(console_handler)
 
     # --- 4. Основной файловый обработчик (для всех общих логов) ---
-    main_log_file = log_dir / "benchmark.log"
-    file_handler = logging.handlers.RotatingFileHandler(
-        main_log_file, maxBytes=log_file_max_mb * 1024 * 1024,
-        backupCount=log_file_backup_count, encoding='utf-8'
-    )
+    main_log_file = log_dir / "baselogic.log"
+    # Удаляем старый файл для перезаписи при новом запуске
+    if main_log_file.exists():
+        main_log_file.unlink()
+    file_handler = logging.FileHandler(main_log_file, mode='a', encoding='utf-8')
     file_handler.setLevel(log_level) # Уровень для основного файла
     file_handler.setFormatter(StructuredFormatter(log_format))
     root_logger.addHandler(file_handler)
@@ -111,12 +111,9 @@ def setup_logging(config: Optional[Dict[str, Any]] = None):
     llm_logger.setLevel(log_llm_level)
     llm_logger.propagate = False  # Важно: не дублируем сообщения в корневой логгер
 
-    # Добавляем обработчик, только если его еще нет
+    # Добавляем обработчик в тот же файл, только если его еще нет
     if not llm_logger.handlers:
-        llm_log_file = log_dir / "llm_interactions.log"
-        llm_handler = logging.handlers.RotatingFileHandler(
-            llm_log_file, maxBytes=5 * 1024 * 1024, backupCount=3, encoding='utf-8'
-        )
+        llm_handler = logging.FileHandler(main_log_file, mode='a', encoding='utf-8')
         llm_handler.setLevel(log_llm_level)
         llm_handler.setFormatter(StructuredFormatter(log_llm_format))
         llm_logger.addHandler(llm_handler)

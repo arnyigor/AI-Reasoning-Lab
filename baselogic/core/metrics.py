@@ -69,7 +69,7 @@ class MetricsCollector:
     def record_test_result(self, test_result: TestResult) -> None:
         """Записывает результат теста"""
         self.test_results.append(test_result)
-        
+
         # Обновляем метрики по категориям
         category = test_result['category']
         if category not in self.category_metrics:
@@ -79,18 +79,75 @@ class MetricsCollector:
                 'accuracy': 0.0,
                 'avg_time_ms': 0.0
             }
-        
+
         cat_metrics = self.category_metrics[category]
         cat_metrics['tests'] += 1
         if test_result['is_correct']:
             cat_metrics['correct'] += 1
-        
+
         # Пересчитываем средние значения
         cat_metrics['accuracy'] = cat_metrics['correct'] / cat_metrics['tests']
-        
+
         # Обновляем среднее время для категории
         category_times = [r['execution_time_ms'] for r in self.test_results if r['category'] == category]
         cat_metrics['avg_time_ms'] = statistics.mean(category_times) if category_times else 0.0
+
+        # Обрабатываем специфические метрики для новых типов тестов
+        self._update_extended_metrics(test_result, cat_metrics)
+
+    def _is_extended_test_category(self, category: str) -> bool:
+        """Определяет, является ли категория тестом с расширенными метриками"""
+        extended_categories = [
+            't15_multi_hop_reasoning',
+            't16_counterfactual_reasoning',
+            't17_proof_verification',
+            't18_constrained_optimization'
+        ]
+        return category in extended_categories
+
+    def _update_extended_metrics(self, test_result: TestResult, cat_metrics: Dict[str, Any]) -> None:
+        """Обновляет расширенные метрики для специфических типов тестов (автоматически для новых категорий)"""
+        # Проверяем, является ли тест категорией с расширенными метриками
+        if not self._is_extended_test_category(test_result['category']):
+            return
+
+        verification_details = test_result.get('verification_details', {})
+
+        # Обработка метрик для multi-hop reasoning
+        if test_result['category'] == 't15_multi_hop_reasoning':
+            chain_length = verification_details.get('chain_length', 0)
+            if 'chain_length_avg' not in cat_metrics:
+                cat_metrics['chain_length_avg'] = []
+            cat_metrics['chain_length_avg'].append(chain_length)
+            cat_metrics['chain_length_avg'] = statistics.mean(cat_metrics['chain_length_avg'])
+
+            # Chain retention score
+            coverage = verification_details.get('chain_completeness', 0.0)
+            if 'chain_retention_score' not in cat_metrics:
+                cat_metrics['chain_retention_score'] = []
+            cat_metrics['chain_retention_score'].append(coverage)
+            cat_metrics['chain_retention_score'] = statistics.mean(cat_metrics['chain_retention_score'])
+
+        # Обработка метрик для proof verification
+        elif test_result['category'] == 't17_proof_verification':
+            if 'proof_verification_accuracy' not in cat_metrics:
+                cat_metrics['proof_verification_accuracy'] = cat_metrics['accuracy']
+
+        # Обработка метрик для counterfactual reasoning
+        elif test_result['category'] == 't16_counterfactual_reasoning':
+            depth_score = verification_details.get('total_score', 0.0)
+            if 'counterfactual_depth_score' not in cat_metrics:
+                cat_metrics['counterfactual_depth_score'] = []
+            cat_metrics['counterfactual_depth_score'].append(depth_score)
+            cat_metrics['counterfactual_depth_score'] = statistics.mean(cat_metrics['counterfactual_depth_score'])
+
+        # Обработка метрик для constrained optimization
+        elif test_result['category'] == 't18_constrained_optimization':
+            constraint_score = verification_details.get('total_score', 0.0)
+            if 'constraint_awareness_score' not in cat_metrics:
+                cat_metrics['constraint_awareness_score'] = []
+            cat_metrics['constraint_awareness_score'].append(constraint_score)
+            cat_metrics['constraint_awareness_score'] = statistics.mean(cat_metrics['constraint_awareness_score'])
     
     def get_overall_metrics(self) -> ModelMetrics:
         """Возвращает общие метрики модели"""
@@ -149,18 +206,30 @@ class MetricsCollector:
         return (self.total_requests / uptime.total_seconds()) * 60
     
     def export_metrics(self, file_path: Path) -> bool:
-        """Экспортирует метрики в JSON файл"""
+        """Экспортирует метрики в JSON файл (включая расширенные метрики для новых тестов)"""
         try:
+            # Собираем расширенные метрики для новых категорий тестов
+            extended_category_metrics = {}
+            for category, metrics in self.category_metrics.items():
+                if self._is_extended_test_category(category):
+                    extended_category_metrics[category] = dict(metrics)  # Копируем все метрики
+                else:
+                    extended_category_metrics[category] = {
+                        k: v for k, v in metrics.items()
+                        if k in ['tests', 'correct', 'accuracy', 'avg_time_ms']  # Только базовые метрики
+                    }
+
             export_data = {
                 'model_name': self.model_name,
                 'export_timestamp': datetime.now().isoformat(),
                 'overall_metrics': self.get_overall_metrics(),
                 'performance_metrics': self.get_performance_metrics().__dict__,
-                'category_metrics': self.category_metrics,
+                'category_metrics': extended_category_metrics,  # Используем расширенные метрики
                 'error_summary': self.get_error_summary(),
                 'uptime_seconds': self.get_uptime().total_seconds(),
                 'requests_per_minute': self.get_requests_per_minute(),
-                'test_results_count': len(self.test_results)
+                'test_results_count': len(self.test_results),
+                'has_extended_metrics': bool(extended_category_metrics)
             }
             
             with open(file_path, 'w', encoding='utf-8') as f:
