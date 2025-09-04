@@ -33,22 +33,26 @@ class AbstractTestGenerator(ABC):
         }
 
     @abstractmethod
-    def verify(self, parsed_answer: str, expected_output: Any) -> Dict[str, Any]:
-        """
-        Проверяет ИЗВЛЕЧЕННЫЙ ответ на соответствие ожиданиям.
-
-        Args:
-            parsed_answer: Ответ, уже извлеченный и очищенный методом parse_llm_output.
-            expected_output: Ожидаемый результат из self.generate().
-        """
-        pass
-
-    @abstractmethod
     def generate(self) -> Dict[str, Any]:
+        """
+        Генерирует тестовый сценарий с промптом и ожидаемым результатом.
+        """
         pass
 
     @abstractmethod
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
+        """
+        Проверяет ответ модели на соответствие ожиданиям.
+
+        Args:
+            llm_output: Полный текстовый ответ от модели (может содержать thinking и т.д.)
+            expected_output: Ожидаемый результат из self.generate().
+
+        Returns:
+            Dict с результатами валидации, включая:
+            - is_correct: Boolean - прошел ли тест
+            - details: Dict с детальной информацией о валидации
+        """
         pass
 
     def _cleanup_llm_response(self, llm_output: str) -> str:
