@@ -82,7 +82,7 @@ class TestRunner:
         else:
             log.info("Плагины не найдены.")
 
-        # --- Шаг 3: Фильтруем загруженные тесты согласно config.yaml ---
+        # --- Шаг 3: Фильтруем загруженные тесты---
         tests_to_run_raw = self.config.get('tests_to_run', [])
         # Убеждаемся, что работаем со списком, даже если из конфига пришла строка
         if isinstance(tests_to_run_raw, str):
@@ -99,6 +99,9 @@ class TestRunner:
         missing_keys = tests_to_run_set - found_keys
         if missing_keys:
             log.warning(f"⚠️ Некоторые тесты из 'tests_to_run' не найдены нигде: {', '.join(missing_keys)}")
+
+        # Сортируем по ключам (именам тестов)
+        filtered_generators = dict(sorted(filtered_generators.items()))
 
         log.info(f"Итоговый набор тестов для запуска: {list(filtered_generators.keys())}")
         return filtered_generators
