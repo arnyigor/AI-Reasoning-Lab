@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional, Dict, Any
 from urllib.parse import urlparse, unquote  # ▸ добавьте в начало файла
+
 import requests
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -45,7 +46,7 @@ def download_file_with_progress(url: str, dest_path: Path):
 
 # --- Основная функция, улучшенная ---
 def create_ollama_model(
-        gguf_source: str, # Может быть URL или локальный путь
+        gguf_source: str,  # Может быть URL или локальный путь
         model_name: Optional[str] = None,
         parameters: Optional[Dict[str, Any]] = None,
         system_message: Optional[str] = None,
@@ -62,10 +63,10 @@ def create_ollama_model(
         print(f"[INFO] Обнаружен URL: {gguf_source}")
 
         # 1. Извлекаем «чистое» имя файла (без ?download=… и без %20)
-        parsed       = urlparse(gguf_source)
-        gguf_filename = Path(unquote(parsed.path)).name          # → Qwen3-4B-…Q4_K_M.gguf
+        parsed = urlparse(gguf_source)
+        gguf_filename = Path(unquote(parsed.path)).name  # → Qwen3-4B-…Q4_K_M.gguf
         if not gguf_filename.lower().endswith(".gguf"):
-            gguf_filename += ".gguf"                            # подстраховка, чтобы было .gguf
+            gguf_filename += ".gguf"  # подстраховка, чтобы было .gguf
 
         # 2. Кладём всё в каталог ./models
         models_dir = Path.cwd() / "models"
@@ -80,13 +81,25 @@ def create_ollama_model(
                 raise RuntimeError(f"Не удалось скачать файл {gguf_source}")
 
         gguf_path_obj = local_gguf_path
-        # ───────────────────────────────────────────────────────────────────
+    else:
+        # Обработка локального файла
+        print(f"[INFO] Обнаружен локальный путь: {gguf_source}")
+        gguf_path_obj = Path(gguf_source)
 
+        # Проверяем, существует ли файл
+        if not gguf_path_obj.exists():
+            raise FileNotFoundError(f"Локальный файл не найден: {gguf_source}")
+
+        # Проверяем, что это файл, а не директория
+        if not gguf_path_obj.is_file():
+            raise ValueError(f"Указанный путь не является файлом: {gguf_source}")
+
+    # Проверка расширения файла
     if gguf_path_obj.suffix.lower() != ".gguf":
         raise ValueError(f"Файл {gguf_path_obj} не является .gguf файлом")
 
-    # ... (Ваш код _extract_model_name_from_path и проверка ollama остаются без изменений) ...
-    # Я их скопирую для полноты.
+    if gguf_path_obj.suffix.lower() != ".gguf":
+        raise ValueError(f"Файл {gguf_path_obj} не является .gguf файлом")
 
     if model_name is None:
         model_name = _extract_model_name_from_path(gguf_path_obj, auto_name_strategy)
@@ -119,7 +132,7 @@ def create_ollama_model(
             check=True,
             capture_output=True,
             text=True,
-            timeout=600 # Увеличено до 10 минут для больших моделей
+            timeout=600  # Увеличено до 10 минут для больших моделей
         )
         print(f"[SUCCESS] Модель '{model_name}' успешно создана")
         if result.stdout.strip():
@@ -138,32 +151,37 @@ def create_ollama_model(
         except Exception as e:
             print(f"[WARNING] Не удалось удалить временный файл {modelfile_path}: {e}")
 
+
 # --- Ваши существующие функции _extract_model_name_from_path и _create_modelfile_content ---
-# (Я их не меняю, просто вставляю для полноты)
 def _extract_model_name_from_path(gguf_path: Path, strategy: str = "smart") -> str:
-    # ... (ваш код без изменений) ...
+    """Извлекает имя модели из пути к GGUF файлу."""
     if strategy == "simple":
         return gguf_path.stem
     elif strategy == "smart":
         filename = gguf_path.stem
         quant_patterns = [r'-?Q\d+_[KM0LS]?$', r'-?[fbi]\d+$']
         clean_name = filename
-        for p in quant_patterns: clean_name = re.sub(p, '', clean_name, flags=re.I)
-        return re.sub(r'-+$', '', clean_name).lower() or filename.lower()
-    return gguf_path.stem
+        for p in quant_patterns:
+            clean_name = re.sub(p, '', clean_name, flags=re.I)
+        result = re.sub(r'-+$', '', clean_name).lower() or filename.lower()
+        return result if result else filename.lower()
+    else:
+        return gguf_path.stem
 
-def _create_modelfile_content(gguf_path: Path, template: Optional[str], parameters: Optional[Dict[str, Any]], system_message: Optional[str]) -> str:
+
+def _create_modelfile_content(gguf_path: Path, template: Optional[str], parameters: Optional[Dict[str, Any]],
+                              system_message: Optional[str]) -> str:
     # --- ИЗМЕНЕНИЕ: Путь в кавычках для совместимости с пробелами ---
     content = f'FROM "{gguf_path.resolve()}"\n\n'
     if system_message: content += f'SYSTEM """{system_message}"""\n\n'
     if template: content += f'TEMPLATE """{template}"""\n\n'
     if parameters:
         for param, value in parameters.items():
-            content += f'PARAMETER {param} {value}\n' # Ollama сама разберет типы
+            content += f'PARAMETER {param} {value}\n'  # Ollama сама разберет типы
         content += '\n'
     return content.strip()
 
-# --- НОВЫЙ БЛОК: Логика для запуска из .env ---
+# --- Логика для запуска из .env ---
 def prepare_models_from_env():
     """
     Запускает процесс подготовки для всех моделей,
@@ -180,12 +198,12 @@ def prepare_models_from_env():
         is_enabled = os.getenv(f"{prefix}ENABLED", "false").lower() == 'true'
         if is_enabled:
             configs_found += 1
-            print("\n" + "="*60)
+            print("\n" + "=" * 60)
             print(f"⚙️ Обработка конфигурации PREPARE_MODEL_{i}")
 
-            gguf_source = os.getenv(f"{prefix}GGUF_URL") # Может быть URL или путь
+            gguf_source = os.getenv(f"{prefix}GGUF_URL")  # Может быть URL или путь
             model_name = os.getenv(f"{prefix}NAME")
-            system_prompt = os.getenv(f"{prefix}SYSTEM_PROMPT") # Поддержка нового имени
+            system_prompt = os.getenv(f"{prefix}SYSTEM_PROMPT")  # Поддержка нового имени
 
             if not gguf_source or not model_name:
                 print(f"[ERROR] Для PREPARE_MODEL_{i} должны быть указаны NAME и GGUF_URL. Пропуск.")
@@ -213,7 +231,7 @@ def prepare_models_from_env():
     if configs_found == 0:
         print("Не найдено включенных моделей для подготовки (PREPARE_MODEL_*_ENABLED=\"true\").")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("--- Подготовка моделей завершена ---")
 
 
