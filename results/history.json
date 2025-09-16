@@ -1,18 +1,23 @@
 {
-    "qwen\/qwen3-4b-2507":{
-        "Trust_Score":0.8726811897,
-        "Accuracy":0.8931372549,
-        "Total_Runs":1020
-    },
     "qwen\/qwen3-4b-thinking-2507":{
         "Trust_Score":0.8511677925,
         "Accuracy":0.8928571429,
         "Total_Runs":280
     },
+    "qwen\/qwen3-4b-2507":{
+        "Trust_Score":0.8467847539,
+        "Accuracy":0.8685714286,
+        "Total_Runs":1050
+    },
     "driaforall.mem-agent":{
         "Trust_Score":0.8432915303,
         "Accuracy":0.9083333333,
         "Total_Runs":120
+    },
+    "openai\/gpt-oss-20b":{
+        "Trust_Score":0.8189511687,
+        "Accuracy":0.8909090909,
+        "Total_Runs":110
     },
     "qwen3-8b":{
         "Trust_Score":0.7782121198,

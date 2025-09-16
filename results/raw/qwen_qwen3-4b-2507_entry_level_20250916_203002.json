@@ -1,0 +1,4232 @@
+[
+    {
+        "test_id": "t02_instructions_1",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'папа снег снег'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: ПАПА СНЕГ СНЕГ  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: ПАПА СНЕГ СНЕГ  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: ПАПА СНЕГ СНЕГ  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "ПАПА СНЕГ СНЕГ",
+            "total_chars": "14",
+            "word_count": "3",
+            "vowel_count": "4"
+        },
+        "is_correct": false,
+        "execution_time_ms": 592.8516999993008,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": true,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "ПАПА СНЕГ СНЕГ",
+                "total_chars": "14",
+                "word_count": "3",
+                "vowel_count": "4"
+            },
+            "extracted": {
+                "phrase": "ПАПА СНЕГ СНЕГ",
+                "chars": "14",
+                "words": "3",
+                "vowels": "6"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036585,
+            "id": "chatcmpl-55js07sqreg5kndpk5ol67",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 17,
+            "prompt_eval_count": 116,
+            "total_duration": 591970300,
+            "prompt_eval_duration": 315694600,
+            "eval_duration": 276275700,
+            "load_duration": 0,
+            "total_latency_ms": 592.8516999993008,
+            "time_to_first_token_ms": 315.69,
+            "peak_ram_increment_mb": 0.21484375
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_2",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'река push папа day ветер собака'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: РЕКА PUSH ПАПА DAY ВЕТР СОБАКА  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: РЕКА PUSH ПАПА DAY ВЕТР СОБАКА  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: РЕКА PUSH ПАПА DAY ВЕТР СОБАКА  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "РЕКА PUSH ПАПА DAY ВЕТЕР СОБАКА",
+            "total_chars": "31",
+            "word_count": "6",
+            "vowel_count": "11"
+        },
+        "is_correct": false,
+        "execution_time_ms": 454.5553000061773,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": false,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "РЕКА PUSH ПАПА DAY ВЕТЕР СОБАКА",
+                "total_chars": "31",
+                "word_count": "6",
+                "vowel_count": "11"
+            },
+            "extracted": {
+                "phrase": "РЕКА PUSH ПАПА DAY ВЕТР СОБАКА",
+                "chars": "28",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036586,
+            "id": "chatcmpl-ng2k4racqnkl3ex9xjm6pc",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 454107999,
+            "prompt_eval_duration": 98303199,
+            "eval_duration": 355804799,
+            "load_duration": 0,
+            "total_latency_ms": 454.5553000061773,
+            "time_to_first_token_ms": 98.3,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_3",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'sky солнце дом поле дом лес'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: SKY СОЛНЦЕ ДОМ ПОЛЕ ДОМ ЛЕС  \nСИМВОЛОВ: 27  \nСЛОВ: 6  \nГЛАСНЫХ: 7",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: SKY СОЛНЦЕ ДОМ ПОЛЕ ДОМ ЛЕС  \nСИМВОЛОВ: 27  \nСЛОВ: 6  \nГЛАСНЫХ: 7",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: SKY СОЛНЦЕ ДОМ ПОЛЕ ДОМ ЛЕС  \nСИМВОЛОВ: 27  \nСЛОВ: 6  \nГЛАСНЫХ: 7",
+        "expected_output": {
+            "phrase": "SKY СОЛНЦЕ ДОМ ПОЛЕ ДОМ ЛЕС",
+            "total_chars": "27",
+            "word_count": "6",
+            "vowel_count": "7"
+        },
+        "is_correct": true,
+        "execution_time_ms": 482.6463000063086,
+        "verification_details": {
+            "reason": "All fields correct",
+            "phrase_match": true,
+            "chars_match": true,
+            "words_match": true,
+            "vowels_match": true,
+            "expected": {
+                "phrase": "SKY СОЛНЦЕ ДОМ ПОЛЕ ДОМ ЛЕС",
+                "total_chars": "27",
+                "word_count": "6",
+                "vowel_count": "7"
+            },
+            "extracted": {
+                "phrase": "SKY СОЛНЦЕ ДОМ ПОЛЕ ДОМ ЛЕС",
+                "chars": "27",
+                "words": "6",
+                "vowels": "7"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036586,
+            "id": "chatcmpl-91wtvs8wl7l437g4viy8hl",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 20,
+            "prompt_eval_count": 119,
+            "total_duration": 481978000,
+            "prompt_eval_duration": 126730900,
+            "eval_duration": 355247100,
+            "load_duration": 0,
+            "total_latency_ms": 482.6463000063086,
+            "time_to_first_token_ms": 126.73,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_4",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'снег поле dog hello ветер'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: СНЕГ ПОЛЕ DOG HELLO ВЕТР  \nСИМВОЛОВ: 23  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: СНЕГ ПОЛЕ DOG HELLO ВЕТР  \nСИМВОЛОВ: 23  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: СНЕГ ПОЛЕ DOG HELLO ВЕТР  \nСИМВОЛОВ: 23  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "expected_output": {
+            "phrase": "СНЕГ ПОЛЕ DOG HELLO ВЕТЕР",
+            "total_chars": "25",
+            "word_count": "5",
+            "vowel_count": "8"
+        },
+        "is_correct": false,
+        "execution_time_ms": 429.8428000038257,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": false,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "СНЕГ ПОЛЕ DOG HELLO ВЕТЕР",
+                "total_chars": "25",
+                "word_count": "5",
+                "vowel_count": "8"
+            },
+            "extracted": {
+                "phrase": "СНЕГ ПОЛЕ DOG HELLO ВЕТР",
+                "chars": "23",
+                "words": "5",
+                "vowels": "7"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036587,
+            "id": "chatcmpl-cbk4dd3pdnaiq4leco2um",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 19,
+            "prompt_eval_count": 119,
+            "total_duration": 429419299,
+            "prompt_eval_duration": 112930799,
+            "eval_duration": 316488500,
+            "load_duration": 0,
+            "total_latency_ms": 429.8428000038257,
+            "time_to_first_token_ms": 112.93,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_5",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'море река dog button blue'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: MОРЕ РЕКА DOG BUTTON BLUE  \nСИМВОЛОВ: 28  \nСЛОВ: 5  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: MОРЕ РЕКА DOG BUTTON BLUE  \nСИМВОЛОВ: 28  \nСЛОВ: 5  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: MОРЕ РЕКА DOG BUTTON BLUE  \nСИМВОЛОВ: 28  \nСЛОВ: 5  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "МОРЕ РЕКА DOG BUTTON BLUE",
+            "total_chars": "25",
+            "word_count": "5",
+            "vowel_count": "9"
+        },
+        "is_correct": false,
+        "execution_time_ms": 392.53260000259615,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": false,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "МОРЕ РЕКА DOG BUTTON BLUE",
+                "total_chars": "25",
+                "word_count": "5",
+                "vowel_count": "9"
+            },
+            "extracted": {
+                "phrase": "MОРЕ РЕКА DOG BUTTON BLUE",
+                "chars": "28",
+                "words": "5",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036587,
+            "id": "chatcmpl-z3kfdcxz9be3vbekpipftw",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 20,
+            "prompt_eval_count": 119,
+            "total_duration": 392067299,
+            "prompt_eval_duration": 95021900,
+            "eval_duration": 297045399,
+            "load_duration": 0,
+            "total_latency_ms": 392.53260000259615,
+            "time_to_first_token_ms": 95.02,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_6",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'дом гора button push sky'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: ДОМ ГОРА BUTTON PUSH SKY  \nСИМВОЛОВ: 25  \nСЛОВ: 5  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: ДОМ ГОРА BUTTON PUSH SKY  \nСИМВОЛОВ: 25  \nСЛОВ: 5  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: ДОМ ГОРА BUTTON PUSH SKY  \nСИМВОЛОВ: 25  \nСЛОВ: 5  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "ДОМ ГОРА BUTTON PUSH SKY",
+            "total_chars": "24",
+            "word_count": "5",
+            "vowel_count": "6"
+        },
+        "is_correct": false,
+        "execution_time_ms": 426.68489999778103,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": true,
+            "expected": {
+                "phrase": "ДОМ ГОРА BUTTON PUSH SKY",
+                "total_chars": "24",
+                "word_count": "5",
+                "vowel_count": "6"
+            },
+            "extracted": {
+                "phrase": "ДОМ ГОРА BUTTON PUSH SKY",
+                "chars": "25",
+                "words": "5",
+                "vowels": "6"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036588,
+            "id": "chatcmpl-njur6qa9v6kneun8nhehzl",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 19,
+            "prompt_eval_count": 119,
+            "total_duration": 426199499,
+            "prompt_eval_duration": 96593900,
+            "eval_duration": 329605599,
+            "load_duration": 0,
+            "total_latency_ms": 426.68489999778103,
+            "time_to_first_token_ms": 96.59,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_7",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'sky ветер море папа'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: SKY ВЕТЕР МОРЕ ПАПА  \nСИМВОЛОВ: 20  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: SKY ВЕТЕР МОРЕ ПАПА  \nСИМВОЛОВ: 20  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: SKY ВЕТЕР МОРЕ ПАПА  \nСИМВОЛОВ: 20  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "SKY ВЕТЕР МОРЕ ПАПА",
+            "total_chars": "19",
+            "word_count": "4",
+            "vowel_count": "6"
+        },
+        "is_correct": false,
+        "execution_time_ms": 410.0222999986727,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": true,
+            "expected": {
+                "phrase": "SKY ВЕТЕР МОРЕ ПАПА",
+                "total_chars": "19",
+                "word_count": "4",
+                "vowel_count": "6"
+            },
+            "extracted": {
+                "phrase": "SKY ВЕТЕР МОРЕ ПАПА",
+                "chars": "20",
+                "words": "4",
+                "vowels": "6"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036588,
+            "id": "chatcmpl-e0f67coem4n12pr55qrkg8",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 18,
+            "prompt_eval_count": 117,
+            "total_duration": 409593300,
+            "prompt_eval_duration": 115042799,
+            "eval_duration": 294550500,
+            "load_duration": 0,
+            "total_latency_ms": 410.0222999986727,
+            "time_to_first_token_ms": 115.04,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_8",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'blue солнце мама house собака море'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: BLUE СОЛНЦЕ МАМА HOUSE СОБАКА МОРЕ  \nСИМВОЛОВ: 31  \nСЛОВ: 6  \nГЛАСНЫХ: 12",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: BLUE СОЛНЦЕ МАМА HOUSE СОБАКА МОРЕ  \nСИМВОЛОВ: 31  \nСЛОВ: 6  \nГЛАСНЫХ: 12",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: BLUE СОЛНЦЕ МАМА HOUSE СОБАКА МОРЕ  \nСИМВОЛОВ: 31  \nСЛОВ: 6  \nГЛАСНЫХ: 12",
+        "expected_output": {
+            "phrase": "BLUE СОЛНЦЕ МАМА HOUSE СОБАКА МОРЕ",
+            "total_chars": "34",
+            "word_count": "6",
+            "vowel_count": "14"
+        },
+        "is_correct": false,
+        "execution_time_ms": 468.51829999650363,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "BLUE СОЛНЦЕ МАМА HOUSE СОБАКА МОРЕ",
+                "total_chars": "34",
+                "word_count": "6",
+                "vowel_count": "14"
+            },
+            "extracted": {
+                "phrase": "BLUE СОЛНЦЕ МАМА HOUSE СОБАКА МОРЕ",
+                "chars": "31",
+                "words": "6",
+                "vowels": "12"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036588,
+            "id": "chatcmpl-3keh6qcw83tvk4qbbid2u",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 22,
+            "prompt_eval_count": 121,
+            "total_duration": 468092600,
+            "prompt_eval_duration": 120247700,
+            "eval_duration": 347844899,
+            "load_duration": 0,
+            "total_latency_ms": 468.51829999650363,
+            "time_to_first_token_ms": 120.25,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_9",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'house nice dog поле собака лес'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HOUSE NICE DOG ПОЛЕ СОБАКА ЛЕС  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HOUSE NICE DOG ПОЛЕ СОБАКА ЛЕС  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HOUSE NICE DOG ПОЛЕ СОБАКА ЛЕС  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "HOUSE NICE DOG ПОЛЕ СОБАКА ЛЕС",
+            "total_chars": "30",
+            "word_count": "6",
+            "vowel_count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 433.51950000214856,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": true,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "HOUSE NICE DOG ПОЛЕ СОБАКА ЛЕС",
+                "total_chars": "30",
+                "word_count": "6",
+                "vowel_count": "12"
+            },
+            "extracted": {
+                "phrase": "HOUSE NICE DOG ПОЛЕ СОБАКА ЛЕС",
+                "chars": "30",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036589,
+            "id": "chatcmpl-xihylb86qap8oa844prpad",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 433101199,
+            "prompt_eval_duration": 110961899,
+            "eval_duration": 322139299,
+            "load_duration": 0,
+            "total_latency_ms": 433.51950000214856,
+            "time_to_first_token_ms": 110.96,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_10",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'гора собака дождь'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: ГОРА СОБАКА ДОЖДЬ  \nСИМВОЛОВ: 15  \nСЛОВ: 3  \nГЛАСНЫХ: 4",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: ГОРА СОБАКА ДОЖДЬ  \nСИМВОЛОВ: 15  \nСЛОВ: 3  \nГЛАСНЫХ: 4",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: ГОРА СОБАКА ДОЖДЬ  \nСИМВОЛОВ: 15  \nСЛОВ: 3  \nГЛАСНЫХ: 4",
+        "expected_output": {
+            "phrase": "ГОРА СОБАКА ДОЖДЬ",
+            "total_chars": "17",
+            "word_count": "3",
+            "vowel_count": "6"
+        },
+        "is_correct": false,
+        "execution_time_ms": 402.75670000119135,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "ГОРА СОБАКА ДОЖДЬ",
+                "total_chars": "17",
+                "word_count": "3",
+                "vowel_count": "6"
+            },
+            "extracted": {
+                "phrase": "ГОРА СОБАКА ДОЖДЬ",
+                "chars": "15",
+                "words": "3",
+                "vowels": "4"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036589,
+            "id": "chatcmpl-akb8fkd654fsn4camjip7",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 17,
+            "prompt_eval_count": 117,
+            "total_duration": 402284499,
+            "prompt_eval_duration": 95819600,
+            "eval_duration": 306464899,
+            "load_duration": 0,
+            "total_latency_ms": 402.75670000119135,
+            "time_to_first_token_ms": 95.82,
+            "peak_ram_increment_mb": 0.0078125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_11",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'water blue sky'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: WATER BLUE SKY  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: WATER BLUE SKY  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: WATER BLUE SKY  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "WATER BLUE SKY",
+            "total_chars": "14",
+            "word_count": "3",
+            "vowel_count": "4"
+        },
+        "is_correct": false,
+        "execution_time_ms": 349.1416000033496,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": true,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "WATER BLUE SKY",
+                "total_chars": "14",
+                "word_count": "3",
+                "vowel_count": "4"
+            },
+            "extracted": {
+                "phrase": "WATER BLUE SKY",
+                "chars": "14",
+                "words": "3",
+                "vowels": "6"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036590,
+            "id": "chatcmpl-be966xzpachpm9elo52uk",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 17,
+            "prompt_eval_count": 116,
+            "total_duration": 348669999,
+            "prompt_eval_duration": 113291300,
+            "eval_duration": 235378699,
+            "load_duration": 0,
+            "total_latency_ms": 349.1416000033496,
+            "time_to_first_token_ms": 113.29,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_12",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'поле река море earth море blue'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: ПОЛЕ РЕКА МОРЕ EARTH МОРЕ BLUE  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: ПОЛЕ РЕКА МОРЕ EARTH МОРЕ BLUE  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: ПОЛЕ РЕКА МОРЕ EARTH МОРЕ BLUE  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "ПОЛЕ РЕКА МОРЕ EARTH МОРЕ BLUE",
+            "total_chars": "30",
+            "word_count": "6",
+            "vowel_count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 411.28510000999086,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": true,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "ПОЛЕ РЕКА МОРЕ EARTH МОРЕ BLUE",
+                "total_chars": "30",
+                "word_count": "6",
+                "vowel_count": "12"
+            },
+            "extracted": {
+                "phrase": "ПОЛЕ РЕКА МОРЕ EARTH МОРЕ BLUE",
+                "chars": "30",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036590,
+            "id": "chatcmpl-yy496ya0mtymxiyqipz2b",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 410856300,
+            "prompt_eval_duration": 93883000,
+            "eval_duration": 316973299,
+            "load_duration": 0,
+            "total_latency_ms": 411.28510000999086,
+            "time_to_first_token_ms": 93.88,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_13",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'nice снег папа'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: NICE СНЕГ ПАПА  \nСИМВОЛОВ: 15  \nСЛОВ: 3  \nГЛАСНЫХ: 5",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: NICE СНЕГ ПАПА  \nСИМВОЛОВ: 15  \nСЛОВ: 3  \nГЛАСНЫХ: 5",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: NICE СНЕГ ПАПА  \nСИМВОЛОВ: 15  \nСЛОВ: 3  \nГЛАСНЫХ: 5",
+        "expected_output": {
+            "phrase": "NICE СНЕГ ПАПА",
+            "total_chars": "14",
+            "word_count": "3",
+            "vowel_count": "5"
+        },
+        "is_correct": false,
+        "execution_time_ms": 376.4509000029648,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": true,
+            "expected": {
+                "phrase": "NICE СНЕГ ПАПА",
+                "total_chars": "14",
+                "word_count": "3",
+                "vowel_count": "5"
+            },
+            "extracted": {
+                "phrase": "NICE СНЕГ ПАПА",
+                "chars": "15",
+                "words": "3",
+                "vowels": "5"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036591,
+            "id": "chatcmpl-f177kdn89qt0twgfeanwztp",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 17,
+            "prompt_eval_count": 116,
+            "total_duration": 375990100,
+            "prompt_eval_duration": 108435300,
+            "eval_duration": 267554799,
+            "load_duration": 0,
+            "total_latency_ms": 376.4509000029648,
+            "time_to_first_token_ms": 108.44,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_14",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'dog blue blue day дом мама'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: DOG BLUE BLUE DAY ДОМ МАМА  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: DOG BLUE BLUE DAY ДОМ МАМА  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: DOG BLUE BLUE DAY ДОМ МАМА  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "DOG BLUE BLUE DAY ДОМ МАМА",
+            "total_chars": "26",
+            "word_count": "6",
+            "vowel_count": "9"
+        },
+        "is_correct": false,
+        "execution_time_ms": 381.725400002324,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "DOG BLUE BLUE DAY ДОМ МАМА",
+                "total_chars": "26",
+                "word_count": "6",
+                "vowel_count": "9"
+            },
+            "extracted": {
+                "phrase": "DOG BLUE BLUE DAY ДОМ МАМА",
+                "chars": "25",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036591,
+            "id": "chatcmpl-we2z049wo8sciz2ci7k4k",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 20,
+            "prompt_eval_count": 119,
+            "total_duration": 381303000,
+            "prompt_eval_duration": 93120499,
+            "eval_duration": 288182500,
+            "load_duration": 0,
+            "total_latency_ms": 381.725400002324,
+            "time_to_first_token_ms": 93.12,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_15",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello река дом гора снег собака'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HELLO РЕКА ДОМ ГОРА СНЕГ СОБАКА  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HELLO РЕКА ДОМ ГОРА СНЕГ СОБАКА  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HELLO РЕКА ДОМ ГОРА СНЕГ СОБАКА  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "HELLO РЕКА ДОМ ГОРА СНЕГ СОБАКА",
+            "total_chars": "31",
+            "word_count": "6",
+            "vowel_count": "11"
+        },
+        "is_correct": false,
+        "execution_time_ms": 442.9122000001371,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "HELLO РЕКА ДОМ ГОРА СНЕГ СОБАКА",
+                "total_chars": "31",
+                "word_count": "6",
+                "vowel_count": "11"
+            },
+            "extracted": {
+                "phrase": "HELLO РЕКА ДОМ ГОРА СНЕГ СОБАКА",
+                "chars": "28",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036591,
+            "id": "chatcmpl-c3wok79vgtvhy3zxd9rkr4",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 442435000,
+            "prompt_eval_duration": 93195599,
+            "eval_duration": 349239400,
+            "load_duration": 0,
+            "total_latency_ms": 442.9122000001371,
+            "time_to_first_token_ms": 93.2,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_16",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'tree nice снег day'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: TREE NICE СНЕГ DAY  \nСИМВОЛОВ: 17  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: TREE NICE СНЕГ DAY  \nСИМВОЛОВ: 17  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: TREE NICE СНЕГ DAY  \nСИМВОЛОВ: 17  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "TREE NICE СНЕГ DAY",
+            "total_chars": "18",
+            "word_count": "4",
+            "vowel_count": "6"
+        },
+        "is_correct": false,
+        "execution_time_ms": 346.2976000009803,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": true,
+            "expected": {
+                "phrase": "TREE NICE СНЕГ DAY",
+                "total_chars": "18",
+                "word_count": "4",
+                "vowel_count": "6"
+            },
+            "extracted": {
+                "phrase": "TREE NICE СНЕГ DAY",
+                "chars": "17",
+                "words": "4",
+                "vowels": "6"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036592,
+            "id": "chatcmpl-qm4h8fbbdmfnd44rd31hg",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 18,
+            "prompt_eval_count": 117,
+            "total_duration": 345852700,
+            "prompt_eval_duration": 93946200,
+            "eval_duration": 251906499,
+            "load_duration": 0,
+            "total_latency_ms": 346.2976000009803,
+            "time_to_first_token_ms": 93.95,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_17",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'снег house море day ветер hello'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: СНЕГ HOUSE МОРЕ DAY ВЕТЕР HELLO  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: СНЕГ HOUSE МОРЕ DAY ВЕТЕР HELLO  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: СНЕГ HOUSE МОРЕ DAY ВЕТЕР HELLO  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "СНЕГ HOUSE МОРЕ DAY ВЕТЕР HELLO",
+            "total_chars": "31",
+            "word_count": "6",
+            "vowel_count": "11"
+        },
+        "is_correct": false,
+        "execution_time_ms": 408.40050000406336,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "СНЕГ HOUSE МОРЕ DAY ВЕТЕР HELLO",
+                "total_chars": "31",
+                "word_count": "6",
+                "vowel_count": "11"
+            },
+            "extracted": {
+                "phrase": "СНЕГ HOUSE МОРЕ DAY ВЕТЕР HELLO",
+                "chars": "28",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036592,
+            "id": "chatcmpl-n67oqrekjt4kq37joy7u5",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 407977800,
+            "prompt_eval_duration": 94280800,
+            "eval_duration": 313696999,
+            "load_duration": 0,
+            "total_latency_ms": 408.40050000406336,
+            "time_to_first_token_ms": 94.28,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_18",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'снег собака собака лес'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: СНЕГ СОБАКА СОБАКА ЛЕС  \nСИМВОЛОВ: 21  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: СНЕГ СОБАКА СОБАКА ЛЕС  \nСИМВОЛОВ: 21  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: СНЕГ СОБАКА СОБАКА ЛЕС  \nСИМВОЛОВ: 21  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "СНЕГ СОБАКА СОБАКА ЛЕС",
+            "total_chars": "22",
+            "word_count": "4",
+            "vowel_count": "8"
+        },
+        "is_correct": false,
+        "execution_time_ms": 427.32319999777246,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "СНЕГ СОБАКА СОБАКА ЛЕС",
+                "total_chars": "22",
+                "word_count": "4",
+                "vowel_count": "8"
+            },
+            "extracted": {
+                "phrase": "СНЕГ СОБАКА СОБАКА ЛЕС",
+                "chars": "21",
+                "words": "4",
+                "vowels": "6"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036593,
+            "id": "chatcmpl-7hg7lnyf6thrtjq81twje",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 19,
+            "prompt_eval_count": 118,
+            "total_duration": 426888500,
+            "prompt_eval_duration": 107680800,
+            "eval_duration": 319207699,
+            "load_duration": 0,
+            "total_latency_ms": 427.32319999777246,
+            "time_to_first_token_ms": 107.68,
+            "peak_ram_increment_mb": 0.0078125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_19",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'world day ветер собака fire солнце'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: WORLD DAY ВЕТЁР СОБАКА FIRE СОЛНЦЕ  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: WORLD DAY ВЕТЁР СОБАКА FIRE СОЛНЦЕ  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: WORLD DAY ВЕТЁР СОБАКА FIRE СОЛНЦЕ  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "WORLD DAY ВЕТЕР СОБАКА FIRE СОЛНЦЕ",
+            "total_chars": "34",
+            "word_count": "6",
+            "vowel_count": "11"
+        },
+        "is_correct": false,
+        "execution_time_ms": 461.60570000938606,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": false,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "WORLD DAY ВЕТЕР СОБАКА FIRE СОЛНЦЕ",
+                "total_chars": "34",
+                "word_count": "6",
+                "vowel_count": "11"
+            },
+            "extracted": {
+                "phrase": "WORLD DAY ВЕТЁР СОБАКА FIRE СОЛНЦЕ",
+                "chars": "30",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036593,
+            "id": "chatcmpl-af2pgiz4thc5gr07k02wrs",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 22,
+            "prompt_eval_count": 121,
+            "total_duration": 461174099,
+            "prompt_eval_duration": 112862800,
+            "eval_duration": 348311299,
+            "load_duration": 0,
+            "total_latency_ms": 461.60570000938606,
+            "time_to_first_token_ms": 112.86,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_20",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'button лес поле птица'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: BUTTON ЛЕС ПОЛЕ ПТИЦА  \nСИМВОЛОВ: 20  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: BUTTON ЛЕС ПОЛЕ ПТИЦА  \nСИМВОЛОВ: 20  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: BUTTON ЛЕС ПОЛЕ ПТИЦА  \nСИМВОЛОВ: 20  \nСЛОВ: 4  \nГЛАСНЫХ: 6",
+        "expected_output": {
+            "phrase": "BUTTON ЛЕС ПОЛЕ ПТИЦА",
+            "total_chars": "21",
+            "word_count": "4",
+            "vowel_count": "7"
+        },
+        "is_correct": false,
+        "execution_time_ms": 375.4300000000512,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "BUTTON ЛЕС ПОЛЕ ПТИЦА",
+                "total_chars": "21",
+                "word_count": "4",
+                "vowel_count": "7"
+            },
+            "extracted": {
+                "phrase": "BUTTON ЛЕС ПОЛЕ ПТИЦА",
+                "chars": "20",
+                "words": "4",
+                "vowels": "6"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036594,
+            "id": "chatcmpl-pprv00iwm2jfqf9k36o4q",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 18,
+            "prompt_eval_count": 118,
+            "total_duration": 375008500,
+            "prompt_eval_duration": 94013500,
+            "eval_duration": 280994999,
+            "load_duration": 0,
+            "total_latency_ms": 375.4300000000512,
+            "time_to_first_token_ms": 94.01,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_21",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'солнце поле папа house'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: СОЛНЦЕ ПОЛЕ ПАПА HOUSE  \nСИМВОЛОВ: 20  \nСЛОВ: 5  \nГЛАСНЫХ: 8",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: СОЛНЦЕ ПОЛЕ ПАПА HOUSE  \nСИМВОЛОВ: 20  \nСЛОВ: 5  \nГЛАСНЫХ: 8",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: СОЛНЦЕ ПОЛЕ ПАПА HOUSE  \nСИМВОЛОВ: 20  \nСЛОВ: 5  \nГЛАСНЫХ: 8",
+        "expected_output": {
+            "phrase": "СОЛНЦЕ ПОЛЕ ПАПА HOUSE",
+            "total_chars": "22",
+            "word_count": "4",
+            "vowel_count": "9"
+        },
+        "is_correct": false,
+        "execution_time_ms": 415.75979998742696,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": false,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "СОЛНЦЕ ПОЛЕ ПАПА HOUSE",
+                "total_chars": "22",
+                "word_count": "4",
+                "vowel_count": "9"
+            },
+            "extracted": {
+                "phrase": "СОЛНЦЕ ПОЛЕ ПАПА HOUSE",
+                "chars": "20",
+                "words": "5",
+                "vowels": "8"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036594,
+            "id": "chatcmpl-bfflb5v39xr66q1jthbin",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 19,
+            "prompt_eval_count": 118,
+            "total_duration": 415340400,
+            "prompt_eval_duration": 112032200,
+            "eval_duration": 303308200,
+            "load_duration": 0,
+            "total_latency_ms": 415.75979998742696,
+            "time_to_first_token_ms": 112.03,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_22",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'earth dog гора'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: EARTH DOG ГОРА  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 4",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: EARTH DOG ГОРА  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 4",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: EARTH DOG ГОРА  \nСИМВОЛОВ: 14  \nСЛОВ: 3  \nГЛАСНЫХ: 4",
+        "expected_output": {
+            "phrase": "EARTH DOG ГОРА",
+            "total_chars": "14",
+            "word_count": "3",
+            "vowel_count": "5"
+        },
+        "is_correct": false,
+        "execution_time_ms": 368.1871000007959,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": true,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "EARTH DOG ГОРА",
+                "total_chars": "14",
+                "word_count": "3",
+                "vowel_count": "5"
+            },
+            "extracted": {
+                "phrase": "EARTH DOG ГОРА",
+                "chars": "14",
+                "words": "3",
+                "vowels": "4"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036595,
+            "id": "chatcmpl-l487uoh31jpqd4iqy22zv",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 17,
+            "prompt_eval_count": 116,
+            "total_duration": 367772400,
+            "prompt_eval_duration": 113562099,
+            "eval_duration": 254210300,
+            "load_duration": 0,
+            "total_latency_ms": 368.1871000007959,
+            "time_to_first_token_ms": 113.56,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_23",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'кот day снег ветер гора'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: КОТ DAY СНЕГ ВЕТР ГОРА  \nСИМВОЛОВ: 19  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: КОТ DAY СНЕГ ВЕТР ГОРА  \nСИМВОЛОВ: 19  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: КОТ DAY СНЕГ ВЕТР ГОРА  \nСИМВОЛОВ: 19  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "expected_output": {
+            "phrase": "КОТ DAY СНЕГ ВЕТЕР ГОРА",
+            "total_chars": "23",
+            "word_count": "5",
+            "vowel_count": "7"
+        },
+        "is_correct": false,
+        "execution_time_ms": 398.29280000412837,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": false,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": true,
+            "expected": {
+                "phrase": "КОТ DAY СНЕГ ВЕТЕР ГОРА",
+                "total_chars": "23",
+                "word_count": "5",
+                "vowel_count": "7"
+            },
+            "extracted": {
+                "phrase": "КОТ DAY СНЕГ ВЕТР ГОРА",
+                "chars": "19",
+                "words": "5",
+                "vowels": "7"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036595,
+            "id": "chatcmpl-zw03x6rcdor9y0yqndnjiw",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 19,
+            "prompt_eval_count": 118,
+            "total_duration": 397856299,
+            "prompt_eval_duration": 93342099,
+            "eval_duration": 304514200,
+            "load_duration": 0,
+            "total_latency_ms": 398.29280000412837,
+            "time_to_first_token_ms": 93.34,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_24",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'button sky button world ветер папа'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: BUTTON SKY BUTTON WORLD ВЕТР ПАПА  \nСИМВОЛОВ: 31  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: BUTTON SKY BUTTON WORLD ВЕТР ПАПА  \nСИМВОЛОВ: 31  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: BUTTON SKY BUTTON WORLD ВЕТР ПАПА  \nСИМВОЛОВ: 31  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "BUTTON SKY BUTTON WORLD ВЕТЕР ПАПА",
+            "total_chars": "34",
+            "word_count": "6",
+            "vowel_count": "9"
+        },
+        "is_correct": false,
+        "execution_time_ms": 397.0241999923019,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": false,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "BUTTON SKY BUTTON WORLD ВЕТЕР ПАПА",
+                "total_chars": "34",
+                "word_count": "6",
+                "vowel_count": "9"
+            },
+            "extracted": {
+                "phrase": "BUTTON SKY BUTTON WORLD ВЕТР ПАПА",
+                "chars": "31",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036595,
+            "id": "chatcmpl-5s3razdh1nol4q8z34h82e",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 22,
+            "prompt_eval_count": 121,
+            "total_duration": 396600300,
+            "prompt_eval_duration": 92500900,
+            "eval_duration": 304099400,
+            "load_duration": 0,
+            "total_latency_ms": 397.0241999923019,
+            "time_to_first_token_ms": 92.5,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_25",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'button дом гора кот nice папа'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: BUTTON ДОМ ГОРА КОТ NICE ПАПА  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 8",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: BUTTON ДОМ ГОРА КОТ NICE ПАПА  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 8",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: BUTTON ДОМ ГОРА КОТ NICE ПАПА  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 8",
+        "expected_output": {
+            "phrase": "BUTTON ДОМ ГОРА КОТ NICE ПАПА",
+            "total_chars": "29",
+            "word_count": "6",
+            "vowel_count": "10"
+        },
+        "is_correct": false,
+        "execution_time_ms": 425.7166000024881,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "BUTTON ДОМ ГОРА КОТ NICE ПАПА",
+                "total_chars": "29",
+                "word_count": "6",
+                "vowel_count": "10"
+            },
+            "extracted": {
+                "phrase": "BUTTON ДОМ ГОРА КОТ NICE ПАПА",
+                "chars": "25",
+                "words": "6",
+                "vowels": "8"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036596,
+            "id": "chatcmpl-8dh8zfsjel5qa5qn9iu7n",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 20,
+            "prompt_eval_count": 120,
+            "total_duration": 425287299,
+            "prompt_eval_duration": 109017199,
+            "eval_duration": 316270099,
+            "load_duration": 0,
+            "total_latency_ms": 425.7166000024881,
+            "time_to_first_token_ms": 109.02,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_26",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'собака push дождь поле day ветер'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: SOBAKA PUSH DOZD POLY DAY VETER  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 8",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: SOBAKA PUSH DOZD POLY DAY VETER  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 8",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: SOBAKA PUSH DOZD POLY DAY VETER  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 8",
+        "expected_output": {
+            "phrase": "СОБАКА PUSH ДОЖДЬ ПОЛЕ DAY ВЕТЕР",
+            "total_chars": "32",
+            "word_count": "6",
+            "vowel_count": "10"
+        },
+        "is_correct": false,
+        "execution_time_ms": 421.8732000008458,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": false,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "СОБАКА PUSH ДОЖДЬ ПОЛЕ DAY ВЕТЕР",
+                "total_chars": "32",
+                "word_count": "6",
+                "vowel_count": "10"
+            },
+            "extracted": {
+                "phrase": "SOBAKA PUSH DOZD POLY DAY VETER",
+                "chars": "28",
+                "words": "6",
+                "vowels": "8"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036596,
+            "id": "chatcmpl-025ynzm9wirizqh9qjurszk",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 121,
+            "total_duration": 421449999,
+            "prompt_eval_duration": 119230099,
+            "eval_duration": 302219899,
+            "load_duration": 0,
+            "total_latency_ms": 421.8732000008458,
+            "time_to_first_token_ms": 119.23,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_27",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'hello птица дождь дом tree лес'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HELLO ПТИЦА ДОЖДЬ ДОМ TREE ЛЕС  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HELLO ПТИЦА ДОЖДЬ ДОМ TREE ЛЕС  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HELLO ПТИЦА ДОЖДЬ ДОМ TREE ЛЕС  \nСИМВОЛОВ: 28  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "HELLO ПТИЦА ДОЖДЬ ДОМ TREE ЛЕС",
+            "total_chars": "30",
+            "word_count": "6",
+            "vowel_count": "9"
+        },
+        "is_correct": false,
+        "execution_time_ms": 432.6535000000149,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "HELLO ПТИЦА ДОЖДЬ ДОМ TREE ЛЕС",
+                "total_chars": "30",
+                "word_count": "6",
+                "vowel_count": "9"
+            },
+            "extracted": {
+                "phrase": "HELLO ПТИЦА ДОЖДЬ ДОМ TREE ЛЕС",
+                "chars": "28",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036597,
+            "id": "chatcmpl-hor32885dre03fpbpukqaas",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 432185899,
+            "prompt_eval_duration": 93554399,
+            "eval_duration": 338631499,
+            "load_duration": 0,
+            "total_latency_ms": 432.6535000000149,
+            "time_to_first_token_ms": 93.55,
+            "peak_ram_increment_mb": 0.0078125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_28",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'снег water папа собака лес'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: СНЕГ WATER ПАПА СОБАКА ЛЕС  \nСИМВОЛОВ: 23  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: СНЕГ WATER ПАПА СОБАКА ЛЕС  \nСИМВОЛОВ: 23  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: СНЕГ WATER ПАПА СОБАКА ЛЕС  \nСИМВОЛОВ: 23  \nСЛОВ: 5  \nГЛАСНЫХ: 7",
+        "expected_output": {
+            "phrase": "СНЕГ WATER ПАПА СОБАКА ЛЕС",
+            "total_chars": "26",
+            "word_count": "5",
+            "vowel_count": "9"
+        },
+        "is_correct": false,
+        "execution_time_ms": 411.77089999837335,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "СНЕГ WATER ПАПА СОБАКА ЛЕС",
+                "total_chars": "26",
+                "word_count": "5",
+                "vowel_count": "9"
+            },
+            "extracted": {
+                "phrase": "СНЕГ WATER ПАПА СОБАКА ЛЕС",
+                "chars": "23",
+                "words": "5",
+                "vowels": "7"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036597,
+            "id": "chatcmpl-ypiy6du35gpic02mu8kt5",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 20,
+            "prompt_eval_count": 119,
+            "total_duration": 411356399,
+            "prompt_eval_duration": 94252200,
+            "eval_duration": 317104199,
+            "load_duration": 0,
+            "total_latency_ms": 411.77089999837335,
+            "time_to_first_token_ms": 94.25,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_29",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'птица поле море гора water папа'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: ПТИЦА ПОЛЕ МОРЕ ГОРА WATER ПАПА  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: ПТИЦА ПОЛЕ МОРЕ ГОРА WATER ПАПА  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: ПТИЦА ПОЛЕ МОРЕ ГОРА WATER ПАПА  \nСИМВОЛОВ: 30  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "ПТИЦА ПОЛЕ МОРЕ ГОРА WATER ПАПА",
+            "total_chars": "31",
+            "word_count": "6",
+            "vowel_count": "12"
+        },
+        "is_correct": false,
+        "execution_time_ms": 433.6954999889713,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": false,
+            "expected": {
+                "phrase": "ПТИЦА ПОЛЕ МОРЕ ГОРА WATER ПАПА",
+                "total_chars": "31",
+                "word_count": "6",
+                "vowel_count": "12"
+            },
+            "extracted": {
+                "phrase": "ПТИЦА ПОЛЕ МОРЕ ГОРА WATER ПАПА",
+                "chars": "30",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036598,
+            "id": "chatcmpl-8nz7hfm7gijfpw0qm7vvd",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 433224699,
+            "prompt_eval_duration": 94988099,
+            "eval_duration": 338236600,
+            "load_duration": 0,
+            "total_latency_ms": 433.6954999889713,
+            "time_to_first_token_ms": 94.99,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    },
+    {
+        "test_id": "t02_instructions_30",
+        "model_name": "qwen/qwen3-4b-2507",
+        "model_details": {
+            "model_name": "qwen/qwen3-4b-2507",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Выполни в точности следующие инструкции по порядку:\n1. Возьми исходную фразу: 'house ветер nice push sky море'.\n2. Напиши ее в ВЕРХНЕМ РЕГИСТРЕ.\n3. Посчитай общее количество символов (включая пробелы и знаки препинания).\n4. Посчитай количество слов в исходной фразе.\n5. Посчитай количество гласных букв в исходной фразе.\n6. Выведи все результаты СТРОГО в следующем формате, без лишних слов:\nОБРАБОТАНО: [фраза в верхнем регистре]\nСИМВОЛОВ: [число]\nСЛОВ: [число]\nГЛАСНЫХ: [число]",
+        "thinking_response": "",
+        "llm_response": "ОБРАБОТАНО: HOUSE ВЕТЕР NICE PUSH SKY МОРЕ  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "thinking_log": "",
+        "parsed_answer": "ОБРАБОТАНО: HOUSE ВЕТЕР NICE PUSH SKY МОРЕ  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "raw_llm_output": "<think></think>\nОБРАБОТАНО: HOUSE ВЕТЕР NICE PUSH SKY МОРЕ  \nСИМВОЛОВ: 25  \nСЛОВ: 6  \nГЛАСНЫХ: 10",
+        "expected_output": {
+            "phrase": "HOUSE ВЕТЕР NICE PUSH SKY МОРЕ",
+            "total_chars": "30",
+            "word_count": "6",
+            "vowel_count": "10"
+        },
+        "is_correct": false,
+        "execution_time_ms": 426.84359999839216,
+        "verification_details": {
+            "reason": "One or more fields incorrect",
+            "phrase_match": true,
+            "chars_match": false,
+            "words_match": true,
+            "vowels_match": true,
+            "expected": {
+                "phrase": "HOUSE ВЕТЕР NICE PUSH SKY МОРЕ",
+                "total_chars": "30",
+                "word_count": "6",
+                "vowel_count": "10"
+            },
+            "extracted": {
+                "phrase": "HOUSE ВЕТЕР NICE PUSH SKY МОРЕ",
+                "chars": "25",
+                "words": "6",
+                "vowels": "10"
+            }
+        },
+        "performance_metrics": {
+            "model": "qwen/qwen3-4b-2507",
+            "created": 1758036598,
+            "id": "chatcmpl-xr4o46y88mahg7ansr1ie",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen/qwen3-4b-2507",
+            "eval_count": 21,
+            "prompt_eval_count": 120,
+            "total_duration": 426361599,
+            "prompt_eval_duration": 118202599,
+            "eval_duration": 308159000,
+            "load_duration": 0,
+            "total_latency_ms": 426.84359999839216,
+            "time_to_first_token_ms": 118.2,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 55.93,
+                "available_ram_gb": 41.29,
+                "used_ram_gb": 14.63,
+                "ram_percentage": 26.2,
+                "total_swap_gb": 8.0,
+                "swap_percentage": 0.4
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.8129",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 357.98,
+                "disk_used_gb": 573.52
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1758036602.3049333
+    }
+]
