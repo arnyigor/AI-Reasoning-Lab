@@ -1,13 +1,18 @@
 {
     "qwen\/qwen3-4b-2507":{
-        "Trust_Score":0.8666812628,
-        "Accuracy":0.8888888889,
-        "Total_Runs":900
+        "Trust_Score":0.8726811897,
+        "Accuracy":0.8931372549,
+        "Total_Runs":1020
     },
     "qwen\/qwen3-4b-thinking-2507":{
-        "Trust_Score":0.8076812687,
-        "Accuracy":0.86875,
-        "Total_Runs":160
+        "Trust_Score":0.8511677925,
+        "Accuracy":0.8928571429,
+        "Total_Runs":280
+    },
+    "driaforall.mem-agent":{
+        "Trust_Score":0.8432915303,
+        "Accuracy":0.9083333333,
+        "Total_Runs":120
     },
     "qwen3-8b":{
         "Trust_Score":0.7782121198,

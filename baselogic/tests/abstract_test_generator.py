@@ -58,30 +58,30 @@ class AbstractTestGenerator(ABC):
     def _cleanup_llm_response(self, llm_output: str) -> str:
         """
         Общий вспомогательный метод для очистки ответа модели от "шума".
-        Удаляет рассуждения в <think>, спецтокены и Markdown.
         """
         if not isinstance(llm_output, str):
             return ""
 
-        # --- НАЧАЛО ИЗМЕНЕНИЙ: "Агрессивная" очистка ---
-        # 1. Удаляем "болтовню" до <think> или до основного ответа
-        # Ищем первое вхождение <think> или осмысленного слова и отрезаем все до него
-        first_meaningful_match = re.search(r"<think>|([A-ZА-ЯЁ][a-zа-яё])", llm_output)
-        if first_meaningful_match:
-            llm_output = llm_output[first_meaningful_match.start():]
-
-        # 2. Удаляем блоки <think>...</think>
+        # 1. Удаляем блоки <think>...</think>
         clean_output = re.sub(r'<think>.*?</think>', '', llm_output, flags=re.DOTALL | re.IGNORECASE)
 
-        # Удаляем известные спецтокены
-        known_tokens = [
-            r"<\|im_start\|>", r"<\|im_end\|>", r"<\|endoftext\|>",
-            r"<s>", r"</s>", r"<\|eot_id\|>", r"assistant"
-        ]
-        tokens_pattern = re.compile("|".join(known_tokens), re.IGNORECASE)
-        clean_output = tokens_pattern.sub("", clean_output)
+        # 2. Извлекаем содержимое из <response>...</response>
+        response_match = re.search(r'<response>(.*?)</response>', clean_output, flags=re.DOTALL | re.IGNORECASE)
+        if response_match:
+            clean_output = response_match.group(1).strip()
 
-        # Удаляем Markdown
+        # 3. Удаляем служебные токены
+        stop_tokens = [
+            r"</s>.*$", r"<\|eot_id\|>.*$", r"<\|endoftext\|>.*$",
+            r"<\|im_start\|>", r"<\|im_end\|>", r"<s>", r"assistant"
+        ]
+        for token in stop_tokens:
+            clean_output = re.sub(token, "", clean_output, flags=re.DOTALL | re.IGNORECASE)
+
+        # 4. Останавливаемся на повторяющемся контенте
+        clean_output = re.sub(r"»\s*,\s*.*$", "", clean_output, flags=re.DOTALL)
+
+        # 5. Удаляем Markdown форматирование
         clean_output = re.sub(r'[*_`~]', '', clean_output)
 
         return clean_output.strip()

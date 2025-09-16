@@ -46,11 +46,23 @@ class OllamaClient(ProviderClient):
     def _load_ollama_environment(self):
         """Установка дефолтных значений для отсутствующих переменных"""
         ollama_settings = {
+            # Основные настройки производительности
             'OLLAMA_NUM_PARALLEL': '1',
             'OLLAMA_MAX_LOADED_MODELS': '1',
             'OLLAMA_CPU_THREADS': '6',
             'OLLAMA_FLASH_ATTENTION': 'false',
             'OLLAMA_KEEP_ALIVE': '5m',
+
+            # Расширенные настройки GPU/памяти
+            'OLLAMA_GPU_LAYERS': '999',      # Количество слоев в GPU
+            'OLLAMA_CONTEXT_SIZE': '4096',   # Размер контекста
+            'OLLAMA_NUM_GPU': '1',           # Количество GPU
+            'OLLAMA_LOW_VRAM': 'false',      # Режим экономии VRAM
+            'OLLAMA_USE_NUMA': 'false',      # Использование NUMA
+
+            # Дополнительные настройки
+            'OLLAMA_GPU_SPLIT_MODE': '0',    # Режим разделения GPU
+            'OLLAMA_OFFLOAD_KQV': 'true',    # Выгрузка KQV в GPU
         }
 
         for key, default_value in ollama_settings.items():
@@ -61,20 +73,43 @@ class OllamaClient(ProviderClient):
             else:
                 log.info(f"✅ Используется из .env: {key}={current_value}")
 
-    def prepare_payload(self, messages: List[Dict[str, str]], model: str, *, stream: bool = False, **kwargs: Any) -> \
-    Dict[str, Any]:
+
+    def prepare_payload(self, messages: List[Dict[str, str]], model: str, *, stream: bool = False, **kwargs: Any) -> Dict[str, Any]:
         top_level_args = {'format', 'keep_alive', 'think'}
         payload = {"model": model, "messages": messages, "stream": stream}
         options = {}
+
+        # Если включен режим использования параметров из .env
+        if self.use_params:
+            # Добавляем настройки из переменных окружения
+            env_options = {
+                'num_ctx': int(os.environ.get('OLLAMA_CONTEXT_SIZE', '4096')),
+                'num_gpu': int(os.environ.get('OLLAMA_NUM_GPU', '1')),
+                'num_thread': int(os.environ.get('OLLAMA_CPU_THREADS', '6')),
+                'low_vram': str_to_bool(os.environ.get('OLLAMA_LOW_VRAM', 'false')),
+                'numa': str_to_bool(os.environ.get('OLLAMA_USE_NUMA', 'false')),
+                'flash_attn': str_to_bool(os.environ.get('OLLAMA_FLASH_ATTENTION', 'false')),
+            }
+
+            # Добавляем в options только не-None значения
+            for key, value in env_options.items():
+                if value is not None:
+                    options[key] = value
+
+        # Обрабатываем пользовательские параметры
         for key, value in kwargs.items():
-            if value is None: continue
+            if value is None:
+                continue
             if key in top_level_args:
                 payload[key] = value
             else:
-                options[key] = value
+                options[key] = value  # Пользовательские параметры перезаписывают env
+
         if options:
             payload['options'] = options
+
         return {k: v for k, v in payload.items() if v is not None}
+
 
     def send_request(self, payload: Dict[str, Any]) -> Union[Dict[str, Any], Iterable[Dict[str, Any]]]:
         """

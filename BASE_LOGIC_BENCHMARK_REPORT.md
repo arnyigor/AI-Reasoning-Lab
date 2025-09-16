@@ -1,6 +1,6 @@
 # 🏆 Отчет по тестированию LLM моделей
 
-*Последнее обновление: 2025-09-04 14:53:43*
+*Последнее обновление: 2025-09-16 15:18:23*
 
 ## 🏆 Основной рейтинг моделей
 
@@ -8,8 +8,9 @@
 
 | Модель                             |   Trust Score | Accuracy   | Coverage   | Verbosity   | Avg Time   |   Runs |
 |:-----------------------------------|--------------:|:-----------|:-----------|:------------|:-----------|-------:|
-| qwen/qwen3-4b-2507                 |         0.867 | 88.9% ▬    | 100%       | 0.0%        | 606 мс     |    900 |
-| qwen/qwen3-4b-thinking-2507        |         0.808 | 86.9% ▬    | 46%        | 98.8%       | 18,180 мс  |    160 |
+| qwen/qwen3-4b-2507                 |         0.873 | 89.3% ▬    | 100%       | 0.0%        | 588 мс     |   1020 |
+| qwen/qwen3-4b-thinking-2507        |         0.851 | 89.3% ▬    | 92%        | 98.2%       | 15,550 мс  |    280 |
+| driaforall.mem-agent               |         0.843 | 90.8% ▬    | 92%        | 96.5%       | 9,759 мс   |    120 |
 | qwen3-8b                           |         0.778 | 88.3% ▬    | 46%        | 93.1%       | 3,483 мс   |     60 |
 | google/gemma-3n-e4b                |         0.754 | 81.7% ▬    | 46%        | 0.0%        | 1,041 мс   |    180 |
 | jan-v1-4b                          |         0.739 | 85.0% ▬    | 46%        | 97.5%       | 10,010 мс  |     60 |
@@ -22,32 +23,34 @@
 ---
 ## ⚡ Сводка производительности
 
-> _Базовые метрики скорости по 10 моделям. Модели отсортированы по p95 латентности._
+> _Базовые метрики скорости по 11 моделям. Модели отсортированы по p95 латентности._
 
 | Модель                             |   Средняя латентность (мс) |   p95 латентность (мс) |   Примерн. QPS |   Всего запусков |
 |:-----------------------------------|---------------------------:|-----------------------:|---------------:|-----------------:|
 | qwen2.5-7b-instruct-1m             |                        291 |                    625 |           3.43 |               60 |
 | jan-nano                           |                        290 |                    694 |           3.44 |              170 |
-| qwen/qwen3-4b-2507                 |                        606 |                   1920 |           1.65 |              900 |
+| qwen/qwen3-4b-2507                 |                        588 |                   1909 |           1.7  |             1020 |
 | google/gemma-3n-e4b                |                       1040 |                   2060 |           0.96 |              180 |
 | gemma3:4b                          |                        626 |                   2451 |           1.6  |              184 |
 | qwen3-8b                           |                       3482 |                   8413 |           0.29 |               60 |
 | deepseek-coder-v2-lite-instruct    |                       3682 |                  17156 |           0.27 |               60 |
+| driaforall.mem-agent               |                       9758 |                  20296 |           0.1  |              120 |
 | deepseek/deepseek-r1-0528-qwen3-8b |                       9067 |                  21217 |           0.11 |              180 |
 | jan-v1-4b                          |                      10009 |                  30172 |           0.1  |               60 |
-| qwen/qwen3-4b-thinking-2507        |                      18179 |                  61764 |           0.06 |              160 |
+| qwen/qwen3-4b-thinking-2507        |                      15550 |                  52480 |           0.06 |              280 |
 
 ---
 
 ---
 ## 🏠 Лидеры локальных провайдеров
 
-> _Все 10 локальных моделей отсортированы по Trust Score. Определение через model_details.provider и hardware_tier._
+> _Все 11 локальных моделей отсортированы по Trust Score. Определение через model_details.provider и hardware_tier._
 
 | Провайдер   | Модель                             |   Trust Score | Точность   |   Средняя латентность (мс) |   p95 латентность (мс) |   QPS |   Запусков |
 |:------------|:-----------------------------------|--------------:|:-----------|---------------------------:|-----------------------:|------:|-----------:|
-| OLLAMA      | qwen/qwen3-4b-2507                 |         0.867 | 88.9%      |                        606 |                   1920 |  1.65 |        900 |
-| OLLAMA      | qwen/qwen3-4b-thinking-2507        |         0.808 | 86.9%      |                      18179 |                  61764 |  0.06 |        160 |
+| OLLAMA      | qwen/qwen3-4b-2507                 |         0.873 | 89.3%      |                        588 |                   1909 |  1.7  |       1020 |
+| OLLAMA      | qwen/qwen3-4b-thinking-2507        |         0.851 | 89.3%      |                      15550 |                  52480 |  0.06 |        280 |
+| LOCAL       | driaforall.mem-agent               |         0.843 | 90.8%      |                       9758 |                  20296 |  0.1  |        120 |
 | OLLAMA      | qwen3-8b                           |         0.778 | 88.3%      |                       3482 |                   8413 |  0.29 |         60 |
 | LOCAL       | google/gemma-3n-e4b                |         0.754 | 81.7%      |                       1040 |                   2060 |  0.96 |        180 |
 | JAN         | jan-v1-4b                          |         0.739 | 85.0%      |                      10009 |                  30172 |  0.1  |         60 |
@@ -74,6 +77,18 @@
 | deepseek/deepseek-r1-0528-qwen3-8b | t03_code_gen          |        30 |        21 | 70%        |
 | deepseek/deepseek-r1-0528-qwen3-8b | t05_summarization     |        30 |        18 | 60%        |
 | deepseek/deepseek-r1-0528-qwen3-8b | t02_instructions      |        30 |        11 | 37%        |
+| driaforall.mem-agent               | t01_simple_logic      |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t04_data_extraction   |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t06_mathematics       |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t07_accuracy_ideal    |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t08_accuracy_flawed   |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t09_verbosity_ideal   |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t10_verbosity_verbose |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t11_positional_first  |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t12_positional_second |        10 |        10 | 100%       |
+| driaforall.mem-agent               | t02_instructions      |        10 |         8 | 80%        |
+| driaforall.mem-agent               | t03_code_gen          |        10 |         7 | 70%        |
+| driaforall.mem-agent               | t05_summarization     |        10 |         4 | 40%        |
 | gemma3:4b                          | t04_data_extraction   |        30 |        30 | 100%       |
 | gemma3:4b                          | t01_simple_logic      |        44 |        42 | 95%        |
 | gemma3:4b                          | t03_code_gen          |        30 |        25 | 83%        |
@@ -98,24 +113,30 @@
 | jan-v1-4b                          | t02_instructions      |        10 |         9 | 90%        |
 | jan-v1-4b                          | t05_summarization     |        10 |         9 | 90%        |
 | jan-v1-4b                          | t03_code_gen          |        10 |         4 | 40%        |
-| qwen/qwen3-4b-2507                 | t03_code_gen          |       100 |       100 | 100%       |
-| qwen/qwen3-4b-2507                 | t04_data_extraction   |       100 |       100 | 100%       |
-| qwen/qwen3-4b-2507                 | t05_summarization     |       100 |       100 | 100%       |
-| qwen/qwen3-4b-2507                 | t07_accuracy_ideal    |        50 |        50 | 100%       |
-| qwen/qwen3-4b-2507                 | t08_accuracy_flawed   |        50 |        50 | 100%       |
-| qwen/qwen3-4b-2507                 | t09_verbosity_ideal   |        50 |        50 | 100%       |
-| qwen/qwen3-4b-2507                 | t10_verbosity_verbose |        50 |        50 | 100%       |
-| qwen/qwen3-4b-2507                 | t11_positional_first  |        50 |        50 | 100%       |
-| qwen/qwen3-4b-2507                 | t12_positional_second |        50 |        50 | 100%       |
-| qwen/qwen3-4b-2507                 | t01_simple_logic      |       100 |        97 | 97%        |
-| qwen/qwen3-4b-2507                 | t06_mathematics       |       100 |        72 | 72%        |
-| qwen/qwen3-4b-2507                 | t02_instructions      |       100 |        31 | 31%        |
-| qwen/qwen3-4b-thinking-2507        | t01_simple_logic      |        30 |        30 | 100%       |
-| qwen/qwen3-4b-thinking-2507        | t04_data_extraction   |        30 |        30 | 100%       |
-| qwen/qwen3-4b-thinking-2507        | t06_mathematics       |        30 |        30 | 100%       |
-| qwen/qwen3-4b-thinking-2507        | t02_instructions      |        10 |         9 | 90%        |
-| qwen/qwen3-4b-thinking-2507        | t05_summarization     |        30 |        25 | 83%        |
-| qwen/qwen3-4b-thinking-2507        | t03_code_gen          |        30 |        15 | 50%        |
+| qwen/qwen3-4b-2507                 | t03_code_gen          |       110 |       110 | 100%       |
+| qwen/qwen3-4b-2507                 | t04_data_extraction   |       110 |       110 | 100%       |
+| qwen/qwen3-4b-2507                 | t05_summarization     |       110 |       110 | 100%       |
+| qwen/qwen3-4b-2507                 | t07_accuracy_ideal    |        60 |        60 | 100%       |
+| qwen/qwen3-4b-2507                 | t09_verbosity_ideal   |        60 |        60 | 100%       |
+| qwen/qwen3-4b-2507                 | t10_verbosity_verbose |        60 |        60 | 100%       |
+| qwen/qwen3-4b-2507                 | t11_positional_first  |        60 |        60 | 100%       |
+| qwen/qwen3-4b-2507                 | t12_positional_second |        60 |        60 | 100%       |
+| qwen/qwen3-4b-2507                 | t01_simple_logic      |       110 |       107 | 97%        |
+| qwen/qwen3-4b-2507                 | t08_accuracy_flawed   |        60 |        57 | 95%        |
+| qwen/qwen3-4b-2507                 | t06_mathematics       |       110 |        82 | 75%        |
+| qwen/qwen3-4b-2507                 | t02_instructions      |       110 |        35 | 32%        |
+| qwen/qwen3-4b-thinking-2507        | t01_simple_logic      |        40 |        40 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t04_data_extraction   |        40 |        40 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t06_mathematics       |        40 |        40 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t07_accuracy_ideal    |        10 |        10 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t08_accuracy_flawed   |        10 |        10 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t09_verbosity_ideal   |        10 |        10 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t10_verbosity_verbose |        10 |        10 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t11_positional_first  |        10 |        10 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t12_positional_second |        10 |        10 | 100%       |
+| qwen/qwen3-4b-thinking-2507        | t02_instructions      |        20 |        19 | 95%        |
+| qwen/qwen3-4b-thinking-2507        | t05_summarization     |        40 |        33 | 82%        |
+| qwen/qwen3-4b-thinking-2507        | t03_code_gen          |        40 |        18 | 45%        |
 | qwen2.5-7b-instruct-1m             | t01_simple_logic      |        10 |        10 | 100%       |
 | qwen2.5-7b-instruct-1m             | t04_data_extraction   |        10 |        10 | 100%       |
 | qwen2.5-7b-instruct-1m             | t05_summarization     |        10 |        10 | 100%       |

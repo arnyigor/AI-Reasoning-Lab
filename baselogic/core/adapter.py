@@ -29,15 +29,45 @@ class AdapterLLMClient(ILLMClient):
         return {"model_name": self.new_client.model, "provider": self.new_client.provider.__class__.__name__}
 
     def _parse_think_response(self, raw_response: str) -> Dict[str, Any]:
+        # Парсим <think> блоки
         think_pattern = re.compile(r"<think>(.*?)</think>", re.DOTALL | re.IGNORECASE)
         think_match = think_pattern.search(raw_response)
 
-        thinking_response, llm_response = "", raw_response
+        thinking_response = ""
         if think_match:
             thinking_response = think_match.group(1).strip()
-            llm_response = think_pattern.sub("", raw_response).strip()
+
+        # Удаляем <think> блоки из ответа
+        llm_response = think_pattern.sub("", raw_response).strip()
+
+        # Парсим <response> блоки
+        response_pattern = re.compile(r"<response>(.*?)</response>", re.DOTALL | re.IGNORECASE)
+        response_match = response_pattern.search(llm_response)
+
+        if response_match:
+            # Если есть <response>, используем только его содержимое
+            llm_response = response_match.group(1).strip()
+        else:
+            # Иначе очищаем от служебных токенов
+            llm_response = self._cleanup_raw_response(llm_response)
 
         return {"thinking_response": thinking_response, "llm_response": llm_response}
+
+    def _cleanup_raw_response(self, text: str) -> str:
+        """Очищает ответ от служебных токенов и мусора."""
+        if not text:
+            return ""
+
+        # Удаляем завершающие токены
+        stop_tokens = [r"</s>", r"<\|eot_id\|>", r"<\|endoftext\|>"]
+        for token in stop_tokens:
+            text = re.sub(token + r".*$", "", text, flags=re.DOTALL)
+
+        # Удаляем повторяющееся содержимое после основного ответа
+        # Ищем паттерн типа "», Поскольку в тексте указано:"
+        text = re.sub(r"»\s*,\s*.*$", "", text, flags=re.DOTALL)
+
+        return text.strip()
 
     # Сначала определим эвристическую функцию. Ее можно сделать статическим методом.
     @staticmethod
@@ -53,12 +83,10 @@ class AdapterLLMClient(ILLMClient):
             # Не логируем здесь, чтобы не спамить, если токенизатор не настроен
             return self._estimate_tokens_heuristic(text)
 
-    def _handle_stream_response(self, response_generator: Generator) -> tuple[
-        str, dict, float | None, float]:
+    def _handle_stream_response(self, response_generator: Generator) -> tuple[str, dict, float | None, float]:
         """Обрабатывает потоковый ответ, собирает текст и метаданные."""
         log.info("Начало получения потокового ответа...")
 
-        # Добавляем время начала стрима
         start_time = time.perf_counter()
         start_time_formatted = time.strftime("%H:%M:%S", time.localtime())
         print(f">>> LLM Stream [{start_time_formatted}]: ", end="", flush=True)
@@ -78,18 +106,26 @@ class AdapterLLMClient(ILLMClient):
                 print(delta, end="", flush=True)
                 chunks_text.append(delta)
 
+            # Проверяем метаданные и условия завершения
             chunk_metadata = self.new_client.provider.extract_metadata_from_chunk(chunk_dict)
             if chunk_metadata:
                 server_metadata.update(chunk_metadata)
 
+            # Проверяем finish_reason для раннего завершения
+            choices = chunk_dict.get("choices", [])
+            if choices and choices[0].get("finish_reason") in ["stop", "length", "content_filter"]:
+                log.info("Стрим завершен по finish_reason: %s", choices[0].get("finish_reason"))
+                break
+
         end_time = time.perf_counter()
         print()  # Переход на новую строку
+
         final_response_str = "".join(chunks_text)
         log.info("Потоковый ответ полностью получен (длина: %d символов).", len(final_response_str))
-        # Логируем финальный ответ в LLM_Interactions логгер
         llm_logger.info("LLM Stream Response: %s", final_response_str)
 
         return final_response_str, server_metadata, ttft_time, end_time
+
 
 
     def _handle_non_stream_response(self, response_dict: dict) -> tuple[str, dict, float, float]:
