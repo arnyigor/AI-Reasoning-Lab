@@ -247,7 +247,7 @@ class NeuralLabyrinthTestGenerator(AbstractTestGenerator):
                     'abs': abs, 'round': round, 'int': int, 'float': float,
                     'list': list, 'dict': dict, 'tuple': tuple, 'set': set,
                     'enumerate': enumerate, 'zip': zip, 'print': print,
-                    '__build_class__': builtins.__build_class__,  # ✅ ПРАВИЛЬНЫЙ ИМПОРТ
+                    '__build_class__': builtins.__build_class__,
                     '__name__': '__main__',
                     '__import__': __import__  # Для math/random
                 },
