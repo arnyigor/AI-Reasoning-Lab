@@ -20,7 +20,7 @@ class AdapterLLMClient(ILLMClient):
     def __init__(self, new_llm_client: LLMClient, model_config: Dict[str, Any]):
         self.new_client = new_llm_client
         self.model_config = model_config
-        self.query_timeout = int(model_config.get('options', {}).get('query_timeout', 180))
+        self.query_timeout = int(model_config.get('options', {}).get('query_timeout', 600))
 
     def get_model_name(self) -> str:
         return self.new_client.model

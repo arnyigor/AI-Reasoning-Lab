@@ -783,7 +783,6 @@ def main():
 
         print("🔍 Сбор информации о системе...")
         system_info = profiler.get_system_info()
-
         # Определяем уровень оборудования
         tier = get_hardware_tier(system_info)
 

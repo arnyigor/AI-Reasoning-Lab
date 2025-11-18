@@ -31,7 +31,7 @@ class OpenAICompatibleClient(ProviderClient):
 
     def send_request(self, payload: Dict[str, Any]) -> Union[Dict[str, Any], Iterable[Dict[str, Any]]]:
         is_stream = payload.get("stream", False)
-        timeout = payload.pop('timeout', 180) # Используем и удаляем, чтобы не отправлять в API
+        timeout = payload.pop('query_timeout', 600)
 
         log.info("Отправка запроса на %s (stream=%s)...", self.endpoint, is_stream)
         log.info("Payload: %s", json.dumps(payload, indent=2, ensure_ascii=False))
@@ -49,29 +49,80 @@ class OpenAICompatibleClient(ProviderClient):
             raise LLMConnectionError(f"Сетевая ошибка: {e}") from e
 
     def _handle_stream(self, response: requests.Response) -> Generator[Dict[str, Any], None, None]:
+        inside_reasoning = False
+
         for line in response.iter_lines():
             if line:
                 decoded_line = line.decode('utf-8')
                 if decoded_line.startswith('data: '):
-                    content = decoded_line[6:]
-                    if content.strip() == "[DONE]":
+                    content_str = decoded_line[6:]
+                    if content_str.strip() == "[DONE]":
                         break
                     try:
-                        chunk = json.loads(content)
-                        yield chunk
-
+                        chunk = json.loads(content_str)
                         choices = chunk.get("choices", [])
-                        if choices:
-                            finish_reason = choices[0].get("finish_reason")
-                            # Завершаем только при определенных типах finish_reason
-                            if finish_reason in ["stop", "length", "content_filter"]:
-                                break
-                            # Или более простой вариант - убрать эту проверку совсем
-                            # и полагаться только на "[DONE]"
+
+                        if choices and len(choices) > 0:
+                            delta = choices[0].get("delta", {})
+                            # Разные провайдеры могут отдавать поле по-разному (reasoning_content или reasoning)
+                            reasoning_part = delta.get("reasoning") or delta.get("reasoning_content")
+                            content_part = delta.get("content")
+
+                            # 1. Логика НАЧАЛА рассуждения
+                            # Если пришло reasoning, но мы еще не внутри -> отправляем <think>
+                            if reasoning_part and not inside_reasoning:
+                                inside_reasoning = True
+                                yield {
+                                    "choices": [{
+                                        "index": 0,
+                                        "delta": {
+                                            "role": "assistant",
+                                            "content": "<think>\n",  # Отправляем строку, а не словарь
+                                            "reasoning": ""
+                                        }
+                                    }]
+                                }
+
+                            # 2. Логика ЗАВЕРШЕНИЯ рассуждения
+                            # Если мы были внутри, но reasoning пропал, ИЛИ пошел обычный content -> закрываем </think>
+                            # Важно: иногда чанки приходят пустые, нужно проверять смену контекста
+                            if inside_reasoning and not reasoning_part and content_part:
+                                inside_reasoning = False
+                                yield {
+                                    "choices": [{
+                                        "index": 0,
+                                        "delta": {
+                                            "role": "assistant",
+                                            "content": "\n</think>\n",
+                                            "reasoning": ""
+                                        }
+                                    }]
+                                }
+
+                            # 3. Подготовка текущего чанка
+                            # Если есть reasoning, мы можем хотеть отдать его как content (чтобы пользователь видел текст мыслей)
+                            # ИЛИ оставить в поле reasoning, если ваш интерфейс это поддерживает.
+                            # Исходя из extract_delta_from_chunk (return content + reasoning),
+                            # достаточно просто прокинуть чанк дальше, убедившись, что поля на месте.
+
+                            yield chunk
+
+                            # Если чанк был последним с reasoning, но без content, закрывающий тег может потребоваться позже.
+                            # (В простой реализации закрытие по 'content_part' обычно надежнее всего).
 
                     except json.JSONDecodeError:
-                        log.warning("Не удалось декодировать JSON-чанк: %s", content)
-
+                        log.warning("Не удалось декодировать JSON-чанк: %s", content_str)
+        # Страховка: если поток закончился, а мы все еще думаем
+        if inside_reasoning:
+            yield {
+                "choices": [{
+                    "index": 0,
+                    "delta": {
+                        "role": "assistant",
+                        "content": "\n</think>\n",
+                    }
+                }]
+            }
 
     def extract_choices(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
         return response.get("choices", [])
@@ -80,7 +131,18 @@ class OpenAICompatibleClient(ProviderClient):
         return choice.get("message", {}).get("content", "")
 
     def extract_delta_from_chunk(self, chunk: Dict[str, Any]) -> str:
-        return chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+        # print(f"chunk = {chunk}") # Можно раскомментировать для отладки
+        choices = chunk.get("choices", [])
+        if not choices:
+            return ""
+
+        delta = choices[0].get("delta", {})
+
+        # Безопасное получение строк, заменяя None на ""
+        content = delta.get("content") or ""
+        reasoning = delta.get("reasoning") or delta.get("reasoning_content") or ""
+
+        return content + reasoning
 
     def extract_metadata_from_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
         """

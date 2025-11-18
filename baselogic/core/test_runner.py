@@ -126,14 +126,16 @@ class TestRunner:
 
         # Отображаем системную информацию как в main() функции system_checker
         cpu_info = system_info['cpu']
-        cpu_name = cpu_info.get('cpu_brand', cpu_info.get('model_name', cpu_info.get('processor_name', 'Unknown CPU')))
+        cpu_name = cpu_info.get('cpu_brand', cpu_info.get('model_name', cpu_info.get('cpu_model', cpu_info.get('processor_name', 'Unknown CPU'))))
         log.info(f"🧠 CPU: {cpu_name}")
         log.info(f"💾 RAM: {system_info['memory']['total_ram_gb']} GB")
 
         for i, gpu in enumerate(system_info['gpus']):
             vram = gpu.get('memory_total_gb', 'N/A')
             gpu_type = gpu.get('type', 'unknown')
-            log.info(f"🎮 GPU {i}: {gpu['vendor']} {gpu['name']} ({vram} GB VRAM, {gpu_type})")
+            driver_version = gpu.get('driver_version', 'unknown')
+            if gpu_type != 'integrated':
+                log.info(f"🎮 GPU {i}: {driver_version} {gpu['vendor']} {gpu['name']} ({vram} GB VRAM, {gpu_type})")
 
         if not system_info['gpus']:
             log.info("🎮 GPU: Не обнаружено дискретных GPU")
@@ -309,7 +311,6 @@ class TestRunner:
             if performance_metrics:
                 self.log_performance_metrics(performance_metrics)
 
-            # ИСПРАВЛЕННЫЙ возврат результата с правильными полями
             return {
                 "test_id": test_id,
                 "model_name": model_name,
@@ -373,61 +374,93 @@ class TestRunner:
         except Exception as e:
             log.error("  ❌ Ошибка сохранения: %s", e, exc_info=True)
 
-
     def log_performance_metrics(self, performance_metrics: Dict[str, Any]):
         if not performance_metrics:
-            log.info("      --- Метрики производительности --- Нет данных")
-            log.info("      ---------------------------------")
+            log.info("📊 --- Метрики производительности: Нет данных ---")
             return
 
-        # Извлечение базовых значений
+        # 1. Безопасное извлечение с дефолтами (защита от None)
+        def get_val(key, default=0):
+            val = performance_metrics.get(key)
+            return val if val is not None else default
+
         model = performance_metrics.get('model', 'unknown')
-        total_duration_ns = performance_metrics.get('total_duration', 0)
-        load_duration_ns = performance_metrics.get('load_duration', 0)
-        prompt_eval_count = performance_metrics.get('prompt_eval_count', 0)
-        prompt_eval_duration_ns = performance_metrics.get('prompt_eval_duration', 0)
-        eval_count = performance_metrics.get('eval_count', 0)
-        eval_duration_ns = performance_metrics.get('eval_duration', 0)
-        time_to_first_token_ms = performance_metrics.get('time_to_first_token_ms')
+
+        # Тайминги (наносекунды)
+        total_duration_ns = get_val('total_duration')
+        load_duration_ns = get_val('load_duration')
+        prompt_eval_duration_ns = get_val('prompt_eval_duration')
+        eval_duration_ns = get_val('eval_duration')
+
+        # Счетчики
+        prompt_eval_count = get_val('prompt_eval_count')
+        eval_count = get_val('eval_count')
+
+        # Другое (миллисекунды и мегабайты)
+        time_to_first_token_ms = performance_metrics.get('time_to_first_token_ms') # Может быть None
         total_latency_ms = performance_metrics.get('total_latency_ms')
         peak_ram_mb = performance_metrics.get('peak_ram_increment_mb')
 
-        # Вычисляемые метрики
-        prompt_tps = (prompt_eval_count / (prompt_eval_duration_ns / 1e9)) if prompt_eval_duration_ns > 0 else 0
-        output_tps = (eval_count / (eval_duration_ns / 1e9)) if eval_duration_ns > 0 else 0
-        total_tps = (eval_count / (total_duration_ns / 1e9)) if total_duration_ns > 0 else 0
+        # 2. Конвертация (ns -> ms, sec)
+        def ns_to_ms(ns): return ns / 1e6
+        def ns_to_sec(ns): return ns / 1e9
 
-        # Конвертация наносекунд в миллисекунды для удобства
-        load_time_ms = load_duration_ns / 1e6
-        prompt_eval_time_ms = prompt_eval_duration_ns / 1e6
-        eval_time_ms = eval_duration_ns / 1e6
-        total_time_ms = total_duration_ns / 1e6
+        load_ms = ns_to_ms(load_duration_ns)
+        prompt_ms = ns_to_ms(prompt_eval_duration_ns)
+        eval_ms = ns_to_ms(eval_duration_ns)
+        total_ms = ns_to_ms(total_duration_ns)
 
-        # Начало логирования
-        log.info("      --- Метрики производительности ---")
-        log.info("      Модель: %s", model)
+        # 3. Расчет производных метрик
+        # Скорости (Tokens Per Second)
+        prompt_tps = (prompt_eval_count / ns_to_sec(prompt_eval_duration_ns)) if prompt_eval_duration_ns > 0 else 0
+        output_tps = (eval_count / ns_to_sec(eval_duration_ns)) if eval_duration_ns > 0 else 0
 
-        log.info("      🚀 Загрузка модели: %.2f мс", load_time_ms)
+        # Важно: Общий TPS (Input + Output) / Total Time (для оценки пропускной способности сервера)
+        total_tokens = prompt_eval_count + eval_count
+        global_tps = (total_tokens / ns_to_sec(total_duration_ns)) if total_duration_ns > 0 else 0
 
-        log.info("      📥 Обработка промпта (%d токенов): %.2f мс → %.2f ток/с",
-                 prompt_eval_count, prompt_eval_time_ms, prompt_tps)
+        # Проценты времени (где мы тратим время?)
+        if total_duration_ns > 0:
+            load_pct = (load_duration_ns / total_duration_ns) * 100
+            prompt_pct = (prompt_eval_duration_ns / total_duration_ns) * 100
+            eval_pct = (eval_duration_ns / total_duration_ns) * 100
+        else:
+            load_pct = prompt_pct = eval_pct = 0
+
+        # 4. Логирование с выравниванием
+        # {:<20} - выравнивание влево, ширина 20
+        # {:>10} - выравнивание вправо, ширина 10
+
+        log.info("📊 --- Performance Metrics Summary ---")
+        log.info(f"   🤖 Model:              {model}")
+
+        # Блок таймингов
+        log.info(f"   ⏱️  Total Time:         {total_ms:,.2f} ms (Server reported)")
+        if total_latency_ms:
+            log.info(f"      (Client Latency):   {total_latency_ms:,.2f} ms")
+
+        log.info("   -----------------------------------------")
+        # Распределение времени
+        log.info(f"   🚀 Load Time:          {load_ms:>8.2f} ms ({load_pct:>5.1f}%)")
+        log.info(f"   📥 Prompt Eval:        {prompt_ms:>8.2f} ms ({prompt_pct:>5.1f}%) | Count: {prompt_eval_count} toks")
 
         if time_to_first_token_ms is not None:
-            log.info("      ⏱️  Время до первого токена: %.0f мс", time_to_first_token_ms)
+            log.info(f"   ⚡ TTFT:               {time_to_first_token_ms:>8.0f} ms (Time To First Token)")
 
-        log.info("      🖨️  Генерация ответа (%d токенов): %.2f мс → %.2f ток/с",
-                 eval_count, eval_time_ms, output_tps)
+        log.info(f"   🖨️  Generation:         {eval_ms:>8.2f} ms ({eval_pct:>5.1f}%) | Count: {eval_count} toks")
 
-        log.info("      🕐 Общее время обработки: %.2f мс (по таймеру: %.2f мс)", total_time_ms,
-                 total_latency_ms or total_time_ms)
+        log.info("   -----------------------------------------")
+        # Блок скоростей
+        log.info(f"   🏎️  Prompt Speed:       {prompt_tps:>8.2f} t/s (Prefill)")
+        log.info(f"   🧠 Gen Speed:          {output_tps:>8.2f} t/s (Decode)")
+        log.info(f"   🌐 Global Speed:       {global_tps:>8.2f} t/s (Total throughput)")
 
-        if peak_ram_mb is not None:
-            log.info("      📈 Пиковое потребление RAM: %.1f МБ", peak_ram_mb)
+        # Блок ресурсов
+        if peak_ram_mb:
+            log.info("   -----------------------------------------")
+            log.info(f"   📈 Peak RAM Delta:     {peak_ram_mb:>8.1f} MB")
 
-        if total_tps > 0:
-            log.info("      🚀 Средняя скорость генерации: %.2f ток/с (по общему времени)", total_tps)
-
-        log.info("      ---------------------------------")
+        log.info("   -----------------------------------------")
 
     def run_benchmarks_with_system_info(self):
         """

@@ -75,7 +75,7 @@ class BaseLLMClient(ILLMClient, ABC):
         self.generation_opts = self.model_options.get('generation') or {}
         self.system_prompt = self.prompting_opts.get('system_prompt')
         self.inference_opts = self.model_options.get('inference') or {}
-        self.query_timeout = self.model_options.get('query_timeout', 180)
+        self.query_timeout = self.model_options.get('query_timeout', 600)
 
         # Метрики и логирование
         self.metrics = ClientMetrics()
