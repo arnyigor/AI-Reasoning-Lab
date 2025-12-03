@@ -64,9 +64,9 @@ if __name__ == '__main__':
     # От этих настроек зависит размер, сложность и "характер" итоговой задачи.
 
     # 1. Задаем желаемые параметры
-    desired_num_items = 4
-    desired_num_categories = 4
-    desired_difficulty = Difficulty.MEDIUM
+    desired_num_items = 8
+    desired_num_categories = 8
+    desired_difficulty = Difficulty.EXPERT
 
     # ===============================================================
     # --- ПОДРОБНОЕ РУКОВОДСТВО ПО ПАРАМЕТРАМ ГЕНЕРАЦИИ ---

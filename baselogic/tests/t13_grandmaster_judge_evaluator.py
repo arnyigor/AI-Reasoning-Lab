@@ -1,14 +1,14 @@
 # grandmaster/src/tests/GrandmasterJudgeEvaluatorTestGenerator.py
 
-import os
-import re
 import json
-from pathlib import Path
-from typing import Dict, Any, Tuple
-from .abstract_test_generator import AbstractTestGenerator
 import logging
+import re
+from typing import Dict, Any, Tuple
+
+from .abstract_test_generator import AbstractTestGenerator
 
 log = logging.getLogger(__name__)
+
 
 class GrandmasterJudgeEvaluatorTestGenerator(AbstractTestGenerator):
     """
@@ -102,12 +102,13 @@ class GrandmasterJudgeEvaluatorTestGenerator(AbstractTestGenerator):
         reasoning_ok = len(str(parsed_judge_verdict.get("reasoning", "")).split()) >= 5
         is_correct = correct_ok and score_ok and reasoning_ok
 
-        return { "is_correct": is_correct, "details": {
+        return {"is_correct": is_correct, "details": {
             "solver_answer": self.solver_answer,
             "ground_truth_answer": self.solution_data['answer'],
             "expected_judge_correct_verdict": expected_correct,
             "judge_verdict": parsed_judge_verdict,
-            "checks": { "correct_verdict_ok": correct_ok, "score_adequacy_ok": score_ok, "reasoning_present_ok": reasoning_ok }}}
+            "checks": {"correct_verdict_ok": correct_ok, "score_adequacy_ok": score_ok,
+                       "reasoning_present_ok": reasoning_ok}}}
 
     def _load_and_parse_puzzle(self, path: str) -> Tuple[str, Dict]:
         full_text = self._load_file(path)
@@ -115,11 +116,14 @@ class GrandmasterJudgeEvaluatorTestGenerator(AbstractTestGenerator):
         conditions_match = re.search(r"Условия \(\d+ подсказок\):\s*\n(.*?)\n\s*={40}", full_text, re.DOTALL)
         question_match = re.search(r"Вопрос:\s*(.*?)\s*\n={40}", full_text, re.DOTALL)
         answer_match = re.search(r"Ответ для проверки:\s*(.*?)\s*\n", full_text, re.DOTALL)
-        solution_table_match = re.search(r"---\s*Скрытое Решение для самопроверки\s*---\s*\n(.*?)$", full_text, re.DOTALL)
+        solution_table_match = re.search(r"---\s*Скрытое Решение для самопроверки\s*---\s*\n(.*?)$", full_text,
+                                         re.DOTALL)
         if not all([conditions_match, question_match, answer_match, solution_table_match]):
             log.error(f"Не удалось распарсить структуру головоломки из файла: {path}")
             return full_text, {}
-        return full_text, { "conditions": conditions_match.group(1).strip(), "question": question_match.group(1).strip(), "answer": answer_match.group(1).strip(), "solution_table": solution_table_match.group(1).strip() }
+        return full_text, {"conditions": conditions_match.group(1).strip(), "question": question_match.group(1).strip(),
+                           "answer": answer_match.group(1).strip(),
+                           "solution_table": solution_table_match.group(1).strip()}
 
     def _load_and_parse_solver_response(self, path: str) -> Tuple[str, str]:
         full_text = self._load_file(path)
@@ -130,6 +134,8 @@ class GrandmasterJudgeEvaluatorTestGenerator(AbstractTestGenerator):
 
     def _load_file(self, path: str) -> str:
         try:
-            with open(path, encoding="utf-8") as f: return f.read()
+            with open(path, encoding="utf-8") as f:
+                return f.read()
         except FileNotFoundError:
-            log.error(f"File not found: {path}"); return ""
+            log.error(f"File not found: {path}");
+            return ""

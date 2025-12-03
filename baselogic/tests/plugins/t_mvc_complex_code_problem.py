@@ -1,25 +1,22 @@
-import random
 import re
-import string
-import asyncio
-import inspect
 from typing import Dict, Any
 
 # Предполагаем, что базовый класс доступен, как в твоем примере
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
+
 class MVCCDBTestGenerator(AbstractTestGenerator):
     def generate(self) -> Dict[str, Any]:
         prompt = (
             """
-            #### Роль и контекст
+           #### Роль и контекст
             Ты — архитектор баз данных и эксперт по Python. Твоя специализация — создание высокопроизводительных систем хранения данных с нуля без использования внешних зависимостей. Ты глубоко понимаешь принципы ACID, MVCC (Multi-Version Concurrency Control) и асинхронного ввода-вывода.
-
+            
             #### Основная задача
             Разработать на чистом Python (Standard Library only) потокобезопасную in-memory базу данных `AsyncMVCCStore`, поддерживающую транзакционность с уровнем изоляции **Snapshot Isolation**.
             
             Модуль должен быть полностью автономным. Внутри модуля должен быть реализован свой тестовый фреймворк, запускающий сценарии при старте скрипта.
-
+            
             #### Функциональные требования к `AsyncMVCCStore`
             1.  **Хранение данных:** Ключ-значение (Key-Value), где ключ — строка, значение — любой сериализуемый объект.
             2.  **MVCC (Многоверсионность):**
@@ -31,35 +28,41 @@ class MVCCDBTestGenerator(AbstractTestGenerator):
                 - Поддержка методов транзакции: `get(key)`, `set(key, value)`, `delete(key)`, `commit()`, `rollback()`.
                 - **Conflict Detection:** При коммите (commit) транзакция должна проверить, не были ли изменены данные другими параллельными транзакциями, завершившимися после начала текущей. При конфликте — выбрасывать исключение `WriteConflictError`.
             4.  **Garbage Collection (Vacuum):**
-                - Фоновый процесс или механизм очистки старых версий данных, которые больше не видны ни одной активной транзакции. Это критично для памяти.
+                - Фоновый процесс или механизм очистки старых версий данных, которые больше не видны ни одной активной транзакции.
             5.  **Асинхронность:**
-                - Все операции ввода-вывода (в данном контексте эмулируемые или логические блокировки) должны быть асинхронными (`async/await`).
-
-            #### Требования и ограничения
-            - **Язык:** Python 3.10+.
-            - **Библиотеки:** ТОЛЬКО стандартная библиотека (asyncio, collections, time, typing, weakref и т.д.). Запрещены внешние БД или либы.
-            - **Производительность:**
-                - Решение должно обрабатывать > 50,000 транзакций в секунду в одном потоке event loop.
-                - Эффективное использование памяти (не хранить бесконечную историю версий). Использовать `__slots__` для оптимизации структур данных.
-            - **Код:** Соблюдение SOLID, Type Hinting, Docstrings.
-
-            #### Сценарии тестирования (должны быть реализованы в коде)
-            1.  **Atomicity:** Проверка, что при ошибке или rollback ни одно изменение транзакции не попадает в базу.
-            2.  **Isolation (Snapshot):**
-                - Запустить Tx1. Изменить ключ A в Tx2 и закоммитить. Проверить, что Tx1 все еще видит старое значение A.
-            3.  **Concurrency & Conflicts:**
-                - Запустить Tx1 и Tx2 одновременно. Обе читают ключ X. Обе пытаются изменить X. Первая, кто сделает commit — успех, вторая — ошибка `WriteConflictError`.
-            4.  **Vacuuming:**
-                - Проверка, что память очищается от старых версий после завершения старых транзакций.
-
-            #### Формат ответа
-            Единый блок кода Python:
-            1.  Реализация `AsyncMVCCStore` и вспомогательных классов.
-            2.  Класс `TestFramework` для запуска тестов.
-            3.  Набор тестов, покрывающий требования.
-            4.  Блок `if __name__ == "__main__":`, запускающий тесты и выводящий отчет.
+                - Все операции ввода-вывода должны быть асинхронными (`async/await`).
             
-            Не пиши пояснений текстом, только код. Если решение не оптимизировано по памяти или скорости, оно будет считаться неверным.
+            #### Требования к коду
+            - **Язык:** Python 3.10+
+            - **Библиотеки:** ТОЛЬКО стандартная библиотека (asyncio, typing, collections и т.д.)
+            - **Импорты:** Все необходимые импорты должны быть в начале файла
+            - **Типы данных:** Используй встроенные типы `list`, `dict`, `set` вместо `List`, `Dict`, `Set`
+            - **Аннотации типов:** Используй `X | None` вместо `Optional[X]`
+            - **Forward References:** Для классов, определённых ниже, используй строковые аннотации: `-> "Transaction"`
+            - **Оптимизация:** Используй `__slots__` для классов Version и Transaction
+            - **Производительность:** Решение должно обрабатывать > 50,000 транзакций в секунду
+            
+            #### Сценарии тестирования (должны быть реализованы в коде)
+            1.  **Atomicity:** При rollback ни одно изменение не должно попасть в базу
+            2.  **Isolation (Snapshot):** Tx1 не видит изменения Tx2, сделанные после старта Tx1
+            3.  **Concurrency & Conflicts:** Первая транзакция коммитится, вторая получает `WriteConflictError`
+            4.  **Vacuuming:** Память очищается от старых версий после завершения транзакций
+            
+            #### Формат ответа
+            Выведи ТОЛЬКО исполняемый Python-код, состоящий из:
+            1.  Импорты
+            2.  Класс `WriteConflictError`
+            3.  Класс `AsyncMVCCStore` и вспомогательные классы
+            4.  Класс `TestFramework` для запуска тестов
+            5.  Набор тестов
+            6.  Блок `if __name__ == "__main__":` с запуском тестов
+            
+            #### КРИТИЧЕСКИ ВАЖНО:
+            1. Начни ответ СРАЗУ со строки `import asyncio` (никакого текста перед этим)
+            2. НЕ используй Markdown-блоки кода (никаких ```
+            3. НЕ пиши пояснений текстом
+            4. Внимательно проверяй синтаксис f-строк (не используй символы вроде `?` внутри `{}`)
+            5. Убедись, что все импорты присутствуют в начале файла
             """
         )
 
@@ -151,59 +154,96 @@ if not loop.run_until_complete(run_hidden_verification()):
         return {
             'prompt': prompt,
             'expected_output': {
-                'function_name': "AsyncMVCCStore", # Маркер, что класс существует
+                'function_name': "AsyncMVCCStore",  # Маркер, что класс существует
                 'tests': hidden_tests
             }
         }
 
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
-        # 1. Извлечение кода (улучшенное)
-        code_match = re.search(r"```python\n(.*?)\n```", llm_output, re.DOTALL)
-        if not code_match:
-            code_match = re.search(r"(class AsyncMVCCStore.*if __name__ == .__main__.:.*?)\Z", llm_output, re.DOTALL | re.MULTILINE)
+        # ШАГ 1: Удаляем <think> блоки (если модель их вставила)
+        cleaned_output = re.sub(r'<think>.*?</think>', '', llm_output, flags=re.DOTALL).strip()
 
-        if not code_match:
-            # Попытка найти хотя бы класс, если форматирование сбито
-            code_match = re.search(r"import.*class AsyncMVCCStore.*", llm_output, re.DOTALL)
+        # ШАГ 2: Пытаемся найти Markdown блок (``````)
+        code_match = re.search(r"``````", cleaned_output, re.DOTALL | re.IGNORECASE)
 
-        if not code_match:
-            return {'is_correct': False, 'details': {'error': 'Код Python не найден'}}
+        if code_match:
+            code_to_exec = code_match.group(1)
+        else:
+            # ШАГ 3: Fallback для "чистого кода" без Markdown
+            # Ищем первый импорт (import или from)
+            start_pattern = re.compile(r'^(import |from )', re.MULTILINE)
+            match = start_pattern.search(cleaned_output)
 
-        code_to_exec = code_match.group(1) if len(code_match.groups()) > 0 else code_match.group(0)
+            if match:
+                # Берём весь текст начиная с первого импорта
+                code_to_exec = cleaned_output[match.start():]
+            else:
+                # Если импортов нет, проверяем, есть ли хоть что-то похожее на код
+                if 'class ' in cleaned_output or 'def ' in cleaned_output:
+                    code_to_exec = cleaned_output
+                else:
+                    return {
+                        'is_correct': False,
+                        'details': {'error': 'Код не найден (нет импортов, классов или функций)'}
+                    }
 
-        # Санитизация
-        replacements = {'—': '-', '‘': "'", '’': "'", '“': '"', '”': '"'}
+        # ШАГ 4: Санитизация "кривых" символов
+        replacements = {'—': '-', ''': "'", ''': "'", '"': '"', '"': '"'}
         for old, new in replacements.items():
             code_to_exec = code_to_exec.replace(old, new)
 
-        # 2. Выполнение
+        # ШАГ 5: Удаляем блок if __name__ == "__main__":
+        code_without_main = re.sub(
+            r'if __name__\s*==\s*[\'"]__main__[\'"]\s*:.*$',
+            '',
+            code_to_exec,
+            flags=re.DOTALL | re.MULTILINE
+        )
+
         try:
-            # Создаем изолированный скоуп
+            # ШАГ 6: Выполняем код модели
             local_scope = {}
-            # Переопределяем print, чтобы не засорять логи, или оставляем для дебага
-            # exec(code_to_exec, {'print': lambda *args: None}, local_scope)
-
-            # Важно: Модель может использовать asyncio.run() внутри if name == main.
-            # Мы должны вырезать блок main, чтобы запустить тесты самостоятельно,
-            # ИЛИ позволить ему выполниться, но перехватить контекст.
-            # Лучшая стратегия: загрузить определения классов, потом запустить свои тесты.
-
-            # Удаляем блок if __name__ == "__main__": чтобы код модели не заблокировал выполнение
-            code_without_main = re.sub(r'if __name__ == .__main__.:.*', '', code_to_exec, flags=re.DOTALL)
-
             exec(code_without_main, {}, local_scope)
 
+            # ШАГ 7: Проверяем, что класс AsyncMVCCStore есть
             if 'AsyncMVCCStore' not in local_scope:
-                return {'is_correct': False, 'details': {'error': 'Класс AsyncMVCCStore не найден'}}
+                return {
+                    'is_correct': False,
+                    'details': {'error': 'Класс AsyncMVCCStore не найден после выполнения кода'}
+                }
 
-            # Запуск скрытых тестов
-            # Нам нужно внедрить класс в скоуп теста
+            # ШАГ 8: Готовим скоуп для скрытых тестов
             test_scope = local_scope.copy()
+
+            # Добавляем asyncio, если его нет (на всякий случай)
+            if 'asyncio' not in test_scope:
+                import asyncio
+                test_scope['asyncio'] = asyncio
+
+            # ШАГ 9: Запускаем скрытые тесты
             exec(expected_output['tests'], test_scope)
 
-            return {'is_correct': True, 'details': {'status': 'MVCC тесты пройдены успешно'}}
+            return {
+                'is_correct': True,
+                'details': {'status': 'MVCC тесты пройдены успешно'}
+            }
 
         except AssertionError as e:
-            return {'is_correct': False, 'details': {'error': 'Логическая ошибка теста', 'msg': str(e)}}
+            return {
+                'is_correct': False,
+                'details': {'error': 'Логическая ошибка теста', 'msg': str(e)}
+            }
+        except SyntaxError as e:
+            return {
+                'is_correct': False,
+                'details': {
+                    'error': 'Синтаксическая ошибка в коде',
+                    'msg': str(e),
+                    'line': e.lineno
+                }
+            }
         except Exception as e:
-            return {'is_correct': False, 'details': {'error': 'Runtime Error', 'traceback': str(e)}}
+            return {
+                'is_correct': False,
+                'details': {'error': 'Runtime Error', 'traceback': str(e)}
+            }

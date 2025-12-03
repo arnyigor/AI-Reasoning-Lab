@@ -373,10 +373,6 @@ class NeuralLabyrinthTestGenerator(AbstractTestGenerator):
         }
 
 
-
-
-
-
     def _analyze_code_structure(self, code: str) -> Dict[str, bool]:
         """Исправленный анализ структуры кода."""
         analysis = {
@@ -422,7 +418,6 @@ class NeuralLabyrinthTestGenerator(AbstractTestGenerator):
             pass
 
         return analysis
-
 
     def _failure_result(self, reason: str) -> Dict[str, Any]:
         """Создает результат неудачного теста."""
