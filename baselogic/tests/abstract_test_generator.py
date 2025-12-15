@@ -1,12 +1,15 @@
-from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Dict, Any, Optional, Union
 import re
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional
+
+from baselogic.core.jvm_runner import JVMRunner, JVMRunnerError
+
 
 class AbstractTestGenerator(ABC):
     """
     Абстрактный базовый класс ("контракт") для всех генераторов тестов.
     """
+
     def __init__(self, test_id: str):
         self.test_id = test_id
 
@@ -29,7 +32,7 @@ class AbstractTestGenerator(ABC):
         clean_answer = self._cleanup_llm_response(llm_raw_output)
         return {
             'answer': clean_answer,
-            'thinking_log': llm_raw_output # Сохраняем оригинал для логов
+            'thinking_log': llm_raw_output  # Сохраняем оригинал для логов
         }
 
     @abstractmethod
@@ -85,3 +88,22 @@ class AbstractTestGenerator(ABC):
         clean_output = re.sub(r'[*_`~]', '', clean_output)
 
         return clean_output.strip()
+
+    def execute_kotlin_code(self, code: str, args: Optional[list[str]] = None) -> Dict[str, Any]:
+        """
+        Выполняет Kotlin-код через JVMRunner.
+        """
+        try:
+            runner = JVMRunner()
+            output = runner.run_kotlin_code(kotlin_source=code, args=args)
+            return {'success': True, 'output': output}
+        except JVMRunnerError as exc:
+            return {
+                'success': False,
+                'error': f'Ошибка выполнения JVM: {exc}'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Неожиданная ошибка при запуске кода: {e}'
+            }

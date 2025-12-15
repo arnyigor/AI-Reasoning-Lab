@@ -146,7 +146,8 @@ class JVMRunner:
         return None # type: ignore
 
     # -------------------------------------------------------------
-    def run_kotlin_code(self, kotlin_source: str) -> str:
+    def run_kotlin_code(self, kotlin_source: str,
+                        args: Optional[list[str]] = None) -> str:
         """
         Компилирует и запускает Kotlin‑код.
         """
@@ -186,11 +187,7 @@ class JVMRunner:
                 return f"Compilation Failed: {exc}"
 
             # ── Запуск ───────────────────────────────────────────────────
-            run_cmd = [
-                str(self.java_path),
-                "-jar",
-                str(jar_file),
-            ]
+            run_cmd = [str(self.java_path), "-jar", str(jar_file)] + (args or [])
 
             try:
                 result_run = subprocess.run(
