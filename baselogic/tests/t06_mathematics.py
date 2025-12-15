@@ -345,7 +345,8 @@ class MathematicsTestGenerator(AbstractTestGenerator):
 
         # 1. Извлекаем все числа из ответа LLM
         number_pattern = r'-?\d+(?:\.\d+)?(?:e[+-]?\d+)?'
-        found_numbers_str = re.findall(number_pattern, llm_output)
+        cleaned = self._cleanup_llm_response(llm_output)
+        found_numbers_str = re.findall(number_pattern, cleaned)
         found_numbers = []
 
         for num_str in found_numbers_str:

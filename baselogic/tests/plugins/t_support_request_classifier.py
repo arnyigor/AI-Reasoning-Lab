@@ -1,4 +1,4 @@
-from typing import Dict, Any, TypedDict, Tuple
+from typing import Dict, Any, TypedDict
 
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
@@ -122,7 +122,7 @@ class SupportRequestClassifierTestGenerator(AbstractTestGenerator):
             "expected_output": expected_output,
         }
 
-    def verify(self, llm_output: str, expected_output: ExpectedOutput) -> Dict[str, Any]:
+    def verify(self, output: str, expected_output: ExpectedOutput) -> Dict[str, Any]:
         """
         Проверяет ответ модели по точному совпадению категории.
 
@@ -134,6 +134,7 @@ class SupportRequestClassifierTestGenerator(AbstractTestGenerator):
             Dict[str, Any]: Результат проверки.
         """
         correct_answer = expected_output["correct"]
+        llm_output = self._cleanup_llm_response(output)
         cleaned_output = llm_output.strip().lower()
         expected_clean = correct_answer.strip().lower()
 

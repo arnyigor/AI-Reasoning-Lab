@@ -316,12 +316,12 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
             }
         }
 
-    def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
+    def verify(self, output: str, expected_output: Any) -> Dict[str, Any]:
         """
         Верификация ответа модели.
         """
         test_type = expected_output.get('test_type')
-
+        llm_output = self._cleanup_llm_response(output)
         # Извлечение данных из ответа LLM
         found_emails = set(re.findall(self.EMAIL_PATTERN, llm_output))
         found_phones = set(re.findall(self.PHONE_PATTERN, llm_output))

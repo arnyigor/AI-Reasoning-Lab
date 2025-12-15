@@ -80,8 +80,9 @@ class VerbosityIdealTestGenerator(AbstractTestGenerator):
         """
         Проверяет что краткое резюме получает справедливую оценку.
         """
+        cleaned = self._cleanup_llm_response(llm_output)
         try:
-            parsed_output = json.loads(llm_output)
+            parsed_output = json.loads(cleaned)
 
             if "score" not in parsed_output:
                 return {

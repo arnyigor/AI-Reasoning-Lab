@@ -476,21 +476,6 @@ class MultiHopReasoningTestGenerator(AbstractTestGenerator):
             'details': details
         }
 
-    def _cleanup_llm_response(self, text: str) -> str:
-        """Очищает ответ LLM от thinking-блоков и технического шума."""
-        # Удаляем thinking-блоки
-        text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL | re.IGNORECASE)
-        text = re.sub(r'<thinking>.*?</thinking>', '', text, flags=re.DOTALL | re.IGNORECASE)
-
-        # Удаляем markdown форматирование
-        text = re.sub(r'\*\*', '', text)
-        text = re.sub(r'#{1,6}\s', '', text)
-
-        # Нормализуем пробелы
-        text = ' '.join(text.split())
-
-        return text
-
     def _check_expected_answer(self, text: str, expected_answer: str) -> bool:
         """
         Проверяет наличие ожидаемого ответа с УЧЕТОМ СИНОНИМОВ.
@@ -527,7 +512,6 @@ class MultiHopReasoningTestGenerator(AbstractTestGenerator):
                       f"{matches/len(keywords)*100:.0f}% < {threshold*100:.0f}%")
 
         return result
-
 
     def _check_step_order(self, text: str, steps: List[str]) -> float:
         """

@@ -1,172 +1,263 @@
+import json
 import logging
 import random
-import json
 import re
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
 log = logging.getLogger(__name__)
 
+
 class InstructionsTestGenerator(AbstractTestGenerator):
     """
-    Генератор тестов на сложное следование инструкциям (Instruction Following).
-    Вместо подсчета символов (проблема токенизации) проверяет логические манипуляции:
-    фильтрацию, сортировку, форматирование и условную логику.
+    Генератор СЛОЖНЫХ тестов на следование инструкциям.
+    Уровни сложности:
+    1. Многокритериальная сортировка (длина + алфавит).
+    2. Вложенный JSON с вычислениями.
+    3. Запрещающие ограничения (Negative constraints).
     """
 
-    def __init__(self, test_id: str = "complex_instructions"):
+    def __init__(self, test_id: str = "hard_instructions"):
         super().__init__(test_id)
 
-        self.categories = {
-            "фрукты": ["яблоко", "банан", "груша", "киви", "манго", "апельсин"],
-            "мебель": ["стол", "стул", "шкаф", "диван", "кровать", "кресло"],
-            "города": ["Москва", "Лондон", "Париж", "Берлин", "Токио", "Минск"],
-            "числа": [10, 25, 3, 42, 100, 7, 15, 88]
+        self.words = {
+            "фрукты": ["яблоко", "киви", "груша", "ананас", "лайм", "помело"],
+            "страны": ["Россия", "Китай", "США", "Оман", "Чад", "Италия"],
+            "имена": ["Анна", "Ян", "Александр", "Ли", "Константин", "Ева"]
         }
 
     def generate(self) -> Dict[str, Any]:
-        """Генерирует один из сценариев сложной инструкции."""
-        scenario = random.choice(["filter_sort", "conditional_transform", "json_format"])
+        """Генерирует случайный сложный сценарий."""
+        scenario = random.choice(["multi_sort", "nested_json_math", "negative_constraint"])
 
-        if scenario == "filter_sort":
-            return self._generate_filter_sort_task()
-        elif scenario == "conditional_transform":
-            return self._generate_conditional_task()
+        if scenario == "multi_sort":
+            return self._generate_multi_sort_task()
+        elif scenario == "nested_json_math":
+            return self._generate_nested_json_task()
         else:
-            return self._generate_json_task()
+            return self._generate_negative_constraint_task()
 
-    def _generate_filter_sort_task(self) -> Dict[str, Any]:
-        """Сценарий 1: Фильтрация категории и сортировка."""
-        target_category = "фрукты"
-        distractor_category = "мебель"
-
-        items = random.sample(self.categories[target_category], 3) + \
-                random.sample(self.categories[distractor_category], 3)
+    def _generate_multi_sort_task(self) -> Dict[str, Any]:
+        """
+        Сценарий 1: Сортировка по длине, затем по алфавиту.
+        В промпте добавлено требование сначала вывести длину каждого слова,
+        чтобы модель «видела» числа в своём контексте и могла использовать их
+        при последующей сортировке.
+        """
+        # Выбираем случайную категорию слов и берём 5 случайных элементов
+        category = random.choice(list(self.words.keys()))
+        items = random.sample(self.words[category], 5)
         random.shuffle(items)
 
-        input_list = ", ".join(items)
-
-        instructions = (
-            f"Дана строка со списком слов: '{input_list}'.\n"
-            f"1. Извлеки из списка ТОЛЬКО {target_category}.\n"
-            "2. Отсортируй их по алфавиту (от А до Я).\n"
-            "3. Выведи результат в формате: 'РЕЗУЛЬТАТ: слово1 > слово2 > слово3'."
+        # Генерируем усиленный промпт
+        prompt = (
+            f"Список: {', '.join(items)}.\n"
+            "Твоя задача — отсортировать этот список.\n"
+            "ШАГ 1: Для каждого слова напиши его длину (количество букв).\n"
+            "ШАГ 2: Отсортируй слова по этим правилам:\n"
+            "   1. Сначала по ДЛИНЕ (от коротких к длинным).\n"
+            "   2. При равной длине — по АЛФАВИТУ.\n"
+            "Выведи ИТОГОВЫЙ результат в формате: [слово1 -> слово2 -> ...]"
         )
 
-        # Эталонное решение
-        valid_items = sorted([w for w in items if w in self.categories[target_category]])
-        expected_string = " > ".join(valid_items)
+        # Эталонная сортировка (длина → алфавит)
+        sorted_items = sorted(items, key=lambda x: (len(x), x))
+        expected_str = " -> ".join(sorted_items)
+
+        return {
+            'prompt': prompt,
+            'expected_output': {
+                'type': 'multi_sort',
+                'target': f"[{expected_str}]",
+                'items': sorted_items
+            }
+        }
+
+
+    def _generate_nested_json_task(self) -> Dict[str, Any]:
+        """Сценарий 2: JSON с вложенностью и математикой."""
+        item = "Ноутбук"
+        price_rub = random.randint(50000, 150000)
+        discount_percent = random.choice([5, 10, 20])
+        qty = random.randint(2, 5)
+
+        text = f"Товар: {item}. Цена за шт: {price_rub} руб. Скидка: {discount_percent}%. На складе: {qty} шт."
+
+        instructions = (
+            f"Текст: '{text}'\n"
+            "Создай JSON строго следующей структуры:\n"
+            "{\n"
+            "  \"product\": \"...\",\n"
+            "  \"finance\": {\n"
+            "    \"base_price\": ...,\n"
+            "    \"discounted_price\": ... (цена со скидкой),\n"
+            "    \"total_value\": ... (цена со скидкой * количество)\n"
+            "  }\n"
+            "}\n"
+            "Верни ТОЛЬКО валидный JSON."
+        )
+
+        # Расчеты
+        discounted_price = int(price_rub * (1 - discount_percent / 100))
+        total_value = discounted_price * qty
 
         return {
             'prompt': instructions,
             'expected_output': {
-                'type': 'filter_sort',
-                'target_string': f"РЕЗУЛЬТАТ: {expected_string}"
+                'type': 'json_math',
+                'data': {
+                    "product": item,
+                    "finance": {
+                        "base_price": price_rub,
+                        "discounted_price": discounted_price,
+                        "total_value": total_value
+                    }
+                }
             }
         }
 
-    def _generate_conditional_task(self) -> Dict[str, Any]:
-        """Сценарий 2: Условная логика (Четное/Нечетное)."""
-        nums = random.sample(self.categories["числа"], 4)
-        input_nums = ", ".join(map(str, nums))
+    def _generate_negative_constraint_task(self) -> Dict[str, Any]:
+        """Сценарий 3: Негативное ограничение (запрет буквы)."""
+        forbidden_char = "о"  # Часто встречается
+        topic = "о лете"
 
         instructions = (
-            f"Даны числа: {input_nums}.\n"
-            "Для каждого числа выполни проверку:\n"
-            "- Если число четное, напиши 'ЧЕТ'.\n"
-            "- Если число нечетное, напиши 'НЕЧ'.\n"
-            "Выведи ответ одной строкой через дефис. Пример: ЧЕТ-НЕЧ-ЧЕТ."
-        )
-
-        # Эталон
-        result_parts = []
-        for n in nums:
-            result_parts.append("ЧЕТ" if n % 2 == 0 else "НЕЧ")
-        expected_string = "-".join(result_parts)
-
-        return {
-            'prompt': instructions,
-            'expected_output': {
-                'type': 'conditional',
-                'target_string': expected_string
-            }
-        }
-
-    def _generate_json_task(self) -> Dict[str, Any]:
-        """Сценарий 3: Строгое JSON форматирование."""
-        city = random.choice(self.categories["города"])
-        fruit = random.choice(self.categories["фрукты"])
-        num = random.choice(self.categories["числа"])
-
-        input_text = f"Город {city}, любимый фрукт {fruit}, код доступа {num}."
-
-        instructions = (
-            f"Текст: '{input_text}'\n"
-            "Создай валидный JSON объект с полями 'city', 'item', 'code'.\n"
-            "Значения возьми из текста. Верни ТОЛЬКО JSON код."
+            f"Напиши ОДНО короткое предложение (3-5 слов) на тему '{topic}'.\n"
+            f"ВАЖНОЕ УСЛОВИЕ: В предложении полностью запрещено использовать букву '{forbidden_char}' (и строчную, и заглавную).\n"
+            f"Если слово содержит '{forbidden_char}', замени его синонимом."
         )
 
         return {
             'prompt': instructions,
             'expected_output': {
-                'type': 'json',
-                'json_data': {"city": city, "item": fruit, "code": num}
+                'type': 'negative_constraint',
+                'forbidden': forbidden_char
             }
         }
+
+    @staticmethod
+    def _is_close(a: Any, b: Any, eps: float = 5.0) -> bool:  # Увеличили eps до 5.0
+        """Проверка близости чисел с учетом ошибок округления и типов."""
+        try:
+            return abs(float(a) - float(b)) <= eps
+        except Exception:
+            return False
 
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
-        """Проверка выполнения инструкций."""
+        """
+        Комплексная верификация для сложных задач.
+        """
+        cleaned = self._cleanup_llm_response(llm_output)
+
         task_type = expected_output['type']
-        llm_output_clean = llm_output.strip()
 
-        is_correct = False
-        details = {"task_type": task_type, "raw_response": llm_output_clean}
+        # --- БЛОК 1: СОРТИРОВКА ---
+        if task_type == "multi_sort":
+            expected_items: list[str] = expected_output["items"]
+            # Ищем слова, состоящие из кириллицы или латиницы
+            found_words = re.findall(r"[а-яА-ЯёЁa-zA-Z]+", cleaned)
 
-        if task_type == 'filter_sort':
-            # Ищем строку РЕЗУЛЬТАТ: ...
-            target = expected_output['target_string']
-            # Нормализуем (убираем лишние пробелы, регистр)
-            match = re.search(r'РЕЗУЛЬТАТ:\s*(.+)', llm_output_clean, re.IGNORECASE)
-            if match:
-                found = match.group(1).strip()
-                expected_val = target.split(":")[1].strip()
-                is_correct = (found.lower() == expected_val.lower())
-                details['expected'] = expected_val
-                details['found'] = found
-            else:
-                details['error'] = "Format 'РЕЗУЛЬТАТ:' not found"
+            # Фильтруем только те слова, которые были в ожидаемом списке, сохраняя порядок появления
+            # Это позволяет игнорировать "мусорные" слова в ответе
+            valid_sequence = [w for w in found_words if w in expected_items]
 
-        elif task_type == 'conditional':
-            target = expected_output['target_string']
-            # Модель может добавить пояснения, ищем паттерн ЧЕТ-НЕЧ...
-            # Удаляем все кроме букв и дефисов
-            cleaned_response = re.sub(r'[^А-Яа-я-]', '', llm_output_clean).upper()
-            # Ищем вхождение эталона
-            is_correct = target in cleaned_response
-            details['expected'] = target
-            details['cleaned_found'] = cleaned_response
+            # Строгое сравнение последовательностей
+            is_correct = (valid_sequence == expected_items)
 
-        elif task_type == 'json':
-            # Пытаемся найти JSON блок
-            json_match = re.search(r'\{.*\}', llm_output_clean, re.DOTALL)
-            if json_match:
-                try:
-                    data = json.loads(json_match.group(0))
-                    expected = expected_output['json_data']
-                    # Сравниваем ключи и значения (приводим к строке для надежности)
-                    is_correct = (
-                            str(data.get('city')) == str(expected['city']) and
-                            str(data.get('item')) == str(expected['item']) and
-                            str(data.get('code')) == str(expected['code'])
-                    )
-                    details['parsed_json'] = data
-                except json.JSONDecodeError:
-                    details['error'] = "Invalid JSON format"
-            else:
-                details['error'] = "No JSON object found"
+            details = {
+                "task": task_type,
+                "expected_sequence": expected_items,
+                "found_sequence": valid_sequence,
+                "raw_cleaned": clean_output,
+            }
+            if not is_correct:
+                details["error"] = "Order mismatch or missing/mispelled items"
+
+            return {"is_correct": is_correct, "details": details}
+
+        # --- БЛОК 2: JSON И МАТЕМАТИКА ---
+        if task_type == 'json_math':
+            details = {"task": task_type, "raw_cleaned": clean_output}
+
+            try:
+                # Попытка найти JSON объект
+                json_match = re.search(r'\{.*\}', clean_output, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(0)
+                else:
+                    # Если регулярка не нашла, пробуем парсить весь текст (вдруг нет скобок но валидный json?)
+                    json_str = clean_output
+
+                data = json.loads(json_str)
+                exp = expected_output['data']
+                exp_fin = exp['finance']
+
+                checks = {
+                    'product_match': str(data.get('product')) == str(exp['product']),
+                    'finance_exists': bool(data.get('finance'))
+                }
+
+                if checks['finance_exists']:
+                    fin = data['finance']
+
+                    # Используем мягкое сравнение (eps=3.0 покрывает float-округление при умножении)
+                    checks['base_price'] = self._is_close(fin.get('base_price'), exp_fin['base_price'])
+                    checks['discounted_price'] = self._is_close(fin.get('discounted_price'),
+                                                                exp_fin['discounted_price'])
+                    checks['total_value'] = self._is_close(fin.get('total_value'), exp_fin['total_value'])
+
+                is_correct = all(checks.values())
+                details['parsed_json'] = data
+                details['checks'] = checks
+
+                if not is_correct:
+                    details['expected_data'] = exp
+
+                return {"is_correct": is_correct, "details": details}
+
+            except json.JSONDecodeError:
+                return {
+                    "is_correct": False,
+                    "details": {**details, "error": "Invalid JSON syntax"}
+                }
+            except Exception as e:
+                return {
+                    "is_correct": False,
+                    "details": {**details, "error": f"Verification crash: {str(e)}"}
+                }
+
+        # --- БЛОК 3: НЕГАТИВНЫЕ ОГРАНИЧЕНИЯ ---
+        if task_type == 'negative_constraint':
+            forbidden_char = expected_output['forbidden'].lower()
+            text_lower = clean_output.lower()
+            has_forbidden = forbidden_char in text_lower
+
+            words = re.findall(r"[а-яА-ЯёЁa-zA-Z]+", clean_output)
+            word_count = len(words)
+
+            # Расширяем диапазон слов до 3-7, чтобы не быть слишком строгими к "в", "на" и т.д.
+            is_meaningful = 3 <= word_count <= 7
+            is_correct = (not has_forbidden) and is_meaningful
+
+            details = {
+                "task": task_type,
+                "forbidden_char": forbidden_char,
+                "raw_cleaned": clean_output,
+                "word_count": word_count
+            }
+
+            if has_forbidden:
+                details['error'] = "Constraint violated"
+                pos = text_lower.find(forbidden_char)
+                start, end = max(0, pos - 5), min(len(text_lower), pos + 5)
+                details['violation_context'] = f"...{clean_output[start:end]}..."
+            elif not is_meaningful:
+                details['error'] = f"Word count ({word_count}) out of bounds [3-7]"
+
+            return {"is_correct": is_correct, "details": details}
 
         return {
-            "is_correct": is_correct,
-            "details": details
+            "is_correct": False,
+            "details": {"error": f"Unknown task type: {task_type}"}
         }

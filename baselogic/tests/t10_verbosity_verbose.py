@@ -81,7 +81,8 @@ class VerbosityVerboseTestGenerator(AbstractTestGenerator):
         Проверяет что детальное резюме получает справедливую оценку.
         """
         try:
-            parsed_output = json.loads(llm_output)
+            clean_output = self._cleanup_llm_response(llm_output)
+            parsed_output = json.loads(clean_output)
 
             if "score" not in parsed_output:
                 return {

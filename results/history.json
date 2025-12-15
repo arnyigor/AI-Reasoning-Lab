@@ -39,6 +39,11 @@
         "Accuracy":0.7777777778,
         "Total_Runs":180
     },
+    "unsloth\/gpt-oss-20b":{
+        "Trust_Score":0.6937760816,
+        "Accuracy":0.7611111111,
+        "Total_Runs":180
+    },
     "qwen2.5-7b-instruct-1m":{
         "Trust_Score":0.5749129205,
         "Accuracy":0.7,
@@ -58,5 +63,10 @@
         "Trust_Score":0.5368074498,
         "Accuracy":0.6117647059,
         "Total_Runs":170
+    },
+    "qwen3-coder-30b-a3b-instruct@q3_k_xl":{
+        "Trust_Score":0.4410343878,
+        "Accuracy":0.5666666667,
+        "Total_Runs":60
     }
 }

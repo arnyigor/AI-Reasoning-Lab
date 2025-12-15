@@ -335,8 +335,7 @@ class AdvancedContextStressTestGenerator(AbstractTestGenerator):
     def verify(self, llm_output: str, expected_output: str) -> Dict[str, Any]:
         """Упрощенная, но строгая верификация для точных данных."""
 
-        # Очистка от markdown и лишних символов
-        clean_resp = llm_output.replace('`', '').strip()
+        clean_resp = self._cleanup_llm_response(llm_output).strip()
         clean_exp = expected_output.strip()
 
         # Подготовка базового словаря деталей

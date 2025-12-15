@@ -3,6 +3,12 @@ from typing import Dict, Any
 
 # Предполагаем, что базовый класс доступен, как в твоем примере
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
+import re
+import sys
+import traceback
+import io
+from contextlib import redirect_stdout
+from typing import Dict, Any
 
 
 class MVCCDBTestGenerator(AbstractTestGenerator):
@@ -160,90 +166,127 @@ if not loop.run_until_complete(run_hidden_verification()):
         }
 
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
-        # ШАГ 1: Удаляем <think> блоки (если модель их вставила)
-        cleaned_output = re.sub(r'<think>.*?</think>', '', llm_output, flags=re.DOTALL).strip()
+        # ШАГ 1: Базовая очистка
+        # Убираем <think> и пробелы по краям
+        cleaned_output = self._cleanup_llm_response(llm_output)
 
-        # ШАГ 2: Пытаемся найти Markdown блок (``````)
-        code_match = re.search(r"``````", cleaned_output, re.DOTALL | re.IGNORECASE)
-
-        if code_match:
-            code_to_exec = code_match.group(1)
-        else:
-            # ШАГ 3: Fallback для "чистого кода" без Markdown
-            # Ищем первый импорт (import или from)
-            start_pattern = re.compile(r'^(import |from )', re.MULTILINE)
-            match = start_pattern.search(cleaned_output)
-
-            if match:
-                # Берём весь текст начиная с первого импорта
-                code_to_exec = cleaned_output[match.start():]
-            else:
-                # Если импортов нет, проверяем, есть ли хоть что-то похожее на код
-                if 'class ' in cleaned_output or 'def ' in cleaned_output:
-                    code_to_exec = cleaned_output
-                else:
-                    return {
-                        'is_correct': False,
-                        'details': {'error': 'Код не найден (нет импортов, классов или функций)'}
-                    }
-
-        # ШАГ 4: Санитизация "кривых" символов
-        replacements = {'—': '-', ''': "'", ''': "'", '"': '"', '"': '"'}
-        for old, new in replacements.items():
-            code_to_exec = code_to_exec.replace(old, new)
-
-        # ШАГ 5: Удаляем блок if __name__ == "__main__":
-        code_without_main = re.sub(
-            r'if __name__\s*==\s*[\'"]__main__[\'"]\s*:.*$',
-            '',
-            code_to_exec,
-            flags=re.DOTALL | re.MULTILINE
+        # ШАГ 2: Поиск НАЧАЛА кода (без парсинга Markdown)
+        # Ищем import, from, class или def в начале строки
+        start_pattern = re.compile(
+            r'^(?:import\s+|from\s+|class\s+\w+|async\s+def\s+|def\s+)',
+            re.MULTILINE
         )
 
+        match = start_pattern.search(cleaned_output)
+
+        if match:
+            # Берем всё от найденного слова до самого конца
+            code_to_exec = cleaned_output[match.start():]
+        else:
+            return {
+                'is_correct': False,
+                'details': {'error': 'Код не найден (нет import, class или def)'}
+            }
+
+        # 3.1 Убираем закрывающие Markdown кавычки
+        if "```" in code_to_exec:
+            code_to_exec = code_to_exec.split("```")[0]
+
+            # 3.2 Убираем блок запуска (if __name__ == "__main__": и его ошибочные вариации)
+            # Многие модели ошибаются тут. Мы просто отрезаем всё, начиная с этой конструкции.
+            # Ищем вариации: if __name__, if name ==, if __name__==
+            main_block_pattern = re.compile(
+                r'^\s*if\s+(?:__name__|name)\s*==\s*[\'"](?:__main__|main)[\'"]\s*:',
+                re.MULTILINE
+            )
+
+            match_main = main_block_pattern.search(code_to_exec)
+            if match_main:
+            # Отрезаем всё, начиная с этой строки
+                code_to_exec = code_to_exec[:match_main.start()]
+
+        # ШАГ 4: Санитизация кавычек (для IDE-совместимости и чистоты)
+        replacements = {
+            '—': '-',
+            '“': '"',
+            '”': '"',
+            '‘': "'",
+            '’': "'",
+            '«': '"',
+            '»': '"'
+        }
+        for old_char, new_char in replacements.items():
+            code_to_exec = code_to_exec.replace(old_char, new_char)
+
+        # ШАГ 5: Подготовка окружения
+        test_scope = {}
+        # Блокируем выполнение if __name__ == "__main__" самым надежным способом
+        test_scope['__name__'] = '__llm_test_execution__'
+
+        # Перехватчик логов (чтобы видеть принты тестов)
+        captured_output = io.StringIO()
+
         try:
-            # ШАГ 6: Выполняем код модели
-            local_scope = {}
-            exec(code_without_main, {}, local_scope)
+            with redirect_stdout(captured_output):
+                # ШАГ 6: Компиляция и исполнение кода модели
+                # Используем compile для лучшего отображения ошибок синтаксиса
+                compiled_code = compile(code_to_exec, "<llm_code>", "exec")
+                exec(compiled_code, test_scope, test_scope)
 
-            # ШАГ 7: Проверяем, что класс AsyncMVCCStore есть
-            if 'AsyncMVCCStore' not in local_scope:
-                return {
-                    'is_correct': False,
-                    'details': {'error': 'Класс AsyncMVCCStore не найден после выполнения кода'}
-                }
+                # ШАГ 7: Проверка результата (класс должен появиться)
+                if 'AsyncMVCCStore' not in test_scope:
+                    return {
+                        'is_correct': False,
+                        'details': {
+                            'error': 'Класс AsyncMVCCStore не найден',
+                            'found_globals': list(test_scope.keys())
+                        }
+                    }
 
-            # ШАГ 8: Готовим скоуп для скрытых тестов
-            test_scope = local_scope.copy()
+                # ШАГ 8: Запуск скрытых тестов
+                # Добавляем asyncio, если его вдруг нет
+                if 'asyncio' not in test_scope:
+                    import asyncio
+                    test_scope['asyncio'] = asyncio
 
-            # Добавляем asyncio, если его нет (на всякий случай)
-            if 'asyncio' not in test_scope:
-                import asyncio
-                test_scope['asyncio'] = asyncio
-
-            # ШАГ 9: Запускаем скрытые тесты
-            exec(expected_output['tests'], test_scope)
+                # Запускаем тесты в ТОМ ЖЕ скоупе
+                exec(expected_output['tests'], test_scope, test_scope)
 
             return {
                 'is_correct': True,
-                'details': {'status': 'MVCC тесты пройдены успешно'}
+                'details': {
+                    'status': 'MVCC тесты пройдены',
+                    'logs': captured_output.getvalue()[-1000:]  # Последние логи
+                }
             }
 
         except AssertionError as e:
             return {
                 'is_correct': False,
-                'details': {'error': 'Логическая ошибка теста', 'msg': str(e)}
+                'details': {
+                    'error': 'Ошибка логики (AssertionError)',
+                    'msg': str(e),
+                    'logs': captured_output.getvalue()
+                }
             }
         except SyntaxError as e:
             return {
                 'is_correct': False,
                 'details': {
-                    'error': 'Синтаксическая ошибка в коде',
+                    'error': 'Ошибка синтаксиса Python',
                     'msg': str(e),
-                    'line': e.lineno
+                    'line': e.lineno,
+                    'code_snippet': code_to_exec.splitlines()[e.lineno - 1] if e.lineno else "N/A"
                 }
             }
         except Exception as e:
             return {
                 'is_correct': False,
-                'details': {'error': 'Runtime Error', 'traceback': str(e)}
+                'details': {
+                    'error': 'Ошибка выполнения (RuntimeError)',
+                    'msg': str(e),
+                    'traceback': traceback.format_exc(),
+                    'logs': captured_output.getvalue()
+                }
             }
+

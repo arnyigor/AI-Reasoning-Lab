@@ -55,9 +55,10 @@ class CodeGenTestGenerator(AbstractTestGenerator):
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
         # 1. Извлекаем блок кода
         # Удаляем блоки <think>...</think> перед поиском кода
-        code_match = re.search(r"```python\n(.*?)\n```", llm_output, re.DOTALL)
+        cleaned = self._cleanup_llm_response(llm_output)
+        code_match = re.search(r"```python\n(.*?)\n```", cleaned, re.DOTALL)
         if not code_match:
-            code_match = re.search(r"def\s.*", llm_output, re.DOTALL)
+            code_match = re.search(r"def\s.*", cleaned, re.DOTALL)
 
         if not code_match:
             return {'is_correct': False, 'details': {'error': 'Блок кода Python не найден в очищенном ответе'}}

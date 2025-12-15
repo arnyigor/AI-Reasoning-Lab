@@ -55,7 +55,8 @@ class PositionalFirstTestGenerator(AbstractTestGenerator):
         Проверяет выбор лучшего резюме когда оно в первой позиции.
         """
         try:
-            choice = llm_output.strip().upper()
+            clean_output = self._cleanup_llm_response(llm_output)
+            choice = clean_output.strip().upper()
 
             # Проверяем, что ответ содержит только букву A или B
             if choice not in ['A', 'B']:

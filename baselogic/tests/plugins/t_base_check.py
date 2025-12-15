@@ -27,7 +27,7 @@ class BaseCheckTestGenerator(AbstractTestGenerator):
             "expected_output": expected_output,
         }
 
-    def verify(self, llm_output: str, expected_output: ExpectedOutput) -> Dict[str, Any]:
+    def verify(self, output: str, expected_output: ExpectedOutput) -> Dict[str, Any]:
         """
         Проверяет ответ модели по правилу вхождения.
 
@@ -38,6 +38,7 @@ class BaseCheckTestGenerator(AbstractTestGenerator):
         Returns:
             Dict[str, Any]: Результат проверки.
         """
+        llm_output = self._cleanup_llm_response(output)
         correct_answer = expected_output["correct"]
         cleaned_output = llm_output.strip().lower()
         expected_clean = correct_answer.strip().lower()

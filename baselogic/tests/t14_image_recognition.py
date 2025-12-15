@@ -78,11 +78,11 @@ class ImageRecognitionTestGenerator(AbstractTestGenerator):
             log.error(f"Не удалось закодировать изображение {path}: {e}")
             raise
 
-    def verify(self, llm_output: str, expected_output: str) -> Dict[str, Any]:
+    def verify(self, output: str, expected_output: str) -> Dict[str, Any]:
         """
         Проверяет ответ модели на соответствие ожидаемому результату.
         """
-
+        llm_output = self._cleanup_llm_response(output)
         # Если ответ пустой - тест не пройден
         if not llm_output or llm_output.strip() == "":
             log.warning("Модель вернула пустой ответ")

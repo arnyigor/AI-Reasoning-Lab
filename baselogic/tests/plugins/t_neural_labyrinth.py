@@ -1,4 +1,3 @@
-import ast
 import logging
 import random
 import re
@@ -146,8 +145,9 @@ class NeuralLabyrinthTestGenerator(AbstractTestGenerator):
     def verify(self, llm_output: str, expected_output: Dict[str, Any]) -> Dict[str, Any]:
         """Комплексная проверка решения на основе CodeGenTestGenerator подхода."""
         try:
+            clean_output = self._cleanup_llm_response(llm_output)
             # 1. Извлекаем и санитизируем код
-            clean_code = self._extract_python_code(llm_output)
+            clean_code = self._extract_python_code(clean_output)
             if not clean_code:
                 return self._failure_result("Не найден Python код в ответе")
 
@@ -168,7 +168,6 @@ class NeuralLabyrinthTestGenerator(AbstractTestGenerator):
         except Exception as e:
             log.error(f"Критическая ошибка в verify: {e}")
             return self._failure_result(f"Критическая ошибка проверки: {str(e)}")
-
 
     def _extract_python_code(self, llm_output: str) -> str:
         """УЛУЧШЕННОЕ извлечение Python кода на основе CodeGenTestGenerator."""
@@ -226,8 +225,6 @@ class NeuralLabyrinthTestGenerator(AbstractTestGenerator):
             code = code.replace(old, new)
 
         return code
-
-
 
     def _execute_and_verify(self, code: str, expected_output: Dict[str, Any]) -> Dict[str, Any]:
         """УЛУЧШЕННОЕ выполнение на основе CodeGenTestGenerator."""
@@ -371,7 +368,6 @@ class NeuralLabyrinthTestGenerator(AbstractTestGenerator):
             'max_score': max_score,
             'details': details
         }
-
 
     def _analyze_code_structure(self, code: str) -> Dict[str, bool]:
         """Исправленный анализ структуры кода."""
