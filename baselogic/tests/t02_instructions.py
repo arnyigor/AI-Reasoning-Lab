@@ -2,7 +2,7 @@ import json
 import logging
 import random
 import re
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
@@ -54,7 +54,7 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         prompt = (
             f"Список: {', '.join(items)}.\n"
             "Твоя задача — отсортировать этот список.\n"
-            "ШАГ 1: Для каждого слова напиши его длину (количество букв).\n"
+            "ШАГ 1: Для каждого слова напиши его длину (количество всех не уникальных букв).\n"
             "ШАГ 2: Отсортируй слова по этим правилам:\n"
             "   1. Сначала по ДЛИНЕ (от коротких к длинным).\n"
             "   2. При равной длине — по АЛФАВИТУ.\n"
@@ -73,7 +73,6 @@ class InstructionsTestGenerator(AbstractTestGenerator):
                 'items': sorted_items
             }
         }
-
 
     def _generate_nested_json_task(self) -> Dict[str, Any]:
         """Сценарий 2: JSON с вложенностью и математикой."""
@@ -98,9 +97,9 @@ class InstructionsTestGenerator(AbstractTestGenerator):
             "Верни ТОЛЬКО валидный JSON."
         )
 
-        # Расчеты
-        discounted_price = int(price_rub * (1 - discount_percent / 100))
-        total_value = discounted_price * qty
+        # вычисления с округлением до 2 знаков
+        discounted_price = round(price_rub * (1 - discount_percent / 100), 2)
+        total_value = round(discounted_price * qty, 2)
 
         return {
             'prompt': instructions,
@@ -137,127 +136,195 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         }
 
     @staticmethod
-    def _is_close(a: Any, b: Any, eps: float = 5.0) -> bool:  # Увеличили eps до 5.0
+    def _is_close(a: Any, b: Any, eps: float = 5.0) -> bool:
         """Проверка близости чисел с учетом ошибок округления и типов."""
         try:
             return abs(float(a) - float(b)) <= eps
         except Exception:
             return False
 
-    def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
+    # ------------------------------------------------------------------
+    # 1. Вспомогательные методы очистки
+    # ------------------------------------------------------------------
+    def _strip_code_fence(self, text: str) -> str:
         """
-        Комплексная верификация для сложных задач.
+        Убирает Markdown‑обёртку ```` ```lang ... ``` ````.
+        Если язык не указан – просто удаляем три обратных кавычки.
+        Возвращает внутренний текст без фэнса.
         """
-        cleaned = self._cleanup_llm_response(llm_output)
+        pattern = r'```(?:\w+)?\s*(.*?)\s*```'
+        return re.sub(pattern, r'\1', text, flags=re.DOTALL)
 
-        task_type = expected_output['type']
+    def _clean_output(self, raw: str) -> str:
+        if not isinstance(raw, str):
+            return ""
 
-        # --- БЛОК 1: СОРТИРОВКА ---
-        if task_type == "multi_sort":
-            expected_items: list[str] = expected_output["items"]
-            # Ищем слова, состоящие из кириллицы или латиницы
-            found_words = re.findall(r"[а-яА-ЯёЁa-zA-Z]+", cleaned)
+        # 1) <think>…</think>
+        text = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL | re.IGNORECASE)
 
-            # Фильтруем только те слова, которые были в ожидаемом списке, сохраняя порядок появления
-            # Это позволяет игнорировать "мусорные" слова в ответе
-            valid_sequence = [w for w in found_words if w in expected_items]
+        # 2) Markdown‑код
+        text = self._strip_code_fence(text)
 
-            # Строгое сравнение последовательностей
-            is_correct = (valid_sequence == expected_items)
+        # 3) Оставляем только “разрешённые” символы: буквы, цифры, пробелы, запятые, точки,
+        # дефисы и теперь скобки + «>» для стрелок.
+        allowed_pattern = r'[^\w\s.,-<>]'
+        text = re.sub(allowed_pattern, '', text)
 
-            details = {
-                "task": task_type,
-                "expected_sequence": expected_items,
-                "found_sequence": valid_sequence,
-                "raw_cleaned": clean_output,
-            }
-            if not is_correct:
-                details["error"] = "Order mismatch or missing/mispelled items"
+        return text.strip()
 
-            return {"is_correct": is_correct, "details": details}
+    def _extract_sorted_list(self, raw: str) -> List[str]:
+        if not isinstance(raw, str):
+            return []
 
-        # --- БЛОК 2: JSON И МАТЕМАТИКА ---
-        if task_type == 'json_math':
-            details = {"task": task_type, "raw_cleaned": clean_output}
+        # 1. Найти строку с «->»
+        lines = raw.splitlines()
+        target_line = None
+        for line in reversed(lines):
+            if '->' in line:
+                target_line = line.strip()
+                break
 
-            try:
-                # Попытка найти JSON объект
-                json_match = re.search(r'\{.*\}', clean_output, re.DOTALL)
-                if json_match:
-                    json_str = json_match.group(0)
-                else:
-                    # Если регулярка не нашла, пробуем парсить весь текст (вдруг нет скобок но валидный json?)
-                    json_str = clean_output
+        if not target_line:
+            # возможно ответ без скобок и стрелок – пробуем обычный split по запятой/пробелу
+            return [w.strip() for w in re.split(r',|\s+', raw) if w]
 
-                data = json.loads(json_str)
-                exp = expected_output['data']
-                exp_fin = exp['finance']
+        # 2. Удаляем внешние квадратные скобки
+        content = re.sub(r'^$|$$', '', target_line).strip()
 
-                checks = {
-                    'product_match': str(data.get('product')) == str(exp['product']),
-                    'finance_exists': bool(data.get('finance'))
-                }
+        # 3. Разделяем по стрелкам и запятой (на случай «a,b»)
+        parts = [p.strip() for p in re.split(r'->|,', content) if p]
+        return parts
 
-                if checks['finance_exists']:
-                    fin = data['finance']
 
-                    # Используем мягкое сравнение (eps=3.0 покрывает float-округление при умножении)
-                    checks['base_price'] = self._is_close(fin.get('base_price'), exp_fin['base_price'])
-                    checks['discounted_price'] = self._is_close(fin.get('discounted_price'),
-                                                                exp_fin['discounted_price'])
-                    checks['total_value'] = self._is_close(fin.get('total_value'), exp_fin['total_value'])
+    def _verify_multi_sort(self, raw: str, expected: Dict[str, Any]) -> Dict[str, Any]:
+        cleaned = self._clean_output(raw)
+        words_in_answer = self._extract_sorted_list(cleaned)
 
-                is_correct = all(checks.values())
-                details['parsed_json'] = data
-                details['checks'] = checks
-
-                if not is_correct:
-                    details['expected_data'] = exp
-
-                return {"is_correct": is_correct, "details": details}
-
-            except json.JSONDecodeError:
-                return {
-                    "is_correct": False,
-                    "details": {**details, "error": "Invalid JSON syntax"}
-                }
-            except Exception as e:
-                return {
-                    "is_correct": False,
-                    "details": {**details, "error": f"Verification crash: {str(e)}"}
-                }
-
-        # --- БЛОК 3: НЕГАТИВНЫЕ ОГРАНИЧЕНИЯ ---
-        if task_type == 'negative_constraint':
-            forbidden_char = expected_output['forbidden'].lower()
-            text_lower = clean_output.lower()
-            has_forbidden = forbidden_char in text_lower
-
-            words = re.findall(r"[а-яА-ЯёЁa-zA-Z]+", clean_output)
-            word_count = len(words)
-
-            # Расширяем диапазон слов до 3-7, чтобы не быть слишком строгими к "в", "на" и т.д.
-            is_meaningful = 3 <= word_count <= 7
-            is_correct = (not has_forbidden) and is_meaningful
-
-            details = {
-                "task": task_type,
-                "forbidden_char": forbidden_char,
-                "raw_cleaned": clean_output,
-                "word_count": word_count
-            }
-
-            if has_forbidden:
-                details['error'] = "Constraint violated"
-                pos = text_lower.find(forbidden_char)
-                start, end = max(0, pos - 5), min(len(text_lower), pos + 5)
-                details['violation_context'] = f"...{clean_output[start:end]}..."
-            elif not is_meaningful:
-                details['error'] = f"Word count ({word_count}) out of bounds [3-7]"
-
-            return {"is_correct": is_correct, "details": details}
+        is_correct = words_in_answer == expected['items']
 
         return {
-            "is_correct": False,
-            "details": {"error": f"Unknown task type: {task_type}"}
+            "is_correct": is_correct,
+            "details": {
+                "task": "multi_sort",
+                "expected_sequence": expected['items'],
+                "found_sequence": words_in_answer,
+                "cleaned_output": cleaned
+            }
         }
+
+    # ------------------------------------------------------------------
+    # 2.1 Новый метод очистки для задач с JSON
+    # ------------------------------------------------------------------
+    def _strip_json_noise(self, raw: str) -> str:
+        """Оставляем только валидный JSON без лишних токенов и <think>."""
+        if not isinstance(raw, str):
+            return ""
+
+        # 1) Удаляем <think> и Markdown‑фэнсы
+        cleaned = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL | re.IGNORECASE)
+        cleaned = self._strip_code_fence(cleaned)
+
+        # 2) Удаляем все токены вида </s>, <|eot_id|>, <|endoftext|>, <|im_start|>, <|im_end|>, <s>, "assistant"
+        for token in [r"</s>", r"<\|eot_id\|>", r"<\|endoftext\|>", r"<\|im_start\|>", r"<\|im_end\|>", r"<s>", r"assistant"]:
+            cleaned = re.sub(token, "", cleaned, flags=re.DOTALL | re.IGNORECASE)
+
+        # 3) Сохраняем только символы, которые могут быть частью JSON
+        allowed_pattern = r'[^\w\s.,-<>]'
+        cleaned = re.sub(allowed_pattern, '', cleaned)
+        return cleaned.strip()
+
+    # ------------------------------------------------------------------
+    # 2.2 Верификация JSON‑тестов
+    # ------------------------------------------------------------------
+    def _verify_json_math(self, raw: str, expected: Dict[str, Any]) -> Dict[str, Any]:
+        # Очищаем только шумы, но не убираем JSON‑символы
+        cleaned = self._strip_json_noise(raw)
+
+        # Используем жадный поиск – берём всю внешнюю структуру { … }
+        json_match = re.search(r'\{.*\}', cleaned, flags=re.DOTALL)
+        if not json_match:
+            return {
+                "is_correct": False,
+                "details": {"task": "json_math", "raw_cleaned": cleaned, "error": "No JSON found"}
+            }
+
+        raw_json = json_match.group(0).strip()
+        # Удаляем лишние запятые перед закрывающими скобками
+        raw_json = re.sub(r',\s*(\})', r'\1', raw_json)
+
+        try:
+            data = json.loads(raw_json)
+        except json.JSONDecodeError as e:
+            return {
+                "is_correct": False,
+                "details": {"task": "json_math", "raw_cleaned": cleaned, "error": f"JSON parse failed: {e}"}
+            }
+
+        exp = expected["data"]
+        fin_exp = exp["finance"]
+
+        checks = {
+            "product_match": str(data.get("product")) == str(exp["product"]),
+            "base_price": self._is_close(
+                data.get("finance", {}).get("base_price"), fin_exp["base_price"]),
+            "discounted_price": self._is_close(
+                data.get("finance", {}).get("discounted_price"), fin_exp["discounted_price"]),
+            "total_value": self._is_close(
+                data.get("finance", {}).get("total_value"), fin_exp["total_value"])
+        }
+
+        return {"is_correct": all(checks.values()), "details": {"task": "json_math",
+                                                                "parsed_json": data,
+                                                                "checks": checks}}
+
+    def _verify_negative_constraint(self, raw: str, expected: Dict[str, Any]) -> Dict[str, Any]:
+        cleaned = self._clean_output(raw)
+        forbidden = expected["forbidden"].lower()
+
+        words = re.findall(r'[а-яА-ЯёЁa-zA-Z]+', cleaned)
+        word_count = len(words)
+
+        is_correct = (
+                3 <= word_count <= 7 and
+                all(forbidden not in w.lower() for w in words)
+        )
+
+        details = {
+            "task": "negative_constraint",
+            "forbidden_char": forbidden,
+            "cleaned_output": cleaned,
+            "word_count": word_count
+        }
+
+        if not is_correct:
+            # Траектория нарушения, если есть слово с запрещённой буквой
+            for w in words:
+                if forbidden in w.lower():
+                    details["violation_context"] = f"...{w}..."
+                    break
+
+            details["error"] = "Constraint violated" if any(forbidden in w.lower() for w in words) else \
+                f"Word count ({word_count}) out of bounds [3-7]"
+
+        return {"is_correct": is_correct, **details}
+
+    # ------------------------------------------------------------------
+    # 3. Публичный verify
+    # ------------------------------------------------------------------
+    def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
+        """
+        Универсальная точка входа – просто делегирует нужной проверке.
+        """
+        if not isinstance(llm_output, str):
+            return {"is_correct": False, "details": {"error": "Non‑string LLM output"}}
+
+        task_type = expected_output.get("type")
+        if task_type == "multi_sort":
+            return self._verify_multi_sort(llm_output, expected_output)
+        elif task_type == "json_math":
+            return self._verify_json_math(llm_output, expected_output)
+        elif task_type == "negative_constraint":
+            return self._verify_negative_constraint(llm_output, expected_output)
+
+        return {"is_correct": False,
+                "details": {"error": f"Unsupported task type: {task_type}"}}
