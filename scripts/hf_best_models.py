@@ -1,354 +1,224 @@
 import json
 import re
-from datetime import datetime
-
+import math
+from datetime import datetime, timezone
 from huggingface_hub import HfApi
-
 
 class GGUFModelRanker:
     def __init__(self):
         self.api = HfApi()
+        self._SIZE_LABEL_RE = re.compile(
+            r'(?P<main>\d+(?:\.\d+)?)\s*[xX]?\s*(?P<second>\d+(?:\.\d+)?)(?P<unit>[BbMm])?',
+            re.IGNORECASE
+        )
 
     # ------------------------------------------------------------------
-    #   Парсер для general.size_label
+    #   Парсинг параметров
     # ------------------------------------------------------------------
-    _SIZE_LABEL_RE = re.compile(
-        r'(?P<main>\d+(?:\.\d+)?)\s*[xX]\s*'
-        r'(?P<second>\d+(?:\.\d+)?)(?P<unit>[BbMm])?',  # unit optional
-        re.IGNORECASE
-    )
-
     def _parse_size_label(self, label: str) -> float | None:
-        """
-        Извлекает значение «основного» параметра из строки вида '256x20B'.
-        Возвращает число в миллиардах (если первый показатель задан в миллионах).
-        Если строка не распознаётся – возвращается None.
-        """
+        if not label: return None
         m = self._SIZE_LABEL_RE.search(label)
-        if not m:
-            return None
+        if not m: return None
 
-        main_val = float(m.group('main'))          # первое число
-        unit     = m.group('unit')                # может быть B/M/None
+        main_val = float(m.group('main'))
+        unit = m.group('unit')
 
-        # Если второй показатель закодирован в миллиардах (20B), то первый
-        # обычно в миллионах. Переведём его в миллиарды.
-        if unit == 'b':
-            return main_val / 1000.0              # 256M → 0,256B
+        # Логика MoE (например, 8x7B)
+        if 'x' in label.lower() and m.group('second'):
+            second_val = float(m.group('second'))
+            main_val = main_val * second_val
 
-        # Иначе считаем, что число уже в миллиардах (или без уточнения)
+        if unit and unit.lower() == 'm':
+            return main_val / 1000.0
         return main_val
 
-    # ------------------------------------------------------------------
-    #   Основная функция извлечения параметров
-    # ------------------------------------------------------------------
-    def extract_parameters(self, model_info):
-        """Извлекает количество параметров из названия модели, тегов или size_label."""
-        # 1) Попытка взять значение из general.size_label (если доступно)
+    def extract_parameters(self, model_info) -> float | None:
+        # 1. size_label
         if hasattr(model_info, 'general') and getattr(model_info.general, 'size_label', None):
-            label = model_info.general.size_label
-            params_from_label = self._parse_size_label(label)
-            if params_from_label is not None:
-                return params_from_label
+            val = self._parse_size_label(model_info.general.size_label)
+            if val: return val
 
-        # 2) Обычные паттерны – название модели / теги (без изменений)
-        name = getattr(model_info, 'modelId', '').lower()
-        param_patterns = [
-            r'(\d+\.?\d*)\s*[bm]b',
-            r'(\d+\.?\d*)b',
-            r'(\d+)\s*billi',
-            r'(\d+)\s*m',
+        # 2. Regex по имени (используем .id вместо .modelId)
+        name = getattr(model_info, 'id', '').lower()
+
+        patterns = [
+            r'(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)b', # MoE: 8x7b
+            r'(\d+(?:\.\d+)?)[b]',               # 7b, 13.5b
         ]
 
-        for pattern in param_patterns:
-            match = re.search(pattern, name)
+        for p in patterns:
+            match = re.search(p, name)
             if match:
-                value = float(match.group(1))
-                if 'm' in name or 'million' in name:
-                    return value / 1000.0
-                return value
-
-        if hasattr(model_info, 'tags'):
-            for tag in model_info.tags:
-                tag = tag.lower()
-                for pattern in param_patterns:
-                    match = re.search(pattern, tag)
-                    if match:
-                        value = float(match.group(1))
-                        if 'm' in tag or 'million' in tag:
-                            return value / 1000.0
-                        return value
-
-        # Если ничего не найдено – возвращаем None
+                vals = match.groups()
+                if len(vals) == 2:
+                    return float(vals[0]) * float(vals[1])
+                return float(vals[0])
         return None
 
-    def calculate_score(self, model, weights=(0.5, 0.3, 0.2)):
-        """
-        Рассчитывает комплексный рейтинг модели на основе:
-            - downloads (50%)
-            - likes     (30%)
-            - recency   (20%)
+    # ------------------------------------------------------------------
+    #   Расчет рейтинга (FIX: createdAt -> created_at)
+    # ------------------------------------------------------------------
+    def calculate_score(self, model, weights=(0.45, 0.35, 0.2)):
+        downloads = getattr(model, 'downloads', 0) or 0
+        likes = getattr(model, 'likes', 0) or 0
 
-        Параметры
-        ----------
-        model   : объект из HfApi.list_models()
-        weights : кортеж (download_weight, like_weight, recency_weight)
-        """
-        # 1. Считаем “raw”‑значения
-        download_score = getattr(model, 'downloads', 0) or 0
-        like_score = getattr(model, 'likes', 0) or 0
+        log_downloads = math.log10(downloads + 1)
+        log_likes = math.log10(likes + 1)
 
-        # 2. Новизна: 1 для последних 7 дней → 0 при 180+ днях
-        if hasattr(model, 'createdAt') and model.createdAt:
+        MAX_LOG_DOWNLOADS = 7.5
+        MAX_LOG_LIKES = 5.0
+
+        norm_download = min(1.0, log_downloads / MAX_LOG_DOWNLOADS)
+        norm_like = min(1.0, log_likes / MAX_LOG_LIKES)
+
+        # Новизна
+        recency_score = 0.5
+
+        # FIX: Используем created_at
+        created_at = getattr(model, 'created_at', None)
+
+        if created_at:
             try:
-                created_date = datetime.fromisoformat(
-                    model.createdAt.replace('Z', '+00:00')
-                )
-                days_old = (datetime.now(created_date.tzinfo) - created_date).days
-                recency_score = max(0.0, 1.0 - (days_old / 180))
-            except Exception:
-                # Если дата непонятна – считаем среднюю новизну
-                recency_score = 0.5
-        else:
-            recency_score = 0.5
+                # Библиотека теперь часто возвращает datetime объект, а не строку
+                if isinstance(created_at, str):
+                    created_dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
+                else:
+                    created_dt = created_at
 
-        # 3. Нормализация скачиваний и лайков (логарифмический масштаб)
-        MAX_DOWNLOADS = 10_000_000  # предел для нормализации
-        MAX_LIKES = 10_000
+                # Приводим к UTC для корректного вычитания
+                if created_dt.tzinfo is None:
+                    created_dt = created_dt.replace(tzinfo=timezone.utc)
 
-        norm_download = min(
-            1.0, (download_score / MAX_DOWNLOADS) ** 0.5
-        )
-        norm_like = min(
-            1.0, (like_score / MAX_LIKES) ** 0.7
-        )
+                delta_days = (datetime.now(timezone.utc) - created_dt).days
 
-        # 4. Итоговый рейтинг
+                if delta_days < 14:
+                    recency_score = 1.0
+                else:
+                    recency_score = max(0.0, 1.0 - (delta_days / 180.0))
+            except Exception as e:
+                # print(f"Date parsing error: {e}") # Debug
+                pass
+
         score = (
                 weights[0] * norm_download +
                 weights[1] * norm_like +
                 weights[2] * recency_score
         )
-        return float(score)
+        return score
 
+    # ------------------------------------------------------------------
+    #   Главный метод выборки
+    # ------------------------------------------------------------------
     def get_top_gguf_models(self,
-                            pipeline_filter=None,
+                            pipeline_filter="text-generation",
                             min_params=None,
                             max_params=None,
-                            min_downloads=0,
-                            top_n=50,
-                            sort_by='combined'):
-        """
-        Получает топ GGUF моделей с фильтрацией
+                            min_downloads=50,
+                            limit_candidates=2000,
+                            top_n=50):
 
-        Args:
-            pipeline_filter (str): Фильтр по типу задачи ('text-generation', 'text-to-image', и т.д.)
-            min_params (float): Минимальное количество параметров в миллиардах
-            max_params (float): Максимальное количество параметров в миллиардах
-            min_downloads (int): Минимальное количество скачиваний
-            top_n (int): Количество моделей для возврата
-            sort_by (str): Метод сортировки ('downloads', 'likes', 'newest', 'combined')
-        """
-        # Получаем все GGUF модели
-        print("Загрузка списка GGUF моделей с Hugging Face...")
-        all_models = list(self.api.list_models(
+        print(f"📡 Запрос к API Hugging Face (fetch limit: {limit_candidates})...")
+
+        models_iter = self.api.list_models(
             filter="gguf",
-            limit=1000  # Загружаем достаточно моделей для фильтрации
-        ))
-
-        print(f"Найдено {len(all_models)} GGUF моделей. Применяем фильтры...")
-
-        filtered_models = []
-        for model in all_models:
-            # Пропускаем приватные модели
-            if getattr(model, 'private', True):
-                continue
-
-            # Применяем фильтр по количеству скачиваний
-            downloads = getattr(model, 'downloads', 0) or 0
-            if downloads < min_downloads:
-                continue
-
-            # Применяем фильтр по типу задачи
-            if pipeline_filter:
-                model_pipeline = getattr(model, 'pipeline_tag', '')
-                if not model_pipeline or pipeline_filter.lower() not in model_pipeline.lower():
-                    continue
-
-            # Применяем фильтр по параметрам
-            params = self.extract_parameters(model)
-            if params is not None:
-                if min_params is not None and params < min_params:
-                    continue
-                if max_params is not None and params > max_params:
-                    continue
-
-            # Добавляем информацию о параметрах в модель
-            model.parameters = params
-            filtered_models.append(model)
-
-        print(f"После фильтрации осталось {len(filtered_models)} моделей")
-
-        # Сортировка моделей
-        if sort_by == 'downloads':
-            sorted_models = sorted(filtered_models, key=lambda x: getattr(x, 'downloads', 0) or 0, reverse=True)
-        elif sort_by == 'likes':
-            sorted_models = sorted(filtered_models, key=lambda x: getattr(x, 'likes', 0) or 0, reverse=True)
-        elif sort_by == 'newest':
-            sorted_models = sorted(filtered_models,
-                                   key=lambda x: getattr(x, 'createdAt', '') or '',
-                                   reverse=True)
-        else:  # combined
-            # Рассчитываем комплексный рейтинг для каждой модели
-            for model in filtered_models:
-                model.combined_score = self.calculate_score(model)
-            sorted_models = sorted(filtered_models, key=lambda x: x.combined_score, reverse=True)
-
-        # Ограничиваем количество моделей
-        top_models = sorted_models[:top_n]
-
-        return top_models
-
-    # ────────────────────────────────  format_model_info  ────────────────────────────────
-    def format_model_info(self, model):
-        """Форматирует информацию о модели для вывода"""
-        model_id = getattr(model, 'modelId', 'N/A')
-        downloads = getattr(model, 'downloads', 'N/A')
-        likes = getattr(model, 'likes', 'N/A')
-        pipeline = getattr(model, 'pipeline_tag', 'N/A')
-        params = getattr(model, 'parameters', 'N/A')
-        created = getattr(model, 'createdAt', 'N/A')
-
-        if pipeline == 'text-generation':
-            pipeline_pretty = '🔤 Text Generation'
-        elif pipeline == 'text-to-image':
-            pipeline_pretty = '🖼️ Text-to-Image'
-        elif pipeline == 'image-text-to-text':
-            pipeline_pretty = '📸 Image-to-Text'
-        elif pipeline == 'automatic-speech-recognition':
-            pipeline_pretty = '🎤 Speech Recognition'
-        elif pipeline == 'text-to-speech':
-            pipeline_pretty = '🗣️ Text-to-Speech'
-        else:
-            pipeline_pretty = f'🔧 {pipeline}'
-
-        param_str = f"{params:.1f}B" if isinstance(params, (int, float)) else "N/A"
-        url = f"https://huggingface.co/{model_id}"  # ← новый атрибут
-
-        return {
-            'name': model_id,
-            'parameters': param_str,
-            'pipeline': pipeline_pretty,
-            'downloads': downloads,
-            'likes': likes,
-            'created': created.split('T')[0] if created != 'N/A' else 'N/A',
-            'url': url,  # ← возвращаем
-            'score': round(getattr(model, 'combined_score', 0), 3) if hasattr(
-                model, 'combined_score') else 'N/A'
-        }
-
-    # ────────────────────────────────  print_top_models  ────────────────────────────────
-    def print_top_models(self, models):
-        """Красиво выводит информацию о топ моделях"""
-        # ----- HEADER --------------------------------------------------------------
-        print("\n" + "=" * 100)
-        print(f"{'🏆 ТОП-50 ЛУЧШИХ GGUF МОДЕЛЕЙ':^100}")
-        print("=" * 100)
-
-        # ----- TABLE HEADERS ------------------------------------------------------
-        header = (
-            f"{'#':^3} | {'МОДЕЛЬ (URL)':^120} | {'ТИП ЗАДАЧИ':^20} | "
-            f"{'ПАРАМЕТРЫ':^10} | {'СКАЧИВАНИЙ':^10} | {'ЛАЙКОВ':^6}"
+            sort="downloads",
+            direction=-1,
+            limit=limit_candidates,
+            full=True
         )
-        print(header)
-        print("-" * len(header))
 
-        # ----- ROWS ---------------------------------------------------------------
-        for i, model in enumerate(models, 1):
-            info = self.format_model_info(model)
+        candidates = []
+        print("⚙️ Обработка и фильтрация...")
 
-            # Вставляем ссылку рядом с именем модели
-            name_with_link = f"{info['name']} ({info['url']})"
+        for model in models_iter:
+            if getattr(model, 'private', False): continue
 
-            print(
-                f"{i:^3} | {name_with_link[:120]:<120} | {info['pipeline'][:20]:<20} | "
-                f"{info['parameters']:^10} | {info['downloads']:^10} | {info['likes']:^6}"
-            )
+            dls = getattr(model, 'downloads', 0) or 0
+            if dls < min_downloads: continue
 
-        # ----- FOOTER -------------------------------------------------------------
-        print("=" * 100)
+            if pipeline_filter:
+                tag = getattr(model, 'pipeline_tag', '')
+                if tag and pipeline_filter.lower() not in tag.lower():
+                    continue
 
+            p_val = self.extract_parameters(model)
 
-# Пример использования
+            # Фильтрация по параметрам
+            if min_params is not None:
+                if p_val is None or p_val < min_params: continue
+            if max_params is not None:
+                if p_val is None or p_val > max_params: continue
+
+            model.parsed_params = p_val
+            model.combined_score = self.calculate_score(model)
+            candidates.append(model)
+
+        candidates.sort(key=lambda x: x.combined_score, reverse=True)
+        return candidates[:top_n]
+
+    # ------------------------------------------------------------------
+    #   Вывод (FIX: modelId -> id, createdAt -> created_at)
+    # ------------------------------------------------------------------
+    def print_top_models(self, models):
+        print("\n" + "=" * 160)
+        print(f"{'🏆 ТОП GGUF МОДЕЛЕЙ (Сортировка: Downloads + Likes + CreatedAt)':^160}")
+        print("=" * 160)
+
+        # Добавил колонку UPDATED
+        h = f"{'#':^3} | {'MODEL ID':<100} | {'PARAMS':^8} | {'DLs':^9} | {'LIKES':^7} | {'CREATED':^12} | {'UPDATED':^12} | {'SCORE':^6}"
+        print(h)
+        print("-" * 160)
+
+        for i, m in enumerate(models, 1):
+            name = getattr(m, 'id', 'N/A')
+            if len(name) > 100: name = name[:100] + "..."
+
+            p_str = f"{m.parsed_params:.1f}B" if getattr(m, 'parsed_params', None) else "?"
+
+            dls = getattr(m, 'downloads', 0)
+            if dls > 1000000: dls_str = f"{dls/1000000:.1f}M"
+            elif dls > 1000: dls_str = f"{dls/1000:.1f}k"
+            else: dls_str = str(dls)
+
+            # Дата создания
+            created_at = getattr(m, 'created_at', None)
+            created_str = str(created_at).split(' ')[0] if created_at else "N/A"
+
+            # Дата обновления (lastModified)
+            updated_at = getattr(m, 'lastModified', None) # В API это поле lastModified
+            if updated_at:
+                # Иногда это строка, иногда datetime
+                if isinstance(updated_at, str):
+                    updated_str = updated_at.split('T')[0]
+                else:
+                    updated_str = str(updated_at).split(' ')[0]
+            else:
+                updated_str = "N/A"
+
+            score = getattr(m, 'combined_score', 0.0)
+            likes = getattr(m, 'likes', 0)
+
+            print(f"{i:^3} | {name:<100} | {p_str:^8} | {dls_str:>9} | {likes:>7} | {created_str:^12} | {updated_str:^12} | {score:.3f}")
+        print("=" * 160)
+
+# ------------------------------------------------------------------
+#   Точка входа
+# ------------------------------------------------------------------
 if __name__ == "__main__":
     ranker = GGUFModelRanker()
 
-    # Топ‑50 лучших GGUF моделей (комплексная сортировка)
-    print("Получение топ-50 лучших GGUF моделей...")
-    top_models = ranker.get_top_gguf_models(
-        top_n=50,
-        sort_by='combined',
-        min_downloads=100
-    )
-    ranker.print_top_models(top_models)
-
-    # Фильтрация по конкретным критериям
-    print("\n" + "=" * 100)
-    print("ФИЛЬТРАЦИЯ ПО КОНКРЕТНЫМ КРИТЕРИЯМ")
-    print("=" * 100)
-
-    min_params_range = 9.0  # Минимальное кол-во параметров (в млрд.)
-    max_params_range = 40.0  # Максимальное кол-во параметров
-
-    text_models = ranker.get_top_gguf_models(
-        pipeline_filter="text-generation",
-        min_params=min_params_range,
-        max_params=max_params_range,
-        min_downloads=1000,
-        top_n=10,
-        sort_by='combined'
-    )
-
-    ranker.print_top_models(top_models)
-
-    # Вариант 2: Фильтрация по конкретным критериям
-    print("\n" + "=" * 100)
-    print("ФИЛЬТРАЦИЯ ПО КОНКРЕТНЫМ КРИТЕРИЯМ")
-    print("=" * 100)
-
-    # Топ-10 text-generation моделей
-    top_text_models = ranker.get_top_gguf_models(
-        pipeline_filter="text-generation",
-        min_params=min_params_range,
-        max_params=max_params_range,
-        min_downloads=1000,
-        top_n=10,
-        sort_by='combined'
-    )
-
-    print(f"\n🔤 ТОП-10 TEXT GENERATION МОДЕЛЕЙ ({min_params_range:,}B-{max_params_range:,}B параметров):")
-    ranker.print_top_models(top_text_models)
-
-    # Топ-10 text-to-image моделей
-    image_models = ranker.get_top_gguf_models(
-        pipeline_filter="text-to-image",
-        min_downloads=500,
-        top_n=10,
-        sort_by='combined'
-    )
-
-    print("\n🖼️ ТОП-10 TEXT-TO-IMAGE МОДЕЛЕЙ:")
-    ranker.print_top_models(image_models)
-
-    # Сохранение результатов в JSON
-    results = [
-        {
-            'rank': i,
-            'model': ranker.format_model_info(model)
-        } for i, model in enumerate(top_models, 1)
-    ]
-
-    with open('top_50_gguf_models.json', 'w', encoding='utf-8') as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
-
-    print(f"\n✅ Результаты сохранены в файл 'top_50_gguf_models.json'")
+    # Сценарий: Найти лучшие модели 6B-20B
+    try:
+        top = ranker.get_top_gguf_models(
+            pipeline_filter="text-generation",
+            min_params=6.0,
+            max_params=121.0,
+            min_downloads=5000,
+            limit_candidates=10000,
+            top_n=25
+        )
+        ranker.print_top_models(top)
+    except Exception as e:
+        print(f"\n❌ Произошла ошибка при выполнении: {e}")
+        import traceback
+        traceback.print_exc()
