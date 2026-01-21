@@ -1,21 +1,62 @@
 import sqlite3
 import math
 import re
-import os
-from datetime import datetime, timezone, timedelta
-from typing import List, Dict, Any, Optional
+import requests
+import time
+import random
+from datetime import datetime, timezone
+from typing import List, Dict, Any, Optional, Tuple
 from enum import Enum
 from contextlib import contextmanager
+from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
-from huggingface_hub import HfApi
+# --- КОНФИГУРАЦИЯ ---
+DB_FILE = "gguf_history_v14_clean.db"
+HF_JSON_API = "https://huggingface.co/models-json"
+PAGES_TO_FETCH = 40  # Глубина сканирования
 
-# Файл базы данных
-DB_FILE = "gguf_history_v5.db"
+# Словарь исключений (мусор)
+BLACKLIST_KEYWORDS = ['lora', 'adapter', 'diffusion', 'image', 'text-to-speech', 'tts', 'music']
 
 class RankingMode(Enum):
     STABLE = "stable"
     TRENDING = "trending"
 
+@dataclass
+class ModelInfo:
+    id: str
+    downloads: int
+    likes: int
+    timestamp: datetime
+    tags: List[str]
+    pipeline_tag: str
+    size_bytes: Optional[float] = None
+
+    # Вычисляемые поля
+    rank: int = 0
+    velocity: float = 0.0
+    accel: float = 0.0
+    combined_score: float = 0.0
+    age_str: str = ""
+    rank_delta: Any = 0
+    parsed_params_b: float = 0.0
+
+    @property
+    def author(self) -> str:
+        if '/' in self.id:
+            return self.id.split('/')[0]
+        return "unknown"
+
+    @property
+    def name(self) -> str:
+        if '/' in self.id:
+            return self.id.split('/', 1)[1]
+        return self.id
+
+# --- DATABASE MANAGER ---
 class RankingHistoryManager:
     def __init__(self, db_path=DB_FILE):
         self.db_path = db_path
@@ -58,23 +99,27 @@ class RankingHistoryManager:
     def _generate_config_key(self, params: Dict[str, Any]) -> str:
         return f"{params.get('mode')}_{params.get('min')}_{params.get('max')}"
 
-    def get_last_state(self, config_hash: str) -> Dict[str, Dict]:
+    def get_last_state(self, config_hash: str) -> Tuple[Dict[str, Dict], Optional[datetime]]:
         with self._connect() as conn:
             cursor = conn.execute(
-                "SELECT id FROM runs WHERE config_hash = ? ORDER BY id DESC LIMIT 1",
+                "SELECT id, timestamp FROM runs WHERE config_hash = ? ORDER BY id DESC LIMIT 1",
                 (config_hash,)
             )
             row = cursor.fetchone()
-            if not row: return {}
+            if not row: return {}, None
 
             last_run_id = row[0]
+            last_ts = datetime.fromisoformat(row[1])
+
             cursor = conn.execute(
                 "SELECT model_id, rank, velocity FROM snapshots WHERE run_id = ?",
                 (last_run_id,)
             )
-            return {r[0]: {"rank": r[1], "velocity": r[2]} for r in cursor.fetchall()}
+            state = {r[0]: {"rank": r[1], "velocity": r[2]} for r in cursor.fetchall()}
+            return state, last_ts
 
-    def save_snapshot(self, models: List[Any], run_params: Dict[str, Any]):
+    def save_snapshot(self, models: List[ModelInfo], run_params: Dict[str, Any]):
+        if not models: return
         config_key = self._generate_config_key(run_params)
         now_iso = datetime.now(timezone.utc).isoformat()
 
@@ -86,7 +131,7 @@ class RankingHistoryManager:
             run_id = cur.lastrowid
 
             data = [
-                (run_id, m.id, getattr(m, 'rank', 0), getattr(m, 'velocity', 0), getattr(m, 'combined_score', 0))
+                (run_id, m.id, m.rank, m.velocity, m.combined_score)
                 for m in models
             ]
             conn.executemany(
@@ -94,275 +139,281 @@ class RankingHistoryManager:
                 data
             )
 
-    def process_ranking(self, current_models: List[Any], run_params: Dict[str, Any]):
-        config_key = self._generate_config_key(run_params)
-        last_state = self.get_last_state(config_key)
-        now = datetime.now(timezone.utc)
+# --- FETCHER ---
+class HFFetcher:
+    def __init__(self):
+        self.session = requests.Session()
+        retries = Retry(total=4, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "application/json"
+        })
 
-        for idx, model in enumerate(current_models, 1):
-            model.rank = idx
+    def _fetch_stream(self, strategy: Dict, max_pages: int) -> List[Dict]:
+        results = []
+        for p in range(max_pages):
+            time.sleep(random.uniform(0.3, 0.8))
+            params = strategy.copy()
+            params['p'] = p
+            try:
+                resp = self.session.get(HF_JSON_API, params=params, timeout=12)
+                if resp.status_code == 200:
+                    models = resp.json().get("models", [])
+                    if not models: break
+                    results.extend(models)
+                elif resp.status_code == 429:
+                    time.sleep(5)
+            except Exception: pass
+        return results
 
-            dt = getattr(model, 'created_at', now)
-            if isinstance(dt, str): dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+    def fetch_deep_scan(self) -> List[ModelInfo]:
+        unique_models: Dict[str, ModelInfo] = {}
+        strategies = [
+            {"sort": "trending", "filter": "gguf"},
+            {"sort": "lastModified", "filter": "gguf"},
+            {"sort": "downloads", "filter": "gguf"},
+            {"sort": "likes", "filter": "gguf"}
+        ]
 
-            # Расчет возраста
-            delta = now - dt.replace(tzinfo=timezone.utc)
-            days = max(0.5, delta.days + (delta.seconds / 86400))
+        print(f"📡 SCANNING HF ({len(strategies)} x {PAGES_TO_FETCH} pages)...")
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            future_to_strat = {executor.submit(self._fetch_stream, s, PAGES_TO_FETCH): s['sort'] for s in strategies}
+            for future in as_completed(future_to_strat):
+                data = future.result()
+                for item in data:
+                    mid = item.get("id")
+                    if mid in unique_models: continue
 
-            if delta.days < 1:
-                hours = delta.seconds // 3600
-                model.age_str = f"{hours}h"
-            elif delta.days < 30:
-                model.age_str = f"{delta.days}d"
-            else:
-                model.age_str = f"{delta.days // 30}M"
+                    if any(bad in mid.lower() for bad in BLACKLIST_KEYWORDS): continue
+                    pipeline = item.get("pipeline_tag", "")
+                    if pipeline and pipeline not in ['text-generation', 'text-generation-inference', 'conversational', 'fill-mask']: continue
 
-            v_curr = model.downloads / days
-            model.velocity = v_curr
+                    dt_str = item.get("lastModified") or item.get("createdAt")
+                    dt = datetime.fromisoformat(dt_str.replace('Z', '+00:00')) if dt_str else datetime.now(timezone.utc)
 
-            if model.id in last_state:
-                prev = last_state[model.id]
-                model.rank_delta = prev['rank'] - idx
-                model.accel = v_curr - prev['velocity']
-            else:
-                model.rank_delta = "new"
-                model.accel = 0.0
+                    meta = item.get("params", {})
 
-        self.save_snapshot(current_models, run_params)
-        return current_models
+                    model = ModelInfo(
+                        id=mid,
+                        downloads=item.get("downloads", 0),
+                        likes=item.get("likes", 0),
+                        timestamp=dt,
+                        tags=item.get("tags", []),
+                        pipeline_tag=pipeline,
+                        size_bytes=meta.get("bs") if meta else None
+                    )
+                    unique_models[mid] = model
 
+        return list(unique_models.values())
+
+# --- RANKER ---
 class GGUFModelRanker:
     def __init__(self):
-        self.api = HfApi()
-        self.history_manager = RankingHistoryManager()
+        self.fetcher = HFFetcher()
+        self.history = RankingHistoryManager()
+        self._cache = None
+        self._last_time_delta_str = "new"
 
-    def _get_dt(self, m) -> Optional[datetime]:
-        dt = getattr(m, 'created_at', None)
-        if not dt: return None
-        if isinstance(dt, str): return datetime.fromisoformat(dt.replace('Z', '+00:00'))
-        return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
-
-    def extract_parameters(self, m) -> float | None:
-        """
-        Универсальный экстрактор.
-        1. Имя репозитория.
-        2. Теги.
-        3. Имена файлов (siblings) - для случаев, когда в названии модели нет размера.
-        4. Safetensors metadata.
-        """
+    def extract_size_billions(self, m: ModelInfo) -> float | None:
+        if m.size_bytes: return round(m.size_bytes / 1_000_000_000, 1)
         mid = m.id.lower()
-        tags = getattr(m, 'tags', []) or []
-        siblings = getattr(m, 'siblings', []) or []
 
-        # --- Вспомогательная функция для regex ---
-        def try_parse(text: str) -> float | None:
-            # MoE (8x7b)
-            moe = re.search(r'(\d+)x(\d+(?:\.\d+)?)b', text)
-            if moe: return float(moe.group(1)) * float(moe.group(2))
+        moe = re.search(r'(\d+)x(\d+(?:\.\d+)?)b', mid)
+        if moe: return float(moe.group(1)) * float(moe.group(2))
 
-            # Billions (7b, 30b)
-            # Улучшенный regex: требует, чтобы после 'b' не было букв (чтобы не ловить 'bert')
-            std = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)b(?:[_\-\./]|$)', text)
-            if std: return float(std.group(1))
+        std = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)b(?:[_\-\./]v\d|[_\-\./]|$)', mid)
+        if std: return float(std.group(1))
 
-            # Millions (270m)
-            mill = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)m(?:[_\-\./]|$)', text)
-            if mill: return float(mill.group(1)) / 1000.0
-            return None
+        mill = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)m(?:[_\-\./]|$)', mid)
+        if mill: return float(mill.group(1)) / 1000.0
 
-        # 1. Проверка ID репозитория
-        res = try_parse(mid)
-        if res: return res
-
-        # 2. Проверка Safetensors (самый точный источник, если есть)
-        st_info = getattr(m, 'safetensors', None)
-        if st_info and hasattr(st_info, 'total') and st_info.total:
-            return round(st_info.total / 1_000_000_000, 1)
-
-        # 3. Проверка тегов
-        for tag in tags:
-            # Ищем теги, которые выглядят ровно как "30b" или "7b"
-            if re.match(r'^\d+(?:\.\d+)?b$', tag.lower()):
-                return float(tag[:-1])
-
-        # 4. ПРОРЫВ: Проверка имен файлов (Siblings)
-        # Это спасет GLM-4.7 и другие модели с "плохими" названиями репо.
-        # Мы ищем первый попавшийся файл, в названии которого есть размер.
-        for file_info in siblings:
-            fname = getattr(file_info, 'rfilename', '').lower()
-            # Пропускаем служебные файлы, смотрим только на .gguf или .safetensors
-            if not (fname.endswith('.gguf') or fname.endswith('.safetensors')):
-                continue
-
-            res = try_parse(fname)
-            if res: return res
-
+        for tag in m.tags:
+            if re.match(r'^\d+(?:\.\d+)?b$', tag.lower()): return float(tag[:-1])
         return None
 
-    def _score_stable(self, m):
-        dl, lk = getattr(m, 'downloads', 0) or 0, getattr(m, 'likes', 0) or 0
-        norm_dl = min(1.0, math.log10(dl + 1) / 6.0)
-        norm_lk = min(1.0, math.log10(lk + 1) / 4.0)
-        return (0.4 * norm_dl) + (0.6 * norm_lk)
+    def prepare_data(self):
+        if not self._cache: self._cache = self.fetcher.fetch_deep_scan()
+        return self._cache
 
-    def _score_trending(self, m):
-        dt = self._get_dt(m)
-        if not dt: return 0.0
-
-        delta = datetime.now(timezone.utc) - dt
-        hours = delta.total_seconds() / 3600.0
-
-        # 1. СТРОГИЙ ФИЛЬТР ВРЕМЕНИ: не старше 7 дней
-        if hours > 168: return 0.0
-
-        dl = getattr(m, 'downloads', 0) or 0
-        lk = getattr(m, 'likes', 0) or 0
-
-        # 2. ПРАВИЛО 2 ЧАСОВ (Зачистка ботов)
-        # Если лайков НЕТ:
-        if lk == 0:
-            # Если модель вышла менее 2 часов назад - даем ей шанс (еще не успели лайкнуть)
-            if hours < 2.0:
-                pass
-                # Если модели больше 2 часов и 0 лайков - это мусор, удаляем (даже если 1000 загрузок)
-            else:
-                return 0.0
-
-        # 3. Формула рейтинга
-        points = (lk * 100) + (math.log10(dl + 1) * 10)
-        gravity = 1.2
-        score = points / pow(hours + 2.0, gravity)
-
-        return score
-
-    def get_top_gguf_models(self, mode=RankingMode.STABLE, min_params=None, max_params=None, top_n=10):
-        run_params = {"mode": mode.value, "min": min_params, "max": max_params, "n": top_n}
-
+    def get_ranked_list(self, mode=RankingMode.STABLE, min_b=None, max_b=None, top_n=20):
+        models = self.prepare_data()
+        run_params = {"mode": mode.value, "min": min_b, "max": max_b, "n": top_n}
         candidates = []
-        raw_models = []
-
-        # === ЭТАП 1: СБОР ДАННЫХ ===
-        if mode == RankingMode.STABLE:
-            print(f"🔄 Запрос к HF API (Mode: STABLE, Sort: downloads)...")
-            # STABLE: Классика — сортировка по загрузкам
-            raw_models = list(self.api.list_models(
-                filter="gguf",
-                sort="downloads",
-                direction=-1,
-                limit=3000,
-                full=True
-            ))
-        else:
-            print(f"🔄 Запрос к HF API (Mode: TRENDING, Strategy: Anti-Spam Hybrid)...")
-            # TRENDING: Гибридная стратегия (Лайки + Новизна)
-            # Берем 4000, чтобы пробить слой спама от ботов
-
-            print("   👉 Загрузка популярных (Top Likes)...")
-            by_likes = list(self.api.list_models(
-                filter="gguf",
-                sort="likes",
-                direction=-1,
-                limit=4000,
-                full=True
-            ))
-
-            print("   👉 Загрузка свежих (Last Modified)...")
-            by_date = list(self.api.list_models(
-                filter="gguf",
-                sort="lastModified",
-                direction=-1,
-                limit=4000,
-                full=True
-            ))
-
-            # Объединяем списки и убираем дубликаты
-            seen_ids = set()
-            for m in by_likes + by_date:
-                if m.id not in seen_ids:
-                    raw_models.append(m)
-                    seen_ids.add(m.id)
-
-        # === ЭТАП 2: ФИЛЬТРАЦИЯ И ОЦЕНКА ===
-        for m in raw_models:
-            # 1. Проверка тегов (только текстовые модели)
-            tags = (getattr(m, 'pipeline_tag', '') or '').lower()
-            model_tags = [t.lower() for t in (getattr(m, 'tags', []) or [])]
-
-            is_text = "text-generation" in tags or any(x in model_tags for x in ['text-generation', 'conversational', 'text-generation-inference'])
-            if not is_text: continue
-
-            # 2. Определение параметров (размера)
-            p = self.extract_parameters(m)
-            m.parsed_params = p
-
-            # 3. Умная фильтрация по размеру
-            if p is not None:
-                # Если размер известен - фильтруем строго
-                if min_params and p < min_params: continue
-                if max_params and p > max_params: continue
-            else:
-                # Если размер НЕИЗВЕСТЕН (автор не указал нигде):
-                # В STABLE - пропускаем (рискованно).
-                # В TRENDING - оставляем, ТОЛЬКО если есть хайп (> 5 лайков).
-                # Это позволяет GLM-4.7 остаться в списке, даже если парсер не нашел цифры.
-                likes = getattr(m, 'likes', 0) or 0
-                if mode == RankingMode.STABLE: continue
-                if likes < 5: continue
-
-            # 4. Расчет очков
-            if mode == RankingMode.TRENDING:
-                m.combined_score = self._score_trending(m)
-            else:
-                m.combined_score = self._score_stable(m)
-
-            # 5. Порог отсечения (убирает совсем слабые модели и ботов с 0 рейтингом)
-            if m.combined_score > 0.1:
-                candidates.append(m)
-
-        # === ЭТАП 3: СОРТИРОВКА И ВОЗВРАТ ===
-        candidates.sort(key=lambda x: x.combined_score, reverse=True)
-        return self.history_manager.process_ranking(candidates[:top_n], run_params)
-
-    def _smart_truncate(self, text, length=75):
-        if len(text) <= length: return text
-        part = (length - 3) // 2
-        return text[:part] + "..." + text[-part:]
-
-    def print_top_models(self, models, title="TOP"):
-        WIDTH = 190
-        print(f"\n{'='*WIDTH}")
-        print(f"{title:^190}")
-        print(f"{'='*WIDTH}")
-
-        header = f"{'#':^3} | {'ΔR':^4} | {'AGE':^5} | {'MODEL ID':<75} | {'SZ (B)':^7} | {'DLs':^9} | {'❤':^6} | {'VELOCITY':^9} | {'ACCEL':^11}"
-        print(header)
-        print("-" * WIDTH)
 
         for m in models:
-            d_r = "🆕" if m.rank_delta == "new" else (f"+{m.rank_delta}" if m.rank_delta > 0 else (f"{m.rank_delta}" if m.rank_delta < 0 else "—"))
+            sz = self.extract_size_billions(m)
+            m.parsed_params_b = sz if sz else 0.0
 
-            v_str = f"{m.velocity/1000:.1f}k" if m.velocity >= 1000 else f"{m.velocity:.0f}"
+            if min_b or max_b:
+                if sz is None: continue
+                if min_b and sz < min_b: continue
+                if max_b and sz > max_b: continue
 
-            if m.rank_delta == "new": a_str = "—"
-            else: a_str = f"{m.accel:+.2f}"
+            if sz is None and mode == RankingMode.TRENDING and m.likes < 3: continue
 
-            p_str = f"{m.parsed_params:.1f}" if m.parsed_params else "?"
+            m.combined_score = self._score_model(m, mode)
+            if m.combined_score > 0.001: candidates.append(m)
+
+        candidates.sort(key=lambda x: x.combined_score, reverse=True)
+        return self._process_history(candidates[:top_n], run_params)
+
+    def _score_model(self, m: ModelInfo, mode: RankingMode) -> float:
+        if mode == RankingMode.STABLE:
+            norm_dl = min(1.0, math.log10(m.downloads + 1) / 7.0)
+            norm_lk = min(1.0, math.log10(m.likes + 1) / 5.0)
+            return (0.4 * norm_dl) + (0.6 * norm_lk)
+        else:
+            delta = datetime.now(timezone.utc) - m.timestamp
+            hours = delta.total_seconds() / 3600.0
+            if hours > 720: return 0.0
+            if m.likes == 0 and hours > 12.0: return 0.0
+            points = (m.likes * 150) + (math.log10(m.downloads + 1) * 30)
+            return points / pow(hours + 2.0, 1.4)
+
+    def _process_history(self, models: List[ModelInfo], run_params: Dict):
+        config_key = self.history._generate_config_key(run_params)
+        last_state, last_ts = self.history.get_last_state(config_key)
+        now = datetime.now(timezone.utc)
+
+        if last_ts:
+            delta_run = now - last_ts
+            if delta_run.days > 0: self._last_time_delta_str = f"{delta_run.days}d"
+            elif delta_run.seconds > 3600: self._last_time_delta_str = f"{delta_run.seconds//3600}h"
+            elif delta_run.seconds > 60: self._last_time_delta_str = f"{delta_run.seconds//60}m"
+            else: self._last_time_delta_str = f"{delta_run.seconds}s"
+        else:
+            self._last_time_delta_str = "new"
+
+        for idx, m in enumerate(models, 1):
+            m.rank = idx
+            delta = now - m.timestamp
+            days = max(0.5, delta.total_seconds() / 86400)
+
+            if delta.days < 1: m.age_str = f"{int(delta.seconds//3600)}h"
+            elif delta.days < 30: m.age_str = f"{delta.days}d"
+            else: m.age_str = f"{delta.days // 30}M"
+
+            m.velocity = m.downloads / days
+
+            if m.id in last_state:
+                prev = last_state[m.id]
+                m.rank_delta = prev['rank'] - idx
+                m.accel = m.velocity - prev['velocity']
+            else:
+                m.rank_delta = "new"
+                m.accel = 0.0
+
+        self.history.save_snapshot(models, run_params)
+        return models
+
+    # --- ЛОГИКА ВЫРАВНИВАНИЯ (БЕЗ ССЫЛОК) ---
+    def _visual_len(self, text: str) -> int:
+        """Считает длину текста без учета ANSI-кодов цвета"""
+        # Удаляем только коды цветов, ссылок больше нет
+        clean_text = re.sub(r'\x1b\[[0-9;]*m', '', text)
+        return len(clean_text)
+
+    def _pad_string(self, text: str, width: int, visual_len: int = None) -> str:
+        """Добавляет пробелы, основываясь на видимой длине"""
+        if visual_len is None:
+            visual_len = self._visual_len(text)
+        padding = max(0, width - visual_len)
+        return text + (" " * padding)
+
+    def print_table(self, models: List[ModelInfo], title: str):
+        W = 165
+        accel_title = f"ACCEL({self._last_time_delta_str})"
+        COL_MODEL_W = 85 # Ширина колонки модели
+
+        print(f"\n{'='*W}")
+        print(f"{title:^165}")
+        print(f"{'='*W}")
+
+        print(f"{'#':^4} | {'Δ':^4} | {'AGE':^5} | {'MODEL ID (Author / Model)':<{COL_MODEL_W}} | {'SZ(B)':^6} | {'DLs':^8} | {'LIKES':^6} | {accel_title:^11}")
+        print("-" * W)
+
+        if not models:
+            print(f"{'NO DATA':^165}")
+
+        for m in models:
+            dr_str = "🆕"
+            if m.rank_delta != "new":
+                if m.rank_delta > 0: dr_str = f"▲{m.rank_delta}"
+                elif m.rank_delta < 0: dr_str = f"▼{abs(m.rank_delta)}"
+                else: dr_str = "—"
+
+            acc_str = "—"
+            if m.rank_delta != "new":
+                acc_str = f"{m.accel:+.1f}"
+
+            # 1. Готовим видимый текст
+            visible_text = f"{m.author}/{m.name}"
+
+            # 2. Обрезка
+            if len(visible_text) > (COL_MODEL_W - 2):
+                avail_len = COL_MODEL_W - len(m.author) - 5
+                trunc_name = m.name[:avail_len] + "..."
+                visible_text = f"{m.author}/{trunc_name}"
+
+            # 3. Раскраска (Cyan для автора)
+            if '/' in visible_text:
+                auth, nm = visible_text.split('/', 1)
+                colored_text = f"\033[36m{auth}\033[0m/{nm}"
+            else:
+                colored_text = visible_text
+
+            # 4. Выравнивание (без ссылок)
+            padded_model = self._pad_string(colored_text, COL_MODEL_W, len(visible_text))
+
+            sz_str = f"{m.parsed_params_b:.1f}" if m.parsed_params_b > 0 else "?"
             dl_str = f"{m.downloads/1000:.1f}k" if m.downloads >= 1000 else str(m.downloads)
 
-            mid = self._smart_truncate(m.id, 75)
+            print(f"{m.rank:^4} | {dr_str:^4} | {m.age_str:^5} | {padded_model} | {sz_str:^6} | {dl_str:>8} | {m.likes:>6} | {acc_str:>11}")
 
-            print(f"{m.rank:^3} | {d_r:^4} | {m.age_str:^5} | {mid:<75} | {p_str:^7} | {dl_str:>9} | {m.likes:>6} | {v_str:>9} | {a_str:>11}")
-        print("=" * WIDTH)
+        print("=" * W)
+        print(f"👉 \033[36mCyan\033[0m = Author. Clean format (No Links).")
 
 if __name__ == "__main__":
     ranker = GGUFModelRanker()
 
-    ranker.print_top_models(
-        ranker.get_top_gguf_models(RankingMode.STABLE, 7, 35, top_n=20),
-        "🏛️ STABLE RANKING (7B - 35B)"
+    ranker.prepare_data()
+
+    # 1. Stable
+    ranker.print_table(
+        ranker.get_ranked_list(RankingMode.STABLE, min_b=6, max_b=40, top_n=20),
+        "🏛️  STABLE RANKING (6B - 40B)"
     )
 
-    ranker.print_top_models(
-        ranker.get_top_gguf_models(RankingMode.TRENDING, 7, 35, top_n=20),
-        "🚀 TRENDING RANKING (7B - 35B)"
+    # 2. Trending
+    ranker.print_table(
+        ranker.get_ranked_list(RankingMode.TRENDING, min_b=0, max_b=200, top_n=20),
+        "🚀  GLOBAL TRENDING (ALL SIZES)"
+    )
+
+    # 3. Edge
+    ranker.print_table(
+        ranker.get_ranked_list(RankingMode.TRENDING, min_b=0, max_b=5.5, top_n=15),
+        "📱  EDGE / MOBILE TRENDING (< 5.5B)"
+    )
+
+    # 4. GGUF PROVIDERS (Специальный режим)
+    print("\n🔍 Фильтрация: Только известные GGUF провайдеры...")
+    GGUF_KINGS = ['unsloth', 'thebloke', 'maziyarpanahi', 'bartowski', 'mradermacher', 'nousresearch']
+
+    all_models = ranker.prepare_data()
+    # Фильтруем
+    gguf_only = [m for m in all_models if m.author.lower() in [k.lower() for k in GGUF_KINGS]]
+    # Сортируем
+    gguf_only.sort(key=lambda m: ranker._score_model(m, RankingMode.STABLE), reverse=True)
+
+    # Переназначаем ранги для красивого вывода
+    for i, m in enumerate(gguf_only, 1):
+        m.rank = i
+        m.rank_delta = "new"
+        m.accel = 0.0
+
+    ranker.print_table(
+        gguf_only[:20],
+        "📦  TOP GGUF PROVIDERS (Unsloth, TheBloke, Bartowski...)"
     )
