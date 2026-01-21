@@ -2,7 +2,7 @@ import sqlite3
 import math
 import re
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any, Optional
 from enum import Enum
 from contextlib import contextmanager
@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from huggingface_hub import HfApi
 
 # Файл базы данных
-DB_FILE = "gguf_history_v3.db"
+DB_FILE = "gguf_history_v5.db"
 
 class RankingMode(Enum):
     STABLE = "stable"
@@ -104,7 +104,18 @@ class RankingHistoryManager:
 
             dt = getattr(model, 'created_at', now)
             if isinstance(dt, str): dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
-            days = max(0.5, (now - dt.replace(tzinfo=timezone.utc)).days)
+
+            # Расчет возраста
+            delta = now - dt.replace(tzinfo=timezone.utc)
+            days = max(0.5, delta.days + (delta.seconds / 86400))
+
+            if delta.days < 1:
+                hours = delta.seconds // 3600
+                model.age_str = f"{hours}h"
+            elif delta.days < 30:
+                model.age_str = f"{delta.days}d"
+            else:
+                model.age_str = f"{delta.days // 30}M"
 
             v_curr = model.downloads / days
             model.velocity = v_curr
@@ -132,25 +143,59 @@ class GGUFModelRanker:
         return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
 
     def extract_parameters(self, m) -> float | None:
+        """
+        Универсальный экстрактор.
+        1. Имя репозитория.
+        2. Теги.
+        3. Имена файлов (siblings) - для случаев, когда в названии модели нет размера.
+        4. Safetensors metadata.
+        """
         mid = m.id.lower()
         tags = getattr(m, 'tags', []) or []
+        siblings = getattr(m, 'siblings', []) or []
 
-        # 1. MoE в имени (8x7b)
-        moe = re.search(r'(\d+)x(\d+(?:\.\d+)?)b', mid)
-        if moe: return float(moe.group(1)) * float(moe.group(2))
+        # --- Вспомогательная функция для regex ---
+        def try_parse(text: str) -> float | None:
+            # MoE (8x7b)
+            moe = re.search(r'(\d+)x(\d+(?:\.\d+)?)b', text)
+            if moe: return float(moe.group(1)) * float(moe.group(2))
 
-        # 2. Обычные миллиарды (7b)
-        std = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)b', mid)
-        if std: return float(std.group(1))
+            # Billions (7b, 30b)
+            # Улучшенный regex: требует, чтобы после 'b' не было букв (чтобы не ловить 'bert')
+            std = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)b(?:[_\-\./]|$)', text)
+            if std: return float(std.group(1))
 
-        # 3. Миллионы (270m)
-        mill = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)m', mid)
-        if mill: return float(mill.group(1)) / 1000.0
+            # Millions (270m)
+            mill = re.search(r'(?:^|[_\-\./])(\d+(?:\.\d+)?)m(?:[_\-\./]|$)', text)
+            if mill: return float(mill.group(1)) / 1000.0
+            return None
 
-        # 4. Поиск в тегах (fallback)
+        # 1. Проверка ID репозитория
+        res = try_parse(mid)
+        if res: return res
+
+        # 2. Проверка Safetensors (самый точный источник, если есть)
+        st_info = getattr(m, 'safetensors', None)
+        if st_info and hasattr(st_info, 'total') and st_info.total:
+            return round(st_info.total / 1_000_000_000, 1)
+
+        # 3. Проверка тегов
         for tag in tags:
-            t_match = re.match(r'^(\d+(?:\.\d+)?)b$', tag.lower())
-            if t_match: return float(t_match.group(1))
+            # Ищем теги, которые выглядят ровно как "30b" или "7b"
+            if re.match(r'^\d+(?:\.\d+)?b$', tag.lower()):
+                return float(tag[:-1])
+
+        # 4. ПРОРЫВ: Проверка имен файлов (Siblings)
+        # Это спасет GLM-4.7 и другие модели с "плохими" названиями репо.
+        # Мы ищем первый попавшийся файл, в названии которого есть размер.
+        for file_info in siblings:
+            fname = getattr(file_info, 'rfilename', '').lower()
+            # Пропускаем служебные файлы, смотрим только на .gguf или .safetensors
+            if not (fname.endswith('.gguf') or fname.endswith('.safetensors')):
+                continue
+
+            res = try_parse(fname)
+            if res: return res
 
         return None
 
@@ -158,82 +203,160 @@ class GGUFModelRanker:
         dl, lk = getattr(m, 'downloads', 0) or 0, getattr(m, 'likes', 0) or 0
         norm_dl = min(1.0, math.log10(dl + 1) / 6.0)
         norm_lk = min(1.0, math.log10(lk + 1) / 4.0)
-        dt = self._get_dt(m)
-        days = (datetime.now(timezone.utc) - dt).days if dt else 365
-        rec = 1.0 if days < 30 else max(0.0, 1.0 - ((days - 30) / 335.0))
-        return (0.25 * norm_dl) + (0.45 * norm_lk) + (0.30 * rec)
+        return (0.4 * norm_dl) + (0.6 * norm_lk)
 
     def _score_trending(self, m):
         dt = self._get_dt(m)
-        if not dt or (datetime.now(timezone.utc) - dt).days > 45: return 0.0
-        dl, lk = getattr(m, 'downloads', 0) or 0, getattr(m, 'likes', 0) or 0
-        days = max(0.5, (datetime.now(timezone.utc) - dt).days)
-        v = math.log10((dl / days) + 1) / 3.5
-        ratio = min(1.0, (lk / dl * 50.0)) if dl > 50 else 0
-        return v * ratio * (1.3 if days < 7 else 1.0)
+        if not dt: return 0.0
+
+        delta = datetime.now(timezone.utc) - dt
+        hours = delta.total_seconds() / 3600.0
+
+        # 1. СТРОГИЙ ФИЛЬТР ВРЕМЕНИ: не старше 7 дней
+        if hours > 168: return 0.0
+
+        dl = getattr(m, 'downloads', 0) or 0
+        lk = getattr(m, 'likes', 0) or 0
+
+        # 2. ПРАВИЛО 2 ЧАСОВ (Зачистка ботов)
+        # Если лайков НЕТ:
+        if lk == 0:
+            # Если модель вышла менее 2 часов назад - даем ей шанс (еще не успели лайкнуть)
+            if hours < 2.0:
+                pass
+                # Если модели больше 2 часов и 0 лайков - это мусор, удаляем (даже если 1000 загрузок)
+            else:
+                return 0.0
+
+        # 3. Формула рейтинга
+        points = (lk * 100) + (math.log10(dl + 1) * 10)
+        gravity = 1.2
+        score = points / pow(hours + 2.0, gravity)
+
+        return score
 
     def get_top_gguf_models(self, mode=RankingMode.STABLE, min_params=None, max_params=None, top_n=10):
-        print(f"🔄 Запрос к HF API (Mode: {mode.value}, Params: {min_params}-{max_params}B)...")
         run_params = {"mode": mode.value, "min": min_params, "max": max_params, "n": top_n}
 
-        models = self.api.list_models(filter="gguf", sort="downloads", direction=-1, limit=2000, full=True)
         candidates = []
-        for m in models:
+        raw_models = []
+
+        # === ЭТАП 1: СБОР ДАННЫХ ===
+        if mode == RankingMode.STABLE:
+            print(f"🔄 Запрос к HF API (Mode: STABLE, Sort: downloads)...")
+            # STABLE: Классика — сортировка по загрузкам
+            raw_models = list(self.api.list_models(
+                filter="gguf",
+                sort="downloads",
+                direction=-1,
+                limit=3000,
+                full=True
+            ))
+        else:
+            print(f"🔄 Запрос к HF API (Mode: TRENDING, Strategy: Anti-Spam Hybrid)...")
+            # TRENDING: Гибридная стратегия (Лайки + Новизна)
+            # Берем 4000, чтобы пробить слой спама от ботов
+
+            print("   👉 Загрузка популярных (Top Likes)...")
+            by_likes = list(self.api.list_models(
+                filter="gguf",
+                sort="likes",
+                direction=-1,
+                limit=4000,
+                full=True
+            ))
+
+            print("   👉 Загрузка свежих (Last Modified)...")
+            by_date = list(self.api.list_models(
+                filter="gguf",
+                sort="lastModified",
+                direction=-1,
+                limit=4000,
+                full=True
+            ))
+
+            # Объединяем списки и убираем дубликаты
+            seen_ids = set()
+            for m in by_likes + by_date:
+                if m.id not in seen_ids:
+                    raw_models.append(m)
+                    seen_ids.add(m.id)
+
+        # === ЭТАП 2: ФИЛЬТРАЦИЯ И ОЦЕНКА ===
+        for m in raw_models:
+            # 1. Проверка тегов (только текстовые модели)
             tags = (getattr(m, 'pipeline_tag', '') or '').lower()
-            if "text-generation" not in tags: continue
+            model_tags = [t.lower() for t in (getattr(m, 'tags', []) or [])]
 
+            is_text = "text-generation" in tags or any(x in model_tags for x in ['text-generation', 'conversational', 'text-generation-inference'])
+            if not is_text: continue
+
+            # 2. Определение параметров (размера)
             p = self.extract_parameters(m)
-            if min_params and (p is None or p < min_params): continue
-            if max_params and (p is None or p > max_params): continue
-
             m.parsed_params = p
-            m.combined_score = self._score_trending(m) if mode == RankingMode.TRENDING else self._score_stable(m)
 
-            if m.combined_score > 0.001: candidates.append(m)
+            # 3. Умная фильтрация по размеру
+            if p is not None:
+                # Если размер известен - фильтруем строго
+                if min_params and p < min_params: continue
+                if max_params and p > max_params: continue
+            else:
+                # Если размер НЕИЗВЕСТЕН (автор не указал нигде):
+                # В STABLE - пропускаем (рискованно).
+                # В TRENDING - оставляем, ТОЛЬКО если есть хайп (> 5 лайков).
+                # Это позволяет GLM-4.7 остаться в списке, даже если парсер не нашел цифры.
+                likes = getattr(m, 'likes', 0) or 0
+                if mode == RankingMode.STABLE: continue
+                if likes < 5: continue
 
+            # 4. Расчет очков
+            if mode == RankingMode.TRENDING:
+                m.combined_score = self._score_trending(m)
+            else:
+                m.combined_score = self._score_stable(m)
+
+            # 5. Порог отсечения (убирает совсем слабые модели и ботов с 0 рейтингом)
+            if m.combined_score > 0.1:
+                candidates.append(m)
+
+        # === ЭТАП 3: СОРТИРОВКА И ВОЗВРАТ ===
         candidates.sort(key=lambda x: x.combined_score, reverse=True)
         return self.history_manager.process_ranking(candidates[:top_n], run_params)
 
-    def _smart_truncate(self, text, length=80):
-        """Обрезает строку посередине, если она слишком длинная"""
+    def _smart_truncate(self, text, length=75):
         if len(text) <= length: return text
         part = (length - 3) // 2
         return text[:part] + "..." + text[-part:]
 
     def print_top_models(self, models, title="TOP"):
-        # Увеличиваем ширину таблицы для вместимости длинных имен
-        TABLE_WIDTH = 185
-        print(f"\n{'='*TABLE_WIDTH}")
-        print(f"{title:^185}")
-        print(f"{'='*TABLE_WIDTH}")
+        WIDTH = 190
+        print(f"\n{'='*WIDTH}")
+        print(f"{title:^190}")
+        print(f"{'='*WIDTH}")
 
-        # Расширенный заголовок, имя модели увеличено до 80 символов
-        header = f"{'#':^3} | {'ΔR':^4} | {'MODEL ID':<80} | {'SZ (B)':^7} | {'DLs':^9} | {'❤':^6} | {'VELOCITY':^9} | {'ACCEL':^11} | {'SCORE':^6}"
+        header = f"{'#':^3} | {'ΔR':^4} | {'AGE':^5} | {'MODEL ID':<75} | {'SZ (B)':^7} | {'DLs':^9} | {'❤':^6} | {'VELOCITY':^9} | {'ACCEL':^11}"
         print(header)
-        print("-" * TABLE_WIDTH)
+        print("-" * WIDTH)
 
         for m in models:
             d_r = "🆕" if m.rank_delta == "new" else (f"+{m.rank_delta}" if m.rank_delta > 0 else (f"{m.rank_delta}" if m.rank_delta < 0 else "—"))
 
             v_str = f"{m.velocity/1000:.1f}k" if m.velocity >= 1000 else f"{m.velocity:.0f}"
 
-            # Ускорение: Точное значение с 2 знаками после запятой
             if m.rank_delta == "new": a_str = "—"
             else: a_str = f"{m.accel:+.2f}"
 
             p_str = f"{m.parsed_params:.1f}" if m.parsed_params else "?"
             dl_str = f"{m.downloads/1000:.1f}k" if m.downloads >= 1000 else str(m.downloads)
 
-            # Обрезка до 80 символов (достаточно для большинства имен)
-            mid = self._smart_truncate(m.id, 80)
+            mid = self._smart_truncate(m.id, 75)
 
-            print(f"{m.rank:^3} | {d_r:^4} | {mid:<80} | {p_str:^7} | {dl_str:>9} | {m.likes:>6} | {v_str:>9} | {a_str:>11} | {m.combined_score:.3f}")
-        print("=" * TABLE_WIDTH)
+            print(f"{m.rank:^3} | {d_r:^4} | {m.age_str:^5} | {mid:<75} | {p_str:^7} | {dl_str:>9} | {m.likes:>6} | {v_str:>9} | {a_str:>11}")
+        print("=" * WIDTH)
 
 if __name__ == "__main__":
     ranker = GGUFModelRanker()
 
-    # Можно менять диапазоны и количество топ-моделей
     ranker.print_top_models(
         ranker.get_top_gguf_models(RankingMode.STABLE, 7, 35, top_n=20),
         "🏛️ STABLE RANKING (7B - 35B)"
