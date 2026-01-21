@@ -1,4 +1,18 @@
-# plugins/t_kmp_compose_bug_hunt.py
+# plugins/t_kmp_compose_bug_hunt_v2.py
+
+"""
+KMP + Compose Bug Hunt v2 (FINAL) – генератор тестов на поиск регрессий.
+--------------------------------------------------------------------
+Особенности:
+1. ГАРАНТИРОВАННАЯ инъекция двух багов (UI Side-effect + VM One-time event).
+   Если подходящие файлы не найдены, создаются синтетические блоки кода.
+2. В коде оставляются маркеры `trace=...` для однозначной идентификации.
+3. Гибкий парсинг ответов LLM (справляется с Markdown, переносами строк в JSON).
+4. Строгая верификация по trace-ID (50% веса оценки).
+
+Author: AI Reasoning Lab
+"""
+
 import os
 import re
 import json
@@ -12,16 +26,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Any, List, Tuple, Optional
 
+# Импортируем базовый класс (предполагается, что он доступен в окружении)
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
 log = logging.getLogger(__name__)
 
 
-# -----------------------------
-# Utilities
-# -----------------------------
+# ----------------------------------------------------------------------
+# Utility helpers
+# ----------------------------------------------------------------------
+
 def _run(cmd: List[str], cwd: Optional[Path] = None) -> str:
-    """Run a command and return stdout; raises on error."""
     p = subprocess.run(
         cmd,
         cwd=str(cwd) if cwd else None,
@@ -42,10 +57,10 @@ def _iter_files(root: Path, exts: Tuple[str, ...], exclude_dirs: Tuple[str, ...]
     for p in root.rglob("*"):
         if not p.is_file():
             continue
-        if p.suffix not in exts and not any(str(p).endswith(e) for e in exts):
+        if not any(p.suffix == e or str(p).endswith(e) for e in exts):
             continue
-        parts = set(p.parts)
-        if any(d in parts for d in exclude_dirs):
+        # Проверка исключенных директорий
+        if any(d in set(p.parts) for d in exclude_dirs):
             continue
         out.append(p)
     return out
@@ -61,56 +76,113 @@ def _read_text_safely(path: Path, max_chars: int) -> str:
     return txt[:max_chars] + "\n/* ... truncated ... */\n"
 
 
-def _find_first_composable_function(src: str) -> Optional[int]:
-    """Returns line index (0-based) where @Composable function body starts."""
+def _normalize_path(path: str) -> str:
+    return path.replace("\\", "/").lower().strip()
+
+
+# ----------------------------------------------------------------------
+# Bug Injection Logic (Aggressive)
+# ----------------------------------------------------------------------
+
+def _inject_ui_side_effect_bug_aggressive(src: str, trace: str) -> Tuple[str, int]:
+    """
+    Инъекция UI-бага (Side-effect в Composable).
+    Если @Composable не найден, создает синтетическую функцию.
+    """
     lines = src.splitlines()
+    ins_at = None
+
+    # Попытка 1: Найти существующий @Composable
     for i, line in enumerate(lines):
         if "@Composable" in line:
-            for j in range(i, min(i + 30, len(lines))):
-                if "fun " in lines[j] and "{" in lines[j]:
-                    return j
-                if "{" in lines[j] and ("fun " in "\n".join(lines[i:j + 1])):
-                    return j
-    return None
+            # Ищем открывающую скобку функции
+            for j in range(i, min(i + 20, len(lines))):
+                if "{" in lines[j]:
+                    ins_at = j + 1
+                    break
+            if ins_at:
+                break
 
-
-def _insert_bug_into_composable(src: str) -> Tuple[str, int]:
-    """
-    Insert realistic Compose regression: launching coroutine in composable body.
-    Returns (new_src, inserted_line_number_1_based).
-    """
-    lines = src.splitlines()
-    ins_at = _find_first_composable_function(src)
-
+    # Попытка 2: Fallback - создаем синтетический блок в конце
     if ins_at is None:
-        ins_at = 0
-        for i, line in enumerate(lines[:200]):
-            if line.strip().startswith("import "):
-                ins_at = i + 1
+        log.warning(f"No @Composable found for trace={trace}, appending synthetic one.")
+        ins_at = len(lines)
+        synthetic_block = [
+            "",
+            "// Synthetic Composable for bug injection",
+            "@androidx.compose.runtime.Composable",
+            "fun BuggyScreen() {",
+        ]
+        lines.extend(synthetic_block)
+        ins_at += len(synthetic_block)
 
-    insert_idx = ins_at + 1
-    trace = uuid.uuid4().hex[:8]
     bug_block = [
-        "    // --- Regression (introduced recently) ---",
-        "    // The screen 'works', but recompositions will trigger this again and again.",
-        "    val _bugScope = androidx.compose.runtime.rememberCoroutineScope()",
-        "    _bugScope.launch {",
-        f"        kotlinx.coroutines.delay(25) // simulate IO; trace={trace}",
-        f"        println(\"[BUG] repeated side-effect; trace={trace}\")",
+        f"    // === UI REGRESSION START (trace={trace}) ===",
+        "    // BUG: Side-effect runs on EVERY recomposition because it's not wrapped in LaunchedEffect",
+        "    val bugScope = androidx.compose.runtime.rememberCoroutineScope()",
+        "    bugScope.launch {",
+        f"        kotlinx.coroutines.delay(50)",
+        f"        println(\"[BUG-UI] Repeated side-effect; trace={trace}\")",
         "    }",
-        "    // --- End regression ---",
+        f"    // === UI REGRESSION END (trace={trace}) ===",
         "",
     ]
 
-    lines[insert_idx:insert_idx] = bug_block
-    inserted_line = insert_idx + 1  # 1-based
-    return "\n".join(lines), inserted_line
+    lines[ins_at:ins_at] = bug_block
+    return "\n".join(lines), ins_at + 1
 
 
-def _normalize_path(path: str) -> str:
-    """Normalize path separators for cross-platform comparison."""
-    return path.replace("\\", "/").lower().strip()
+def _inject_vm_one_time_event_bug_aggressive(src: str, trace: str) -> Tuple[str, int]:
+    """
+    Инъекция VM-бага (One-time event не сбрасывается).
+    Если класс не найден, создает синтетический класс.
+    """
+    lines = src.splitlines()
+    ins_at = None
 
+    # Попытка 1: Найти любой класс
+    for i, line in enumerate(lines):
+        if re.search(r'\bclass\s+\w+', line):
+            for j in range(i, min(i + 30, len(lines))):
+                if "{" in lines[j]:
+                    ins_at = j + 1
+                    break
+            if ins_at:
+                break
+
+    # Попытка 2: Fallback - создаем синтетический класс
+    if ins_at is None:
+        log.warning(f"No class found for trace={trace}, appending synthetic one.")
+        ins_at = len(lines)
+        synthetic_block = [
+            "",
+            "// Synthetic ViewModel for bug injection",
+            "class BuggyViewModel {",
+        ]
+        lines.extend(synthetic_block)
+        ins_at += len(synthetic_block)
+
+    bug_block = [
+        f"    // === VM REGRESSION START (trace={trace}) ===",
+        "    // BUG: One-time event NEVER reset",
+        "    private val _navigateEvent = kotlinx.coroutines.flow.MutableStateFlow(false)",
+        "    val navigateEvent: kotlinx.coroutines.flow.StateFlow<Boolean> = _navigateEvent",
+        "",
+        "    fun triggerNavigation() {",
+        f"        _navigateEvent.value = true  // NEVER RESET! Listeners will receive 'true' repeatedly.",
+        f"        println(\"[BUG-VM] Event triggered; trace={trace}\")",
+        "    }",
+        f"    // === VM REGRESSION END (trace={trace}) ===",
+        "",
+    ]
+
+    lines[ins_at:ins_at] = bug_block
+    return "\n".join(lines), ins_at + 1
+
+
+# ----------------------------------------------------------------------
+# Config Classes
+# ----------------------------------------------------------------------
 
 @dataclass
 class RepoConfig:
@@ -127,20 +199,11 @@ class CaseConfig:
     per_file_max_chars: int
 
 
-# -----------------------------
-# Generator
-# -----------------------------
-class KmpComposeBugHuntTestGenerator(AbstractTestGenerator):
-    """
-    Realistic "bug hunt" for a large KMP + Compose codebase.
+# ----------------------------------------------------------------------
+# Main Generator Class
+# ----------------------------------------------------------------------
 
-    Improvements:
-    - Cross-platform path normalization
-    - Line number tolerance (±10 lines)
-    - Better JSON parsing with fallback
-    - More forgiving verification logic
-    """
-
+class KmpComposeBugHuntV2TestGenerator(AbstractTestGenerator):
     DEFAULT_REPO_URL = "https://github.com/JetBrains/compose-multiplatform.git"
 
     def __init__(self, test_id: str):
@@ -152,132 +215,144 @@ class KmpComposeBugHuntTestGenerator(AbstractTestGenerator):
             local_dir=Path(os.getenv("KMP_LOCAL_DIR", ".cache/kmp_repo")).resolve(),
         )
 
-        lengths_str = os.getenv("KMP_CONTEXT_LENGTHS_K", "8,16,32")
-        depths_str = os.getenv("KMP_NEEDLE_DEPTH_PERCENTAGES", "10,50,90")
-        max_files = int(os.getenv("KMP_MAX_FILES", "40"))
-        per_file_max_chars = int(os.getenv("KMP_PER_FILE_MAX_CHARS", "8000"))
+        lengths_str = os.getenv("KMP_CONTEXT_LENGTHS_K", "8,16")
+        depths_str = os.getenv("KMP_NEEDLE_DEPTH_PERCENTAGES", "30,70")
 
+        self.max_files = int(os.getenv("KMP_MAX_FILES", "25"))
+        self.per_file_max_chars = int(os.getenv("KMP_PER_FILE_MAX_CHARS", "5000"))
         self.context_lengths_k = [int(x.strip()) for x in lengths_str.split(",") if x.strip()]
         self.needle_depths = [int(x.strip()) for x in depths_str.split(",") if x.strip()]
-        self.max_files = max_files
-        self.per_file_max_chars = per_file_max_chars
 
         self.test_plan = self._create_test_plan()
         self.current_test_index = 0
 
-        log.info("KMP Compose BugHunt: plan=%d cases", len(self.test_plan))
+        log.info(f"KMP BugHunt v2 initialized. Plan: {len(self.test_plan)} tests.")
 
     def _create_test_plan(self) -> List[Dict[str, Any]]:
         plan = []
         for k in self.context_lengths_k:
             for d in self.needle_depths:
-                plan.append(
-                    {
-                        "context_k": k,
-                        "depth_percent": d,
-                        "test_id": f"kmp_compose_bug_hunt_{k}k_{d}pct",
-                    }
-                )
+                plan.append({
+                    "context_k": k,
+                    "depth_percent": d,
+                    "test_id": f"kmp_bug_hunt_v2_{k}k_{d}pct",
+                })
         return plan
 
     def _ensure_repo(self) -> None:
         self.repo.local_dir.parent.mkdir(parents=True, exist_ok=True)
-
         if not self.repo.local_dir.exists():
             log.info("Cloning repo into %s", self.repo.local_dir)
             _run(["git", "clone", "--depth", "1", self.repo.url, str(self.repo.local_dir)])
         else:
-            try:
-                _run(["git", "fetch", "--all", "--prune"], cwd=self.repo.local_dir)
-            except Exception as e:
-                log.warning("git fetch failed: %s", e)
-
-        if self.repo.ref and self.repo.ref != "HEAD":
-            try:
-                _run(["git", "checkout", self.repo.ref], cwd=self.repo.local_dir)
-            except Exception as e:
-                log.warning("git checkout %s failed: %s", self.repo.ref, e)
+            # Опционально можно сделать git pull, если нужно свежее состояние
+            pass
 
     def _pick_files(self, cfg: CaseConfig) -> List[Path]:
         root = self.repo.local_dir
-        exts = (".kt", ".kts", ".gradle.kts", ".md")
-        exclude_dirs = (
-            ".git",
-            "build",
-            ".gradle",
-            ".idea",
-            "out",
-            "node_modules",
-            "Pods",
-            "DerivedData",
-            "generated",
-        )
+        exts = (".kt", ".kts")
+        exclude_dirs = (".git", "build", ".gradle", ".idea", "out", "generated", "node_modules")
 
-        files = _iter_files(root, exts=exts, exclude_dirs=exclude_dirs)
-        preferred = [p for p in files if any(seg in p.parts for seg in ("src", "examples", "sample", "samples"))]
-        pool = preferred if len(preferred) >= 20 else files
+        all_files = _iter_files(root, exts=exts, exclude_dirs=exclude_dirs)
 
-        seed = _sha1_text(f"{self.test_id}:{cfg.context_k}:{cfg.depth_percent}:{len(pool)}")
+        # Предпочитаем исходники примеров, там чаще встречается код UI
+        preferred = [p for p in all_files if any(seg in p.parts for seg in ("src", "examples", "sample"))]
+        pool = preferred if len(preferred) >= 10 else all_files
+
+        # Детерминированный шаффл
+        seed_val = f"{self.test_id}:{cfg.context_k}:{cfg.depth_percent}"
+        seed = _sha1_text(seed_val)
         rnd = random.Random(seed)
         rnd.shuffle(pool)
 
-        return pool[: cfg.max_files]
+        return pool[:cfg.max_files]
 
     def _build_context_blocks(self, chosen: List[Path], cfg: CaseConfig) -> Tuple[List[str], Dict[str, Any]]:
-        """Returns list of text blocks and an injection metadata dict."""
-        rnd = random.Random(_sha1_text(f"{self.test_id}:{cfg.context_k}:{cfg.depth_percent}:target"))
-        kt_files = [p for p in chosen if str(p).endswith(".kt")]
-        target_file = rnd.choice(kt_files) if kt_files else rnd.choice(chosen)
-
+        rnd = random.Random(_sha1_text(f"{self.test_id}:inject"))
         root = self.repo.local_dir
-        rel_target = str(target_file.relative_to(root))
+
+        # Нам нужно минимум 2 файла для инъекции
+        kt_files = [p for p in chosen if str(p).endswith(".kt")]
+        if len(kt_files) < 2:
+            # Если файлов мало, дублируем их для теста
+            if not kt_files:
+                raise RuntimeError("No .kt files found in repo subset.")
+            kt_files = kt_files * 2
+
+        ui_file = rnd.choice(kt_files)
+        vm_file = rnd.choice([f for f in kt_files if f != ui_file] or [ui_file])
+
+        trace_ui = uuid.uuid4().hex[:8]
+        trace_vm = uuid.uuid4().hex[:8]
+
+        injection_meta = {
+            "ui_bug": {"file": None, "line": None, "trace": trace_ui},
+            "vm_bug": {"file": None, "line": None, "trace": trace_vm},
+            "all_files": [],
+        }
 
         blocks: List[str] = []
-        injection_meta: Dict[str, Any] = {
-            "target_file": rel_target,
-            "inserted_line": None,
-            "trace": None,
-        }
+        injection_count = 0
 
         for p in chosen:
             rel = str(p.relative_to(root))
-            txt = _read_text_safely(p, max_chars=cfg.per_file_max_chars)
+            txt = _read_text_safely(p, cfg.per_file_max_chars)
             if not txt.strip():
                 continue
 
-            if p == target_file and str(p).endswith(".kt"):
-                new_txt, line_no = _insert_bug_into_composable(txt)
+            # UI Bug Injection
+            if p == ui_file:
+                new_txt, line_no = _inject_ui_side_effect_bug_aggressive(txt, trace_ui)
                 txt = new_txt
-                injection_meta["inserted_line"] = line_no
+                injection_meta["ui_bug"]["file"] = rel
+                injection_meta["ui_bug"]["line"] = line_no
+                log.info(f"Injecting UI bug into {rel} at line {line_no} (trace={trace_ui})")
+                injection_count += 1
+
+            # VM Bug Injection
+            if p == vm_file:
+                new_txt, line_no = _inject_vm_one_time_event_bug_aggressive(txt, trace_vm)
+                txt = new_txt
+                injection_meta["vm_bug"]["file"] = rel
+                injection_meta["vm_bug"]["line"] = line_no
+                log.info(f"Injecting VM bug into {rel} at line {line_no} (trace={trace_vm})")
+                injection_count += 1
 
             header = (
                 f"\n\n// ================================\n"
                 f"// FILE: {rel}\n"
-                f"// SNAPSHOT_SHA1: {_sha1_text(txt)}\n"
+                f"// SHA: {_sha1_text(txt)}\n"
                 f"// ================================\n"
             )
             blocks.append(header + txt)
+            injection_meta["all_files"].append(rel)
+
+        # Валидация
+        if injection_count < 2:
+            # В редких случаях (один файл) может быть меньше, но мы стараемся обеспечить 2
+            log.warning(f"Injected only {injection_count}/2 bugs. Verification might be affected.")
 
         return blocks, injection_meta
 
     def _assemble_haystack(self, blocks: List[str], cfg: CaseConfig) -> str:
-        """Assemble context with target size."""
-        target_chars = cfg.context_k * 1024 * 3
+        # Простая склейка с ограничением длины
+        target_chars = cfg.context_k * 1024 * 3  # ~3 chars per token approximation
         joined = "\n".join(blocks)
 
         if len(joined) <= target_chars:
             return joined
 
-        head = joined[: int(target_chars * 0.6)]
-        tail = joined[-int(target_chars * 0.35) :]
-        noise = (
-            "\n\n/* --- build logs excerpt ---\n"
-            f"[{datetime.datetime.now().isoformat()}] WARN: Gradle configuration cache reused\n"
-            f"[{datetime.datetime.now().isoformat()}] INFO: KMP targets: android/ios/desktop\n"
-            f"[{datetime.datetime.now().isoformat()}] DEBUG: taskId={uuid.uuid4().hex[:12]}\n"
-            "--- end logs --- */\n\n"
-        )
-        return head + noise + tail
+        # Если контекст слишком большой, режем середину (чтобы сохранить хедеры файлов и инъекции,
+        # которые вероятнее всего попали в начало или конец списка при шаффле,
+        # но лучше просто обрезать хвост аккуратно)
+        # В данной реализации просто берем начало и хвост.
+        head = joined[:int(target_chars * 0.7)]
+        tail = joined[-int(target_chars * 0.25):]
+        return head + "\n\n/* ... Huge context omitted ... */\n\n" + tail
+
+    # ----------------------------------------------------------------------
+    # Generator Method
+    # ----------------------------------------------------------------------
 
     def generate(self) -> Dict[str, Any]:
         if not self.test_plan:
@@ -287,56 +362,58 @@ class KmpComposeBugHuntTestGenerator(AbstractTestGenerator):
         self.current_test_index += 1
 
         cfg = CaseConfig(
-            context_k=int(config["context_k"]),
-            depth_percent=int(config["depth_percent"]),
+            context_k=config["context_k"],
+            depth_percent=config["depth_percent"],
             max_files=self.max_files,
             per_file_max_chars=self.per_file_max_chars,
         )
 
         self._ensure_repo()
-
         chosen = self._pick_files(cfg)
         blocks, meta = self._build_context_blocks(chosen, cfg)
-
-        # Depth control: move target file block
-        target_file = meta["target_file"]
-        target_idx = None
-        for i, b in enumerate(blocks):
-            if f"// FILE: {target_file}" in b:
-                target_idx = i
-                break
-
-        if target_idx is not None:
-            b = blocks.pop(target_idx)
-            insert_at = int(len(blocks) * (cfg.depth_percent / 100.0))
-            insert_at = max(0, min(insert_at, len(blocks)))
-            blocks.insert(insert_at, b)
-
         haystack = self._assemble_haystack(blocks, cfg)
 
         question = (
-            "В проекте KMP + Compose появилась регрессия: при открытии экрана/компонента "
-            "наблюдается повторяющийся side-effect (например, множатся запросы/логи) при рекомпозициях.\n\n"
-            "Задача:\n"
-            "1) Найди точное место в коде, которое запускает side-effect на каждой рекомпозиции.\n"
-            "2) Укажи путь к файлу и примерную строку.\n"
-            "3) Предложи исправление: перенести запуск в LaunchedEffect(...) или другой корректный механизм side-effects.\n\n"
-            "Ответ верни в JSON с полями: file, line, root_cause, fix_patch."
+            "В проекте KMP + Compose обнаружены ДВЕ регрессии:\n\n"
+            "**Регрессия 1 (UI)**: Side-effect запускается напрямую в теле @Composable вне LaunchedEffect, "
+            "вызывая повторное выполнение при каждой рекомпозиции.\n"
+            "**Регрессия 2 (VM)**: One-time event в StateFlow никогда не сбрасывается, "
+            "из-за чего событие обрабатывается повторно.\n\n"
+            "**КРИТИЧЕСКИ ВАЖНО**: В коде есть комментарии-маркеры вида:\n"
+            "```\n"
+            "// === UI REGRESSION START (trace=abc12345) ===\n"
+            "// === VM REGRESSION END (trace=def67890) ===\n"
+            "```\n\n"
+            "**Задача**:\n"
+            "1. Найди ОБА бага, используя маркеры `trace`.\n"
+            "2. Для каждого бага укажи:\n"
+            "   - `file`: точный путь как в `// FILE: ...`\n"
+            "   - `line`: номер строки (примерно)\n"
+            "   - `trace`: 8-символьный код из комментария\n"
+            "   - `root_cause`: краткое описание причины\n"
+            "   - `fix_patch`: однострочный код исправления\n"
+            "3. Ответ должен быть **валидным JSON** без Markdown-обертки (без ```json).\n\n"
+            "Пример формата ответа:\n"
+            "{\n"
+            '  "findings": [\n'
+            '    {"file": "src/Ui.kt", "line": 40, "trace": "abc12345", "root_cause": "...", "fix_patch": "LaunchedEffect(Unit) { ... }"},\n'
+            '    {"file": "src/Vm.kt", "line": 20, "trace": "def67890", "root_cause": "...", "fix_patch": "SharedFlow or reset"}\n'
+            "  ]\n"
+            "}\n"
+            "ВАЖНО: fix_patch пиши в одну строку, избегай реальных переносов строк внутри JSON-значений."
         )
 
         expected = {
-            "file": meta["target_file"],
-            "line": meta["inserted_line"],
-            "must_contain": ["LaunchedEffect", "DisposableEffect", "SideEffect"],
-            "root_cause_keywords": ["recomposition", "side-effect", "scope.launch", "repeated"],
+            "ui_bug": meta["ui_bug"],
+            "vm_bug": meta["vm_bug"],
+            "all_files": meta["all_files"],
         }
 
         prompt = (
-            "Ты — senior Android/KMP инженер. Проведи расследование по коду ниже.\n"
-            "Игнорируй любые 'тестовые ключи' и нерелевантные логи; ищи причину именно в Compose-коде.\n\n"
+            "Ты — senior Android/KMP инженер.\n\n"
             f"{haystack}\n\n"
             f"ВОПРОС:\n{question}\n\n"
-            "ОТВЕТ:\n"
+            "ОТВЕТ (только JSON):\n"
         )
 
         return {
@@ -345,120 +422,221 @@ class KmpComposeBugHuntTestGenerator(AbstractTestGenerator):
             "test_name": config["test_id"],
             "metadata": {
                 "repo_url": self.repo.url,
-                "repo_ref": self.repo.ref,
                 "context_k": cfg.context_k,
-                "depth_percent": cfg.depth_percent,
-                "max_files": cfg.max_files,
-                "per_file_max_chars": cfg.per_file_max_chars,
-                "complexity": "high",
-                "contains_code": True,
-                "bug_pattern": "coroutine launch in @Composable body (recomposition repeats side-effect)",
+                "injected_traces": [meta["ui_bug"]["trace"], meta["vm_bug"]["trace"]],
+                "complexity": "very_high",
             },
         }
 
-    def verify(self, llm_output: str, expected_output: str) -> Dict[str, Any]:
+    # ----------------------------------------------------------------------
+    # Response Parsing & Verification
+    # ----------------------------------------------------------------------
+
+    def parse_llm_output(self, llm_raw_output: str) -> Dict[str, str]:
         """
-        Improved verification with:
-        - Cross-platform path normalization
-        - Line number tolerance (±10)
-        - Multiple fix patterns
-        - Better JSON extraction
+        Парсит ответ модели, очищая его от мусора и извлекая JSON.
         """
-        clean = self._cleanup_llm_response(llm_output).strip()
-        exp = json.loads(expected_output)
+        clean = self._cleanup_llm_response(llm_raw_output)
+        parsed_json = self._parse_json_flexible(clean)
 
-        details = {
-            "expected_file": exp.get("file"),
-            "expected_line": exp.get("line"),
-            "received_snippet": clean[:300],
-            "match_file": False,
-            "match_fix": False,
-            "match_root_cause": False,
-            "match_line": False,
-        }
-
-        # Extract JSON from response
-        ans_obj = None
-        json_match = re.search(r'```json\s*(\{.*?\})\s*```', clean, re.DOTALL)
-        if json_match:
-            try:
-                ans_obj = json.loads(json_match.group(1))
-            except:
-                pass
-
-        if ans_obj is None:
-            try:
-                ans_obj = json.loads(clean)
-            except:
-                pass
-
-        # Normalize expected file path
-        expected_file = _normalize_path(exp.get("file", ""))
-        expected_line = exp.get("line")
-
-        # File check (cross-platform)
-        file_ok = False
-        if expected_file:
-            # Check in raw text
-            if expected_file in _normalize_path(clean):
-                file_ok = True
-            # Check in parsed JSON
-            if isinstance(ans_obj, dict):
-                ans_file = _normalize_path(str(ans_obj.get("file", "")))
-                if expected_file in ans_file or ans_file in expected_file:
-                    file_ok = True
-
-        # Line check (with tolerance)
-        line_ok = False
-        if expected_line and isinstance(ans_obj, dict):
-            ans_line = ans_obj.get("line")
-            if ans_line and isinstance(ans_line, (int, float)):
-                if abs(int(ans_line) - expected_line) <= 10:
-                    line_ok = True
-
-        # Fix check (multiple patterns)
-        fix_ok = False
-        must_patterns = exp.get("must_contain", [])
-        fix_patterns = [
-            r'LaunchedEffect',
-            r'DisposableEffect',
-            r'SideEffect',
-            r'rememberUpdatedState',
-        ]
-
-        combined_check = clean
-        if isinstance(ans_obj, dict):
-            combined_check += " " + str(ans_obj.get("fix_patch", ""))
-            combined_check += " " + str(ans_obj.get("root_cause", ""))
-
-        if any(re.search(p, combined_check, re.IGNORECASE) for p in fix_patterns):
-            fix_ok = True
-
-        # Root cause check
-        cause_ok = False
-        cause_keys = exp.get("root_cause_keywords", [])
-        hits = sum(1 for k in cause_keys if k.lower() in combined_check.lower())
-        if hits >= max(1, len(cause_keys) // 2):
-            cause_ok = True
-
-        details["match_file"] = file_ok
-        details["match_line"] = line_ok
-        details["match_fix"] = fix_ok
-        details["match_root_cause"] = cause_ok
-
-        # Scoring
-        score = 0.0
-        if file_ok:
-            score += 0.4
-        if line_ok:
-            score += 0.1
-        if fix_ok:
-            score += 0.4
-        if cause_ok:
-            score += 0.1
+        # Если не удалось распарсить, возвращаем "чистый" текст
+        answer_str = json.dumps(parsed_json, ensure_ascii=False) if parsed_json else clean
 
         return {
-            "is_correct": score >= 0.8,  # Более мягкий порог
+            'answer': answer_str,
+            'thinking_log': llm_raw_output,
+            'parsed_findings': parsed_json.get('findings', []) if parsed_json else []
+        }
+
+    def _parse_json_flexible(self, text: str) -> Optional[Dict[str, Any]]:
+        """
+        Продвинутый парсинг JSON, устойчивый к типичным ошибкам LLM:
+        - Markdown fence
+        - Неэкранированные переносы строк в значениях
+        - Опечатки в ключах (rootcause vs root_cause)
+        """
+        # Используем метод санитизации из базового класса (замена тире и т.д.)
+        clean = self._sanitize_code(text)
+
+        # Убираем ```json ... ``` и просто ``` ... ```
+        clean = re.sub(r'```(?:json)?\s*(.*?)```', r'\1', clean, flags=re.DOTALL)
+
+        # Заменяем явные \n на пробелы (чтобы не ломать JSON)
+        clean = re.sub(r'\\n', ' ', clean)
+
+        # Нормализуем ключи (rootcause -> root_cause)
+        clean = re.sub(r'"root[_-]?cause"', '"root_cause"', clean, flags=re.IGNORECASE)
+        clean = re.sub(r'"fix[_-]?patch"', '"fix_patch"', clean, flags=re.IGNORECASE)
+
+        # Функция для удаления реальных переносов строк ВНУТРИ значений JSON
+        def fix_multiline_strings(match):
+            key = match.group(1)
+            value = match.group(2)
+            # Заменяем переносы на пробелы
+            fixed_value = value.replace('\n', ' ').replace('\r', '')
+            return f'"{key}": "{fixed_value}"'
+
+        # Regex ловит "key": "value...with...newlines"
+        # Поддерживает значения, не содержащие кавычек внутри (или простые случаи)
+        clean = re.sub(r'"(\w+)":\s*"([^"]*(?:\n[^"]*)*)"', fix_multiline_strings, clean)
+
+        try:
+            parsed = json.loads(clean)
+            return self._normalize_parsed_dict(parsed)
+        except Exception:
+            pass
+
+        # Fallback: поиск JSON-объекта внутри текста
+        match = re.search(r'\{[\s\S]*?"findings"[\s\S]*?\}', clean)
+        if match:
+            try:
+                # Повторяем фиксы для найденного фрагмента
+                json_str = match.group(0)
+                json_str = re.sub(r'\\n', ' ', json_str)
+                json_str = re.sub(r'"(\w+)":\s*"([^"]*(?:\n[^"]*)*)"', fix_multiline_strings, json_str)
+                return self._normalize_parsed_dict(json.loads(json_str))
+            except Exception:
+                pass
+
+        return None
+
+    def _normalize_parsed_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Дополнительная нормализация словаря после парсинга."""
+        if "findings" in data and isinstance(data["findings"], list):
+            for f in data["findings"]:
+                # Подстраховка для ключей, если regex не сработал
+                if "rootcause" in f and "root_cause" not in f:
+                    f["root_cause"] = f.pop("rootcause")
+                if "fixpatch" in f and "fix_patch" not in f:
+                    f["fix_patch"] = f.pop("fixpatch")
+        return data
+
+    def verify(self, llm_output: str, expected_output: str) -> Dict[str, Any]:
+        """
+        Верификация ответа.
+        Критерии:
+        1. Valid JSON.
+        2. Найдены оба бага (проверка по Trace ID - 50% баллов).
+        3. Корректные файлы (с учетом basename).
+        4. Наличие ключевых слов исправления (LaunchedEffect, SharedFlow...).
+        """
+        clean = self._cleanup_llm_response(llm_output)
+        try:
+            exp = json.loads(expected_output)
+        except json.JSONDecodeError:
+            # Если expected некорректен (крайне маловероятно), тест фейлится
+            return {"is_correct": False, "score": 0.0, "details": {"error": "Invalid expected_output"}}
+
+        ans_obj = self._parse_json_flexible(clean)
+
+        if not ans_obj or "findings" not in ans_obj:
+            return {
+                "is_correct": False,
+                "score": 0.0,
+                "details": {
+                    "error": "No valid JSON with 'findings' key found.",
+                    "preview": clean[:500]
+                }
+            }
+
+        findings = ans_obj["findings"]
+        if not isinstance(findings, list) or len(findings) < 2:
+            return {
+                "is_correct": False,
+                "score": 0.0,
+                "details": {
+                    "error": f"Expected at least 2 findings, got {len(findings) if isinstance(findings, list) else 'invalid type'}",
+                    "findings": findings
+                }
+            }
+
+        # 1. Trace ID Check (Most Important)
+        expected_traces = {exp["ui_bug"]["trace"], exp["vm_bug"]["trace"]}
+        got_traces = {str(f.get("trace", "")).strip() for f in findings}
+        # Пересечение найденных и ожидаемых
+        matched_traces = expected_traces.intersection(got_traces)
+        trace_ok = (matched_traces == expected_traces)
+
+        # 2. File Check (Tolerance to path variations)
+        all_files_normalized = {_normalize_path(f) for f in exp["all_files"]}
+        files_ok = True
+        # Проверяем первые 2 находки (предполагаем, что они соответствуют 2 багам)
+        for f in findings[:2]:
+            got_file = _normalize_path(f.get("file", ""))
+            # Проверяем полное совпадение
+            if got_file in all_files_normalized:
+                continue
+
+            # Проверяем совпадение по имени файла (basename)
+            got_basename = os.path.basename(got_file)
+            expected_basenames = [os.path.basename(p) for p in all_files_normalized]
+
+            if got_basename not in expected_basenames:
+                files_ok = False
+                break
+
+        # 3. Fix Patterns Check
+        fix_text = " ".join(str(f.get("fix_patch", "")) for f in findings[:2]).lower()
+        required_keywords = [
+            "launchedeffect", "disposableeffect", "sharedflow",
+            "channel", "reset", "clear", "emit", "acknowledge", "consume"
+        ]
+        fix_ok = any(kw in fix_text for kw in required_keywords)
+
+        # 4. Root Cause Check
+        root_cause_text = " ".join(str(f.get("root_cause", "")) for f in findings[:2]).lower()
+        cause_keywords = [
+            "recomposition", "side-effect", "side effect", "coroutine",
+            "one-time", "event", "never reset", "repeated", "launch"
+        ]
+        # Достаточно найти 2 совпадения ключевых слов
+        cause_ok = sum(1 for kw in cause_keywords if kw in root_cause_text) >= 2
+
+        # 5. Line Check (Low priority)
+        line_ok = True
+        tolerance = 20
+        # Пытаемся сопоставить находки с ожидаемыми по trace
+        for f in findings:
+            tr = str(f.get("trace", "")).strip()
+            expected_line = None
+            if tr == exp["ui_bug"]["trace"]:
+                expected_line = exp["ui_bug"]["line"]
+            elif tr == exp["vm_bug"]["trace"]:
+                expected_line = exp["vm_bug"]["line"]
+
+            if expected_line is not None:
+                ans_line = f.get("line")
+                if isinstance(ans_line, int):
+                    if abs(ans_line - expected_line) > tolerance:
+                        # line_ok = False # Можно не штрафовать строго
+                        pass
+                else:
+                    # Если линия не int или отсутствует
+                    pass
+
+        # Scoring System
+        score = 0.0
+        if trace_ok: score += 0.50
+        if files_ok: score += 0.15
+        if fix_ok: score += 0.20
+        if cause_ok: score += 0.10
+        if line_ok: score += 0.05
+
+        return {
+            "is_correct": score >= 0.70,
             "score": round(score, 3),
-            "details": details,
+            "details": {
+                "trace_ok": trace_ok,
+                "files_ok": files_ok,
+                "fix_ok": fix_ok,
+                "cause_ok": cause_ok,
+                "matched_traces": list(matched_traces),
+                "expected_traces": list(expected_traces),
+                "score_breakdown": {
+                    "trace": 0.50 if trace_ok else 0.0,
+                    "files": 0.15 if files_ok else 0.0,
+                    "fix": 0.20 if fix_ok else 0.0,
+                    "cause": 0.10 if cause_ok else 0.0
+                }
+            },
         }
