@@ -149,19 +149,55 @@ class JVMRunner:
     def run_kotlin_code(self, kotlin_source: str,
                         args: Optional[list[str]] = None) -> str:
         """
-        Компилирует и запускает Kotlin‑код.
+        Компилирует и запускает Kotlin-код.
+
+        Автоматическая обработка:
+        1. Если в коде нет 'fun main', метод сам создает функцию main(args: Array<String>).
+        2. Импорты (строки с 'import'/'package') выносятся в начало файла.
+        3. Остальной код помещается внутрь main, поэтому переменная 'args' доступна сразу.
         """
+
+        # ── 1️⃣ Smart Wrapping (Авто-обертка) ──────────────────────────
+        # Проверяем, определил ли пользователь main сам. Если нет — генерируем обертку.
+        if "fun main" not in kotlin_source:
+            lines = kotlin_source.splitlines()
+            header_lines = []  # imports, package
+            body_lines = []    # логика
+
+            for line in lines:
+                s = line.strip()
+                # Выносим импорты и пакеты наверх
+                if s.startswith("package ") or s.startswith("import "):
+                    header_lines.append(line)
+                else:
+                    body_lines.append(line)
+
+            # Собираем новый исходник
+            # args доступен внутри благодаря сигнатуре main
+            wrapped_source = (
+                    "\n".join(header_lines) + "\n\n"
+                                              "fun main(args: Array<String>) {\n" +
+                    "\n".join(body_lines) +
+                    "\n}"
+            )
+
+            logger.debug("Auto-wrapped Kotlin source into 'fun main(args)'")
+            final_source = wrapped_source
+        else:
+            final_source = kotlin_source
+
+        # ── 2️⃣ Стандартный процесс компиляции и запуска ───────────────
         with tempfile.TemporaryDirectory() as tmp_dir_str:
             tmp_dir = Path(tmp_dir_str)
             src_file = tmp_dir / "Main.kt"
             jar_file = tmp_dir / "output.jar"
 
             try:
-                src_file.write_text(kotlin_source, encoding="utf-8")
+                src_file.write_text(final_source, encoding="utf-8")
             except OSError as exc:
                 return f"Error writing source file: {exc}"
 
-            # ── Компиляция ───────────────────────────────────────────────
+            # Компиляция
             compile_cmd = [
                 str(self.kotlinc_path),
                 "-include-runtime",
@@ -186,7 +222,7 @@ class JVMRunner:
             except Exception as exc:
                 return f"Compilation Failed: {exc}"
 
-            # ── Запуск ───────────────────────────────────────────────────
+            # Запуск (передаем args в subprocess)
             run_cmd = [str(self.java_path), "-jar", str(jar_file)] + (args or [])
 
             try:
@@ -196,7 +232,7 @@ class JVMRunner:
                     capture_output=True,
                     text=True,
                     timeout=10,
-                    shell=self.use_shell, # Важно для Windows если java вызвана через батник (редко, но бывает)
+                    shell=self.use_shell,
                 )
                 if result_run.returncode != 0:
                     return f"Runtime Error:\n{result_run.stderr.strip()}"
@@ -210,34 +246,22 @@ class JVMRunner:
 
 # -------------------------------------------------------------
 if __name__ == "__main__":
-    # Включаем подробный лог для отладки
-    logging.getLogger().setLevel(logging.DEBUG)
+    runner = JVMRunner()
 
-    # Исправленный Kotlin код: добавлено определение класса User
-    kotlin_code = """
-        data class User(val name: String)
-
-        fun main() {
-            val version = System.getProperty("java.version")
-            println("Hello from Python! Running on JVM version: $version")
-
-            val x = 10
-            val y = 20
-            val user = User("Mark")
-            println("Result of calculation: ${x + y} with name: ${user.name}")
-        }
+    # ПРИМЕР: Просто логика + импорты. Без fun main!
+    # Мы обращаемся к 'args' напрямую, как будто это скрипт.
+    script_body = """
+    import java.io.File
+    
+    val name = if (args.isNotEmpty()) args[0] else "Unknown"
+    println("Hello, $name!")
+    
+    // Можно даже определять локальные классы/функции
+    data class Status(val code: Int)
+    println(Status(200))
     """
 
-    print("--- Starting JVM Runner ---")
-    try:
-        runner = JVMRunner()
-        output = runner.run_kotlin_code(kotlin_source=kotlin_code)
-    except JVMRunnerError as exc:
-        logger.error(f"Initialization Error: {exc}")
-        output = str(exc)
-    except Exception as e:
-        logger.error(f"Unexpected Error: {e}")
-        output = str(e)
-
-    print("\n--- Execution Output ---")
+    print("--- Auto-wrapped Execution ---")
+    # Передаем аргумент "Developer" в Python, он попадает в args[0] в Kotlin
+    output = runner.run_kotlin_code(script_body, args=["Developer"])
     print(output)

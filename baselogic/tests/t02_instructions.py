@@ -241,7 +241,7 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         cleaned = self._strip_json_noise(raw)
 
         # Используем жадный поиск – берём всю внешнюю структуру { … }
-        json_match = re.search(r'\{.*\}', cleaned, flags=re.DOTALL)
+        json_match = re.search(r'\{.*}', cleaned, flags=re.DOTALL)
         if not json_match:
             return {
                 "is_correct": False,
@@ -250,7 +250,7 @@ class InstructionsTestGenerator(AbstractTestGenerator):
 
         raw_json = json_match.group(0).strip()
         # Удаляем лишние запятые перед закрывающими скобками
-        raw_json = re.sub(r',\s*(\})', r'\1', raw_json)
+        raw_json = re.sub(r',\s*(})', r'\1', raw_json)
 
         try:
             data = json.loads(raw_json)

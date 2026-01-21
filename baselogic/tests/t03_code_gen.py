@@ -1,9 +1,12 @@
+import logging
 import random
 import re
 from typing import Dict, Any
 
-from baselogic.tests.abstract_test_generator import AbstractTestGenerator
+import logger
 
+from baselogic.tests.abstract_test_generator import AbstractTestGenerator
+log = logging.getLogger(__name__)
 
 class CodeGenTestGenerator(AbstractTestGenerator):
     # Пример реализации generate()
@@ -53,47 +56,67 @@ class CodeGenTestGenerator(AbstractTestGenerator):
         }
 
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
-        # 1. Извлекаем блок кода
-        # Удаляем блоки <think>...</think> перед поиском кода
+        # 1. Extract code block
         cleaned = self._cleanup_llm_response(llm_output)
         code_match = re.search(r"```python\n(.*?)\n```", cleaned, re.DOTALL)
         if not code_match:
             code_match = re.search(r"def\s.*", cleaned, re.DOTALL)
-
+    
         if not code_match:
-            return {'is_correct': False, 'details': {'error': 'Блок кода Python не найден в очищенном ответе'}}
-
-        code_to_exec = code_match.group(1) if len(code_match.groups()) > 0 else code_match.group(0)
-
-        # >>>>> НАЧАЛО ИЗМЕНЕНИЙ: "Санитизация" кода <<<<<
-        # Заменяем типографские символы на стандартные для Python
-        replacements = {
-            '—': '-',  # Длинное тире -> Минус
-            '‘': "'",  # Левая одинарная кавычка -> Стандартная
-            '’': "'",  # Правая одинарная кавычка -> Стандартная
-            '“': '"',  # Левая двойная кавычка -> Стандартная
-            '”': '"',  # Правая двойная кавычка -> Стандартная
-        }
-        for old, new in replacements.items():
-            code_to_exec = code_to_exec.replace(old, new)
-        # >>>>> КОНЕЦ ИЗМЕНЕНИЙ <<<<<
-
-        # 2. Выполняем код и запускаем тесты
-        try:
-            local_scope = {}
-            exec(code_to_exec, {}, local_scope)
-
-            function_name = expected_output['function_name']
-            if function_name not in local_scope:
-                return {'is_correct': False, 'details': {'error': f'Функция {function_name} не была определена'}}
-
-            for test_case in expected_output['tests']:
-                exec(test_case, {}, local_scope)
-
-            return {'is_correct': True, 'details': {'status': 'Все тесты пройдены'}}
-
-        except AssertionError as e:
             return {'is_correct': False,
-                    'details': {'error': 'Логическая ошибка (AssertionError)', 'failed_test': str(e)}}
+                    'details': {'error': 'Блок кода Python не найден в очищенном ответе'}}
+    
+        # Prefer the captured group; strip surrounding whitespace
+        code_to_exec = (code_match.group(1) if code_match.lastindex else code_match.group(0)).strip()
+    
+        for old, new in {'—': '-', '‘': "'", '’': "'",
+                         '“': '"', '”': '"'}.items():
+            code_to_exec = code_to_exec.replace(old, new)
+    
+        log.info(f"code_to_exec {code_to_exec}")
+    
+        # 2. Execute the extracted code
+        local_scope: Dict[str, Any] = {}
+        try:
+            exec(code_to_exec, local_scope)          # single namespace
         except Exception as e:
-            return {'is_correct': False, 'details': {'error': 'Ошибка синтаксиса или выполнения', 'traceback': str(e)}}
+            return {'is_correct': False,
+                    'details': {'error': f'Ошибка синтаксиса или выполнения',
+                                'traceback': str(e)}}
+    
+        # 3. Resolve the expected function name (allow underscore miss‑match)
+        expected_name: str = expected_output['function_name']
+        if expected_name not in local_scope:
+            funcs = [name for name, obj in local_scope.items() if callable(obj)]
+            if len(funcs) == 1:
+                alt_name = funcs[0]
+                if alt_name.replace('_', '') == expected_name.replace('_', ''):
+                    log.info(f"Found alternative function name: {alt_name}")
+                    expected_name = alt_name
+                else:
+                    return {'is_correct': False,
+                            'details': {'error': f'Функция {expected_name} не была определена',
+                                        'found_candidates': funcs}}
+            else:
+                return {'is_correct': False,
+                        'details': {'error': f'Функция {expected_name} не была определена',
+                                    'found_candidates': funcs}}
+    
+        # 4. Run supplied tests – adapt test string to the actual function name
+        for test_case in expected_output['tests']:
+            try:
+                adapted_test = test_case.replace(expected_output['function_name'], expected_name)
+                exec(adapted_test, {}, local_scope)
+            except AssertionError as e:
+                return {'is_correct': False,
+                        'details': {'error': 'Логическая ошибка (AssertionError)',
+                                    'failed_test': str(e)}}
+            except Exception as e:
+                return {'is_correct': False,
+                        'details': {'error': 'Ошибка выполнения теста',
+                                    'traceback': str(e)}}
+    
+        return {'is_correct': True, 'details': {'status': 'Все тесты пройдены'}}
+
+
+
