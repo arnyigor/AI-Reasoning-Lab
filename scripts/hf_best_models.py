@@ -3,332 +3,159 @@ import json
 import math
 import os
 import re
-from datetime import datetime, timezone
-from typing import List, Dict, Any
+from datetime import datetime, timezone, timedelta
+from typing import List, Dict, Any, Optional
+from enum import Enum
 
 from huggingface_hub import HfApi
 
-# Файл для хранения истории
 HISTORY_FILE = "gguf_ranking_history.json"
 
+class RankingMode(Enum):
+    STABLE = "stable"
+    TRENDING = "trending"
 
 class RankingHistoryManager:
-    def __init__(self, filepath=HISTORY_FILE, max_history=20):
+    def __init__(self, filepath=HISTORY_FILE, max_history=20, cleanup_days=30):
         self.filepath = filepath
         self.max_history = max_history
+        self.cleanup_days = cleanup_days
         self.data = self._load_data()
+        self._cleanup_old_configs()
 
     def _load_data(self):
-        if not os.path.exists(self.filepath):
-            return {}
+        if not os.path.exists(self.filepath): return {}
         try:
-            with open(self.filepath, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception:
-            return {}
+            with open(self.filepath, 'r', encoding='utf-8') as f: return json.load(f)
+        except Exception: return {}
 
     def _save_data(self):
-        with open(self.filepath, 'w', encoding='utf-8') as f:
-            json.dump(self.data, f, ensure_ascii=False, indent=2)
+        try:
+            with open(self.filepath, 'w', encoding='utf-8') as f:
+                json.dump(self.data, f, ensure_ascii=False, indent=2)
+        except Exception as e: print(f"❌ Error: {e}")
+
+    def _cleanup_old_configs(self):
+        now = datetime.now(timezone.utc)
+        keys_to_delete = [k for k, v in self.data.items() if not v.get("snapshots") or
+                          (now - datetime.fromisoformat(v["snapshots"][-1]["timestamp"]).replace(tzinfo=timezone.utc)).days > self.cleanup_days]
+        for k in keys_to_delete: del self.data[k]
+        if keys_to_delete: self._save_data()
 
     def _generate_config_key(self, params: Dict[str, Any]) -> str:
-        """Создает уникальный хэш для набора параметров фильтрации."""
-        # Сортируем ключи, чтобы порядок не влиял на хэш
-        s = json.dumps(params, sort_keys=True)
-        return hashlib.md5(s.encode('utf-8')).hexdigest()
+        return hashlib.md5(json.dumps(params, sort_keys=True).encode('utf-8')).hexdigest()
 
     def process_ranking(self, current_models: List[Any], run_params: Dict[str, Any]):
-        """
-        Сравнивает текущий топ с историей, рассчитывает динамику и сохраняет изменения.
-        Возвращает список моделей с добавленным атрибутом .rank_delta
-        """
         config_key = self._generate_config_key(run_params)
+        if config_key not in self.data: self.data[config_key] = {"params": run_params, "snapshots": []}
+        history = self.data[config_key]
+        snapshots = history["snapshots"]
 
-        # Инициализация ветки истории для этих параметров
-        if config_key not in self.data:
-            self.data[config_key] = {
-                "params": run_params,
-                "snapshots": []
-            }
+        # Карта последнего состояния для расчета Δ Rank и Δ Velocity
+        last_state = {item['id']: item for item in snapshots[-1]['items']} if snapshots else {}
 
-        history_entry = self.data[config_key]
-        snapshots = history_entry["snapshots"]
-
-        # 1. Формируем текущий "слепок" (только ID и ранг для сравнения)
-        current_snapshot_map = {
-            getattr(m, 'id'): idx
-            for idx, m in enumerate(current_models, 1)
-        }
-        current_ids_ordered = [getattr(m, 'id') for m in current_models]
-
-        # 2. Получаем последний слепок (если есть)
-        last_snapshot_map = {}
-        last_ids_ordered = []
-
-        if snapshots:
-            last_record = snapshots[-1]
-            # last_record['items'] - это список dict {'id': ..., 'rank': ...}
-            last_snapshot_map = {item['id']: item['rank'] for item in last_record['items']}
-            last_ids_ordered = [item['id'] for item in last_record['items']]
-
-        # 3. Рассчитываем динамику для каждой модели
+        now = datetime.now(timezone.utc)
         for idx, model in enumerate(current_models, 1):
             mid = getattr(model, 'id')
-            if not snapshots:
-                # Истории нет вообще -> все новые
-                model.rank_delta = "new"
-                model.prev_rank = None
-            elif mid not in last_snapshot_map:
-                # В прошлом топе не было -> New
-                model.rank_delta = "new"
-                model.prev_rank = None
+            dt = getattr(model, 'created_at', now)
+            if isinstance(dt, str): dt = datetime.fromisoformat(dt.replace('Z', '+00:00'))
+            days = max(0.5, (now - dt.replace(tzinfo=timezone.utc)).days)
+
+            # Текущая скорость
+            v_curr = model.downloads / days
+            model.velocity = v_curr
+
+            if mid in last_state:
+                model.rank_delta = last_state[mid]['rank'] - idx
+                model.accel = v_curr - last_state[mid].get('v', v_curr)
             else:
-                prev_rank = last_snapshot_map[mid]
-                diff = prev_rank - idx  # Если был 5, стал 3: 5-3 = +2 (рост)
-                model.rank_delta = diff
-                model.prev_rank = prev_rank
+                model.rank_delta = "new"
+                model.accel = 0.0
 
-        # 4. Проверяем, изменился ли порядок или состав топа
-        # Сравниваем списки ID. Если они идентичны - ничего не пишем (экономим место)
-        has_changed = (current_ids_ordered != last_ids_ordered)
+        # Сохраняем новый снимок, если состав или данные изменились
+        current_ids = [m.id for m in current_models]
+        last_ids = [item['id'] for item in snapshots[-1]['items']] if snapshots else []
 
-        if has_changed:
-            print(f"📝 Обнаружены изменения в рейтинге. Сохраняем новую запись в историю (Config: {config_key[:8]})...")
-
+        if current_ids != last_ids or len(snapshots) == 0:
             new_record = {
-                "timestamp": datetime.now().isoformat(),
-                "items": [
-                    {
-                        "id": getattr(m, 'id'),
-                        "rank": idx,
-                        "score": getattr(m, 'combined_score', 0)
-                    }
-                    for idx, m in enumerate(current_models, 1)
-                ]
+                "timestamp": now.isoformat(),
+                "items": [{"id": m.id, "rank": i, "v": m.velocity, "score": m.combined_score}
+                          for i, m in enumerate(current_models, 1)]
             }
-
             snapshots.append(new_record)
-
-            # Ротация (удаляем старые, если больше лимита)
-            if len(snapshots) > self.max_history:
-                snapshots.pop(0)  # Удаляем самый старый
-
+            if len(snapshots) > self.max_history: snapshots.pop(0)
             self._save_data()
-        else:
-            print("💤 Рейтинг не изменился с последнего запуска. История не обновлена.")
 
         return current_models
-
 
 class GGUFModelRanker:
     def __init__(self):
         self.api = HfApi()
-        self.history_manager = RankingHistoryManager()  # Подключаем менеджер истории
+        self.history_manager = RankingHistoryManager()
 
-        self._SIZE_LABEL_RE = re.compile(
-            r'(?P<main>\d+(?:\.\d+)?)\s*[xX]?\s*(?P<second>\d+(?:\.\d+)?)(?P<unit>[BbMm])?',
-            re.IGNORECASE
-        )
+    def _get_dt(self, m) -> Optional[datetime]:
+        dt = getattr(m, 'created_at', None)
+        if not dt: return None
+        if isinstance(dt, str): return datetime.fromisoformat(dt.replace('Z', '+00:00'))
+        return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
 
-    # --- (Методы парсинга и extract_parameters те же, сокращены для краткости) ---
-    def _parse_size_label(self, label: str) -> float | None:
-        if not label: return None
-        m = self._SIZE_LABEL_RE.search(label)
-        if not m: return None
-        main_val = float(m.group('main'))
-        unit = m.group('unit')
-        if 'x' in label.lower() and m.group('second'):
-            main_val = main_val * float(m.group('second'))
-        if unit and unit.lower() == 'm': return main_val / 1000.0
-        return main_val
+    def extract_parameters(self, m) -> float | None:
+        match = re.search(r'(\d+(?:\.\d+)?)b', m.id.lower())
+        return float(match.group(1)) if match else None
 
-    def extract_parameters(self, model_info) -> float | None:
-        if hasattr(model_info, 'general') and getattr(model_info.general, 'size_label', None):
-            val = self._parse_size_label(model_info.general.size_label)
-            if val: return val
-        name = getattr(model_info, 'id', '').lower()
-        patterns = [r'(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)b', r'(\d+(?:\.\d+)?)[b]']
-        for p in patterns:
-            match = re.search(p, name)
-            if match:
-                vals = match.groups()
-                if len(vals) == 2: return float(vals[0]) * float(vals[1])
-                return float(vals[0])
-        return None
+    def _score_stable(self, m):
+        dl, lk = getattr(m, 'downloads', 0) or 0, getattr(m, 'likes', 0) or 0
+        norm_dl = min(1.0, math.log10(dl + 1) / 6.0)
+        norm_lk = min(1.0, math.log10(lk + 1) / 4.0)
+        dt = self._get_dt(m)
+        days = (datetime.now(timezone.utc) - dt).days if dt else 365
+        rec = 1.0 if days < 30 else max(0.0, 1.0 - ((days - 30) / 335.0))
+        return (0.25 * norm_dl) + (0.45 * norm_lk) + (0.30 * rec)
 
-    def calculate_score(self, model, weights=(0.25, 0.45, 0.30)):
-        downloads = getattr(model, 'downloads', 0) or 0
-        likes = getattr(model, 'likes', 0) or 0
+    def _score_trending(self, m):
+        dt = self._get_dt(m)
+        if not dt or (datetime.now(timezone.utc) - dt).days > 45: return 0.0
+        dl, lk = getattr(m, 'downloads', 0) or 0, getattr(m, 'likes', 0) or 0
+        days = max(0.5, (datetime.now(timezone.utc) - dt).days)
+        v = math.log10((dl / days) + 1) / 3.5
+        ratio = min(1.0, (lk / dl * 50.0)) if dl > 50 else 0
+        return v * ratio * (1.3 if days < 7 else 1.0)
 
-        # 1. Логарифмирование для сглаживания (Power Law distribution)
-        # Используем меньшие делители, так как GGUF репозитории имеют меньше трафика, чем оригиналы
-        log_downloads = math.log10(downloads + 1)
-        log_likes = math.log10(likes + 1)
-
-        # Нормализация:
-        # 6.0 соответствует 1 млн скачиваний (достаточно для GGUF)
-        # 4.0 соответствует 10,000 лайков (реалистичный потолок для топов вроде TheBloke)
-        norm_download = min(1.0, log_downloads / 6.0)
-        norm_like = min(1.0, log_likes / 4.0)
-
-        # 2. Умная свежесть (Sigmoid вместо Linear)
-        # Позволяет моделям "жить" чуть дольше, но резко штрафует совсем старье
-        created_at = getattr(model, 'created_at', None)
-        recency_score = 0.0
-        if created_at:
-            if isinstance(created_at, str):
-                created_at = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-            if created_at.tzinfo is None: created_at = created_at.replace(tzinfo=timezone.utc)
-
-            delta_days = (datetime.now(timezone.utc) - created_at).days
-
-            # "Плато" новизны: первые 30 дней модель считается новой (1.0)
-            if delta_days < 30:
-                recency_score = 1.0
-            else:
-                # Мягкое затухание до 0 за год (365 дней), а не за полгода
-                recency_score = max(0.0, 1.0 - ((delta_days - 30) / 335.0))
-
-        # 3. Бонус за соотношение Лайки/Скачивания (Engagement Rate)
-        # Это "секретный соус" для поиска скрытых жемчужин
-        engagement_bonus = 0.0
-        if downloads > 1000:
-            ratio = likes / downloads
-            # Если лайков больше 1% от скачиваний — это очень круто для HF
-            if ratio > 0.01: engagement_bonus = 0.05
-
-        final_score = (weights[0] * norm_download) + \
-                      (weights[1] * norm_like) + \
-                      (weights[2] * recency_score) + \
-                      engagement_bonus
-
-        return min(1.0, final_score)
-
-
-    def get_top_gguf_models(self,
-                            pipeline_filter="text-generation",
-                            min_params=None,
-                            max_params=None,
-                            min_downloads=50,
-                            limit_candidates=2000,
-                            top_n=50):
-
-        # Сохраняем параметры запуска для истории
-        run_params = {
-            "pipeline": pipeline_filter,
-            "min_params": min_params,
-            "max_params": max_params,
-            "top_n": top_n
-        }
-
-        print(f"📡 Запрос к API Hugging Face (fetch limit: {limit_candidates})...")
-        models_iter = self.api.list_models(filter="gguf", sort="downloads", direction=-1, limit=limit_candidates,
-                                           full=True)
-
+    def get_top_gguf_models(self, mode=RankingMode.STABLE, min_params=None, max_params=None, top_n=10):
+        run_params = {"mode": mode.value, "min": min_params, "max": max_params, "n": top_n}
+        models = self.api.list_models(filter="gguf", sort="downloads", direction=-1, limit=10000, full=True)
         candidates = []
-        print("⚙️ Фильтрация и расчет рейтинга...")
-
-        for model in models_iter:
-            if getattr(model, 'private', False): continue
-            dls = getattr(model, 'downloads', 0) or 0
-            if dls < min_downloads: continue
-
-            if pipeline_filter:
-                tag = getattr(model, 'pipeline_tag', '')
-                if tag and pipeline_filter.lower() not in tag.lower(): continue
-
-            p_val = self.extract_parameters(model)
-            if min_params is not None:
-                if p_val is None or p_val < min_params: continue
-            if max_params is not None:
-                if p_val is None or p_val > max_params: continue
-
-            model.parsed_params = p_val
-            model.combined_score = self.calculate_score(model)
-            candidates.append(model)
-
+        for m in models:
+            if "text-generation" not in (getattr(m, 'pipeline_tag', '') or '').lower(): continue
+            p = self.extract_parameters(m)
+            if (min_params and (p is None or p < min_params)) or (max_params and (p is None or p > max_params)): continue
+            m.parsed_params = p
+            m.combined_score = self._score_trending(m) if mode == RankingMode.TRENDING else self._score_stable(m)
+            if m.combined_score > 0.001: candidates.append(m)
         candidates.sort(key=lambda x: x.combined_score, reverse=True)
-        top_models = candidates[:top_n]
+        return self.history_manager.process_ranking(candidates[:top_n], run_params)
 
-        # --- МАГИЯ ИСТОРИИ ---
-        # Передаем список в менеджер истории для расчета динамики
-        top_models = self.history_manager.process_ranking(top_models, run_params)
-
-        return top_models
-
-    def print_top_models(self, models):
-        print("\n" + "=" * 165)
-        print(f"{'🏆 ТОП GGUF МОДЕЛЕЙ С ДИНАМИКОЙ':^165}")
-        print("=" * 165)
-
-        # Добавил колонку Δ (Delta)
-        h = f"{'#':^3} | {'Δ':^6} | {'MODEL ID':<70} | {'PARAMS':^8} | {'DLs':^9} | {'LIKES':^7} | {'CREATED':^12} | {'UPDATED':^12} | {'SCORE':^6}"
-        print(h)
-        print("-" * 165)
-
+    def print_top_models(self, models, title="TOP"):
+        print(f"\n{'='*180}\n{title:^180}\n{'='*180}")
+        header = f"{'#':^3} | {'ΔR':^4} | {'MODEL ID':<60} | {'PARAMS':^8} | {'DLs':^8} | {'V (DL/D)':^9} | {'ACCEL':^9} | {'LIKES':^6} | {'SCORE':^6}"
+        print(header)
+        print("-" * 180)
         for i, m in enumerate(models, 1):
-            name = getattr(m, 'id', 'N/A')
-            if len(name) > 50: name = name[:47] + "..."
+            d_r = "🆕" if m.rank_delta == "new" else (f"+{m.rank_delta}" if m.rank_delta > 0 else (f"{m.rank_delta}" if m.rank_delta < 0 else "—"))
+            v_str = f"{m.velocity:.1f}" if m.velocity < 1000 else f"{m.velocity/1000:.1f}k"
 
-            p_str = f"{m.parsed_params:.1f}B" if getattr(m, 'parsed_params', None) else "?"
+            # Визуализация ускорения
+            if abs(m.accel) < 0.1: a_str = "stable"
+            else: a_str = f"{'+' if m.accel > 0 else ''}{m.accel:.1f}"
 
-            dls = getattr(m, 'downloads', 0)
-            if dls > 1000000:
-                dls_str = f"{dls / 1000000:.1f}M"
-            elif dls > 1000:
-                dls_str = f"{dls / 1000:.1f}k"
-            else:
-                dls_str = str(dls)
+            p_str = f"{m.parsed_params:.1f}B" if m.parsed_params else "?"
+            dl_str = f"{m.downloads/1000:.1f}k" if m.downloads > 1000 else str(m.downloads)
 
-            created_at = getattr(m, 'created_at', None)
-            created_str = str(created_at).split(' ')[0] if created_at else "N/A"
+            print(f"{i:^3} | {d_r:^4} | {m.id[:58]:<60} | {p_str:^8} | {dl_str:>8} | {v_str:>9} | {a_str:>9} | {m.likes:>6} | {m.combined_score:.3f}")
+        print("=" * 180)
 
-            updated_at = getattr(m, 'lastModified', None)
-            updated_str = str(updated_at).split('T')[0] if updated_at else "N/A"
-
-            score = getattr(m, 'combined_score', 0.0)
-            likes = getattr(m, 'likes', 0)
-
-            # --- Форматирование Динамики ---
-            delta = getattr(m, 'rank_delta', 0)
-            if delta == "new":
-                delta_str = "🆕"  # New entry
-            elif delta == 0:
-                delta_str = "➖"  # No change
-            elif delta > 0:
-                delta_str = f"🟢 +{delta}"  # Rose
-            else:
-                delta_str = f"🔴 {delta}"  # Fell (delta is negative already)
-
-            print(
-                f"{i:^3} | {delta_str:^6} | {name:<70} | {p_str:^8} | {dls_str:>9} | {likes:>7} | {created_str:^12} | {updated_str:^12} | {score:.3f}")
-        print("=" * 165)
-
-
-# ------------------------------------------------------------------
-#   Тестирование с разными параметрами
-# ------------------------------------------------------------------
 if __name__ == "__main__":
     ranker = GGUFModelRanker()
-
-    print("\n🔹 СЦЕНАРИЙ 1: Легкие модели (3B-120B) для локального ПК")
-    top_small = ranker.get_top_gguf_models(
-        pipeline_filter="text-generation",
-        min_params=8.0,
-        max_params=22.0,
-        limit_candidates=10000,
-        top_n=25
-    )
-    ranker.print_top_models(top_small)
-
-    print("\n🔹 СЦЕНАРИЙ 2: Тяжелые модели (120B+) для серверов")
-    # Обратите внимание: для этого сценария будет создана ОТДЕЛЬНАЯ история,
-    # и она не перезапишет историю для сценария 1.
-    top_large = ranker.get_top_gguf_models(
-        pipeline_filter="text-generation",
-        min_params=23.0,
-        max_params=150.0,
-        limit_candidates=10000,
-        top_n=25
-    )
-    ranker.print_top_models(top_large)
+    # Запуск для сбора первой точки истории или сравнения
+    ranker.print_top_models(ranker.get_top_gguf_models(RankingMode.STABLE, 8, 35), "🏛️ STABLE RANKING")
+    ranker.print_top_models(ranker.get_top_gguf_models(RankingMode.TRENDING, 8, 35), "🚀 TRENDING RANKING")
