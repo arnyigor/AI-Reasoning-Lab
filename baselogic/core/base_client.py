@@ -2,17 +2,16 @@
 Базовый класс для LLM клиентов.
 Устраняет дублирование кода между различными типами клиентов.
 """
-import json
-import time
 import logging
+import time
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, Union
 from dataclasses import dataclass
+from typing import Dict, Any, Optional
 
-from .interfaces import ILLMClient, LLMClientError, LLMTimeoutError, LLMConnectionError, LLMResponseError
+from .interfaces import ILLMClient, LLMTimeoutError, LLMConnectionError, LLMResponseError
 from .logger import llm_logger
-from .types import ModelOptions, ClientConfig
 from .metrics import record_request_metrics
+from .types import ModelOptions
 
 
 @dataclass
@@ -24,21 +23,21 @@ class ClientMetrics:
     total_response_time: float = 0.0
     min_response_time: float = float('inf')
     max_response_time: float = 0.0
-    
+
     @property
     def avg_response_time(self) -> float:
         """Среднее время ответа"""
         if self.successful_requests == 0:
             return 0.0
         return self.total_response_time / self.successful_requests
-    
+
     @property
     def success_rate(self) -> float:
         """Процент успешных запросов"""
         if self.total_requests == 0:
             return 0.0
         return (self.successful_requests / self.total_requests) * 100
-    
+
     def record_request(self, response_time: float, success: bool) -> None:
         """Записывает метрики запроса"""
         self.total_requests += 1
@@ -50,15 +49,17 @@ class ClientMetrics:
         else:
             self.failed_requests += 1
 
+
 # Используем ваш логгер
 log = logging.getLogger(__name__)
+
 
 class BaseLLMClient(ILLMClient, ABC):
     """
     Базовый класс для всех LLM клиентов.
     Предоставляет общую функциональность и устраняет дублирование кода.
     """
-    
+
     def __init__(self, model_name: str, model_options: Optional[ModelOptions] = None):
         """
         Инициализирует базовый клиент.
@@ -80,18 +81,18 @@ class BaseLLMClient(ILLMClient, ABC):
         # Метрики и логирование
         self.metrics = ClientMetrics()
         self.logger = llm_logger
-        
+
         # Валидация
         self._validate_config()
-    
+
     def _validate_config(self) -> None:
         """Валидирует конфигурацию клиента"""
         if not self.model_name:
             raise ValueError("model_name не может быть пустым")
-        
+
         if self.query_timeout <= 0:
             raise ValueError("query_timeout должен быть положительным числом")
-        
+
         # Проверяем temperature если указан
         temperature = self.generation_opts.get('temperature')
         if temperature is not None:
@@ -100,7 +101,8 @@ class BaseLLMClient(ILLMClient, ABC):
             if not 0 <= temperature <= 2:
                 raise ValueError("temperature должен быть в диапазоне [0, 2]")
 
-    def query(self, user_prompt: str) -> dict[str, Any] | None: # <-- ИЗМЕНЕНИЕ 1: Возвращает Dict
+    def query(self, user_prompt: str, system_prompt: str = None) -> dict[
+                                                                        str, Any] | None:  # <-- ИЗМЕНЕНИЕ 1: Возвращает Dict
         """
         Выполняет запрос к модели и возвращает СТРУКТУРИРОВАННЫЙ ответ.
         Возвращает словарь с ключами 'thinking_response' и 'llm_response'.
@@ -154,7 +156,7 @@ class BaseLLMClient(ILLMClient, ABC):
             pass
 
     @abstractmethod
-    def _execute_query(self, user_prompt: str) -> Dict[str, Any]: # <-- ИЗМЕНЕНИЕ 3: Обновляем контракт
+    def _execute_query(self, user_prompt: str) -> Dict[str, Any]:  # <-- ИЗМЕНЕНИЕ 3: Обновляем контракт
         """
         Абстрактный метод для выполнения запроса.
         Должен быть реализован в конкретных клиентах.
@@ -166,7 +168,7 @@ class BaseLLMClient(ILLMClient, ABC):
         }
         """
         pass
-    
+
     def get_model_info(self) -> Dict[str, Any]:
         """
         Возвращает информацию о модели.
@@ -184,20 +186,20 @@ class BaseLLMClient(ILLMClient, ABC):
                 "success_rate": self.metrics.success_rate
             }
         }
-    
+
     def get_model_name(self) -> str:
         """Возвращает имя модели"""
         return self.model_name
-    
+
     def get_metrics(self) -> ClientMetrics:
         """Возвращает метрики клиента"""
         return self.metrics
-    
+
     def reset_metrics(self) -> None:
         """Сбрасывает метрики клиента"""
         self.metrics = ClientMetrics()
         self.logger.info("Метрики клиента сброшены")
-    
+
     def get_performance_summary(self) -> Dict[str, Any]:
         """Возвращает сводку производительности"""
         return {
@@ -207,7 +209,8 @@ class BaseLLMClient(ILLMClient, ABC):
             "failed_requests": self.metrics.failed_requests,
             "success_rate": f"{self.metrics.success_rate:.1f}%",
             "avg_response_time": f"{self.metrics.avg_response_time:.2f}с",
-            "min_response_time": f"{self.metrics.min_response_time:.2f}с" if self.metrics.min_response_time != float('inf') else "N/A",
+            "min_response_time": f"{self.metrics.min_response_time:.2f}с" if self.metrics.min_response_time != float(
+                'inf') else "N/A",
             "max_response_time": f"{self.metrics.max_response_time:.2f}с"
         }
 
@@ -226,7 +229,7 @@ class BaseLLMClient(ILLMClient, ABC):
         self.logger.info("📥 User prompt: %s", user_prompt)
 
         return messages
-    
+
     def _validate_response(self, response: Any) -> str:
         """
         Валидирует ответ от модели.
@@ -242,12 +245,12 @@ class BaseLLMClient(ILLMClient, ABC):
         """
         if not response:
             raise LLMResponseError("Получен пустой ответ от модели")
-        
+
         if not isinstance(response, str):
             raise LLMResponseError(f"Ожидался строковый ответ, получен: {type(response)}")
-        
+
         return response.strip()
-    
+
     def _handle_timeout(self, timeout_seconds: float) -> None:
         """
         Обрабатывает таймаут запроса.
@@ -257,7 +260,7 @@ class BaseLLMClient(ILLMClient, ABC):
         """
         self.logger.warning("⏱️ Запрос превысил таймаут (%dс)", timeout_seconds)
         raise LLMTimeoutError(f"Запрос превысил таймаут ({timeout_seconds}с)")
-    
+
     def _handle_connection_error(self, error: Exception) -> None:
         """
         Обрабатывает ошибки подключения.
@@ -267,7 +270,7 @@ class BaseLLMClient(ILLMClient, ABC):
         """
         self.logger.error("🔌 Ошибка подключения: %s", error)
         raise LLMConnectionError(f"Ошибка подключения: {error}") from error
-    
+
     def _handle_response_error(self, error: Exception) -> None:
         """
         Обрабатывает ошибки ответа.

@@ -274,13 +274,14 @@ class TestRunner:
         process = psutil.Process(os.getpid())
         try:
             prompt = test_data['prompt']
+            system_prompt = test_data['system_prompt']
             expected_output = test_data['expected_output']
 
             log.info("      3️⃣ Отправка запроса к модели...")
             start_time = time.perf_counter()
             initial_ram = process.memory_info().rss / (1024 * 1024)
 
-            response_struct = client.query(prompt)
+            response_struct = client.query(prompt, system_prompt)
 
             end_time = time.perf_counter()
             peak_ram = process.memory_info().rss / (1024 * 1024)

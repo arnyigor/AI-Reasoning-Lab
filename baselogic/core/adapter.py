@@ -126,8 +126,6 @@ class AdapterLLMClient(ILLMClient):
 
         return final_response_str, server_metadata, ttft_time, end_time
 
-
-
     def _handle_non_stream_response(self, response_dict: dict) -> tuple[str, dict, float, float]:
         """Обрабатывает непотоковый (полный) ответ."""
         end_time = ttft_time = time.perf_counter()
@@ -194,8 +192,9 @@ class AdapterLLMClient(ILLMClient):
             }
         }
 
-    def query(self, user_prompt: str) -> Dict[str, Any]:
+    def query(self, user_prompt: str,  system_prompt: str = None) -> Dict[str, Any]:
         log.info("Adapter получил промпт (длина: %d символов).", len(user_prompt))
+        log.info("system_prompt %s. НО ОН не передается в модель", system_prompt)
         prompt_token_count = self._count_tokens_client(user_prompt)
         log.info(f"Клиентская оценка токенов промпта: {prompt_token_count}")
 

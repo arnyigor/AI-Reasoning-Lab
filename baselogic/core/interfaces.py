@@ -9,7 +9,7 @@ class ILLMClient(ABC):
     """
 
     @abstractmethod
-    def query(self, user_prompt: str) -> Dict[str, Any]:  # <-- ИЗМЕНЕНИЕ ЗДЕСЬ
+    def query(self, user_prompt: str, system_prompt: str = None) -> Dict[str, Any]:
         """
         Отправляет запрос к LLM и возвращает СТРУКТУРИРОВАННЫЙ ответ.
 
@@ -25,6 +25,8 @@ class ILLMClient(ABC):
 
         Raises:
             LLMClientError: При ошибках взаимодействия с LLM
+            :param user_prompt:
+            :param system_prompt:
         """
         pass
 
