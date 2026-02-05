@@ -9,7 +9,7 @@ class ILLMClient(ABC):
     """
 
     @abstractmethod
-    def query(self, user_prompt: str, system_prompt: str = None) -> Dict[str, Any]:
+    def query(self, user_prompt: str,  system_prompt: Optional[str] = None) -> Dict[str, Any]:
         """
         Отправляет запрос к LLM и возвращает СТРУКТУРИРОВАННЫЙ ответ.
 

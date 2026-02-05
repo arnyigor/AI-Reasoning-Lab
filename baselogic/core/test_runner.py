@@ -274,9 +274,13 @@ class TestRunner:
         process = psutil.Process(os.getpid())
         try:
             prompt = test_data['prompt']
-            system_prompt = test_data['system_prompt']
-            expected_output = test_data['expected_output']
+            if 'system_prompt' not in test_data:
+                log.debug("      ℹ️ system_prompt не указан, используется пустой")
+                system_prompt = None
+            else:
+                system_prompt = test_data['system_prompt']
 
+            expected_output = test_data['expected_output']
             log.info("      3️⃣ Отправка запроса к модели...")
             start_time = time.perf_counter()
             initial_ram = process.memory_info().rss / (1024 * 1024)

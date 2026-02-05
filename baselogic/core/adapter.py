@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from typing import Dict, Any, Generator
+from typing import Dict, Any, Generator, Optional, List
 
 from .interfaces import ILLMClient, LLMClientError
 from .llm_client import LLMClient
@@ -192,13 +192,30 @@ class AdapterLLMClient(ILLMClient):
             }
         }
 
-    def query(self, user_prompt: str,  system_prompt: str = None) -> Dict[str, Any]:
+    def query(self, user_prompt: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
         log.info("Adapter получил промпт (длина: %d символов).", len(user_prompt))
-        log.info("system_prompt %s. НО ОН не передается в модель", system_prompt)
-        prompt_token_count = self._count_tokens_client(user_prompt)
-        log.info(f"Клиентская оценка токенов промпта: {prompt_token_count}")
+        messages: List[Dict[str, str]] = []
 
-        messages = [{"role": "user", "content": user_prompt}]
+        if system_prompt is not None and len(system_prompt.strip()) == 0:
+            log.warning("system_prompt задан, но пустой (только пробелы/переводы строк) — игнорирую.")
+            system_prompt = None
+
+        if system_prompt is not None and system_prompt.strip():
+            messages.append({"role": "system", "content": system_prompt})
+            log.debug("  → Добавлен system prompt (длина %d символов)", len(system_prompt))
+
+        # user-промпт всегда обязательный
+        messages.append({"role": "user", "content": user_prompt})
+
+        log.info("Сформировано %d сообщений в контексте.", len(messages))
+
+        prompt_token_count = self._count_tokens_client(user_prompt)
+        if system_prompt and system_prompt.strip():
+            # ⚠️ Аккуратно: если _count_tokens_client учитывает *только user*, добавьте token count system
+            log.debug("⚠️ Оценка токенов *только* для user-промпта (system не учитывается).")
+        else:
+            log.info(f"Клиентская оценка токенов промпта: {prompt_token_count}")
+
         inference_opts = self.model_config.get('inference', {})
         use_stream = str(inference_opts.get('stream', 'false')).lower() == 'true'
         generation_opts = self.model_config.get('generation', {})
