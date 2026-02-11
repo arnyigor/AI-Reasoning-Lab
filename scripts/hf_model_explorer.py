@@ -857,7 +857,7 @@ Mouse Wheel      Scroll through models
         self.chk_var = tk.IntVar(value=0)
         self.chk_gguf = ttk.Checkbutton(
             row2,
-            text="Known GGUF Providers Only",
+            text="GGUF Only (Author + GGUF Tag)",
             variable=self.chk_var,
             command=self._on_filter_change,
         )
@@ -1155,6 +1155,42 @@ Mouse Wheel      Scroll through models
                 if size < min_b or size > max_b:
                     continue
 
+    def _is_gguf_model(self, model: ModelInfo) -> bool:
+        """Check if model is GGUF format by tags or name"""
+        model_lower = model.id.lower()
+
+        gguf_patterns = ["gguf", "-gguf"]
+
+        if any(pattern in model_lower for pattern in gguf_patterns):
+            return True
+
+        for tag in model.tags:
+            if "gguf" in tag.lower():
+                return True
+
+        return False
+
+    def _apply_filters_and_sort(self):
+        if not self.models:
+            return
+
+        min_b, max_b = self.slider.get()
+        sort_mode = self.sort_var.get()
+        search_query = self.search_var.get().lower().strip()
+        top_n = self.top_n_var.get()
+        gguf_only = self.chk_var.get() == 1
+
+        filtered = []
+        for model in self.models:
+            size = model.parsed_params_b
+            if size is None or size == 0:
+                if min_b > 1:
+                    continue
+
+            if size is not None:
+                if size < min_b or size > max_b:
+                    continue
+
             if search_query:
                 name = model.name.lower()
                 author = model.author.lower()
@@ -1167,9 +1203,23 @@ Mouse Wheel      Scroll through models
                 if model.author.lower() not in [k.lower() for k in GGUF_KINGS]:
                     continue
 
+                if not self._is_gguf_model(model):
+                    continue
+
             filtered.append(model)
 
         sorted_models = self._sort_models(filtered, sort_mode)
+
+        total_models = len(self.models)
+        filtered_count = len(sorted_models[:top_n])
+
+        if gguf_only:
+            non_gguf_count = len(filtered)
+            self.lbl_count.config(
+                text=f"Showing {filtered_count} GGUF models (filtered {non_gguf_count} non-GGUF)"
+            )
+        else:
+            self.lbl_count.config(text=f"Showing {filtered_count} models")
 
         self._update_treeview(sorted_models[:top_n])
 
