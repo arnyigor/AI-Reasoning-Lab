@@ -268,11 +268,11 @@ class CustomRangeSlider:
             label="32B - 70B (Large)", command=lambda: self._set_preset(32, 70)
         )
         preset_menu.add_command(
-            label="70B - 100B (XL)", command=lambda: self._set_preset(70, 100)
+            label="70B - 150B (XL)", command=lambda: self._set_preset(70, 150)
         )
         preset_menu.add_separator()
         preset_menu.add_command(
-            label="All (1B - 100B)", command=lambda: self._set_preset(1, 100)
+            label="All (1B - 150B)", command=lambda: self._set_preset(1, 150)
         )
         self.btn_presets.config(menu=preset_menu)
 
@@ -297,10 +297,10 @@ class CustomRangeSlider:
                 min_val = 1
                 self.entry_min.delete(0, tk.END)
                 self.entry_min.insert(0, "1")
-            if max_val > 100:
-                max_val = 100
+            if max_val > 150:
+                max_val = 150
                 self.entry_max.delete(0, tk.END)
-                self.entry_max.insert(0, "100")
+                self.entry_max.insert(0, "150")
         except ValueError:
             pass
 
@@ -325,7 +325,7 @@ class CustomRangeSlider:
             min_val = int(self.entry_min.get())
             max_val = int(self.entry_max.get())
             min_val = max(1, min_val)
-            max_val = min(100, max_val)
+            max_val = min(150, max_val)
             if min_val > max_val:
                 min_val, max_val = max_val, min_val
             return (min_val, max_val)
@@ -779,7 +779,7 @@ Mouse Wheel      Scroll through models
             font=("Segoe UI", 10, "bold"),
         ).pack(side=tk.LEFT, padx=(0, 10))
 
-        self.slider = CustomRangeSlider(row1, min_val=1, max_val=100)
+        self.slider = CustomRangeSlider(row1, min_val=1, max_val=150)
         self.slider.set(12, 64)
         self.slider.pack(side=tk.LEFT, padx=5)
 
@@ -873,7 +873,7 @@ Mouse Wheel      Scroll through models
         self.top_n_combo = ttk.Combobox(
             row2,
             textvariable=self.top_n_var,
-            values=[25, 50, 100, 200],
+            values=[25, 50, 100, 150, 200],
             state="readonly",
             width=8,
             font=("Consolas", 10),
@@ -968,16 +968,18 @@ Mouse Wheel      Scroll through models
 
         self.lbl_status = ttk.Label(
             status_frame,
-            text="Ready",
+            text="Initializing...",
             style="Status.TLabel",
             anchor=tk.W,
+            foreground=AppStyle.WARNING,
         )
         self.lbl_status.pack(side=tk.LEFT, padx=10)
 
         self.lbl_count = ttk.Label(
             status_frame,
-            text="",
+            text="Loading...",
             style="Status.TLabel",
+            foreground=AppStyle.ACCENT,
         )
         self.lbl_count.pack(side=tk.LEFT, padx=10)
 
@@ -986,6 +988,7 @@ Mouse Wheel      Scroll through models
             mode="indeterminate",
             length=200,
         )
+        self.progress.pack(side=tk.RIGHT, padx=10)
 
     def _build_help_tooltip(self):
         help_frame = ttk.Frame(self.root, style="Status.TFrame")
@@ -1045,6 +1048,12 @@ Mouse Wheel      Scroll through models
 
             for model in self.models:
                 if model.id == model_id:
+                    size_info = (
+                        f"{model.parsed_params_b:.1f}B"
+                        if model.parsed_params_b
+                        else "?"
+                    )
+                    print(f"[DEBUG] Selected: {model_id} | Size: {size_info}")
                     self.details_panel.update(model)
                     break
 
@@ -1134,7 +1143,7 @@ Mouse Wheel      Scroll through models
                 RankingMode.STABLE,
                 min_b=None,
                 max_b=None,
-                top_n=500,
+                top_n=5000,
             )
 
             self.root.after(0, self._on_data_loaded)
@@ -1145,7 +1154,24 @@ Mouse Wheel      Scroll through models
         self.is_loading = False
         self.btn_refresh.config(state=tk.NORMAL)
         self.progress.stop()
-        self.lbl_status.config(text=f"Loaded {len(self.models)} models")
+
+        unknown_count = sum(
+            1
+            for m in self.models
+            if m.parsed_params_b is None or m.parsed_params_b == 0
+        )
+
+        if unknown_count > 0:
+            self.lbl_status.config(
+                text=f"Loaded {len(self.models)} models ({unknown_count} unknown params)...",
+                foreground=AppStyle.WARNING,
+            )
+            self.root.update()
+            self._fetch_unknown_params(self.models)
+
+        self.lbl_status.config(
+            text=f"Loaded {len(self.models)} models", foreground=AppStyle.SUCCESS
+        )
 
         self._apply_filters_and_sort()
 
@@ -1154,27 +1180,14 @@ Mouse Wheel      Scroll through models
         self.btn_refresh.config(state=tk.NORMAL)
         self.progress.stop()
 
-        messagebox.showerror("Error", f"Failed to load models:\n{error_msg}")
-        self.lbl_status.config(text="Error loading models")
+        self.lbl_status.config(
+            text=f"Error: {error_msg[:50]}", foreground=AppStyle.ERROR
+        )
+        print(f"[ERROR] {error_msg}")
 
     def _refresh_data(self):
         self.models = []
         self._load_data_async()
-
-    def _is_gguf_model(self, model: ModelInfo) -> bool:
-        """Check if model is GGUF format by tags or name"""
-        model_lower = model.id.lower()
-
-        gguf_patterns = ["gguf", "-gguf"]
-
-        if any(pattern in model_lower for pattern in gguf_patterns):
-            return True
-
-        for tag in model.tags:
-            if "gguf" in tag.lower():
-                return True
-
-        return False
 
     def _apply_filters_and_sort(self):
         if not self.models:
@@ -1187,13 +1200,11 @@ Mouse Wheel      Scroll through models
         gguf_only = self.chk_var.get() == 1
 
         filtered = []
+
         for model in self.models:
             size = model.parsed_params_b
-            if size is None or size == 0:
-                if min_b > 1:
-                    continue
 
-            if size is not None:
+            if size is not None and size > 0:
                 if size < min_b or size > max_b:
                     continue
 
@@ -1215,19 +1226,111 @@ Mouse Wheel      Scroll through models
             filtered.append(model)
 
         sorted_models = self._sort_models(filtered, sort_mode)
+        displayed_models = sorted_models[:top_n]
 
         total_models = len(self.models)
-        filtered_count = len(sorted_models[:top_n])
+        range_passed = len(
+            [
+                m
+                for m in self.models
+                if m.parsed_params_b and min_b <= m.parsed_params_b <= max_b
+            ]
+        )
 
+        status_msg = f"Displayed: {len(displayed_models)} | Range: {range_passed}/{total_models} | Sort: {sort_mode}"
         if gguf_only:
-            non_gguf_count = len(filtered)
-            self.lbl_count.config(
-                text=f"Showing {filtered_count} GGUF models (filtered {non_gguf_count} non-GGUF)"
-            )
-        else:
-            self.lbl_count.config(text=f"Showing {filtered_count} models")
+            status_msg += f" | GGUF Only"
+        if search_query:
+            status_msg += f' | Q: "{search_query}"'
 
-        self._update_treeview(sorted_models[:top_n])
+        self.lbl_count.config(text=status_msg)
+
+        print(
+            f"[INFO] Total: {total_models} | Range: {range_passed} | Filtered: {len(filtered)} | Displayed: {len(displayed_models)}"
+        )
+
+        self._update_treeview(displayed_models)
+
+    def _is_gguf_model(self, model: ModelInfo) -> bool:
+        """Check if model is GGUF format by tags or name"""
+        model_lower = model.id.lower()
+
+        gguf_patterns = ["gguf", "-gguf"]
+
+        if any(pattern in model_lower for pattern in gguf_patterns):
+            return True
+
+        for tag in model.tags:
+            if "gguf" in tag.lower():
+                return True
+
+        return False
+
+    def _fetch_unknown_params(self, models: List[ModelInfo]):
+        """Fetch parameters for GGUF models with unknown size"""
+        import requests
+
+        unknown_gguf = [
+            m
+            for m in models
+            if (m.parsed_params_b is None or m.parsed_params_b == 0)
+            and self._is_gguf_model(m)
+        ]
+
+        if not unknown_gguf:
+            return
+
+        print(f"[INFO] Fetching params for {len(unknown_gguf)} GGUF models...")
+        cache = self.ranker._params_cache
+        fetched_count = 0
+
+        session = requests.Session()
+        session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0",
+                "Accept": "application/json",
+            }
+        )
+
+        for model in unknown_gguf[:200]:
+            try:
+                params = None
+
+                resp = session.get(
+                    f"https://huggingface.co/api/models/{model.id}",
+                    timeout=15,
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+
+                    gguf = data.get("gguf")
+                    if gguf and isinstance(gguf, dict):
+                        total = gguf.get("total")
+                        if total and isinstance(total, (int, float)):
+                            params = total / 1e9
+
+                if params and params > 0.5 and params < 2000:
+                    model.parsed_params_b = params
+                    cache.set_model_params(model.id, params)
+                    fetched_count += 1
+                    print(f"  [OK] {model.id}: {params:.1f}B")
+                else:
+                    if gguf:
+                        print(f"  [SKIP] {model.id}: gguf={gguf}")
+                    else:
+                        print(f"  [SKIP] {model.id}: no gguf field")
+
+            except Exception as e:
+                print(f"  [ERR] {model.id}: {e}")
+
+        session.close()
+
+        print(
+            f"[INFO] Fetched {fetched_count}/{min(len(unknown_gguf), 200)} GGUF models"
+        )
+
+        if fetched_count > 0:
+            self._apply_filters_and_sort()
 
     def _sort_models(self, models: List[ModelInfo], sort_mode: str) -> List[ModelInfo]:
         if sort_mode == "trending":
