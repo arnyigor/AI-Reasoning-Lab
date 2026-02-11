@@ -409,6 +409,7 @@ class ModelDetailsPanel:
         self.lbl_score = self._create_detail_label(score_frame, "Score:")
         self.lbl_norm_dl = self._create_detail_label(score_frame, "Norm DLs:")
         self.lbl_norm_lk = self._create_detail_label(score_frame, "Norm Likes:")
+        self.lbl_time_boost = self._create_detail_label(score_frame, "Time Boost:")
         self.lbl_calculated = self._create_detail_label(score_frame, "Formula:")
 
     def _create_detail_label(self, parent, label_text: str) -> ttk.Label:
@@ -454,6 +455,7 @@ class ModelDetailsPanel:
 
         if hasattr(model, "combined_score"):
             score = model.combined_score
+            time_boost = self._calculate_time_boost(model.timestamp)
             self.lbl_score.config(text=f"{score:.4f}")
             self.lbl_norm_dl.config(
                 text=f"{min(1.0, math.log10(model.downloads + 1) / 7.0):.3f}"
@@ -461,26 +463,50 @@ class ModelDetailsPanel:
             self.lbl_norm_lk.config(
                 text=f"{min(1.0, math.log10(model.likes + 1) / 4.0):.3f}"
             )
+            self.lbl_time_boost.config(
+                text=f"{time_boost:.2f}" + (" (fresh)" if time_boost >= 0.9 else "")
+            )
             self.lbl_calculated.config(
-                text="0.3xNormDL + 0.7xNormLK (Likes priority)",
+                text="0.25xNormDL + 0.6xNormLK + 0.15xTime",
                 foreground=AppStyle.SUCCESS,
             )
         else:
             self.lbl_score.config(text="-")
             self.lbl_norm_dl.config(text="-")
             self.lbl_norm_lk.config(text="-")
+            self.lbl_time_boost.config(text="-")
             self.lbl_calculated.config(text="-")
+
+    def _calculate_time_boost(self, timestamp: datetime) -> float:
+        delta = datetime.now(timezone.utc) - timestamp
+        hours = delta.total_seconds() / 3600.0
+
+        if hours < 24:
+            return 1.0
+        elif hours < 168:
+            return 0.9
+        elif hours < 720:
+            return 0.7
+        elif hours < 2160:
+            return 0.5
+        else:
+            return 0.2
 
     def _format_timestamp(self, dt: datetime) -> str:
         delta = datetime.now(timezone.utc) - dt
-        if delta.days < 1:
-            hours = delta.seconds // 3600
-            return f"{hours}h ago" if hours > 0 else "Just now"
-        elif delta.days < 30:
-            return f"{delta.days}d ago"
+        total_seconds = delta.total_seconds()
+        hours = total_seconds / 3600.0
+        days = total_seconds / 86400.0
+
+        if hours < 1:
+            minutes = total_seconds / 60.0
+            return f"{int(minutes)}m ago" if minutes >= 1 else "Just now"
+        elif hours < 24:
+            return f"{int(hours)}h ago"
+        elif days < 30:
+            return f"{int(days)}d ago"
         else:
-            months = delta.days // 30
-            return f"{months}mo ago"
+            return f"{int(days // 30)}mo ago"
 
     def _clear_all(self):
         for lbl in [
@@ -494,6 +520,7 @@ class ModelDetailsPanel:
             self.lbl_score,
             self.lbl_norm_dl,
             self.lbl_norm_lk,
+            self.lbl_time_boost,
             self.lbl_calculated,
         ]:
             lbl.config(text="-")
@@ -1134,27 +1161,6 @@ Mouse Wheel      Scroll through models
         self.models = []
         self._load_data_async()
 
-    def _apply_filters_and_sort(self):
-        if not self.models:
-            return
-
-        min_b, max_b = self.slider.get()
-        sort_mode = self.sort_var.get()
-        search_query = self.search_var.get().lower().strip()
-        top_n = self.top_n_var.get()
-        gguf_only = self.chk_var.get() == 1
-
-        filtered = []
-        for model in self.models:
-            size = model.parsed_params_b
-            if size is None or size == 0:
-                if min_b > 1:
-                    continue
-
-            if size is not None:
-                if size < min_b or size > max_b:
-                    continue
-
     def _is_gguf_model(self, model: ModelInfo) -> bool:
         """Check if model is GGUF format by tags or name"""
         model_lower = model.id.lower()
@@ -1242,7 +1248,23 @@ Mouse Wheel      Scroll through models
     def _calculate_smart_score(self, m: ModelInfo) -> float:
         norm_dl = min(1.0, math.log10(m.downloads + 1) / 7.0)
         norm_lk = min(1.0, math.log10(m.likes + 1) / 4.0)
-        return (0.3 * norm_dl) + (0.7 * norm_lk)
+        time_boost = self._calculate_time_boost(m.timestamp)
+        return (0.25 * norm_dl) + (0.6 * norm_lk) + (0.15 * time_boost)
+
+    def _calculate_time_boost(self, timestamp: datetime) -> float:
+        delta = datetime.now(timezone.utc) - timestamp
+        hours = delta.total_seconds() / 3600.0
+
+        if hours < 24:
+            return 1.0
+        elif hours < 168:
+            return 0.9
+        elif hours < 720:
+            return 0.7
+        elif hours < 2160:
+            return 0.5
+        else:
+            return 0.2
 
     def _update_treeview(self, models: List[ModelInfo]):
         for item in self.tree.get_children():
@@ -1293,13 +1315,19 @@ Mouse Wheel      Scroll through models
 
     def _format_timestamp(self, dt: datetime) -> str:
         delta = datetime.now(timezone.utc) - dt
-        if delta.days < 1:
-            hours = delta.seconds // 3600
-            return f"{hours}h" if hours > 0 else "now"
-        elif delta.days < 30:
-            return f"{delta.days}d"
+        total_seconds = delta.total_seconds()
+        hours = total_seconds / 3600.0
+        days = total_seconds / 86400.0
+
+        if hours < 1:
+            minutes = total_seconds / 60.0
+            return f"{int(minutes)}m" if minutes >= 1 else "now"
+        elif hours < 24:
+            return f"{int(hours)}h"
+        elif days < 30:
+            return f"{int(days)}d"
         else:
-            return f"{delta.days // 30}mo"
+            return f"{int(days // 30)}mo"
 
     def _sort_treeview(self, col):
         current_order = self.tree.heading(col).get("order", "asc")
