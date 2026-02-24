@@ -4,17 +4,47 @@ HuggingFace Model Explorer GUI
 Beautiful GUI application for browsing and ranking GGUF models
 """
 
-import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
-from tkinter.font import Font
-import threading
-import time
 import math
+import threading
+import tkinter as tk
+import webbrowser
 from datetime import datetime, timezone
 from enum import Enum
-from typing import List, Dict, Optional, Callable
-import webbrowser
+from tkinter import ttk, messagebox
+from tkinter.font import Font
+from typing import List, Optional
 import pyperclip
+import logging
+from pathlib import Path
+import json
+
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+
+# Создаём кастомный форматтер, который выводит extra-поля как JSON
+class StructuredFormatter(logging.Formatter):
+    def format(self, record):
+        if hasattr(record, "extra"):
+            # Добавляем все поля из extra в основной словарь лога
+            log_entry = {
+                "timestamp": self.formatTime(record),
+                "level": record.levelname,
+                "event": record.getMessage(),
+                **record.extra,
+            }
+            return json.dumps(log_entry, ensure_ascii=False)
+        else:
+            return super().format(record)
+
+# Настраиваем логгер
+handler = logging.FileHandler(LOG_DIR / "model_explorer.log", encoding="utf-8")
+handler.setFormatter(StructuredFormatter())
+
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[handler],
+    force=True,  # Перезаписывает настройки, если уже был логгер
+)
 
 try:
     from hf_best_models import (
@@ -1156,9 +1186,18 @@ Mouse Wheel      Scroll through models
         self.progress.stop()
 
         unknown_count = sum(
-            1
-            for m in self.models
-            if m.parsed_params_b is None or m.parsed_params_b == 0
+            1 for m in self.models if m.parsed_params_b is None or m.parsed_params_b == 0
+        )
+
+        logging.info(
+            "DATA_LOADED",
+            extra={
+                "total_models": len(self.models),
+                "unknown_sizes": unknown_count,
+                "model_ids_sample": [m.id for m in self.models[:5]] if self.models else [],
+                "source": "HuggingFace API",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
         )
 
         if unknown_count > 0:
@@ -1168,12 +1207,13 @@ Mouse Wheel      Scroll through models
             )
             self.root.update()
             self._fetch_unknown_params(self.models)
+        else:
+            self.lbl_status.config(
+                text=f"Loaded {len(self.models)} models", foreground=AppStyle.SUCCESS
+            )
 
-        self.lbl_status.config(
-            text=f"Loaded {len(self.models)} models", foreground=AppStyle.SUCCESS
-        )
+        self._apply_filters_and_sort()  # Теперь фильтрация логируется отдельно
 
-        self._apply_filters_and_sort()
 
     def _on_data_error(self, error_msg):
         self.is_loading = False
@@ -1199,6 +1239,16 @@ Mouse Wheel      Scroll through models
         top_n = self.top_n_var.get()
         gguf_only = self.chk_var.get() == 1
 
+        filter_context = {
+            "min_size_b": min_b,
+            "max_size_b": max_b,
+            "search_query": search_query if search_query else None,
+            "sort_mode": sort_mode,
+            "top_n": top_n,
+            "gguf_only": gguf_only,
+            "total_models_before_filter": len(self.models),
+        }
+
         filtered = []
 
         for model in self.models:
@@ -1216,10 +1266,8 @@ Mouse Wheel      Scroll through models
 
             if gguf_only:
                 from config import GGUF_KINGS
-
                 if model.author.lower() not in [k.lower() for k in GGUF_KINGS]:
                     continue
-
                 if not self._is_gguf_model(model):
                     continue
 
@@ -1228,28 +1276,44 @@ Mouse Wheel      Scroll through models
         sorted_models = self._sort_models(filtered, sort_mode)
         displayed_models = sorted_models[:top_n]
 
+        filter_context.update({
+            "models_after_filter": len(filtered),
+            "models_displayed": len(displayed_models),
+            "displayed_model_ids_sample": [m.id for m in displayed_models[:3]] if displayed_models else [],
+        })
+
+        logging.info("FILTER_APPLIED", extra=filter_context)
+
+        # Обновляем статус
         total_models = len(self.models)
-        range_passed = len(
-            [
-                m
-                for m in self.models
-                if m.parsed_params_b and min_b <= m.parsed_params_b <= max_b
-            ]
-        )
+        range_passed = len([m for m in self.models if m.parsed_params_b and min_b <= m.parsed_params_b <= max_b])
 
         status_msg = f"Displayed: {len(displayed_models)} | Range: {range_passed}/{total_models} | Sort: {sort_mode}"
         if gguf_only:
-            status_msg += f" | GGUF Only"
+            status_msg += " | GGUF Only"
         if search_query:
             status_msg += f' | Q: "{search_query}"'
 
         self.lbl_count.config(text=status_msg)
 
-        print(
-            f"[INFO] Total: {total_models} | Range: {range_passed} | Filtered: {len(filtered)} | Displayed: {len(displayed_models)}"
+        logging.info(
+            "FILTER_APPLIED",
+            extra={
+                "total_models_before": total_models,
+                "models_after_size_filter": len(filtered),
+                "models_displayed": len(displayed_models),
+                "min_size_b": min_b,
+                "max_size_b": max_b,
+                "search_query": search_query or None,
+                "sort_mode": sort_mode,
+                "top_n": top_n,
+                "gguf_only": gguf_only,
+                "sample_model_ids": [m.id for m in displayed_models[:3]] if displayed_models else [],
+            },
         )
 
         self._update_treeview(displayed_models)
+
 
     def _is_gguf_model(self, model: ModelInfo) -> bool:
         """Check if model is GGUF format by tags or name"""
@@ -1274,7 +1338,7 @@ Mouse Wheel      Scroll through models
             m
             for m in models
             if (m.parsed_params_b is None or m.parsed_params_b == 0)
-            and self._is_gguf_model(m)
+               and self._is_gguf_model(m)
         ]
 
         if not unknown_gguf:
@@ -1494,8 +1558,8 @@ Mouse Wheel      Scroll through models
     def _on_close(self):
         if self.is_loading:
             if not messagebox.askyesno(
-                "Confirm",
-                "Data is still loading. Are you sure you want to exit?",
+                    "Confirm",
+                    "Data is still loading. Are you sure you want to exit?",
             ):
                 return
 

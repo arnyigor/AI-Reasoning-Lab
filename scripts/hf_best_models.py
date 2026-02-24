@@ -2,6 +2,9 @@ import sqlite3
 import math
 import os
 import re
+import json
+import hashlib
+import asyncio
 
 import requests
 import time
@@ -15,6 +18,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from rapidfuzz import fuzz
+from huggingface_hub import HfApi, get_safetensors_metadata, ModelInfo
 
 from config import (
     DB_FILE,
@@ -71,6 +75,331 @@ class ModelInfo:
     @property
     def hf_url(self) -> str:
         return f"https://huggingface.co/{self.id}"
+
+
+def extract_base_model_name(model_id: str) -> str:
+    """
+    Извлекает базовое имя модели из полного ID.
+    bartowski/Qwen3-32B-GGUF -> qwen3-32b
+    unsloth/Qwen3-32B-GGUF -> qwen3-32b
+    NousResearch/Meta-Llama-3.1-70B-Instruct -> llama-3.1-70b
+    """
+    name = model_id.lower()
+
+    parts = name.split("/")
+    base_name = parts[-1] if len(parts) > 1 else parts[0]
+
+    base_name = re.sub(r"[-_\.]?gguf$", "", base_name)
+    base_name = re.sub(r"[-_\.]?unsloth$", "", base_name)
+    base_name = re.sub(r"[-_\.]?thebloke$", "", base_name)
+    base_name = re.sub(r"[-_\.]?guff$", "", base_name)
+
+    base_name = re.sub(r"v(\d+(\.\d+)*)", "", base_name)
+    base_name = re.sub(r"-instruct$", "", base_name)
+    base_name = re.sub(r"-chat$", "", base_name)
+    base_name = re.sub(r"-dp$", "", base_name)
+    base_name = re.sub(r"-sft$", "", base_name)
+    base_name = re.sub(r"-dpo$", "", base_name)
+    base_name = re.sub(r"-orca-?\d*$", "", base_name)
+
+    base_name = re.sub(r"(\d+)b", r"\1b", base_name)
+    base_name = re.sub(r"(\d+)m", r"\1m", base_name)
+
+    base_name = re.sub(r"[-_]+", "-", base_name)
+    base_name = base_name.strip("-")
+
+    return base_name
+
+
+async def fetch_model_params(model_id: str, api: HfApi = None) -> Optional[float]:
+    """
+    Запрашивает количество параметров модели через HF API.
+    Возвращает параметры в миллиардах (B) или None если недоступно.
+    """
+    try:
+        if api is None:
+            api = HfApi()
+
+        return await asyncio.to_thread(_fetch_params_sync, model_id, api)
+
+    except Exception:
+        pass
+
+    return None
+
+
+async def fetch_model_params_batch(
+    models: List["ModelInfo"],
+    cache_manager: "CacheManager" = None,
+    api: HfApi = None,
+    max_concurrent: int = 10,
+    timeout_seconds: float = 60.0,
+) -> Dict[str, float]:
+    """
+    Асинхронно запрашивает параметры для списка моделей.
+    Возвращает dict {model_id: params_b}.
+    """
+    if not models:
+        return {}
+
+    if api is None:
+        api = HfApi()
+
+    cache_hits: Dict[str, float] = {}
+    models_to_fetch: List["ModelInfo"] = []
+
+    for m in models:
+        if cache_manager:
+            cached = cache_manager.get_model_params(m.id)
+            if cached is not None:
+                cache_hits[m.id] = cached
+                m.parsed_params_b = cached
+                continue
+        models_to_fetch.append(m)
+
+    if not models_to_fetch:
+        return cache_hits
+
+    results: Dict[str, float] = {}
+    completed = 0
+    start_time = time.time()
+
+    for m in models_to_fetch:
+        if time.time() - start_time > timeout_seconds:
+            print(
+                f"  [ENRICH] Timeout reached, stopping at {completed}/{len(models_to_fetch)}"
+            )
+            break
+
+        try:
+            params = _fetch_params_sync(m.id, api)
+            if params is not None:
+                results[m.id] = params
+                m.parsed_params_b = params
+                if cache_manager:
+                    cache_manager.set_model_params(m.id, params)
+            completed += 1
+
+            if completed % 5 == 0:
+                print(f"  [ENRICH] Progress: {completed}/{len(models_to_fetch)}")
+
+        except Exception as e:
+            completed += 1
+            print(f"  [ENRICH ERROR] {m.id}: {e}")
+
+    print(
+        f"  [ENRICH] Completed {completed}/{len(models_to_fetch)} in {time.time() - start_time:.1f}s"
+    )
+    return {**cache_hits, **results}
+
+
+def _fetch_params_sync(model_id: str, api: HfApi) -> Optional[float]:
+    """
+    Синхронная обёртка для получения параметров модели.
+    """
+    try:
+        info = api.model_info(model_id)
+
+        if hasattr(info, "gguf") and info.gguf:
+            gguf_info = info.gguf
+            if isinstance(gguf_info, dict):
+                total = gguf_info.get("total")
+                if total and isinstance(total, (int, float)):
+                    return total / 1e9
+
+                params = gguf_info.get("parameters")
+                if params:
+                    if isinstance(params, (int, float)):
+                        return params / 1e9
+                    elif isinstance(params, str):
+                        if "b" in params.lower():
+                            match = re.search(r"([\d.]+)", params)
+                            return float(match.group(1)) if match else None
+                        elif "m" in params.lower():
+                            match = re.search(r"([\d.]+)", params)
+                            return float(match.group(1)) / 1000 if match else None
+
+        try:
+            metadata = get_safetensors_metadata(model_id)
+            if hasattr(metadata, "parameter_count") and metadata.parameter_count:
+                total_params = sum(metadata.parameter_count.values())
+                return total_params / 1e9
+        except Exception:
+            pass
+
+        config = getattr(info, "config", None)
+        if config and isinstance(config, dict):
+            hidden_size = config.get("hidden_size")
+            num_layers = config.get("num_layers", config.get("n_layers", 0))
+            num_heads = config.get("num_attention_heads", config.get("n_heads", 0))
+            num_key_value_heads = config.get("num_key_value_heads", num_heads)
+            vocab_size = config.get("vocab_size", 0)
+
+            if hidden_size and num_layers and num_heads and vocab_size:
+                approx_params = (
+                    hidden_size * num_layers * 3 + vocab_size * hidden_size
+                ) * 2
+                if num_key_value_heads != num_heads:
+                    approx_params += hidden_size * num_layers * 2
+                return approx_params / 1e9
+
+    except Exception:
+        pass
+
+    return None
+
+
+class CacheManager:
+    def __init__(self, db_path: str = "hf_cache.db"):
+        self.db_path = db_path
+        self._init_db()
+
+    def _init_db(self):
+        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
+        cursor = self.conn.cursor()
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS cache (
+                key TEXT PRIMARY KEY,
+                data TEXT,
+                timestamp TEXT,
+                ttl_seconds INTEGER
+            )
+        """)
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS model_params_cache (
+                model_id TEXT PRIMARY KEY,
+                params_b REAL,
+                fetched_at TEXT
+            )
+        """)
+
+        self.conn.commit()
+
+    def get(self, key: str) -> Optional[str]:
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT data, ttl_seconds FROM cache WHERE key = ? AND ttl_seconds IS NOT NULL",
+            (key,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        data, ttl = row
+        cached_time = datetime.fromisoformat(self._get_timestamp(key))
+        elapsed = (datetime.now(timezone.utc) - cached_time).total_seconds()
+        if elapsed > ttl:
+            return None
+        return data
+
+    def set(self, key: str, data: str, ttl_seconds: int = 3600):
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "REPLACE INTO cache (key, data, timestamp, ttl_seconds) VALUES (?, ?, ?, ?)",
+            (key, data, datetime.now(timezone.utc).isoformat(), ttl_seconds),
+        )
+        self.conn.commit()
+
+    def _get_timestamp(self, key: str) -> str:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT timestamp FROM cache WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return row[0] if row else datetime.now(timezone.utc).isoformat()
+
+    def get_model_params(self, model_id: str) -> Optional[float]:
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT params_b, fetched_at FROM model_params_cache WHERE model_id = ?",
+            (model_id,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        params = row[0]
+
+        suspicious_versions = [
+            4.0,
+            4.1,
+            4.2,
+            4.3,
+            4.4,
+            4.5,
+            4.6,
+            4.7,
+            4.8,
+            4.9,
+            3.5,
+            3.0,
+            2.0,
+            1.0,
+            1.5,
+            2.5,
+            3.1,
+            3.2,
+            3.3,
+            3.4,
+        ]
+
+        if params < 0.5 or params > 1000 or params in suspicious_versions:
+            cursor.execute(
+                "DELETE FROM model_params_cache WHERE model_id = ?", (model_id,)
+            )
+            self.conn.commit()
+            return None
+        return params
+
+    def validate_and_cleanup_params_cache(self) -> int:
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT model_id, params_b FROM model_params_cache")
+        invalid_count = 0
+
+        suspicious_versions = [
+            4.0,
+            4.1,
+            4.2,
+            4.3,
+            4.4,
+            4.5,
+            4.6,
+            4.7,
+            4.8,
+            4.9,
+            3.5,
+            3.0,
+            2.0,
+            1.0,
+            1.5,
+            2.5,
+            3.1,
+            3.2,
+            3.3,
+            3.4,
+        ]
+
+        for row in cursor.fetchall():
+            model_id, params = row
+            if params < 0.5 or params > 1000 or params in suspicious_versions:
+                cursor.execute(
+                    "DELETE FROM model_params_cache WHERE model_id = ?", (model_id,)
+                )
+                invalid_count += 1
+
+        self.conn.commit()
+        return invalid_count
+
+    def set_model_params(self, model_id: str, params_b: float):
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "REPLACE INTO model_params_cache (model_id, params_b, fetched_at) VALUES (?, ?, ?)",
+            (model_id, params_b, datetime.now(timezone.utc).isoformat()),
+        )
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
 
 
 # --- DATABASE MANAGER ---
@@ -134,6 +463,12 @@ class RankingHistoryManager:
         finally:
             conn.close()
 
+    def reset_rankings(self):
+        """Удаляет только рейтинги (runs, snapshots), сохраняя model_params_cache."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM snapshots")
+            conn.execute("DELETE FROM runs")
+
     def _generate_config_key(self, params: Dict[str, Any]) -> str:
         return f"{params.get('mode')}_{params.get('min')}_{params.get('max')}"
 
@@ -196,64 +531,21 @@ class HFFetcher:
                 "Authorization": f"Bearer {HF_TOKEN}" if HF_TOKEN else "",
             }
         )
-        self._init_cache()
+        self.cache = CacheManager()
+        self.hf_api = HfApi()
         self._last_deep_scan = None
 
-    def _init_cache(self):
-        import sqlite3
+    def _get_cache_key(self, *args) -> str:
+        key_str = "_".join(str(a) for a in args)
+        return hashlib.md5(key_str.encode()).hexdigest()
 
-        self._cache_conn = sqlite3.connect(
-            "hf_deep_scan_cache.db", check_same_thread=False
-        )
-        cursor = self._cache_conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS deep_scan_cache (
-                key TEXT PRIMARY KEY,
-                data TEXT,
-                timestamp TEXT,
-                config_hash TEXT
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS query_cache (
-                key TEXT PRIMARY KEY,
-                data TEXT,
-                timestamp TEXT,
-                ttl_seconds INTEGER
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS specialized_cache (
-                key TEXT PRIMARY KEY,
-                data TEXT,
-                timestamp TEXT,
-                ttl_seconds INTEGER
-            )
-        """)
-        self._cache_conn.commit()
+    def _is_cache_valid(self, key: str, ttl: int = DEEP_SCAN_CACHE_TTL) -> bool:
+        data = self.cache.get(key)
+        return data is not None
 
-    def _get_cache_key(self) -> str:
-        strategies = ["trending", "lastModified", "downloads", "likes"]
-        return f"deep_scan_{len(strategies)}_{PAGES_TO_FETCH}"
-
-    def _is_cache_valid(self) -> bool:
-        cursor = self._cache_conn.cursor()
-        cursor.execute(
-            "SELECT timestamp FROM deep_scan_cache WHERE key = ?",
-            (self._get_cache_key(),),
-        )
-        row = cursor.fetchone()
-        if not row:
-            return False
-        cached_time = datetime.fromisoformat(row[0])
-        now = datetime.now(timezone.utc)
-        elapsed = (now - cached_time).total_seconds()
-        return elapsed < DEEP_SCAN_CACHE_TTL
-
-    def _save_cache(self, data: List[ModelInfo], config_hash: str):
-        cursor = self._cache_conn.cursor()
-        import json
-
+    def _save_cache(
+        self, key: str, data: List[ModelInfo], ttl: int = DEEP_SCAN_CACHE_TTL
+    ):
         models_data = [
             {
                 "id": m.id,
@@ -266,28 +558,14 @@ class HFFetcher:
             }
             for m in data
         ]
-        cursor.execute(
-            "REPLACE INTO deep_scan_cache (key, data, timestamp, config_hash) VALUES (?, ?, ?, ?)",
-            (
-                self._get_cache_key(),
-                json.dumps(models_data),
-                datetime.now(timezone.utc).isoformat(),
-                config_hash,
-            ),
-        )
-        self._cache_conn.commit()
+        self.cache.set(key, json.dumps(models_data), ttl)
 
-    def _load_cache(self) -> Optional[List[ModelInfo]]:
-        cursor = self._cache_conn.cursor()
-        cursor.execute(
-            "SELECT data FROM deep_scan_cache WHERE key = ?", (self._get_cache_key(),)
-        )
-        row = cursor.fetchone()
-        if not row:
+    def _load_cache(self, key: str) -> Optional[List[ModelInfo]]:
+        data = self.cache.get(key)
+        if not data:
             return None
-        import json
 
-        models_data = json.loads(row[0])
+        models_data = json.loads(data)
         models = []
         for m in models_data:
             dt = datetime.fromisoformat(m["timestamp"])
@@ -303,105 +581,6 @@ class HFFetcher:
                 )
             )
         return models
-
-    def _get_query_cache_key(
-        self, query: str, author: str = None, limit: int = SEARCH_LIMIT
-    ) -> str:
-        import hashlib
-
-        key_str = f"query_{query}_{author}_{limit}"
-        return hashlib.md5(key_str.encode()).hexdigest()
-
-    def _get_query_cache_ttl(self) -> int:
-        return 1800  # 30 minutes for queries
-
-    def _is_query_cache_valid(self, key: str, ttl: int = None) -> bool:
-        if ttl is None:
-            ttl = self._get_query_cache_ttl()
-        cursor = self._cache_conn.cursor()
-        cursor.execute("SELECT timestamp FROM query_cache WHERE key = ?", (key,))
-        row = cursor.fetchone()
-        if not row:
-            return False
-        cached_time = datetime.fromisoformat(row[0])
-        elapsed = (datetime.now(timezone.utc) - cached_time).total_seconds()
-        return elapsed < ttl
-
-    def _save_query_cache(self, key: str, data: List[Dict]):
-        cursor = self._cache_conn.cursor()
-        import json
-
-        cursor.execute(
-            "REPLACE INTO query_cache (key, data, timestamp, ttl_seconds) VALUES (?, ?, ?, ?)",
-            (
-                key,
-                json.dumps(data),
-                datetime.now(timezone.utc).isoformat(),
-                self._get_query_cache_ttl(),
-            ),
-        )
-        self._cache_conn.commit()
-
-    def _load_query_cache(self, key: str) -> Optional[List[Dict]]:
-        cursor = self._cache_conn.cursor()
-        cursor.execute("SELECT data FROM query_cache WHERE key = ?", (key,))
-        row = cursor.fetchone()
-        if not row:
-            return None
-        import json
-
-        return json.loads(row[0])
-
-    def _get_specialized_cache_key(
-        self,
-        query: str = "",
-        author: str = None,
-        limit: int = 1000,
-        tags: List[str] = None,
-    ) -> str:
-        import hashlib
-
-        tags_str = ",".join(tags) if tags else ""
-        key_str = f"spec_{query}_{author}_{limit}_{tags_str}"
-        return hashlib.md5(key_str.encode()).hexdigest()
-
-    def _get_specialized_cache_ttl(self) -> int:
-        return 3600  # 1 hour for specialized
-
-    def _is_specialized_cache_valid(self, key: str) -> bool:
-        cursor = self._cache_conn.cursor()
-        cursor.execute("SELECT timestamp FROM specialized_cache WHERE key = ?", (key,))
-        row = cursor.fetchone()
-        if not row:
-            return False
-        cached_time = datetime.fromisoformat(row[0])
-        elapsed = (datetime.now(timezone.utc) - cached_time).total_seconds()
-        return elapsed < self._get_specialized_cache_ttl()
-
-    def _save_specialized_cache(self, key: str, data: List[Dict]):
-        cursor = self._cache_conn.cursor()
-        import json
-
-        cursor.execute(
-            "REPLACE INTO specialized_cache (key, data, timestamp, ttl_seconds) VALUES (?, ?, ?, ?)",
-            (
-                key,
-                json.dumps(data),
-                datetime.now(timezone.utc).isoformat(),
-                self._get_specialized_cache_ttl(),
-            ),
-        )
-        self._cache_conn.commit()
-
-    def _load_specialized_cache(self, key: str) -> Optional[List[Dict]]:
-        cursor = self._cache_conn.cursor()
-        cursor.execute("SELECT data FROM specialized_cache WHERE key = ?", (key,))
-        row = cursor.fetchone()
-        if not row:
-            return None
-        import json
-
-        return json.loads(row[0])
 
     def _fetch_stream(self, strategy: Dict, max_pages: int) -> List[Dict]:
         results = []
@@ -433,19 +612,16 @@ class HFFetcher:
         """
         Поиск моделей через официальный HF API.
         """
-        cache_key = self._get_query_cache_key(query, author, limit)
+        cache_key = self._get_cache_key("query", query, author, limit)
 
-        if use_cache and self._is_query_cache_valid(cache_key):
-            cached = self._load_query_cache(cache_key)
-            if cached is not None:
+        if use_cache:
+            cached = self.cache.get(cache_key)
+            if cached:
+                data = json.loads(cached)
                 print(
-                    f'  [CACHE] query="{query}" author={author} ({len(cached)} results)'
+                    f'  [CACHE] query="{query}" author={author} ({len(data)} results)'
                 )
-                return cached
-            else:
-                print(
-                    f'  [CACHE MISS] query="{query}" - empty or invalid, fetching from API'
-                )
+                return data
 
         params = {
             "search": query,
@@ -458,28 +634,33 @@ class HFFetcher:
         if author:
             params["author"] = author
 
-        try:
-            time.sleep(0.3)
-            resp = self.session.get(HF_API, params=params, timeout=15)
+        for retry_count in range(3):
+            try:
+                time.sleep(0.3)
+                resp = self.session.get(HF_API, params=params, timeout=15)
 
-            if resp.status_code == 200:
-                data = resp.json()
-                print(f'  [API] query="{query}" author={author} ({len(data)} results)')
-                if use_cache:
-                    self._save_query_cache(cache_key, data)
-                return data
-            elif resp.status_code == 429:
-                print("  [WARN] HF API rate limited, waiting...")
-                time.sleep(5)
-                return self.fetch_by_query(
-                    query, author, limit, pipeline_tag, use_cache
-                )
-            else:
-                print(f"  [ERROR] HF API error: {resp.status_code}")
-                return []
-        except Exception as e:
-            print(f"  [ERROR] HF API request failed: {e}")
-            return []
+                if resp.status_code == 200:
+                    data = resp.json()
+                    print(
+                        f'  [API] query="{query}" author={author} ({len(data)} results)'
+                    )
+                    if use_cache:
+                        self.cache.set(cache_key, json.dumps(data), 1800)
+                    return data
+                elif resp.status_code == 429:
+                    print(f"  [WARN] HF API rate limited, retry {retry_count + 1}/3")
+                    time.sleep(5 * (retry_count + 1))
+                    continue
+                else:
+                    print(f"  [ERROR] HF API error: {resp.status_code}")
+                    return []
+            except Exception as e:
+                print(f"  [ERROR] HF API request failed: {e}")
+                time.sleep(2)
+                continue
+
+        print(f'  [ERROR] Max retries exceeded for query="{query}"')
+        return []
 
     def fetch_specialized(
         self,
@@ -492,19 +673,17 @@ class HFFetcher:
         """
         Fetch specialized models by category tags.
         """
-        cache_key = self._get_specialized_cache_key(query, author, limit, tags)
+        cache_key = self._get_cache_key(
+            "spec", query, author, limit, ",".join(tags) if tags else ""
+        )
 
-        if use_cache and self._is_specialized_cache_valid(cache_key):
-            cached = self._load_specialized_cache(cache_key)
-            if cached is not None:
+        if use_cache:
+            cached = self.cache.get(cache_key)
+            if cached:
+                data = json.loads(cached)
                 tags_str = ",".join(tags) if tags else "all"
-                print(f"  [CACHE] tags={tags_str} ({len(cached)} results)")
-                return cached
-            else:
-                tags_str = ",".join(tags) if tags else "all"
-                print(
-                    f"  [CACHE MISS] tags={tags_str} - empty or invalid, fetching from API"
-                )
+                print(f"  [CACHE] tags={tags_str} ({len(data)} results)")
+                return data
 
         params = {
             "search": query,
@@ -519,27 +698,32 @@ class HFFetcher:
         if author:
             params["author"] = author
 
-        try:
-            time.sleep(0.3)
-            resp = self.session.get(HF_API, params=params, timeout=20)
+        for retry_count in range(3):
+            try:
+                time.sleep(0.3)
+                resp = self.session.get(HF_API, params=params, timeout=20)
 
-            if resp.status_code == 200:
-                data = resp.json()
-                tags_str = ",".join(tags) if tags else "all"
-                print(f"  [API] tags={tags_str} ({len(data)} results)")
-                if use_cache:
-                    self._save_specialized_cache(cache_key, data)
-                return data
-            elif resp.status_code == 429:
-                print("  [WARN] HF API rate limited")
-                time.sleep(5)
-                return self.fetch_specialized(query, author, limit, tags, use_cache)
-            else:
-                print(f"  [ERROR] HF API error: {resp.status_code}")
-                return []
-        except Exception as e:
-            print(f"  [ERROR] HF API request failed: {e}")
-            return []
+                if resp.status_code == 200:
+                    data = resp.json()
+                    tags_str = ",".join(tags) if tags else "all"
+                    print(f"  [API] tags={tags_str} ({len(data)} results)")
+                    if use_cache:
+                        self.cache.set(cache_key, json.dumps(data), 3600)
+                    return data
+                elif resp.status_code == 429:
+                    print(f"  [WARN] HF API rate limited, retry {retry_count + 1}/3")
+                    time.sleep(5 * (retry_count + 1))
+                    continue
+                else:
+                    print(f"  [ERROR] HF API error: {resp.status_code}")
+                    return []
+            except Exception as e:
+                print(f"  [ERROR] HF API request failed: {e}")
+                time.sleep(2)
+                continue
+
+        print(f"  [ERROR] Max retries exceeded for specialized fetch")
+        return []
 
     def fetch_deep_scan(self, force_refresh: bool = False) -> List[ModelInfo]:
         strategies = [
@@ -549,8 +733,10 @@ class HFFetcher:
             {"sort": "likes", "filter": "gguf"},
         ]
 
-        if not force_refresh and self._is_cache_valid():
-            cached = self._load_cache()
+        cache_key = self._get_cache_key("deep", len(strategies), PAGES_TO_FETCH)
+
+        if not force_refresh:
+            cached = self._load_cache(cache_key)
             if cached:
                 print(
                     f"[CACHE] Deep scan (less than {DEEP_SCAN_CACHE_TTL // 60} min old, {len(cached)} models)"
@@ -558,7 +744,9 @@ class HFFetcher:
                 self._last_deep_scan = cached
                 return cached
             else:
-                print(f"📡 [CACHE MISS] Empty or invalid cache, fetching from API")
+                print(
+                    f"[NETWORK] [CACHE MISS] Empty or invalid cache, fetching from API"
+                )
 
         print(f"[NETWORK] SCANNING HF ({len(strategies)} x {PAGES_TO_FETCH} pages)...")
         unique_models: Dict[str, ModelInfo] = {}
@@ -577,6 +765,7 @@ class HFFetcher:
 
                     if any(bad in mid.lower() for bad in BLACKLIST_KEYWORDS):
                         continue
+
                     pipeline = item.get("pipeline_tag", "")
                     if pipeline and pipeline not in [
                         "text-generation",
@@ -604,13 +793,18 @@ class HFFetcher:
                         pipeline_tag=pipeline,
                         size_bytes=meta.get("bs") if meta else None,
                     )
+
+                    size_bytes = meta.get("bs") if meta else None
+                    if size_bytes:
+                        model.size_bytes = size_bytes
+
                     unique_models[mid] = model
 
         result = list(unique_models.values())
         print(
-            f"📡 [SAVED] {len(result)} models cached for {DEEP_SCAN_CACHE_TTL // 60} minutes"
+            f"[NETWORK] [SAVED] {len(result)} models cached for {DEEP_SCAN_CACHE_TTL // 60} minutes"
         )
-        self._save_cache(result, self._get_cache_key())
+        self._save_cache(cache_key, result, DEEP_SCAN_CACHE_TTL)
         self._last_deep_scan = result
         return result
 
@@ -624,6 +818,8 @@ class GGUFModelRanker:
         self._last_time_delta_str = "new"
         self._report_buffer = []
         self._search_cache = {}
+        self._params_cache = CacheManager()
+        self._dedup_cache = {}
 
     def _fuzzy_match_score(
         self, query: str, m: ModelInfo, fields: List[str] = None
@@ -798,12 +994,42 @@ class GGUFModelRanker:
 
         if not hasattr(self, "_search_cache"):
             self._search_cache = {}
+
+        result = self._deduplicate_models(result)
+
         self._search_cache[cache_key] = result
         return result
 
-    def extract_size_billions(self, m: ModelInfo) -> float | None:
-        if m.size_bytes:
-            return round(m.size_bytes / 1_000_000_000, 1)
+    def _deduplicate_models(self, models: List[ModelInfo]) -> List[ModelInfo]:
+        """
+        Дедуплицирует модели по базовому имени.
+        Оставляет только лучшего провайдера (по downloads/likes) для каждой базовой модели.
+        """
+        base_to_models: Dict[str, List[ModelInfo]] = {}
+
+        for m in models:
+            base_name = extract_base_model_name(m.id)
+            if base_name not in base_to_models:
+                base_to_models[base_name] = []
+            base_to_models[base_name].append(m)
+
+        result = []
+        for base_name, model_list in base_to_models.items():
+            if len(model_list) == 1:
+                best = model_list[0]
+            else:
+                best = max(model_list, key=lambda x: (x.downloads, x.likes))
+                for m in model_list:
+                    if m.id != best.id:
+                        m.similarity_score = -1
+
+            result.append(best)
+
+        result.sort(key=lambda x: x.combined_score, reverse=True)
+        return result
+
+    def _parse_params_from_name(self, m: ModelInfo) -> Optional[float]:
+        """Парсит параметры из названия модели и тегов."""
         mid = m.id.lower()
 
         moe = re.search(r"(\d+)x(\d+(?:\.\d+)?)b", mid)
@@ -821,13 +1047,46 @@ class GGUFModelRanker:
             return float(mill.group(1)) / 1000.0
 
         for tag in m.tags:
-            if re.match(r"^\d+(?:\.\d+)?b$", tag.lower()):
-                return float(tag[:-1])
+            tag_lower = tag.lower()
+            if re.match(r"^\d+(?:\.\d+)?b$", tag_lower):
+                return float(tag_lower.replace("b", ""))
+            if re.match(r"^\d+(?:\.\d+)?m$", tag_lower):
+                return float(tag_lower.replace("m", "")) / 1000
+
+        return None
+
+    def extract_size_billions(
+        self, m: ModelInfo, fetch_if_missing: bool = False
+    ) -> Optional[float]:
+        if m.size_bytes:
+            return round(m.size_bytes / 1_000_000_000, 1)
+
+        cached = self._params_cache.get_model_params(m.id)
+        if cached is not None:
+            return cached
+
+        params = self._parse_params_from_name(m)
+        if params:
+            self._params_cache.set_model_params(m.id, params)
+            return params
+
+        if fetch_if_missing:
+            try:
+                params = _fetch_params_sync(m.id, self.fetcher.hf_api)
+                if params:
+                    self._params_cache.set_model_params(m.id, params)
+                    return params
+            except Exception:
+                pass
+
         return None
 
     def prepare_data(self):
         if not self._cache:
             self._cache = self.fetcher.fetch_deep_scan()
+            for m in self._cache:
+                sz = self._parse_params_from_name(m)
+                m.parsed_params_b = sz if sz else 0.0
         return self._cache
 
     def get_ranked_list(self, mode, min_b=None, max_b=None, top_n=20):
@@ -1083,6 +1342,48 @@ class GGUFModelRanker:
         # 2. Добавляем в Markdown буфер
         self.buffer_markdown_table(models, title)
 
+    async def enrich_unknown_params(
+        self,
+        models: List[ModelInfo],
+        max_concurrent: int = 10,
+        timeout_seconds: float = 60.0,
+    ) -> int:
+        """
+        Обогащает модели с неизвестными параметрами через HF API.
+        Возвращает количество успешно обновлённых моделей.
+        """
+        unknown = [
+            m for m in models if m.parsed_params_b == 0 or m.parsed_params_b is None
+        ]
+
+        if not unknown:
+            return 0
+
+        print(f"  [ENRICH] Fetching params for {len(unknown)} models...")
+
+        try:
+            results = await fetch_model_params_batch(
+                models=unknown,
+                cache_manager=self._params_cache,
+                api=self.fetcher.hf_api,
+                max_concurrent=max_concurrent,
+                timeout_seconds=timeout_seconds,
+            )
+
+            enriched_count = len(results)
+            for m in unknown:
+                if m.id not in results:
+                    m.parsed_params_b = 0
+
+            if enriched_count == 0:
+                print(f"  [ENRICH] No params fetched from API")
+
+            return enriched_count
+
+        except Exception as e:
+            print(f"  [ENRICH ERROR] {e}")
+            return 0
+
 
 # --- SPECIALIZED RANKER ---
 class SpecializedRanker:
@@ -1102,62 +1403,48 @@ class SpecializedRanker:
         self.history = history_manager
         self.default_author = default_author
         self._cache = {}
-        self._spec_conn = sqlite3.connect("specialized_models.db")
-        self._init_spec_db()
-
-    def _init_spec_db(self):
-        cursor = self._spec_conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS spec_cache (
-                category TEXT,
-                model_id TEXT,
-                data TEXT,
-                fetched_at TEXT,
-                PRIMARY KEY (category, model_id)
-            )
-        """)
-        self._spec_conn.commit()
+        self._cache_manager = CacheManager("hf_cache.db")
 
     def _save_to_cache(self, category: str, models: List[ModelInfo]):
-        cursor = self._spec_conn.cursor()
-        for m in models:
-            data_str = f"{m.downloads},{m.likes},{m.parsed_params_b}"
-            timestamp_str = m.timestamp.isoformat()
-            cursor.execute(
-                "REPLACE INTO spec_cache (category, model_id, data, author, fetched_at) VALUES (?, ?, ?, ?, ?)",
-                (
-                    category,
-                    m.id,
-                    data_str,
-                    m.author,
-                    timestamp_str,
-                ),
-            )
-        self._spec_conn.commit()
+        key = f"spec_{category}"
+        models_data = [
+            {
+                "id": m.id,
+                "downloads": m.downloads,
+                "likes": m.likes,
+                "parsed_params_b": m.parsed_params_b,
+                "timestamp": m.timestamp.isoformat(),
+                "author": m.author,
+            }
+            for m in models
+        ]
+        self._cache_manager.set(key, json.dumps(models_data), 3600)
 
     def _load_from_cache(self, category: str) -> List[ModelInfo]:
-        cursor = self._spec_conn.cursor()
-        cursor.execute(
-            "SELECT model_id, data, fetched_at FROM spec_cache WHERE category = ?",
-            (category,),
-        )
+        key = f"spec_{category}"
+        cached = self._cache_manager.get(key)
+        if not cached:
+            return []
+
+        models_data = json.loads(cached)
         models = []
-        for row in cursor.fetchall():
-            downloads, likes, size_b = map(float, row[1].split(","))
+        for m in models_data:
             timestamp = (
-                datetime.fromisoformat(row[2]) if row[2] else datetime.now(timezone.utc)
+                datetime.fromisoformat(m["timestamp"])
+                if m.get("timestamp")
+                else datetime.now(timezone.utc)
             )
-            m = ModelInfo(
-                id=row[0],
-                downloads=int(downloads),
-                likes=int(likes),
+            model = ModelInfo(
+                id=m["id"],
+                downloads=m.get("downloads", 0),
+                likes=m.get("likes", 0),
                 timestamp=timestamp,
                 tags=[],
                 pipeline_tag="text-generation",
-                size_bytes=size_b * 1_000_000_000 if size_b > 0 else None,
+                size_bytes=None,
             )
-            m.parsed_params_b = size_b
-            models.append(m)
+            model.parsed_params_b = m.get("parsed_params_b", 0.0)
+            models.append(model)
         return models
 
     def fetch_all(self, author=None, timeout_seconds=60, force_refresh=False):
@@ -1335,7 +1622,7 @@ class SpecializedRanker:
         return [x["model"] for x in universal[:top_n]]
 
     def close(self):
-        self._spec_conn.close()
+        self._cache_manager.close()
 
 
 if __name__ == "__main__":
@@ -1347,12 +1634,17 @@ if __name__ == "__main__":
 
     print("=" * 80)
     if force_refresh:
-        print("[REFRESH] FORCE REFRESH MODE - Cache will be ignored")
-        # Clear all caches
-        for db_file in ["hf_deep_scan_cache.db", "specialized_models.db"]:
-            if os.path.exists(db_file):
-                os.remove(db_file)
-                print(f"  Cleared {db_file}")
+        print("[REFRESH] FORCE REFRESH MODE - Rankings reset, params cache preserved")
+        ranker = GGUFModelRanker()
+        if hasattr(ranker.fetcher, "cache"):
+            ranker.fetcher.cache.close()
+        if hasattr(ranker, "_params_cache"):
+            ranker._params_cache.close()
+        import gc
+
+        gc.collect()
+        ranker.history.reset_rankings()
+        print("  [OK] Rankings reset, model_params_cache preserved")
     else:
         if use_emoji:
             print("[CACHE] MODE - Using cached data")
@@ -1420,11 +1712,16 @@ if __name__ == "__main__":
     print("=" * 80)
 
     search_queries = [
-        ("qwen", 15),
-        ("gpt", 15),
-        ("deepseek", 15),
-        ("nemot", 15),
-        ("Chimera", 15),
+        ("qwen3", 10),
+        ("Qwen2.5", 10),
+        ("gpt-oss", 10),
+        ("deepseek", 10),
+        ("minimax", 10),
+        ("Devstral", 10),
+        ("Kimi K2", 10),
+        ("GLM", 10),
+        ("Coder", 10),
+        ("Gemma", 10),
     ]
 
     for query, top_n in search_queries:
@@ -1437,12 +1734,15 @@ if __name__ == "__main__":
     print("=" * 80)
 
     hf_api_searches = [
-        ("llama", "unsloth", 10),
-        ("mistral", "bartowski", 10),
         ("deepseek", "unsloth", 10),
         ("qwen", "unsloth", 10),
-        ("nemot", "unsloth", 10),
-        ("Chimera", "unsloth", 10),
+        ("minimax", "unsloth", 10),
+        ("Devstral", "unsloth", 10),
+        ("gpt-oss", "unsloth", 10),
+        ("Kimi K2", "unsloth", 10),
+        ("GLM", "unsloth", 10),
+        ("Qwen", "unsloth", 10),
+        ("Coder", "unsloth", 10),
     ]
 
     for query, author, top_n in hf_api_searches:
@@ -1485,4 +1785,202 @@ if __name__ == "__main__":
 
     # 7. Сохраняем Markdown
     ranker.save_markdown_report()
-()
+
+
+def get_dynamic_search_queries(models: List[ModelInfo], top_n: int = 15) -> List[str]:
+    """
+    Генерирует динамический список поисковых запросов на основе популярных моделей.
+    """
+    if not models:
+        return [
+            "qwen3",
+            "Qwen2.5",
+            "gpt-oss",
+            "deepseek",
+            "minimax",
+            "Devstral",
+            "Kimi K2",
+            "GLM",
+            "Coder",
+            "Gemma",
+        ]
+
+    base_names = []
+    for m in models:
+        base = extract_base_model_name(m.id)
+        if base and len(base) > 2:
+            base_names.append(base)
+
+    from collections import Counter
+
+    counter = Counter(base_names)
+
+    queries = []
+    for name, count in counter.most_common(top_n):
+        if count >= 1 and len(name) > 2:
+            queries.append(name)
+
+    defaults = [
+        "qwen3",
+        "Qwen2.5",
+        "gpt-oss",
+        "deepseek",
+        "minimax",
+        "Devstral",
+        "Kimi K2",
+        "GLM",
+        "Coder",
+        "Gemma",
+    ]
+    for default in defaults:
+        if default.lower() not in [q.lower() for q in queries]:
+            queries.append(default)
+            if len(queries) >= top_n + 5:
+                break
+
+    return queries[: top_n + 5]
+
+
+if __name__ == "__main__":
+    import sys
+    import os
+
+    force_refresh = "--force-refresh" in sys.argv or "-f" in sys.argv
+    use_emoji = "--no-emoji" not in sys.argv
+
+    print("=" * 80)
+    if force_refresh:
+        print("[REFRESH] FORCE REFRESH MODE - Rankings reset, params cache preserved")
+        ranker = GGUFModelRanker()
+        if hasattr(ranker.fetcher, "cache"):
+            ranker.fetcher.cache.close()
+        if hasattr(ranker, "_params_cache"):
+            ranker._params_cache.close()
+        import gc
+
+        gc.collect()
+        ranker.history.reset_rankings()
+        print("  [OK] Rankings reset, model_params_cache preserved")
+    else:
+        if use_emoji:
+            print("[CACHE] MODE - Using cached data")
+        else:
+            print("[CACHE MODE] Using cached data")
+
+    ranker = GGUFModelRanker()
+
+    # Validate and cleanup params cache from invalid entries
+    cleaned = ranker._params_cache.validate_and_cleanup_params_cache()
+    if cleaned > 0:
+        print(f"[CACHE] Cleaned {cleaned} invalid param entries")
+
+    if force_refresh:
+        ranker.fetcher.fetch_deep_scan(force_refresh=True)
+    all_models = ranker.prepare_data()
+
+    # Progressive enrichment of unknown parameters (max 5 batches = 250 models)
+    print("\n[INFO] Progressive enrichment of model parameters...")
+    unknown_models = [
+        m for m in all_models if m.parsed_params_b == 0 or m.parsed_params_b is None
+    ]
+    unknown_models.sort(key=lambda x: (x.downloads, x.likes), reverse=True)
+
+    batch_size = 50
+    max_batches = 5
+    total_enriched = 0
+
+    for batch_num in range(1, max_batches + 1):
+        if not unknown_models:
+            break
+
+        batch = unknown_models[:batch_size]
+        remaining = len(unknown_models)
+
+        print(
+            f"  [ENRICH] Batch {batch_num}/{max_batches}: {len(batch)} models (remaining: {remaining})..."
+        )
+
+        enriched = asyncio.run(
+            ranker.enrich_unknown_params(batch, max_concurrent=5, timeout_seconds=45.0)
+        )
+
+        total_enriched += enriched
+
+        # Remove processed batch (regardless of result)
+        unknown_models = unknown_models[batch_size:]
+
+        if enriched == 0:
+            print(f"  [ENRICH] No params fetched, skipping remaining batches")
+            break
+
+    print(f"  [ENRICH] Total enriched this run: {total_enriched} models")
+
+    # === GGUF PROVIDERS (ГЛАВНАЯ ТАБЛИЦА) ===
+    print("\n" + "=" * 80)
+    print("[INFO] TOP GGUF MODELS FROM KNOWN PROVIDERS")
+    print("=" * 80)
+
+    gguf_only = [
+        m for m in all_models if m.author.lower() in [k.lower() for k in GGUF_KINGS]
+    ]
+
+    # Ensure all GGUF provider models have parameters before ranking
+    unknown_providers = [
+        m for m in gguf_only if m.parsed_params_b == 0 or m.parsed_params_b is None
+    ]
+
+    if unknown_providers:
+        print(
+            f"\n[ENRICH] GGUF providers: enriching all {len(unknown_providers)} unknown models..."
+        )
+        enriched_total = 0
+        batch_num = 0
+        failed_models = []
+
+        while unknown_providers and batch_num < 10:
+            batch = unknown_providers[:50]
+            batch_num += 1
+            print(f"  [ENRICH] Providers batch {batch_num}: {len(batch)} models...")
+
+            enriched = asyncio.run(
+                ranker.enrich_unknown_params(
+                    batch, max_concurrent=5, timeout_seconds=30.0
+                )
+            )
+            enriched_total += enriched
+
+            # Remove successfully enriched from list
+            still_unknown = []
+            for m in batch:
+                if m.parsed_params_b and m.parsed_params_b > 0:
+                    pass  # Successfully enriched
+                else:
+                    still_unknown.append(m)
+
+            unknown_providers = still_unknown
+
+            if not unknown_providers:
+                print(f"  [ENRICH] All GGUF provider models enriched!")
+                break
+
+        print(
+            f"  [ENRICH] GGUF providers enriched: {enriched_total}/{len(unknown_providers) + enriched_total}"
+        )
+
+    # Sort GGUF providers by score
+    gguf_only.sort(
+        key=lambda m: ranker._score_model(m, RankingMode.STABLE), reverse=True
+    )
+
+    for i, m in enumerate(gguf_only, 1):
+        m.rank = i
+        m.rank_delta = "new"
+        m.accel = 0.0
+
+    ranker.print_table(
+        gguf_only[:30],
+        "[PROVIDERS] TOP GGUF PROVIDERS (Unsloth, TheBloke, Bartowski...)",
+    )
+
+    # Сохраняем Markdown
+    ranker.save_markdown_report()

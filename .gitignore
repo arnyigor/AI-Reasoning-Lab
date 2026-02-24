@@ -217,3 +217,7 @@ __marimo__/
 system_profile.json
 .DS_Store
 node_modules/
+/scripts/gguf_history.db
+/scripts/HF_RANKING_REPORT.md
+/scripts/hf_deep_scan_cache.db
+/scripts/specialized_models.db
