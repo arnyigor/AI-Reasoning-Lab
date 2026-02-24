@@ -108,22 +108,28 @@ class KmpArchitectureGauntletTestGenerator(AbstractTestGenerator):
             is_fatal = True
 
         # ------------------------------------------------------------------
-        # TRAP 3 & 4: iOS Coroutines and Thread Safety
+        # TRAP 3 & 4: iOS Coroutines and Thread Safety (Улучшенный Regex)
         # ------------------------------------------------------------------
         if re.search(r'Thread\.sleep', full_code):
             penalties.append("FATAL: Used Thread.sleep on iOS. Will trigger Watchdog crash (0x8badf00d).")
             is_fatal = True
 
-        if re.search(r'suspendCoroutine\s*\{', full_code) and not re.search(r'suspendCancellableCoroutine', full_code):
-            penalties.append("WARNING: Used non-cancellable coroutine for iOS biometry. Can leak if ViewModel is cleared.")
+        # Проверяем, есть ли suspendCoroutine именно рядом с LAContext или evaluatePolicy
+        ios_biometry_block = re.search(r'(LAContext|evaluatePolicy)[\s\S]{1,500}', full_code)
 
-        if re.search(r'suspendCancellableCoroutine', full_code):
-            bonuses.append("GOOD: Used suspendCancellableCoroutine for Native interop.")
-            if not re.search(r'invokeOnCancellation', full_code):
-                penalties.append("FATAL: Used suspendCancellableCoroutine but forgot invokeOnCancellation to invalidate LAContext.")
-                is_fatal = True
+        if ios_biometry_block:
+            ios_code = ios_biometry_block.group(0)
+            if 'suspendCancellableCoroutine' in ios_code:
+                bonuses.append("GOOD: Used suspendCancellableCoroutine for iOS Native interop.")
+                if 'invokeOnCancellation' in ios_code or 'invalidate' in ios_code:
+                    bonuses.append("GOOD: Properly handled iOS FaceID cancellation via invokeOnCancellation.")
+                else:
+                    penalties.append("FATAL: Used suspendCancellableCoroutine on iOS but forgot invokeOnCancellation to invalidate LAContext.")
+                    is_fatal = True
+            elif 'suspendCoroutine' in ios_code:
+                penalties.append("WARNING: Used non-cancellable coroutine for iOS biometry. Can leak if ViewModel is cleared.")
             else:
-                bonuses.append("GOOD: Properly handled iOS FaceID cancellation via invokeOnCancellation.")
+                penalties.append("WARNING: iOS LAContext not wrapped in suspendCancellableCoroutine (Sync blocking or fake implementation).")
 
         # ------------------------------------------------------------------
         # TRAP 5: JVM Hallucinations in KMP
@@ -159,18 +165,50 @@ class KmpArchitectureGauntletTestGenerator(AbstractTestGenerator):
             is_fatal = True
 
         # ------------------------------------------------------------------
-        # SCORING LOGIC
+        # SCORING LOGIC (Балльная система)
         # ------------------------------------------------------------------
-        is_correct = not is_fatal and len(penalties) <= 1
+        # 1. Подсчет количества каждого типа событий
+        bonuses_count = len(bonuses)
+        fatals_count = sum(1 for p in penalties if p.startswith("FATAL"))
+        warnings_count = sum(1 for p in penalties if p.startswith("WARNING"))
+
+        # 2. Начисление и списание баллов
+        points = bonuses_count * 25  # Максимум 100 баллов (при 4 бонусах)
+        points -= fatals_count * 40  # Жесткий штраф за краши и галлюцинации
+        points -= warnings_count * 15 # Средний штраф за архитектурные недочеты
+
+        # 3. Нормализация (не даем уйти ниже 0 или выше 100)
+        final_points = max(0, min(100, points))
+
+        # Бинарный вердикт остается для совместимости:
+        # Считаем тест полностью пройденным, только если баллы >= 85 и нет FATAL
+        is_fatal = fatals_count > 0
+        is_correct = not is_fatal and final_points >= 85
 
         return {
             "is_correct": is_correct,
-            "score": 1.0 if is_correct else 0.0,
+            # score возвращаем в диапазоне 0.0 - 1.0 для совместимости с ядром фреймворка
+            "score": round(final_points / 100.0, 2),
             "details": {
                 "verdict": "PASS" if is_correct else "FAIL",
+                "points": final_points,
+                "grade": self._get_grade_label(final_points),
                 "is_fatal": is_fatal,
+                "stats": {
+                    "good_count": bonuses_count,
+                    "fatal_count": fatals_count,
+                    "warning_count": warnings_count
+                },
                 "bonuses": bonuses,
                 "penalties": penalties,
                 "extracted_code_length": len(full_code)
             }
         }
+
+    def _get_grade_label(self, points: int) -> str:
+        """Вспомогательный метод для красивого отображения уровня модели"""
+        if points >= 90: return "Senior (A)"
+        if points >= 70: return "Middle+ (B)"
+        if points >= 40: return "Middle (C)"
+        if points >= 15: return "Junior (D)"
+        return "Trainee / Hallucination (F)"
