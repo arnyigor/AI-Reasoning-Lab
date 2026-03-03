@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import random
 import re
 from typing import Dict, Any, List
@@ -54,11 +55,12 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         prompt = (
             f"Список: {', '.join(items)}.\n"
             "Твоя задача — отсортировать этот список.\n"
+            "❗ ВАЖНО: Не переводи слова на другие языки. Работай строго с исходными словами.\n"
             "ШАГ 1: Для каждого слова напиши его длину (количество всех не уникальных букв).\n"
             "ШАГ 2: Отсортируй слова по этим правилам:\n"
             "   1. Сначала по ДЛИНЕ (от коротких к длинным).\n"
             "   2. При равной длине — по АЛФАВИТУ.\n"
-            "Выведи ИТОГОВЫЙ результат в формате: [слово1 -> слово2 -> ...]"
+            "Выведи ТОЛЬКО одну строку в формате: [слово1 -> слово2 -> ...]. Без таблиц, без пояснений, без markdown."
         )
 
         # Эталонная сортировка (длина → алфавит)
@@ -136,12 +138,15 @@ class InstructionsTestGenerator(AbstractTestGenerator):
         }
 
     @staticmethod
-    def _is_close(a: Any, b: Any, eps: float = 5.0) -> bool:
-        """Проверка близости чисел с учетом ошибок округления и типов."""
+    def _is_close(a: Any, b: Any, rel_tol: float = 1e-5, abs_tol: float = 0.02) -> bool:
+        """Сравнение чисел с допуском для финансовых расчётов."""
         try:
-            return abs(float(a) - float(b)) <= eps
-        except Exception:
-            return False
+            # Округляем до 2 знаков перед сравнением (копейки)
+            a_rounded = round(float(a), 2)
+            b_rounded = round(float(b), 2)
+            return math.isclose(a_rounded, b_rounded, rel_tol=rel_tol, abs_tol=abs_tol)
+        except (ValueError, TypeError):
+            return str(a).strip() == str(b).strip()
 
     # ------------------------------------------------------------------
     # 1. Вспомогательные методы очистки
@@ -189,11 +194,11 @@ class InstructionsTestGenerator(AbstractTestGenerator):
             return [w.strip() for w in re.split(r',|\s+', raw) if w]
 
         # 2. Удаляем внешние квадратные скобки
-        content = re.sub(r'^$|$$', '', target_line).strip()
+        content = re.sub(r'^\[|\]$', '', target_line).strip()
 
-        # 3. Разделяем по стрелкам и запятой (на случай «a,b»)
-        parts = [p.strip() for p in re.split(r'->|,', content) if p]
-        return parts
+        # Разделяем по любому варианту стрелки или запятой:
+        parts = [p.strip() for p in re.split(r'\s*[-=→>]+\s*|,', content) if p and p.strip() not in ['->', '→']]
+        return [p for p in parts if re.match(r'^[а-яА-ЯёЁa-zA-Z]+$', p)]  # фильтр только слов
 
 
     def _verify_multi_sort(self, raw: str, expected: Dict[str, Any]) -> Dict[str, Any]:
@@ -216,48 +221,47 @@ class InstructionsTestGenerator(AbstractTestGenerator):
     # 2.1 Новый метод очистки для задач с JSON
     # ------------------------------------------------------------------
     def _strip_json_noise(self, raw: str) -> str:
-        """Оставляем только валидный JSON без лишних токенов и <think>."""
+        """Удаляет только разметку и системные промпты, не разрушая синтаксис."""
         if not isinstance(raw, str):
             return ""
 
-        # 1) Удаляем <think> и Markdown‑фэнсы
+        # 1. Удаляем <think>
         cleaned = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL | re.IGNORECASE)
+        # 2. Удаляем Markdown фенсы (```json ... ```)
         cleaned = self._strip_code_fence(cleaned)
 
-        # 2) Удаляем все токены вида </s>, <|eot_id|>, <|endoftext|>, <|im_start|>, <|im_end|>, <s>, "assistant"
-        for token in [r"</s>", r"<\|eot_id\|>", r"<\|endoftext\|>", r"<\|im_start\|>", r"<\|im_end\|>", r"<s>", r"assistant"]:
+        # 3. Удаляем стоп-токены
+        for token in[r"</s>", r"<\|eot_id\|>", r"<\|endoftext\|>", r"<\|im_start\|>", r"<\|im_end\|>", r"<s>", r"assistant"]:
             cleaned = re.sub(token, "", cleaned, flags=re.DOTALL | re.IGNORECASE)
 
-        # 3) Сохраняем только символы, которые могут быть частью JSON
-        allowed_pattern = r'[^\w\s.,-<>]'
-        cleaned = re.sub(allowed_pattern, '', cleaned)
+        # УБРАНА ДЕСТРУКТИВНАЯ ОЧИСТКА REGEX'ом[^\w\s.,-<>]
         return cleaned.strip()
 
     # ------------------------------------------------------------------
     # 2.2 Верификация JSON‑тестов
     # ------------------------------------------------------------------
     def _verify_json_math(self, raw: str, expected: Dict[str, Any]) -> Dict[str, Any]:
-        # Очищаем только шумы, но не убираем JSON‑символы
         cleaned = self._strip_json_noise(raw)
 
-        # Используем жадный поиск – берём всю внешнюю структуру { … }
-        json_match = re.search(r'\{.*}', cleaned, flags=re.DOTALL)
+        # Жадный поиск от первой { до последней }
+        json_match = re.search(r'\{.*\}', cleaned, flags=re.DOTALL)
         if not json_match:
             return {
                 "is_correct": False,
-                "details": {"task": "json_math", "raw_cleaned": cleaned, "error": "No JSON found"}
+                "details": {"task": "json_math", "raw_cleaned": cleaned, "error": "No JSON payload found inside {}"}
             }
 
         raw_json = json_match.group(0).strip()
-        # Удаляем лишние запятые перед закрывающими скобками
-        raw_json = re.sub(r',\s*(})', r'\1', raw_json)
+
+        # Мягкая эвристика: убираем trailing commas (частая ошибка LLM)
+        raw_json = re.sub(r',\s*([}\]])', r'\1', raw_json)
 
         try:
             data = json.loads(raw_json)
         except json.JSONDecodeError as e:
             return {
                 "is_correct": False,
-                "details": {"task": "json_math", "raw_cleaned": cleaned, "error": f"JSON parse failed: {e}"}
+                "details": {"task": "json_math", "raw_json": raw_json, "error": f"JSON decode failed: {e}"}
             }
 
         exp = expected["data"]

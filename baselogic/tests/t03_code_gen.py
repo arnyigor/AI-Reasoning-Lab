@@ -23,11 +23,14 @@ class CodeGenTestGenerator(AbstractTestGenerator):
             },
             {
                 "name": "is_palindrome",
-                "docstring": "проверяет, является ли строка палиндромом.",
+                "docstring": "проверяет, является ли строка палиндромом(учитывая только буквы, игнорируя регистр, пробелы и пунктуацию).",
                 "tests": [
                     "assert is_palindrome('radar') == True",
                     "assert is_palindrome('hello') == False",
-                    "assert is_palindrome('A man a plan a canal Panama') == True"  # Сложный случай
+                    "assert is_palindrome('A man a plan a canal Panama') == True"  # Сложный случай,
+                    "assert is_palindrome('') == True",        # Пустая строка — технически палиндром
+                    "assert is_palindrome('!!!') == True",      # Только пунктуация → пустая → палиндром
+                    "assert is_palindrome('a') == True"        # Один символ
                 ]
             }
         ]

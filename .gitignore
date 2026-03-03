@@ -221,3 +221,6 @@ node_modules/
 /scripts/HF_RANKING_REPORT.md
 /scripts/hf_deep_scan_cache.db
 /scripts/specialized_models.db
+/scripts/AGENTS.md
+/scripts/hf_cache.db
+/scripts/hf_cache.db-journal
