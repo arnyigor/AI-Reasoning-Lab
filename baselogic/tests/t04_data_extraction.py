@@ -1,14 +1,17 @@
+import logging
 import random
 import re
-import logging
-from typing import Dict, Any, List, Set, Tuple
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
+from typing import Dict, Any, List, Tuple, Union, Set, Iterable
+
+import unicodedata
 
 # Предполагаем, что этот класс уже существует в вашем проекте
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
 log = logging.getLogger(__name__)
+
 
 class DataExtractionTestGenerator(AbstractTestGenerator):
     """
@@ -80,6 +83,41 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
         }
 
     # --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ НОРМАЛИЗАЦИИ ---
+
+    def _normalize_for_extraction(self, text: str) -> str:
+        """
+        Нормализует Unicode-символы для совместимости с ASCII-regex.
+        """
+        import unicodedata
+
+        # Нормализация к NFC-форме
+        text = unicodedata.normalize('NFC', text)
+
+        # Замена специальных пробелов на обычные
+        text = re.sub(r'[\u202f\u00a0\u2000-\u200b]', ' ', text)
+
+        # Замена специальных дефисов/тире на обычный дефис
+        text = re.sub(r'[\u2011\u2012\u2013\u2014\u2015]', '-', text)
+
+        return text
+
+
+    def _filter_false_phones(self, candidates: Iterable[str]) -> Set[str]:
+        """
+        Фильтрует ложные срабатывания (даты, суммы) из найденных 'телефонов'.
+        """
+        filtered = set()
+        for candidate in candidates:
+            # Исключаем форматы дат YYYY-MM-DD, DD.MM.YYYY
+            if re.match(r'^\d{4}[-./]\d{2}[-./]\d{2}$', candidate):
+                continue
+            if re.match(r'^\d{1,2}[-./]\d{1,2}[-./]\d{4}$', candidate):
+                continue
+            # Исключаем чистые суммы без валюты (короткие числовые строки)
+            if re.match(r'^[\d\s.,]+$', candidate) and len(candidate.strip()) < 15:
+                continue
+            filtered.add(candidate)
+        return filtered
 
     def _normalize_phone(self, phone: str) -> str:
         """
@@ -243,7 +281,9 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
         text = "Данные системы: " + "; ".join(parts)
 
         return {
-            'prompt': f"Извлеки все email, телефоны и ссылки списком.\nТекст: {text}",
+            'prompt': f"""Извлеки все email, телефоны и ссылки списком.
+                    ВАЖНО: Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.
+                    Текст: {text}""",
             'expected_output': {
                 'emails': set(e_list), 'phones': set(p_list), 'urls': set(u_list),
                 'test_type': 'multi_entity_extraction'
@@ -263,8 +303,8 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
         target_phone = random.choice(self.phones)
         target_url = random.choice(self.urls)
         target_address = random.choice(self.addresses)
-        target_date = dates[0]     # Берем первую дату
-        target_amount = amounts[0] # Берем первую сумму
+        target_date = dates[0]  # Берем первую дату
+        target_amount = amounts[0]  # Берем первую сумму
 
         data = {
             'email': target_email,
@@ -295,7 +335,6 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
             'expected_output': {**data, 'test_type': 'structured_document'}
         }
 
-
     def _generate_contextual_extraction_test(self) -> Dict[str, Any]:
         target_phone = random.choice(self.phones)
         noise_phone = random.choice([p for p in self.phones if p != target_phone])
@@ -322,9 +361,11 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
         """
         test_type = expected_output.get('test_type')
         llm_output = self._cleanup_llm_response(output)
+        llm_output = self._normalize_for_extraction(llm_output)
         # Извлечение данных из ответа LLM
         found_emails = set(re.findall(self.EMAIL_PATTERN, llm_output))
         found_phones = set(re.findall(self.PHONE_PATTERN, llm_output))
+        found_phones = self._filter_false_phones(found_phones)
         found_urls = set(re.findall(self.URL_PATTERN, llm_output))
         found_dates = set()
         for pat in self.DATE_PATTERNS:
@@ -360,13 +401,15 @@ class DataExtractionTestGenerator(AbstractTestGenerator):
             errors.append(f"Missing emails. Exp: {exp_emails}, Got: {act_emails}")
 
         # 2. Phones
-        exp_phones = {self._normalize_phone(p) for p in (expected_output.get('phones') or [expected_output.get('phone', '')]) if p}
+        exp_phones = {self._normalize_phone(p) for p in
+                      (expected_output.get('phones') or [expected_output.get('phone', '')]) if p}
         act_phones = {self._normalize_phone(p) for p in found_phones}
         if not exp_phones.issubset(act_phones):
             errors.append(f"Missing phones. Exp: {exp_phones}, Got: {act_phones}")
 
         # 3. URLs
-        exp_urls = {self._normalize_url(u) for u in (expected_output.get('urls') or [expected_output.get('url', '')]) if u}
+        exp_urls = {self._normalize_url(u) for u in (expected_output.get('urls') or [expected_output.get('url', '')]) if
+                    u}
         act_urls = {self._normalize_url(u) for u in found_urls}
         if not exp_urls.issubset(act_urls):
             errors.append(f"Missing URLs. Exp: {exp_urls}, Got: {act_urls}")
