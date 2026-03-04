@@ -1,13 +1,11 @@
-import json
+import difflib
 import logging
+import os
 import random
 import re
-import difflib
-import ast
 import subprocess
 import tempfile
-import os
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List
 
 # Предполагается, что базовый класс импортируется из вашего фреймворка
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
@@ -33,89 +31,188 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
         self.templates = self._init_templates()
 
     def _init_templates(self) -> List[Dict[str, Any]]:
-        """База сценариев для разных языков."""
+        """
+        База усложненных сценариев.
+        Требуют алгоритмического мышления, понимания краевых случаев и точного следования плану.
+        """
         return [
+            # ------------------------------------------------------------------
+            # 1. PYTHON: Рекурсивное "сплющивание" словаря (Алгоритмическая сложность)
+            # ------------------------------------------------------------------
             {
                 "language": "python",
-                "task_name": "list_filter",
+                "task_name": "flatten_nested_dict",
                 "plan": [
-                    "Создать функцию `filter_even(numbers)`",
-                    "Проверить, что `numbers` это список (выбросить ValueError если нет)",
-                    "Использовать list comprehension для фильтрации четных чисел",
-                    "Вернуть отфильтрованный список"
+                    "Создать функцию `flatten_dict(d, parent_key='', sep='.')`",
+                    "Инициализировать пустой словарь для результата",
+                    "Пройтись по всем ключам и значениям входного словаря",
+                    "Сформировать новый ключ, соединив parent_key и текущий ключ через sep (если parent_key не пуст)",
+                    "Если значение — это словарь, рекурсивно вызвать flatten_dict и обновить результат",
+                    "Иначе — записать значение в результат по новому ключу",
+                    "Вернуть плоский словарь"
                 ],
-                "structural_checks": {"functions": ["filter_even"], "keywords": ["ValueError", "for", "in", "if"]},
+                "structural_checks": {
+                    "functions": ["flatten_dict"],
+                    "keywords": ["parent_key", "sep", "items()", "isinstance", "dict"]
+                },
                 "tests": [
-                    "assert filter_even([1, 2, 3, 4]) == [2, 4]",
-                    "assert filter_even([11, 13, 15]) == []",
-                    "assert filter_even([2]) == [2]"
+                    # Тест 1: Базовая вложенность
+                    "assert flatten_dict({'a': 1, 'b': {'c': 2, 'd': {'e': 3}}}) == {'a': 1, 'b.c': 2, 'b.d.e': 3}",
+                    # Тест 2: Пустой словарь
+                    "assert flatten_dict({}) == {}",
+                    # Тест 3: Кастомный разделитель
+                    "assert flatten_dict({'x': {'y': 42}}, sep='_') == {'x_y': 42}"
                 ],
                 "expected_code": (
-                    "def filter_even(numbers):\n"
-                    "    if not isinstance(numbers, list):\n"
-                    "        raise ValueError('Must be a list')\n"
-                    "    return [x for x in numbers if x % 2 == 0]"
+                    "def flatten_dict(d, parent_key='', sep='.'):\n"
+                    "    items = {}\n"
+                    "    for k, v in d.items():\n"
+                    "        new_key = f'{parent_key}{sep}{k}' if parent_key else k\n"
+                    "        if isinstance(v, dict):\n"
+                    "            items.update(flatten_dict(v, new_key, sep=sep))\n"
+                    "        else:\n"
+                    "            items[new_key] = v\n"
+                    "    return items"
                 )
             },
-            {
-                "language": "kotlin",
-                "task_name": "user_data_class",
-                "plan": [
-                    "Создать `data class User` с полями `name: String` и `age: Int`",
-                    "Добавить метод `isValid(): Boolean` внутри класса",
-                    "Метод должен возвращать true, если `name` не пустое и `age > 0`"
-                ],
-                "structural_checks": {"classes": ["User"], "methods": ["isValid"], "keywords": ["data class", "String", "Int"]},
-                "tests": [
-                    "val u1 = User(\"Alice\", 25)\nassert(u1.isValid()) { \"Test 1 Failed\" }",
-                    "val u2 = User(\"\", 25)\nassert(!u2.isValid()) { \"Test 2 Failed\" }",
-                    "val u3 = User(\"Bob\", -5)\nassert(!u3.isValid()) { \"Test 3 Failed\" }"
-                ],
-                "expected_code": (
-                    "data class User(val name: String, val age: Int) {\n"
-                    "    fun isValid(): Boolean {\n"
-                    "        return name.isNotEmpty() && age > 0\n"
-                    "    }\n"
-                    "}"
-                )
-            },
+
+            # ------------------------------------------------------------------
+            # 2. JAVASCRIPT: Агрегация данных (Бизнес-логика, Map/Reduce)
+            # ------------------------------------------------------------------
             {
                 "language": "javascript",
-                "task_name": "string_reverser",
+                "task_name": "sales_aggregator",
                 "plan": [
-                    "Создать функцию `reverseString(str)`",
-                    "Проверить, что на вход передана строка",
-                    "Вернуть перевернутую строку, используя методы split, reverse и join"
+                    "Создать функцию `aggregateSales(transactions)`",
+                    "Убедиться, что на вход передан массив. Если нет — вернуть пустой объект {}",
+                    "Отфильтровать транзакции: оставить только те, у которых `status` равен 'completed'",
+                    "Сгруппировать оставшиеся транзакции по `department`",
+                    "Для каждого департамента вычислить сумму `amount`",
+                    "Вернуть объект вида { departmentName: totalAmount }"
                 ],
-                "structural_checks": {"functions": ["reverseString"], "keywords": ["split", "reverse", "join"]},
+                "structural_checks": {
+                    "functions": ["aggregateSales"],
+                    "keywords": ["Array.isArray", "filter", "reduce", "completed", "amount"]
+                },
                 "tests": [
-                    "if (reverseString('hello') !== 'olleh') throw new Error('Test 1');",
-                    "if (reverseString('abc') !== 'cba') throw new Error('Test 2');"
+                    # Тест 1: Нормальные данные + игнорирование pending
+                    "const data = [{department: 'IT', amount: 100, status: 'completed'}, {department: 'IT', amount: 50, status: 'pending'}, {department: 'HR', amount: 200, status: 'completed'}];\n"
+                    "const res = aggregateSales(data);\n"
+                    "if (res['IT'] !== 100 || res['HR'] !== 200) throw new Error('Aggregation failed');",
+                    # Тест 2: Пустой массив
+                    "if (Object.keys(aggregateSales([])).length !== 0) throw new Error('Empty array failed');",
+                    # Тест 3: Не массив
+                    "if (Object.keys(aggregateSales(null)).length !== 0) throw new Error('Null handling failed');"
                 ],
                 "expected_code": (
-                    "function reverseString(str) {\n"
-                    "    if (typeof str !== 'string') return '';\n"
-                    "    return str.split('').reverse().join('');\n"
+                    "function aggregateSales(transactions) {\n"
+                    "    if (!Array.isArray(transactions)) return {};\n"
+                    "    return transactions\n"
+                    "        .filter(t => t.status === 'completed')\n"
+                    "        .reduce((acc, t) => {\n"
+                    "            const dept = t.dept || t.department;\n"
+                    "            acc[dept] = (acc[dept] || 0) + t.amount;\n"
+                    "            return acc;\n"
+                    "        }, {});\n"
                     "}"
                 )
             },
+
+            # ------------------------------------------------------------------
+            # 3. KOTLIN: ООП, Инкапсуляция и Исключения (Архитектурная логика)
+            # ------------------------------------------------------------------
+            {
+                "language": "kotlin",
+                "task_name": "bank_account_oop",
+                "plan": [
+                    "Создать класс `BankAccount` с приватным свойством `balance: Double` (по умолчанию 0.0)",
+                    "Добавить метод `deposit(amount: Double)`: увеличивает баланс. Если amount <= 0, выбросить `IllegalArgumentException`",
+                    "Добавить метод `withdraw(amount: Double)`: уменьшает баланс. Если amount > баланса, выбросить `IllegalStateException`",
+                    "Добавить метод `getBalance(): Double` для получения текущего остатка"
+                ],
+                "structural_checks": {
+                    "classes": ["BankAccount"],
+                    "methods": ["deposit", "withdraw", "getBalance"],
+                    "keywords": ["private var", "Double", "IllegalArgumentException", "IllegalStateException"]
+                },
+                "tests": [
+                    # Тест 1: Успешное пополнение и снятие
+                    "val acc = BankAccount()\nacc.deposit(100.0)\nacc.withdraw(40.0)\nassert(acc.getBalance() == 60.0) { \"Math failed\" }",
+                    # Тест 2: Ошибка при депозите <= 0
+                    "try { BankAccount().deposit(-10.0); assert(false) { \"Should throw\" } } catch(e: IllegalArgumentException) {}",
+                    # Тест 3: Ошибка при овердрафте
+                    "try { BankAccount().withdraw(10.0); assert(false) { \"Should throw\" } } catch(e: IllegalStateException) {}"
+                ],
+                "expected_code": (
+                    "class BankAccount(private var balance: Double = 0.0) {\n"
+                    "    fun deposit(amount: Double) {\n"
+                    "        if (amount <= 0) throw IllegalArgumentException(\"Amount must be positive\")\n"
+                    "        balance += amount\n"
+                    "    }\n"
+                    "    fun withdraw(amount: Double) {\n"
+                    "        if (amount > balance) throw IllegalStateException(\"Insufficient funds\")\n"
+                    "        balance -= amount\n"
+                    "    }\n"
+                    "    fun getBalance(): Double = balance\n"
+                    "}"
+                )
+            },
+
+            # ------------------------------------------------------------------
+            # 4. HTML: Доступность (A11y) и Regex валидация
+            # ------------------------------------------------------------------
             {
                 "language": "html",
-                "task_name": "login_form",
+                "task_name": "advanced_a11y_form",
                 "plan": [
-                    "Создать тег `<form>` с id `loginForm`",
-                    "Добавить `<input type=\"email\">` для почты",
-                    "Добавить `<input type=\"password\">` для пароля",
-                    "Добавить кнопку `<button type=\"submit\">` с текстом 'Войти'"
+                    "Создать `<form>` с id `secureForm`",
+                    "Добавить `<fieldset>` с тегом `<legend>` (текст 'Оплата')",
+                    "Добавить `<input type=\"text\">` с id `cardNumber` и атрибутом `aria-label=\"Номер карты\"`",
+                    "Добавить к input регулярное выражение (атрибут pattern) для проверки ровно 16 цифр: `\\d{16}`",
+                    "Добавить `<select>` с id `currency` и двумя `<option>` (USD и EUR)",
+                    "Добавить `<button type=\"submit\">`Оплатить`</button>`"
                 ],
-                "structural_checks": {"keywords": ["<form", "loginForm", "type=\"email\"", "type=\"password\"", "<button"]},
-                "tests": [], # HTML не выполняем, проверяем только по плану
+                "structural_checks": {
+                    "keywords": [
+                        "<form", "secureForm", "<fieldset", "<legend",
+                        "aria-label", "pattern=\"\\d{16}\"", "<select", "<option", "USD", "EUR"
+                    ]
+                },
+                "tests": [], # Не выполняем, проверяем план и структуру
                 "expected_code": (
-                    "<form id=\"loginForm\">\n"
-                    "    <input type=\"email\" required>\n"
-                    "    <input type=\"password\" required>\n"
-                    "    <button type=\"submit\">Войти</button>\n"
+                    "<form id=\"secureForm\">\n"
+                    "    <fieldset>\n"
+                    "        <legend>Оплата</legend>\n"
+                    "        <input type=\"text\" id=\"cardNumber\" aria-label=\"Номер карты\" pattern=\"\\d{16}\" required>\n"
+                    "        <select id=\"currency\">\n"
+                    "            <option value=\"USD\">USD</option>\n"
+                    "            <option value=\"EUR\">EUR</option>\n"
+                    "        </select>\n"
+                    "        <button type=\"submit\">Оплатить</button>\n"
+                    "    </fieldset>\n"
                     "</form>"
+                )
+            },
+
+            # ------------------------------------------------------------------
+            # 5. PYTHON: "Ловушка перфекциониста" (Для режима strict_copy)
+            # ------------------------------------------------------------------
+            {
+                "language": "python",
+                "task_name": "strict_copy_trap",
+                "plan": [], # Этот шаблон заточен под режим strict_copy
+                "structural_checks": {},
+                "tests": [
+                    "assert ugly_math(2, 3) == 13"
+                ],
+                # Код специально написан не по PEP8 (разные отступы, комментарии в странных местах, лишние скобки).
+                # Умные модели часто пытаются "починить" форматирование. Мы проверяем, умеют ли они слушать команду "копируй строго".
+                "expected_code": (
+                    "def ugly_math( a,b ):\n"
+                    "  # some weird comment\n"
+                    "    res = ( a * 2 )+   (b * 3)\n"
+                    "    return   res\n"
+                    "print(ugly_math( 2, 3 ))"
                 )
             }
         ]
@@ -123,16 +220,17 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
     # ==================== ФАЗА 1: ГЕНЕРАЦИЯ ====================
 
     def generate(self) -> Dict[str, Any]:
-        """Случайно выбирает задачу и режим, генерирует промпт."""
         task = random.choice(self.templates)
         language = task["language"]
 
-        # Определяем доступные режимы для этого языка
-        available_modes = ["strict_copy", "plan_following"]
-        if language in self.EXECUTABLE_LANGUAGES and len(task["tests"]) > 0:
-            available_modes.append("functional")
-
-        mode = random.choice(available_modes)
+        # ЕСЛИ ЭТО ЛОВУШКА ДЛЯ КОПИРОВАНИЯ - ЖЕСТКО ЗАДАЕМ РЕЖИМ
+        if task["task_name"] == "strict_copy_trap":
+            mode = "strict_copy"
+        else:
+            available_modes = ["strict_copy", "plan_following"]
+            if language in self.EXECUTABLE_LANGUAGES and len(task["tests"]) > 0:
+                available_modes.append("functional")
+            mode = random.choice(available_modes)
 
         prompt = self._build_prompt(task, mode)
 
@@ -289,22 +387,25 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
         return {"is_correct": False, "details": {"error": f"Функциональные тесты для {lang} не поддержаны"}}
 
     def _run_python(self, code: str, tests: List[str]) -> Dict[str, Any]:
-        """Запускает Python-код через exec() (основано на вашем примере)."""
-        local_scope = {}
+        """Запускает Python-код через exec() с единым скоупом."""
+        scope = {}  # <- Один словарь для globals и locals!
         try:
-            # Запускаем сам код, чтобы объявить функции
-            exec(code, local_scope, local_scope)
+            # Запускаем код модели
+            exec(code, scope)
         except Exception as e:
             return {"is_correct": False, "details": {"mode": "functional", "error": f"Синтаксическая ошибка: {e}"}}
 
         # Запускаем тесты
         for test in tests:
             try:
-                exec(test, local_scope, local_scope)
+                # ВАЖНО: передаем scope один раз (он будет работать и как globals, и как locals)
+                exec(test, scope)
             except AssertionError:
-                return {"is_correct": False, "details": {"mode": "functional", "error": "Тест не пройден", "failed_test": test}}
+                return {"is_correct": False,
+                        "details": {"mode": "functional", "error": "Тест не пройден", "failed_test": test}}
             except Exception as e:
-                return {"is_correct": False, "details": {"mode": "functional", "error": f"Ошибка выполнения теста: {e}", "failed_test": test}}
+                return {"is_correct": False, "details": {"mode": "functional", "error": f"Ошибка выполнения теста: {e}",
+                                                         "failed_test": test}}
 
         return {"is_correct": True, "details": {"mode": "functional", "status": "Все тесты пройдены"}}
 
