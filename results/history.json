@@ -9,6 +9,11 @@
         "Accuracy":0.875,
         "Total_Runs":400
     },
+    "unsloth\/qwen3-coder-next":{
+        "Trust_Score":0.7703289993,
+        "Accuracy":0.8625,
+        "Total_Runs":80
+    },
     "qwen3.5-9b":{
         "Trust_Score":0.7131775779,
         "Accuracy":0.7575,

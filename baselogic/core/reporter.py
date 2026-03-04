@@ -836,8 +836,6 @@ class Reporter:
             log.error(f"Ошибка при генерации рейтинга локальных провайдеров: {e}", exc_info=True)
             return ""
 
-
-
     def save_report_to_file(self, filename: Optional[str] = None) -> Path:
         """Сохраняет отчет в Markdown файл."""
         if filename is None:

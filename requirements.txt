@@ -3,6 +3,13 @@
 fastapi==0.104.0
 uvicorn[standard]==0.24.0
 
+# GUI для Benchmark Viewer
+customtkinter==5.2.2
+Pillow==10.4.0
+matplotlib==3.9.0
+pandas==2.2.0
+numpy==1.26.0
+
 # WebSocket поддержка
 websockets==12.0
 
