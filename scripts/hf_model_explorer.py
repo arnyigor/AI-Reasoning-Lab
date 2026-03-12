@@ -1408,17 +1408,22 @@ Mouse Wheel      Scroll through models
             },
         )
 
-    def _load_data_async(self):
+    def _load_data_async(self, force_refresh=False):
         self.is_loading = True
         self.btn_refresh.config(state=tk.DISABLED)
         self.progress.start()
         self.lbl_status.config(text="Loading models...")
 
-        thread = threading.Thread(target=self._load_data_thread, daemon=True)
+        # Передаем параметр force_refresh в поток
+        thread = threading.Thread(target=self._load_data_thread, args=(force_refresh,), daemon=True)
         thread.start()
 
-    def _load_data_thread(self):
+    def _load_data_thread(self, force_refresh):
         try:
+            # Если нажали Refresh — форсируем скачивание напрямую с сайта
+            if force_refresh:
+                self.ranker.fetcher.fetch_deep_scan(force_refresh=True)
+
             self.ranker.prepare_data()
             self.models = self.ranker.get_ranked_list(
                 RankingMode.STABLE,
@@ -1429,7 +1434,10 @@ Mouse Wheel      Scroll through models
 
             self.root.after(0, self._on_data_loaded)
         except Exception as e:
-            self.root.after(0, lambda: self._on_data_error(str(e)))
+            # ИСПРАВЛЕНИЕ: Сохраняем текст ошибки в локальную строковую переменную
+            error_msg = str(e)
+            self.root.after(0, lambda: self._on_data_error(error_msg))
+
 
     def _on_data_loaded(self):
         self.is_loading = False
@@ -1547,7 +1555,13 @@ Mouse Wheel      Scroll through models
     def _refresh_data(self):
         self.models = []
         self.filtered_models = []
-        self._load_data_async()
+
+        # Обязательно сбрасываем кэш данных в оперативной памяти!
+        if hasattr(self.ranker, '_cache'):
+            self.ranker._cache = None
+
+        # Запускаем загрузку с флагом принудительного обновления
+        self._load_data_async(force_refresh=True)
 
     def _is_gguf_model(self, model: ModelInfo) -> bool:
         """Check if model is GGUF format by tags or name"""
@@ -1571,8 +1585,12 @@ Mouse Wheel      Scroll through models
         Trending mode uses single-level sort (downloads, likes).
         """
         if sort_mode == "trending":
-            # Trending: simple multi-level (downloads, likes)
-            return sorted(models, key=lambda m: (m.downloads, m.likes), reverse=True)
+            # Используем настоящий тренд HF. Если очков нет (модель старая), сортируем по лайкам
+            return sorted(
+                models,
+                key=lambda m: (getattr(m, 'hf_trending_score', 0), m.likes, m.downloads),
+                reverse=True
+            )
 
         elif sort_mode == "likes":
             # Primary: likes, Secondary: downloads, Tertiary: modified (timestamp)

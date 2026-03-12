@@ -7,7 +7,7 @@ HF_JSON_API = "https://huggingface.co/models-json"
 HF_TOKEN = os.getenv("HF_TOKEN", "")
 SEARCH_LIMIT = 100
 PAGES_TO_FETCH = 50
-DEEP_SCAN_CACHE_TTL = 3600  # 1 hour in seconds
+DEEP_SCAN_CACHE_TTL = 1800  # 1 hour in seconds
 
 BLACKLIST_KEYWORDS = [
     "lora",

@@ -48,7 +48,7 @@ class ModelInfo:
     tags: List[str]
     pipeline_tag: str
     size_bytes: Optional[float] = None
-
+    hf_trending_score: float = 0.0
     # Вычисляемые поля
     rank: int = 0
     velocity: float = 0.0
@@ -537,6 +537,7 @@ class HFFetcher:
                 "tags": m.tags,
                 "pipeline_tag": m.pipeline_tag,
                 "size_bytes": m.size_bytes,
+                "hf_trending_score": getattr(m, 'hf_trending_score', 0.0)
             }
             for m in data
         ]
@@ -551,17 +552,18 @@ class HFFetcher:
         models = []
         for m in models_data:
             dt = datetime.fromisoformat(m["timestamp"])
-            models.append(
-                ModelInfo(
-                    id=m["id"],
-                    downloads=m["downloads"],
-                    likes=m["likes"],
-                    timestamp=dt,
-                    tags=m.get("tags", []),
-                    pipeline_tag=m.get("pipeline_tag", ""),
-                    size_bytes=m.get("size_bytes"),
-                )
+            model = ModelInfo(
+                id=m["id"],
+                downloads=m["downloads"],
+                likes=m["likes"],
+                timestamp=dt,
+                tags=m.get("tags", []),
+                pipeline_tag=m.get("pipeline_tag", ""),
+                size_bytes=m.get("size_bytes"),
             )
+            model.hf_trending_score = m.get("hf_trending_score", 0.0)
+
+            models.append(model)
         return models
 
     def _fetch_stream(self, strategy: Dict, max_pages: int) -> List[Dict]:
@@ -741,34 +743,39 @@ class HFFetcher:
         # filter="gguf" — это официальный фильтр библиотеки
         try:
             # Получаем итератор моделей
-            cursor = self.hf_api.list_models(
-                filter="gguf",
-                sort="downloads",
-                direction=-1,
-                limit=500, # Можно поставить больше
-                full=True
+            cursor_dl = self.hf_api.list_models(
+                filter="gguf", sort="downloads", direction=-1, limit=1000, full=True
+            )
+            # 2. Получаем топ самых НОВЫХ (недавно созданных/обновленных)
+            cursor_new = self.hf_api.list_models(
+                filter="gguf", sort="lastModified", direction=-1, limit=1000, full=True
+            )
+            # 3. Получаем топ по лайкам
+            cursor_likes = self.hf_api.list_models(
+                filter="gguf", sort="likes", direction=-1, limit=1000, full=True
             )
 
-            for model_info in cursor:
-                mid = model_info.id
-                if mid in unique_models:
-                    continue
+            # Объединяем результаты всех запросов
+            for cursor in [cursor_dl, cursor_new, cursor_likes]:
+                for model_info in cursor:
+                    mid = model_info.id
+                    if mid in unique_models:
+                        continue
 
-                # Фильтрация по blacklist (ваша логика)
-                if any(bad in mid.lower() for bad in BLACKLIST_KEYWORDS):
-                    continue
+                    # Фильтрация по blacklist
+                    if any(bad in mid.lower() for bad in BLACKLIST_KEYWORDS):
+                        continue
 
-                # Преобразование объекта ModelInfo из библиотеки в ваш объект ModelInfo
-                model = ModelInfo(
-                    id=mid,
-                    downloads=model_info.downloads,
-                    likes=model_info.likes,
-                    timestamp=model_info.lastModified,
-                    tags=model_info.tags,
-                    pipeline_tag=model_info.pipeline_tag or "",
-                    size_bytes=None # Параметры размера часто лежат в meta, если нужно
-                )
-                unique_models[mid] = model
+                    model = ModelInfo(
+                        id=mid,
+                        downloads=model_info.downloads,
+                        likes=model_info.likes,
+                        timestamp=model_info.lastModified,
+                        tags=model_info.tags,
+                        pipeline_tag=model_info.pipeline_tag or "",
+                        size_bytes=None
+                    )
+                    unique_models[mid] = model
 
         except Exception as e:
             print(f"[ERROR] HF API fetch failed: {e}")
