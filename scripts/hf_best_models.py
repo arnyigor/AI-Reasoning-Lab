@@ -110,30 +110,12 @@ def extract_base_model_name(model_id: str) -> str:
 
     return base_name
 
-
-async def fetch_model_params(model_id: str, api: HfApi = None) -> Optional[float]:
-    """
-    Запрашивает количество параметров модели через HF API.
-    Возвращает параметры в миллиардах (B) или None если недоступно.
-    """
-    try:
-        if api is None:
-            api = HfApi()
-
-        return await asyncio.to_thread(_fetch_params_sync, model_id, api)
-
-    except Exception:
-        pass
-
-    return None
-
-
 async def fetch_model_params_batch(
-    models: List["ModelInfo"],
-    cache_manager: "CacheManager" = None,
-    api: HfApi = None,
-    max_concurrent: int = 10,
-    timeout_seconds: float = 60.0,
+        models: List["ModelInfo"],
+        cache_manager: "CacheManager" = None,
+        api: HfApi = None,
+        max_concurrent: int = 10,
+        timeout_seconds: float = 60.0,
 ) -> Dict[str, float]:
     """
     Асинхронно запрашивает параметры для списка моделей.
@@ -237,8 +219,8 @@ def _fetch_params_sync(model_id: str, api: HfApi) -> Optional[float]:
 
             if hidden_size and num_layers and num_heads and vocab_size:
                 approx_params = (
-                    hidden_size * num_layers * 3 + vocab_size * hidden_size
-                ) * 2
+                                        hidden_size * num_layers * 3 + vocab_size * hidden_size
+                                ) * 2
                 if num_key_value_heads != num_heads:
                     approx_params += hidden_size * num_layers * 2
                 return approx_params / 1e9
@@ -473,7 +455,7 @@ class RankingHistoryManager:
         return f"{params.get('mode')}_{params.get('min')}_{params.get('max')}"
 
     def get_last_state(
-        self, config_hash: str
+            self, config_hash: str
     ) -> Tuple[Dict[str, Dict], Optional[datetime]]:
         with self._connect() as conn:
             cursor = conn.execute(
@@ -544,7 +526,7 @@ class HFFetcher:
         return data is not None
 
     def _save_cache(
-        self, key: str, data: List[ModelInfo], ttl: int = DEEP_SCAN_CACHE_TTL
+            self, key: str, data: List[ModelInfo], ttl: int = DEEP_SCAN_CACHE_TTL
     ):
         models_data = [
             {
@@ -587,6 +569,9 @@ class HFFetcher:
         for p in range(max_pages):
             time.sleep(random.uniform(0.3, 0.8))
             params = strategy.copy()
+            # Если sort вызывает 400, убираем его и фильтруем локально
+            if params.get('sort') == 'trending':
+                params.pop('sort')
             params["p"] = p
             try:
                 resp = self.session.get(HF_JSON_API, params=params, timeout=12)
@@ -602,12 +587,12 @@ class HFFetcher:
         return results
 
     def fetch_by_query(
-        self,
-        query: str,
-        author: str = None,
-        limit: int = SEARCH_LIMIT,
-        pipeline_tag: str = "text-generation",
-        use_cache: bool = True,
+            self,
+            query: str,
+            author: str = None,
+            limit: int = SEARCH_LIMIT,
+            pipeline_tag: str = "text-generation",
+            use_cache: bool = True,
     ) -> List[Dict]:
         """
         Поиск моделей через официальный HF API.
@@ -663,12 +648,12 @@ class HFFetcher:
         return []
 
     def fetch_specialized(
-        self,
-        query: str = "",
-        author: str = None,
-        limit: int = 1000,
-        tags: List[str] = None,
-        use_cache: bool = True,
+            self,
+            query: str = "",
+            author: str = None,
+            limit: int = 1000,
+            tags: List[str] = None,
+            use_cache: bool = True,
     ) -> List[Dict]:
         """
         Fetch specialized models by category tags.
@@ -748,64 +733,48 @@ class HFFetcher:
                     f"[NETWORK] [CACHE MISS] Empty or invalid cache, fetching from API"
                 )
 
-        print(f"[NETWORK] SCANNING HF ({len(strategies)} x {PAGES_TO_FETCH} pages)...")
+        print(f"[NETWORK] SCANNING HF via HfApi...")
         unique_models: Dict[str, ModelInfo] = {}
 
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            future_to_strat = {
-                executor.submit(self._fetch_stream, s, PAGES_TO_FETCH): s["sort"]
-                for s in strategies
-            }
-            for future in as_completed(future_to_strat):
-                data = future.result()
-                for item in data:
-                    mid = item.get("id")
-                    if mid in unique_models:
-                        continue
+        # Используем библиотечный метод, он сам обрабатывает лимиты и параметры
+        # direction=-1 — это сортировка по убыванию (как в вашем старом коде)
+        # filter="gguf" — это официальный фильтр библиотеки
+        try:
+            # Получаем итератор моделей
+            cursor = self.hf_api.list_models(
+                filter="gguf",
+                sort="downloads",
+                direction=-1,
+                limit=500, # Можно поставить больше
+                full=True
+            )
 
-                    if any(bad in mid.lower() for bad in BLACKLIST_KEYWORDS):
-                        continue
+            for model_info in cursor:
+                mid = model_info.id
+                if mid in unique_models:
+                    continue
 
-                    pipeline = item.get("pipeline_tag", "")
-                    if pipeline and pipeline not in [
-                        "text-generation",
-                        "text-generation-inference",
-                        "conversational",
-                        "fill-mask",
-                    ]:
-                        continue
+                # Фильтрация по blacklist (ваша логика)
+                if any(bad in mid.lower() for bad in BLACKLIST_KEYWORDS):
+                    continue
 
-                    dt_str = item.get("lastModified") or item.get("createdAt")
-                    dt = (
-                        datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-                        if dt_str
-                        else datetime.now(timezone.utc)
-                    )
+                # Преобразование объекта ModelInfo из библиотеки в ваш объект ModelInfo
+                model = ModelInfo(
+                    id=mid,
+                    downloads=model_info.downloads,
+                    likes=model_info.likes,
+                    timestamp=model_info.lastModified,
+                    tags=model_info.tags,
+                    pipeline_tag=model_info.pipeline_tag or "",
+                    size_bytes=None # Параметры размера часто лежат в meta, если нужно
+                )
+                unique_models[mid] = model
 
-                    meta = item.get("params", {})
-
-                    model = ModelInfo(
-                        id=mid,
-                        downloads=item.get("downloads", 0),
-                        likes=item.get("likes", 0),
-                        timestamp=dt,
-                        tags=item.get("tags", []),
-                        pipeline_tag=pipeline,
-                        size_bytes=meta.get("bs") if meta else None,
-                    )
-
-                    size_bytes = meta.get("bs") if meta else None
-                    if size_bytes:
-                        model.size_bytes = size_bytes
-
-                    unique_models[mid] = model
+        except Exception as e:
+            print(f"[ERROR] HF API fetch failed: {e}")
 
         result = list(unique_models.values())
-        print(
-            f"[NETWORK] [SAVED] {len(result)} models cached for {DEEP_SCAN_CACHE_TTL // 60} minutes"
-        )
         self._save_cache(cache_key, result, DEEP_SCAN_CACHE_TTL)
-        self._last_deep_scan = result
         return result
 
 
@@ -822,7 +791,7 @@ class GGUFModelRanker:
         self._dedup_cache = {}
 
     def _fuzzy_match_score(
-        self, query: str, m: ModelInfo, fields: List[str] = None
+            self, query: str, m: ModelInfo, fields: List[str] = None
     ) -> float:
         if fields is None:
             fields = ["name"]
@@ -847,13 +816,13 @@ class GGUFModelRanker:
         return (w_score + p_score) / 2
 
     def _adaptive_threshold(
-        self, query: str, base: int = 85, min_thresh: int = 70
+            self, query: str, base: int = 85, min_thresh: int = 70
     ) -> int:
         length_penalty = len(query) * 2
         return max(min_thresh, base - length_penalty)
 
     def _parse_model_info(
-        self, api_data: List[Dict], strict_pipeline_tag: bool = True
+            self, api_data: List[Dict], strict_pipeline_tag: bool = True
     ) -> List[ModelInfo]:
         """
         Парсит результаты HF API в ModelInfo.
@@ -863,7 +832,8 @@ class GGUFModelRanker:
         """
         models = []
         for item in api_data:
-            if not item:
+            tags = item.get("tags", [])
+            if "gguf" not in tags: # Проверка наличия тега, а не только фильтра API
                 continue
 
             mid = item.get("id")
@@ -875,15 +845,15 @@ class GGUFModelRanker:
 
             pipeline = item.get("pipeline_tag", "")
             if (
-                strict_pipeline_tag
-                and pipeline
-                and pipeline
-                not in [
-                    "text-generation",
-                    "text-generation-inference",
-                    "conversational",
-                    "fill-mask",
-                ]
+                    strict_pipeline_tag
+                    and pipeline
+                    and pipeline
+                    not in [
+                "text-generation",
+                "text-generation-inference",
+                "conversational",
+                "fill-mask",
+            ]
             ):
                 continue
 
@@ -909,15 +879,15 @@ class GGUFModelRanker:
         return models
 
     def search_models(
-        self,
-        query: str,
-        mode: RankingMode = RankingMode.STABLE,
-        min_b: Optional[float] = None,
-        max_b: Optional[float] = None,
-        top_n: int = 20,
-        author: str = None,
-        search_fields: List[str] = None,
-        use_hf_api: Optional[bool] = None,
+            self,
+            query: str,
+            mode: RankingMode = RankingMode.STABLE,
+            min_b: Optional[float] = None,
+            max_b: Optional[float] = None,
+            top_n: int = 20,
+            author: str = None,
+            search_fields: List[str] = None,
+            use_hf_api: Optional[bool] = None,
     ) -> List[ModelInfo]:
         if search_fields is None:
             search_fields = ["name"]
@@ -1056,7 +1026,7 @@ class GGUFModelRanker:
         return None
 
     def extract_size_billions(
-        self, m: ModelInfo, fetch_if_missing: bool = False
+            self, m: ModelInfo, fetch_if_missing: bool = False
     ) -> Optional[float]:
         if m.size_bytes:
             return round(m.size_bytes / 1_000_000_000, 1)
@@ -1343,10 +1313,10 @@ class GGUFModelRanker:
         self.buffer_markdown_table(models, title)
 
     async def enrich_unknown_params(
-        self,
-        models: List[ModelInfo],
-        max_concurrent: int = 10,
-        timeout_seconds: float = 60.0,
+            self,
+            models: List[ModelInfo],
+            max_concurrent: int = 10,
+            timeout_seconds: float = 60.0,
     ) -> int:
         """
         Обогащает модели с неизвестными параметрами через HF API.
@@ -1524,7 +1494,7 @@ class SpecializedRanker:
         print(f"  Total fetch time: {time.time() - total_start:.1f}s")
 
     def _filter_by_author(
-        self, models: List[ModelInfo], author: str = None
+            self, models: List[ModelInfo], author: str = None
     ) -> List[ModelInfo]:
         if not author:
             return models
@@ -1548,7 +1518,7 @@ class SpecializedRanker:
                     m.categories = [category]
 
     def get_ranking(
-        self, category: str, top_n: int = 20, author: str = None
+            self, category: str, top_n: int = 20, author: str = None
     ) -> List[ModelInfo]:
         if category not in self._cache:
             self._cache[category] = self._load_from_cache(category)
@@ -1565,7 +1535,7 @@ class SpecializedRanker:
         return models[:top_n]
 
     def get_universal_models(
-        self, min_categories: int = 3, top_n: int = 20, author: str = None
+            self, min_categories: int = 3, top_n: int = 20, author: str = None
     ) -> List[ModelInfo]:
         # Ensure all categories are loaded and have categories assigned
         for category in self.CATEGORIES:

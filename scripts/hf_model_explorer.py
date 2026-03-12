@@ -17,6 +17,7 @@ import pyperclip
 import logging
 from pathlib import Path
 import json
+import queue
 
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
@@ -221,8 +222,10 @@ class AppStyle:
 class CustomRangeSlider:
     """Custom range input widget with input fields"""
 
-    def __init__(self, parent, min_val: int = 12, max_val: int = 64, **kwargs):
+    def __init__(self, parent, min_val: int = 12, max_val: int = 64,
+                 on_change_callback=None, **kwargs):
         self.parent = parent
+        self.on_change_callback = on_change_callback  # Callback when values change
 
         self.frame = ttk.Frame(parent)
 
@@ -239,7 +242,7 @@ class CustomRangeSlider:
             font=("Consolas", 10),
         )
         self.entry_min.pack(side=tk.LEFT, padx=(2, 5))
-        self.entry_min.insert(0, "12")
+        self.entry_min.insert(0, str(min_val))
 
         ttk.Label(
             self.frame,
@@ -267,7 +270,7 @@ class CustomRangeSlider:
             font=("Consolas", 10),
         )
         self.entry_max.pack(side=tk.LEFT, padx=(2, 5))
-        self.entry_max.insert(0, "64")
+        self.entry_max.insert(0, str(max_val))
 
         ttk.Label(
             self.frame,
@@ -275,10 +278,14 @@ class CustomRangeSlider:
             style="TLabel",
         ).pack(side=tk.LEFT)
 
+        # Bind to entry changes - trigger on Return, FocusOut, and key releases
         self.entry_min.bind("<Return>", self._on_entry_change)
         self.entry_min.bind("<FocusOut>", self._on_entry_change)
+        self.entry_min.bind("<KeyRelease>", self._on_entry_change_delayed)
+
         self.entry_max.bind("<Return>", self._on_entry_change)
         self.entry_max.bind("<FocusOut>", self._on_entry_change)
+        self.entry_max.bind("<KeyRelease>", self._on_entry_change_delayed)
 
         self.btn_presets = ttk.Menubutton(
             self.frame,
@@ -302,11 +309,14 @@ class CustomRangeSlider:
         )
         preset_menu.add_separator()
         preset_menu.add_command(
-            label="All (1B - 150B)", command=lambda: self._set_preset(1, 150)
+            label="All (1B - 2T)", command=lambda: self._set_preset(1, 2000)
         )
         self.btn_presets.config(menu=preset_menu)
 
         self._update_from_entries()
+
+        # Debounce timer for delayed updates
+        self._after_id = None
 
     def pack(self, **kwargs):
         self.frame.pack(**kwargs)
@@ -318,21 +328,43 @@ class CustomRangeSlider:
         self.entry_max.insert(0, str(max_val))
         self._on_entry_change()
 
+    def _on_entry_change_delayed(self, event=None):
+        """Handle key release with debounce for immediate feedback"""
+        if self._after_id:
+            self.parent.after_cancel(self._after_id)
+        # Schedule update after 300ms of no typing
+        self._after_id = self.parent.after(300, self._on_entry_change)
+
     def _on_entry_change(self, event=None):
+        """Called when entry values change"""
         try:
             min_val = int(self.entry_min.get())
             max_val = int(self.entry_max.get())
 
+            # Validate and clamp values
             if min_val < 1:
                 min_val = 1
                 self.entry_min.delete(0, tk.END)
                 self.entry_min.insert(0, "1")
-            if max_val > 150:
-                max_val = 150
+            if max_val > 2000:
+                max_val = 2000
                 self.entry_max.delete(0, tk.END)
-                self.entry_max.insert(0, "150")
+                self.entry_max.insert(0, "2000")
+
+            # Ensure min <= max
+            if min_val > max_val:
+                min_val, max_val = max_val, min_val
+                self.entry_min.delete(0, tk.END)
+                self.entry_min.insert(0, str(min_val))
+                self.entry_max.delete(0, tk.END)
+                self.entry_max.insert(0, str(max_val))
+
         except ValueError:
-            pass
+            return  # Ignore invalid input during typing
+
+        # Notify callback if set
+        if self.on_change_callback:
+            self.on_change_callback()
 
     def _update_from_entries(self):
         try:
@@ -349,13 +381,16 @@ class CustomRangeSlider:
         self.entry_min.insert(0, str(min_val))
         self.entry_max.delete(0, tk.END)
         self.entry_max.insert(0, str(max_val))
+        # Trigger callback when preset is set
+        if self.on_change_callback:
+            self.on_change_callback()
 
     def get(self) -> tuple:
         try:
             min_val = int(self.entry_min.get())
             max_val = int(self.entry_max.get())
             min_val = max(1, min_val)
-            max_val = min(150, max_val)
+            max_val = min(2000, max_val)
             if min_val > max_val:
                 min_val, max_val = max_val, min_val
             return (min_val, max_val)
@@ -569,13 +604,41 @@ class ModelExplorerApp:
 
         self.ranker = GGUFModelRanker()
         self.models: List[ModelInfo] = []
+        self.filtered_models: List[ModelInfo] = []  # Cache for filtered results
         self.is_loading = False
+        self.filter_queue = queue.Queue()  # Queue for filter operations
+        self.filter_thread = None
+        self.filter_lock = threading.Lock()
 
         self._setup_styles()
         self._build_ui()
         self._setup_bindings()
 
+        # Start background filter processor
+        self._start_filter_processor()
+
         self._load_data_async()
+
+    def _start_filter_processor(self):
+        """Start background thread for processing filter operations"""
+        def process_filters():
+            while True:
+                try:
+                    # Get filter request from queue (blocking)
+                    filter_params = self.filter_queue.get(timeout=0.1)
+                    if filter_params is None:  # Shutdown signal
+                        break
+
+                    # Process the filter
+                    self._process_filter_operation(filter_params)
+                    self.filter_queue.task_done()
+                except queue.Empty:
+                    continue
+                except Exception as e:
+                    print(f"[FILTER ERROR] {e}")
+
+        self.filter_thread = threading.Thread(target=process_filters, daemon=True)
+        self.filter_thread.start()
 
     def _build_menu(self):
         menubar = tk.Menu(self.root, bg=AppStyle.BG_SECONDARY, fg=AppStyle.FG_PRIMARY)
@@ -702,12 +765,14 @@ class ModelExplorerApp:
             messagebox.showerror("Export Error", f"Failed to export:\n{str(e)}")
 
     def _reset_all_filters(self):
+        """Reset all filters including min likes"""
         self.slider.set(12, 64)
         self.sort_var.set("smart")
         self.search_var.set("")
         self.top_n_var.set(50)
         self.chk_var.set(0)
-        self._apply_filters_and_sort()
+        self.min_likes_var.set("0")  # Reset min likes
+        self._queue_filter_update()
 
     def _show_shortcuts(self):
         shortcuts_text = """
@@ -809,8 +874,12 @@ Mouse Wheel      Scroll through models
             font=("Segoe UI", 10, "bold"),
         ).pack(side=tk.LEFT, padx=(0, 10))
 
-        self.slider = CustomRangeSlider(row1, min_val=1, max_val=150)
-        self.slider.set(12, 64)
+        self.slider = CustomRangeSlider(
+            row1,
+            min_val=12,
+            max_val=64,
+            on_change_callback=self._queue_filter_update
+        )
         self.slider.pack(side=tk.LEFT, padx=5)
 
         ttk.Button(
@@ -919,6 +988,53 @@ Mouse Wheel      Scroll through models
             command=self._on_filter_change,
         )
         self.chk_gguf.pack(side=tk.LEFT, padx=20)
+
+        # NEW: Minimum Likes Filter
+        ttk.Separator(row2, orient=tk.VERTICAL).pack(
+            side=tk.LEFT, fill=tk.Y, padx=15, pady=5
+        )
+
+        ttk.Label(
+            row2,
+            text="Min Likes:",
+            style="TLabel",
+            font=("Segoe UI", 10, "bold"),
+        ).pack(side=tk.LEFT, padx=(0, 5))
+
+        self.min_likes_var = tk.StringVar(value="0")
+        self.min_likes_var.trace_add("write", self._on_min_likes_change)
+
+        self.entry_min_likes = ttk.Entry(
+            row2,
+            textvariable=self.min_likes_var,
+            width=8,
+            font=("Consolas", 10),
+        )
+        self.entry_min_likes.pack(side=tk.LEFT, padx=5)
+
+        # Preset buttons for common like thresholds
+        likes_menu_btn = ttk.Menubutton(
+            row2,
+            text="Presets",
+            style="TButton",
+        )
+        likes_menu_btn.pack(side=tk.LEFT, padx=5)
+
+        likes_menu = tk.Menu(likes_menu_btn, tearoff=0)
+        likes_menu.add_command(label="Any (0)", command=lambda: self._set_min_likes(0))
+        likes_menu.add_command(label="Popular (100+)", command=lambda: self._set_min_likes(100))
+        likes_menu.add_command(label="Very Popular (500+)", command=lambda: self._set_min_likes(500))
+        likes_menu.add_command(label="Top Tier (1000+)", command=lambda: self._set_min_likes(1000))
+        likes_menu.add_command(label="Elite (5000+)", command=lambda: self._set_min_likes(5000))
+        likes_menu_btn.config(menu=likes_menu)
+
+    def _on_min_likes_change(self, *args):
+        """Handle minimum likes filter change"""
+        self._queue_filter_update()
+
+    def _set_min_likes(self, value: int):
+        """Set minimum likes from preset"""
+        self.min_likes_var.set(str(value))
 
     def _build_main_content(self):
         content_frame = ttk.Frame(self.root, style="Primary.TFrame")
@@ -1076,7 +1192,7 @@ Mouse Wheel      Scroll through models
             item = self.tree.item(selected[0])
             model_id = item["values"][1] if len(item["values"]) > 1 else None
 
-            for model in self.models:
+            for model in self.filtered_models:  # Use filtered_models instead
                 if model.id == model_id:
                     size_info = (
                         f"{model.parsed_params_b:.1f}B"
@@ -1094,7 +1210,7 @@ Mouse Wheel      Scroll through models
             model_id = item["values"][1] if len(item["values"]) > 1 else None
 
             if model_id:
-                for model in self.models:
+                for model in self.filtered_models:  # Use filtered_models
                     if model.id == model_id:
                         webbrowser.open(model.hf_url)
                         break
@@ -1115,14 +1231,14 @@ Mouse Wheel      Scroll through models
                 self.lbl_status.config(text=f"Copied: {model_id}")
 
             def copy_url():
-                for model in self.models:
+                for model in self.filtered_models:
                     if model.id == model_id:
                         pyperclip.copy(model.hf_url)
                         self.lbl_status.config(text=f"Copied URL: {model.hf_url}")
                         break
 
             def open_url():
-                for model in self.models:
+                for model in self.filtered_models:
                     if model.id == model_id:
                         webbrowser.open(model.hf_url)
                         break
@@ -1138,24 +1254,159 @@ Mouse Wheel      Scroll through models
                 context_menu.grab_release()
 
     def _on_sort_change(self):
-        self._apply_filters_and_sort()
+        self._queue_filter_update()
 
     def _on_search_change(self, *args):
-        self._apply_filters_and_sort()
+        self._queue_filter_update()
 
     def _on_filter_change(self):
-        self._apply_filters_and_sort()
+        self._queue_filter_update()
 
     def _on_top_n_change(self, event=None):
-        self._apply_filters_and_sort()
+        self._queue_filter_update()
 
     def _reset_range(self):
         self.slider.set(12, 64)
-        self._apply_filters_and_sort()
+        self._queue_filter_update()
 
     def _clear_search(self):
         self.search_var.set("")
         self.entry_search.focus_set()
+
+    def _queue_filter_update(self):
+        """Queue a filter update operation (non-blocking)"""
+        if not self.models:
+            return
+
+        # Parse min likes
+        try:
+            min_likes = int(self.min_likes_var.get())
+            if min_likes < 0:
+                min_likes = 0
+        except ValueError:
+            min_likes = 0
+
+        # Get current filter parameters
+        filter_params = {
+            'min_b': self.slider.get()[0],
+            'max_b': self.slider.get()[1],
+            'sort_mode': self.sort_var.get(),
+            'search_query': self.search_var.get().lower().strip(),
+            'top_n': self.top_n_var.get(),
+            'gguf_only': self.chk_var.get() == 1,
+            'min_likes': min_likes,  # NEW: Add min likes to filter params
+        }
+
+        # Put in queue for background processing
+        try:
+            # Clear old items
+            while not self.filter_queue.empty():
+                try:
+                    self.filter_queue.get_nowait()
+                except queue.Empty:
+                    break
+            self.filter_queue.put(filter_params)
+        except Exception as e:
+            print(f"[QUEUE ERROR] {e}")
+
+    def _process_filter_operation(self, params):
+        """Process filter operation in background thread"""
+        try:
+            min_b = params['min_b']
+            max_b = params['max_b']
+            sort_mode = params['sort_mode']
+            search_query = params['search_query']
+            top_n = params['top_n']
+            gguf_only = params['gguf_only']
+            min_likes = params.get('min_likes', 0)  # NEW: Get min likes
+
+            # Filter models
+            filtered = []
+            for model in self.models:
+                size = model.parsed_params_b
+
+                if size is not None and size > 0:
+                    if size < min_b or size > max_b:
+                        continue
+
+                # NEW: Filter by minimum likes
+                if model.likes < min_likes:
+                    continue
+
+                if search_query:
+                    name = model.name.lower()
+                    author = model.author.lower()
+                    if search_query not in name and search_query not in author:
+                        continue
+
+                if gguf_only:
+                    from config import GGUF_KINGS
+                    if model.author.lower() not in [k.lower() for k in GGUF_KINGS]:
+                        continue
+                    if not self._is_gguf_model(model):
+                        continue
+
+                filtered.append(model)
+
+            # Sort with smart multi-level sorting
+            sorted_models = self._sort_models_smart(filtered, sort_mode)
+            displayed_models = sorted_models[:top_n]
+
+            # Update UI from main thread
+            self.root.after(0, lambda: self._update_ui_after_filter(
+                displayed_models, len(filtered), params
+            ))
+
+        except Exception as e:
+            print(f"[FILTER PROCESS ERROR] {e}")
+
+    def _update_ui_after_filter(self, displayed_models, total_filtered, params):
+        """Update UI after filter operation completes"""
+        self.filtered_models = displayed_models  # Cache for selection
+
+        # Update treeview
+        self._update_treeview(displayed_models)
+
+        # Update status
+        min_b = params['min_b']
+        max_b = params['max_b']
+        sort_mode = params['sort_mode']
+        search_query = params['search_query']
+        gguf_only = params['gguf_only']
+        top_n = params['top_n']
+        min_likes = params.get('min_likes', 0)  # NEW
+
+        total_models = len(self.models)
+        range_passed = len([m for m in self.models
+                            if m.parsed_params_b and min_b <= m.parsed_params_b <= max_b])
+
+        status_msg = f"Displayed: {len(displayed_models)} | Range: {range_passed}/{total_models} | Sort: {sort_mode}"
+        if gguf_only:
+            status_msg += " | GGUF Only"
+        if search_query:
+            status_msg += f' | Q: "{search_query}"'
+        if min_likes > 0:  # NEW
+            status_msg += f' | ❤️ >{min_likes}'
+
+        self.lbl_count.config(text=status_msg)
+
+        # Log filter operation
+        logging.info(
+            "FILTER_APPLIED",
+            extra={
+                "total_models_before": total_models,
+                "models_after_size_filter": total_filtered,
+                "models_displayed": len(displayed_models),
+                "min_size_b": min_b,
+                "max_size_b": max_b,
+                "min_likes": min_likes,  # NEW
+                "search_query": search_query or None,
+                "sort_mode": sort_mode,
+                "top_n": top_n,
+                "gguf_only": gguf_only,
+                "sample_model_ids": [m.id for m in displayed_models[:3]] if displayed_models else [],
+            },
+        )
 
     def _load_data_async(self):
         self.is_loading = True
@@ -1206,137 +1457,23 @@ Mouse Wheel      Scroll through models
                 foreground=AppStyle.WARNING,
             )
             self.root.update()
-            self._fetch_unknown_params(self.models)
+            # Fetch unknown params in background
+            threading.Thread(target=self._fetch_unknown_params_async, daemon=True).start()
         else:
             self.lbl_status.config(
                 text=f"Loaded {len(self.models)} models", foreground=AppStyle.SUCCESS
             )
 
-        self._apply_filters_and_sort()  # Теперь фильтрация логируется отдельно
+        # Apply initial filter
+        self._queue_filter_update()
 
-
-    def _on_data_error(self, error_msg):
-        self.is_loading = False
-        self.btn_refresh.config(state=tk.NORMAL)
-        self.progress.stop()
-
-        self.lbl_status.config(
-            text=f"Error: {error_msg[:50]}", foreground=AppStyle.ERROR
-        )
-        print(f"[ERROR] {error_msg}")
-
-    def _refresh_data(self):
-        self.models = []
-        self._load_data_async()
-
-    def _apply_filters_and_sort(self):
-        if not self.models:
-            return
-
-        min_b, max_b = self.slider.get()
-        sort_mode = self.sort_var.get()
-        search_query = self.search_var.get().lower().strip()
-        top_n = self.top_n_var.get()
-        gguf_only = self.chk_var.get() == 1
-
-        filter_context = {
-            "min_size_b": min_b,
-            "max_size_b": max_b,
-            "search_query": search_query if search_query else None,
-            "sort_mode": sort_mode,
-            "top_n": top_n,
-            "gguf_only": gguf_only,
-            "total_models_before_filter": len(self.models),
-        }
-
-        filtered = []
-
-        for model in self.models:
-            size = model.parsed_params_b
-
-            if size is not None and size > 0:
-                if size < min_b or size > max_b:
-                    continue
-
-            if search_query:
-                name = model.name.lower()
-                author = model.author.lower()
-                if search_query not in name and search_query not in author:
-                    continue
-
-            if gguf_only:
-                from config import GGUF_KINGS
-                if model.author.lower() not in [k.lower() for k in GGUF_KINGS]:
-                    continue
-                if not self._is_gguf_model(model):
-                    continue
-
-            filtered.append(model)
-
-        sorted_models = self._sort_models(filtered, sort_mode)
-        displayed_models = sorted_models[:top_n]
-
-        filter_context.update({
-            "models_after_filter": len(filtered),
-            "models_displayed": len(displayed_models),
-            "displayed_model_ids_sample": [m.id for m in displayed_models[:3]] if displayed_models else [],
-        })
-
-        logging.info("FILTER_APPLIED", extra=filter_context)
-
-        # Обновляем статус
-        total_models = len(self.models)
-        range_passed = len([m for m in self.models if m.parsed_params_b and min_b <= m.parsed_params_b <= max_b])
-
-        status_msg = f"Displayed: {len(displayed_models)} | Range: {range_passed}/{total_models} | Sort: {sort_mode}"
-        if gguf_only:
-            status_msg += " | GGUF Only"
-        if search_query:
-            status_msg += f' | Q: "{search_query}"'
-
-        self.lbl_count.config(text=status_msg)
-
-        logging.info(
-            "FILTER_APPLIED",
-            extra={
-                "total_models_before": total_models,
-                "models_after_size_filter": len(filtered),
-                "models_displayed": len(displayed_models),
-                "min_size_b": min_b,
-                "max_size_b": max_b,
-                "search_query": search_query or None,
-                "sort_mode": sort_mode,
-                "top_n": top_n,
-                "gguf_only": gguf_only,
-                "sample_model_ids": [m.id for m in displayed_models[:3]] if displayed_models else [],
-            },
-        )
-
-        self._update_treeview(displayed_models)
-
-
-    def _is_gguf_model(self, model: ModelInfo) -> bool:
-        """Check if model is GGUF format by tags or name"""
-        model_lower = model.id.lower()
-
-        gguf_patterns = ["gguf", "-gguf"]
-
-        if any(pattern in model_lower for pattern in gguf_patterns):
-            return True
-
-        for tag in model.tags:
-            if "gguf" in tag.lower():
-                return True
-
-        return False
-
-    def _fetch_unknown_params(self, models: List[ModelInfo]):
-        """Fetch parameters for GGUF models with unknown size"""
+    def _fetch_unknown_params_async(self):
+        """Fetch unknown parameters in background without blocking GUI"""
         import requests
 
         unknown_gguf = [
             m
-            for m in models
+            for m in self.models
             if (m.parsed_params_b is None or m.parsed_params_b == 0)
                and self._is_gguf_model(m)
         ]
@@ -1394,18 +1531,75 @@ Mouse Wheel      Scroll through models
         )
 
         if fetched_count > 0:
-            self._apply_filters_and_sort()
+            # Refresh UI after fetching params
+            self.root.after(0, self._queue_filter_update)
 
-    def _sort_models(self, models: List[ModelInfo], sort_mode: str) -> List[ModelInfo]:
+    def _on_data_error(self, error_msg):
+        self.is_loading = False
+        self.btn_refresh.config(state=tk.NORMAL)
+        self.progress.stop()
+
+        self.lbl_status.config(
+            text=f"Error: {error_msg[:50]}", foreground=AppStyle.ERROR
+        )
+        print(f"[ERROR] {error_msg}")
+
+    def _refresh_data(self):
+        self.models = []
+        self.filtered_models = []
+        self._load_data_async()
+
+    def _is_gguf_model(self, model: ModelInfo) -> bool:
+        """Check if model is GGUF format by tags or name"""
+        model_lower = model.id.lower()
+
+        gguf_patterns = ["gguf", "-gguf"]
+
+        if any(pattern in model_lower for pattern in gguf_patterns):
+            return True
+
+        for tag in model.tags:
+            if "gguf" in tag.lower():
+                return True
+
+        return False
+
+    def _sort_models_smart(self, models: List[ModelInfo], sort_mode: str) -> List[ModelInfo]:
+        """
+        Smart multi-level sorting.
+        Primary sort by selected mode, then by likes, then by downloads.
+        Trending mode uses single-level sort (downloads, likes).
+        """
         if sort_mode == "trending":
+            # Trending: simple multi-level (downloads, likes)
             return sorted(models, key=lambda m: (m.downloads, m.likes), reverse=True)
+
         elif sort_mode == "likes":
-            return sorted(models, key=lambda m: m.likes, reverse=True)
+            # Primary: likes, Secondary: downloads, Tertiary: modified (timestamp)
+            return sorted(models, key=lambda m: (
+                m.likes,
+                m.downloads,
+                m.timestamp.timestamp() if m.timestamp else 0
+            ), reverse=True)
+
         elif sort_mode == "downloads":
-            return sorted(models, key=lambda m: m.downloads, reverse=True)
+            # Primary: downloads, Secondary: likes, Tertiary: modified
+            return sorted(models, key=lambda m: (
+                m.downloads,
+                m.likes,
+                m.timestamp.timestamp() if m.timestamp else 0
+            ), reverse=True)
+
         elif sort_mode == "modified":
-            return sorted(models, key=lambda m: m.timestamp, reverse=True)
+            # Primary: modified, Secondary: likes, Tertiary: downloads
+            return sorted(models, key=lambda m: (
+                m.timestamp.timestamp() if m.timestamp else 0,
+                m.likes,
+                m.downloads
+            ), reverse=True)
+
         elif sort_mode == "smart":
+            # Smart: calculate combined score, then sort by score
             for m in models:
                 m.combined_score = self._calculate_smart_score(m)
             return sorted(models, key=lambda m: m.combined_score, reverse=True)
@@ -1562,6 +1756,12 @@ Mouse Wheel      Scroll through models
                     "Data is still loading. Are you sure you want to exit?",
             ):
                 return
+
+        # Signal filter thread to stop
+        try:
+            self.filter_queue.put_nowait(None)
+        except:
+            pass
 
         self.root.destroy()
 
