@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List, Tuple, Optional, Literal
 from dataclasses import dataclass, field
 from unittest.mock import MagicMock
 
@@ -25,9 +25,12 @@ class CodeTask:
     original_code: str
     user_request: str  # Что просит пользователь (как в реальном чате)
 
+    # Язык промпта
+    prompt_language: str = "ru"  # "ru" или "en"
+
     # Валидация
-    expected_changes: List[str] = field(default_factory=list)  # Что должно появиться
-    forbidden_patterns: List[str] = field(default_factory=list)  # Что должно исчезнуть
+    expected_changes: List[str] = field(default_factory=list)
+    forbidden_patterns: List[str] = field(default_factory=list)
     structural_requirements: Dict[str, Any] = field(default_factory=dict)
 
     # Функциональные тесты
@@ -37,31 +40,23 @@ class CodeTask:
     # Внешние зависимости (для мокирования)
     external_dependencies: List[str] = field(default_factory=list)
 
-    # Режим тестирования
-    test_mode: str = "execute"  # "execute", "ast_only", "compile_only"
-
-    # Для diff_apply
-    unified_diff: str = ""
-    expected_result: str = ""
+    # Режим тестирования: execute, structure_only, compile_only
+    test_mode: str = "execute"
 
 
 class CombatCodeAgentTestGenerator(AbstractTestGenerator):
     """
-    Combat-level тест для code agent.
+    Combat-level тест для code agent v3.
 
-    Симулирует реальные сценарии:
-    1. Пользователь вставляет код и просит внести правки
-    2. Agent должен понять контекст и применить изменения
-    3. Код должен остаться рабочим
-
-    Улучшения v2:
-    - Автоматическое мокирование внешних зависимостей
-    - Трехуровневая верификация (syntax → structure → execution)
-    - Более детальные сообщения об ошибках
-    - Поддержка partial success (структура OK, но runtime fail)
+    Улучшения:
+    - Двуязычные промпты (RU/EN)
+    - Гибкие паттерны валидации
+    - Исправлены ложные срабатывания
+    - Расширенный набор задач
+    - Поддержка Python 3.12
     """
 
-    def __init__(self, test_id: str = "combat_code_agent"):
+    def __init__(self, test_id: str = "t_instructions_code"):
         super().__init__(test_id)
         self.tasks = self._init_combat_tasks()
 
@@ -69,12 +64,13 @@ class CombatCodeAgentTestGenerator(AbstractTestGenerator):
         """Боевые задачи из реальной практики."""
         return [
             # ══════════════════════════════════════════════════════════════
-            # 1. KOTLIN: Добавить обработку ошибок в suspend функцию
+            # 1. KOTLIN: Добавить обработку ошибок (RU)
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="kotlin_add_error_handling",
                 language="kotlin",
                 mode="feature_add",
+                prompt_language="ru",
                 description="Добавление обработки ошибок в корутину",
                 original_code='''
 class UserRepository(private val api: UserApi) {
@@ -101,67 +97,72 @@ class UserRepository(private val api: UserApi) {
                     "try",
                     "catch",
                     "Log.e",
-                    "UserRepository",
                     "User?",
                     "null"
                 ],
                 structural_requirements={
-                    "must_contain_all": ["try {", "catch (", "Log.e("],
-                    "return_type_change": ("User", "User?")
+                    "must_contain_all": ["try", "catch"],
+                    "must_contain_any": ["Log.e", "log.e", "Logger"],
                 },
-                test_code='''
-import kotlinx.coroutines.runBlocking
-
-// Mock классы для теста
-interface UserApi {
-    suspend fun fetchUser(id: String): UserResponse
-    suspend fun updateUser(req: UserRequest): UpdateResponse
-}
-data class UserResponse(val id: String, val name: String) {
-    fun toUser() = User(id, name)
-}
-data class User(val id: String, val name: String) {
-    fun toRequest() = UserRequest(id, name)
-}
-data class UserRequest(val id: String, val name: String)
-data class UpdateResponse(val isSuccessful: Boolean)
-
-// Mock Android Log
-object Log {
-    fun e(tag: String, msg: String, ex: Throwable? = null) {
-        println("ERROR[$tag]: $msg")
-    }
-}
-
-// Тест
-fun main() {
-    val mockApi = object : UserApi {
-        override suspend fun fetchUser(id: String) = UserResponse(id, "Test")
-        override suspend fun updateUser(req: UserRequest) = UpdateResponse(true)
-    }
-    
-    val repo = UserRepository(mockApi)
-    
-    // Проверяем что тип возврата nullable
-    val result: User? = runBlocking { repo.getUser("1") }
-    assert(result != null) { "getUser should return User" }
-    
-    val updated = runBlocking { repo.updateUser(User("1", "New")) }
-    assert(updated) { "updateUser should return true" }
-    
-    println("TYPE_CHECK_PASSED")
-}
-''',
-                test_mode="execute"
+                test_mode="structure_only"
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 2. PYTHON: Рефакторинг - вынести конфиг в отдельный класс
+            # 2. KOTLIN: Error Handling (EN)
+            # ══════════════════════════════════════════════════════════════
+            CodeTask(
+                task_id="kotlin_error_handling_en",
+                language="kotlin",
+                mode="feature_add",
+                prompt_language="en",
+                description="Add error handling to suspend functions",
+                original_code='''
+class ProductRepository(private val api: ProductApi) {
+    
+    suspend fun getProduct(productId: Long): Product {
+        val response = api.fetchProduct(productId)
+        return response.toProduct()
+    }
+    
+    suspend fun deleteProduct(productId: Long): Boolean {
+        val response = api.deleteProduct(productId)
+        return response.isSuccessful
+    }
+}
+'''.strip(),
+                user_request="""
+Add error handling to both methods:
+1. Wrap in try-catch blocks
+2. Log errors using Log.e with tag "ProductRepository"
+3. In getProduct, return null on error (change return type to Product?)
+4. In deleteProduct, return false on error
+5. Catch Exception type
+""",
+                expected_changes=[
+                    "try",
+                    "catch",
+                    "Log.e",
+                    "Product?",
+                    "null",
+                    "Exception"
+                ],
+                forbidden_patterns=[
+                    ": Product {",  # Should be Product?
+                ],
+                structural_requirements={
+                    "must_contain_all": ["try", "catch"],
+                },
+                test_mode="structure_only"
+            ),
+
+            # ══════════════════════════════════════════════════════════════
+            # 3. PYTHON: Dataclass Refactoring (RU)
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="python_extract_config",
                 language="python",
                 mode="refactor",
+                prompt_language="ru",
                 description="Извлечение конфигурации в отдельный класс",
                 original_code='''
 import os
@@ -200,66 +201,38 @@ class CacheService:
                     "from_env",
                     "@classmethod"
                 ],
-                forbidden_patterns=[
-                    # Запрещаем os.getenv ВНУТРИ CacheService.__init__
-                    # Используем контекстную проверку
-                ],
                 structural_requirements={
                     "classes": ["RedisConfig", "CacheService"],
                     "dataclass_frozen": True,
-                    "no_env_in_cache_init": True  # Специальная проверка
+                    "cache_service_accepts_config": True
                 },
-                external_dependencies=["redis"],  # Требует мокирования
+                external_dependencies=["redis"],
                 test_code='''
-# Mock redis перед импортом
 import sys
 from unittest.mock import MagicMock
 sys.modules['redis'] = MagicMock()
 
-# Теперь безопасно выполнять код
 import dataclasses
-import os
 
-# RedisConfig должен быть dataclass
-assert dataclasses.is_dataclass(RedisConfig), "RedisConfig must be a dataclass"
+# Проверяем что RedisConfig - dataclass
+assert dataclasses.is_dataclass(RedisConfig), "RedisConfig должен быть dataclass"
 
 # Проверяем frozen
+cfg = RedisConfig(host="localhost", port=6379, db=0, password=None)
 try:
-    cfg = RedisConfig(host="localhost", port=6379, db=0, password=None)
-    cfg.host = "other"  # Должно упасть
-    assert False, "Should be frozen"
+    cfg.host = "other"
+    raise AssertionError("RedisConfig должен быть frozen")
 except dataclasses.FrozenInstanceError:
     pass
 
 # Проверяем from_env
-assert hasattr(RedisConfig, 'from_env'), "Missing from_env method"
-assert callable(getattr(RedisConfig, 'from_env')), "from_env must be callable"
+assert hasattr(RedisConfig, 'from_env'), "Отсутствует метод from_env"
 
-# Проверяем что это classmethod
+# Проверяем что CacheService принимает config
 import inspect
-from_env_method = getattr(RedisConfig, 'from_env')
-# У classmethod первый аргумент - cls, не self
-assert inspect.ismethod(from_env_method), "from_env should be a method"
-
-# CacheService принимает config
 sig = inspect.signature(CacheService.__init__)
 params = list(sig.parameters.keys())
-assert 'config' in params or 'redis_config' in params, f"CacheService.__init__ должен принимать config. Params: {params}"
-
-# Проверяем что CacheService больше не читает env напрямую
-import ast
-import inspect
-
-# Получаем исходный код CacheService.__init__
-source = inspect.getsource(CacheService.__init__)
-tree = ast.parse(source)
-
-# Ищем вызовы os.getenv в __init__
-for node in ast.walk(tree):
-    if isinstance(node, ast.Call):
-        if isinstance(node.func, ast.Attribute):
-            if node.func.attr == 'getenv':
-                raise AssertionError("CacheService.__init__ не должен вызывать os.getenv напрямую")
+assert any(p in params for p in ['config', 'redis_config', 'cfg']), f"CacheService должен принимать config. Params: {params}"
 
 print("ALL_STRUCTURE_TESTS_PASSED")
 ''',
@@ -267,13 +240,150 @@ print("ALL_STRUCTURE_TESTS_PASSED")
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 3. TYPESCRIPT: Добавить типизацию к legacy JS коду
+            # 4. PYTHON: Async Context Manager (EN)
+            # ══════════════════════════════════════════════════════════════
+            CodeTask(
+                task_id="python_async_context_manager",
+                language="python",
+                mode="feature_add",
+                prompt_language="en",
+                description="Convert class to async context manager",
+                original_code='''
+class DatabaseConnection:
+    def __init__(self, url: str):
+        self.url = url
+        self.connection = None
+    
+    async def connect(self):
+        self.connection = f"Connected to {self.url}"
+        print(self.connection)
+    
+    async def disconnect(self):
+        print("Disconnecting...")
+        self.connection = None
+    
+    async def execute(self, query: str):
+        if not self.connection:
+            raise RuntimeError("Not connected")
+        return f"Executed: {query}"
+'''.strip(),
+                user_request="""
+Convert this class to an async context manager:
+1. Add __aenter__ and __aexit__ methods
+2. __aenter__ should call connect() and return self
+3. __aexit__ should call disconnect() even if an error occurred
+4. Use proper type hints (return 'DatabaseConnection' or Self)
+""",
+                expected_changes=[
+                    "__aenter__",
+                    "__aexit__",
+                    "async def __aenter__",
+                    "async def __aexit__",
+                    "return self"
+                ],
+                structural_requirements={
+                    "has_aenter": True,
+                    "has_aexit": True
+                },
+                test_code='''
+import asyncio
+
+async def test_context_manager():
+    async with DatabaseConnection("postgresql://localhost") as db:
+        result = await db.execute("SELECT 1")
+        assert "Executed" in result, "execute() should work inside context"
+    
+    assert db.connection is None, "Connection should be closed after context exit"
+    print("ASYNC_CONTEXT_MANAGER_OK")
+
+asyncio.run(test_context_manager())
+''',
+                test_mode="execute"
+            ),
+
+            # ══════════════════════════════════════════════════════════════
+            # 5. PYTHON: Fix Race Condition (EN)
+            # ══════════════════════════════════════════════════════════════
+            CodeTask(
+                task_id="python_fix_race_condition",
+                language="python",
+                mode="bug_fix",
+                prompt_language="en",
+                description="Fix race condition in async code",
+                original_code='''
+import asyncio
+from typing import Dict
+
+class RateLimiter:
+    def __init__(self, max_requests: int, window_seconds: int):
+        self.max_requests = max_requests
+        self.window = window_seconds
+        self.requests: Dict[str, list] = {}
+    
+    async def is_allowed(self, client_id: str) -> bool:
+        now = asyncio.get_event_loop().time()
+        
+        if client_id not in self.requests:
+            self.requests[client_id] = []
+        
+        self.requests[client_id] = [
+            t for t in self.requests[client_id]
+            if now - t < self.window
+        ]
+        
+        if len(self.requests[client_id]) >= self.max_requests:
+            return False
+        
+        self.requests[client_id].append(now)
+        return True
+'''.strip(),
+                user_request="""
+This code has a race condition when is_allowed is called concurrently.
+Fix it:
+1. Add asyncio.Lock to protect shared state
+2. Use per-client locks (not a global lock)
+3. Use 'async with' to acquire the lock
+4. Store locks in a dictionary attribute
+""",
+                expected_changes=[
+                    "asyncio.Lock",
+                    "async with",
+                ],
+                structural_requirements={
+                    "has_lock_dict": True,
+                    "uses_async_with": True
+                },
+                test_code='''
+import asyncio
+
+async def stress_test():
+    limiter = RateLimiter(max_requests=5, window_seconds=1)
+    
+    async def hammer(client_id: str, n: int):
+        results = await asyncio.gather(*[
+            limiter.is_allowed(client_id) for _ in range(n)
+        ])
+        return sum(results)
+    
+    allowed = await hammer("test_client", 100)
+    
+    assert allowed == 5, f"Race condition detected! Allowed {allowed} instead of 5"
+    print("RACE_CONDITION_FIXED")
+
+asyncio.run(stress_test())
+''',
+                test_mode="execute"
+            ),
+
+            # ══════════════════════════════════════════════════════════════
+            # 6. TYPESCRIPT: Add Types (EN)
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="ts_add_types",
                 language="typescript",
                 mode="feature_add",
-                description="Добавление строгой типизации",
+                prompt_language="en",
+                description="Add strict typing to legacy JavaScript code",
                 original_code='''
 // @ts-nocheck
 export function processOrder(order, user, options) {
@@ -303,21 +413,18 @@ export function validateOrder(order) {
 }
 '''.strip(),
                 user_request="""
-Добавь полную типизацию:
-1. Убери @ts-nocheck
-2. Создай интерфейсы: Order, OrderItem, User, ProcessOptions, ProcessedOrder, ValidationResult
-3. Типизируй все функции и их параметры
-4. Используй strict типы (не any)
+Add full TypeScript typing:
+1. Remove @ts-nocheck
+2. Create interfaces: Order, OrderItem, User, ProcessOptions, ProcessedOrder, ValidationResult
+3. Type all function parameters and return types
+4. Use strict types (no 'any')
 """,
                 expected_changes=[
                     "interface Order",
                     "interface OrderItem",
                     "interface User",
-                    "interface ProcessOptions",
                     "interface ProcessedOrder",
                     "interface ValidationResult",
-                    ": Order",
-                    ": User"
                 ],
                 forbidden_patterns=[
                     "@ts-nocheck",
@@ -325,20 +432,21 @@ export function validateOrder(order) {
                     "as any"
                 ],
                 structural_requirements={
-                    "interfaces_count": 6,
-                    "no_implicit_any": True
+                    "min_interfaces": 5,
+                    "no_ts_nocheck": True
                 },
-                test_mode="compile_only"  # Только компиляция TypeScript
+                test_mode="structure_only"
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 4. KOTLIN: Миграция с callback на Flow
+            # 7. KOTLIN: Callback to Flow (EN)
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="kotlin_callback_to_flow",
                 language="kotlin",
                 mode="refactor",
-                description="Миграция callback API на Kotlin Flow",
+                prompt_language="en",
+                description="Migrate callback API to Kotlin Flow",
                 original_code='''
 interface LocationCallback {
     fun onLocationUpdate(lat: Double, lng: Double)
@@ -365,303 +473,39 @@ class LocationService(private val client: FusedLocationClient) {
 }
 '''.strip(),
                 user_request="""
-Перепиши на Kotlin Flow:
-1. Убери интерфейс LocationCallback
-2. Метод locationUpdates() должен возвращать Flow<LatLng>
-3. Используй callbackFlow для обертки callback API
-4. Добавь awaitClose для корректной очистки
-5. Создай data class LatLng(val lat: Double, val lng: Double)
+Rewrite using Kotlin Flow:
+1. Remove the LocationCallback interface
+2. Create a method locationUpdates() that returns Flow<LatLng>
+3. Use callbackFlow to wrap the callback-based API
+4. Add awaitClose for proper cleanup
+5. Create data class LatLng(val lat: Double, val lng: Double)
 """,
                 expected_changes=[
                     "Flow<LatLng>",
                     "callbackFlow",
                     "awaitClose",
                     "data class LatLng",
-                    "trySend",  # или offer/emit
                 ],
                 forbidden_patterns=[
                     "interface LocationCallback",
                     "var callback:",
-                    "callback.onLocationUpdate"
                 ],
                 structural_requirements={
-                    "must_import": ["kotlinx.coroutines.flow"],
-                    "data_class": "LatLng"
+                    "has_flow_return": True,
+                    "has_data_class": "LatLng"
                 },
-                test_code='''
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
-
-// Mock классы
-data class Location(val latitude: Double, val longitude: Double)
-interface LocationListener {
-    fun onLocationChanged(location: Location)
-}
-class FusedLocationClient {
-    private var listener: LocationListener? = null
-    fun requestLocationUpdates(l: LocationListener) { listener = l }
-    fun removeLocationUpdates() { listener = null }
-    fun simulateUpdate(lat: Double, lng: Double) {
-        listener?.onLocationChanged(Location(lat, lng))
-    }
-}
-
-// Тест
-fun main() = runBlocking {
-    val mockClient = FusedLocationClient()
-    val service = LocationService(mockClient)
-    
-    val flow = service.locationUpdates()
-    
-    // Проверяем что это Flow
-    assert(flow is Flow<*>) { "locationUpdates should return Flow" }
-    
-    println("FLOW_MIGRATION_PASSED")
-}
-''',
-                test_mode="execute"
+                test_mode="structure_only"
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 5. PYTHON: Исправить race condition в async коде
-            # ══════════════════════════════════════════════════════════════
-            CodeTask(
-                task_id="python_fix_race_condition",
-                language="python",
-                mode="bug_fix",
-                description="Исправление race condition",
-                original_code='''
-import asyncio
-from typing import Dict, Any
-
-class RateLimiter:
-    def __init__(self, max_requests: int, window_seconds: int):
-        self.max_requests = max_requests
-        self.window = window_seconds
-        self.requests: Dict[str, list] = {}
-    
-    async def is_allowed(self, client_id: str) -> bool:
-        now = asyncio.get_event_loop().time()
-        
-        if client_id not in self.requests:
-            self.requests[client_id] = []
-        
-        # Очищаем старые запросы
-        self.requests[client_id] = [
-            t for t in self.requests[client_id]
-            if now - t < self.window
-        ]
-        
-        if len(self.requests[client_id]) >= self.max_requests:
-            return False
-        
-        self.requests[client_id].append(now)
-        return True
-'''.strip(),
-                user_request="""
-В этом коде race condition при конкурентных вызовах is_allowed.
-Исправь:
-1. Добавь asyncio.Lock для защиты shared state
-2. Lock должен быть per-client (не глобальный)
-3. Используй async with для захвата lock
-""",
-                expected_changes=[
-                    "asyncio.Lock",
-                    "async with",
-                    "_locks"  # словарь локов
-                ],
-                structural_requirements={
-                    "lock_per_client": True,
-                    "uses_async_with": True
-                },
-                test_code='''
-import asyncio
-from typing import Dict
-
-# Тест на race condition
-async def stress_test():
-    limiter = RateLimiter(max_requests=5, window_seconds=1)
-    
-    async def hammer(client_id: str, n: int):
-        results = await asyncio.gather(*[
-            limiter.is_allowed(client_id) for _ in range(n)
-        ])
-        return sum(results)
-    
-    # 100 конкурентных запросов, должно пройти ровно 5
-    allowed = await hammer("test_client", 100)
-    
-    # С race condition может пройти больше 5
-    assert allowed == 5, f"Race condition detected! Allowed {allowed} requests instead of 5"
-    print("RACE_CONDITION_FIXED")
-
-asyncio.run(stress_test())
-''',
-                test_mode="execute"
-            ),
-
-            # ══════════════════════════════════════════════════════════════
-            # 6. KOTLIN: Code Review правки (BigDecimal + validation)
-            # ══════════════════════════════════════════════════════════════
-            CodeTask(
-                task_id="kotlin_code_review_fixes",
-                language="kotlin",
-                mode="agent_edit",
-                description="Применение правок из code review",
-                original_code='''
-class PaymentProcessor(
-    private val gateway: PaymentGateway,
-    private val logger: Logger
-) {
-    fun processPayment(amount: Double, cardToken: String): PaymentResult {
-        logger.info("Processing payment: $amount")
-        
-        val response = gateway.charge(amount, cardToken)
-        
-        if (response.success) {
-            logger.info("Payment successful")
-            return PaymentResult.Success(response.transactionId)
-        } else {
-            logger.error("Payment failed: ${response.error}")
-            return PaymentResult.Failure(response.error)
-        }
-    }
-}
-'''.strip(),
-                user_request="""
-Code review comments:
-1. Line 5: amount должен быть BigDecimal, не Double (финансы!)
-2. Line 6: Добавь валидацию amount > 0 перед обработкой
-3. Line 8: gateway.charge может бросить исключение - оберни в try-catch
-4. Line 11: Залогируй transactionId в success case
-5. Общее: Сделай функцию suspend (gateway.charge должен быть suspend)
-""",
-                expected_changes=[
-                    "BigDecimal",
-                    "suspend fun",
-                    "try",
-                    "catch",
-                    "transactionId"
-                ],
-                forbidden_patterns=[
-                    "amount: Double"  # должен быть BigDecimal
-                ],
-                structural_requirements={
-                    "suspend_function": True,
-                    "has_validation": True,
-                    "has_error_handling": True
-                },
-                test_code='''
-import kotlinx.coroutines.runBlocking
-import java.math.BigDecimal
-
-// Mock классы
-interface PaymentGateway {
-    suspend fun charge(amount: BigDecimal, token: String): ChargeResponse
-}
-data class ChargeResponse(val success: Boolean, val transactionId: String?, val error: String?)
-sealed class PaymentResult {
-    data class Success(val transactionId: String) : PaymentResult()
-    data class Failure(val error: String) : PaymentResult()
-}
-class Logger {
-    fun info(msg: String) = println("INFO: $msg")
-    fun error(msg: String) = println("ERROR: $msg")
-}
-
-// Тест
-fun main() = runBlocking {
-    val mockGateway = object : PaymentGateway {
-        override suspend fun charge(amount: BigDecimal, token: String) =
-            ChargeResponse(true, "TXN123", null)
-    }
-    
-    val processor = PaymentProcessor(mockGateway, Logger())
-    
-    // Проверяем что принимает BigDecimal
-    val result = processor.processPayment(BigDecimal("100.00"), "tok_test")
-    
-    assert(result is PaymentResult.Success) { "Should succeed" }
-    
-    println("PAYMENT_PROCESSOR_FIXED")
-}
-''',
-                test_mode="execute"
-            ),
-
-            # ══════════════════════════════════════════════════════════════
-            # 7. PYTHON: Async context manager для database transactions
-            # ══════════════════════════════════════════════════════════════
-            CodeTask(
-                task_id="python_async_context_manager",
-                language="python",
-                mode="feature_add",
-                description="Добавление async context manager",
-                original_code='''
-class DatabaseConnection:
-    def __init__(self, url: str):
-        self.url = url
-        self.connection = None
-    
-    async def connect(self):
-        # Simulate connection
-        self.connection = f"Connected to {self.url}"
-        print(self.connection)
-    
-    async def disconnect(self):
-        print("Disconnecting...")
-        self.connection = None
-    
-    async def execute(self, query: str):
-        if not self.connection:
-            raise RuntimeError("Not connected")
-        return f"Executed: {query}"
-'''.strip(),
-                user_request="""
-Преврати класс в async context manager:
-1. Добавь методы __aenter__ и __aexit__
-2. __aenter__ должен вызывать connect() и возвращать self
-3. __aexit__ должен вызывать disconnect() даже при ошибке
-4. Используй typing для аннотации типов (Self или 'DatabaseConnection')
-""",
-                expected_changes=[
-                    "__aenter__",
-                    "__aexit__",
-                    "async def __aenter__",
-                    "async def __aexit__",
-                    "return self"
-                ],
-                structural_requirements={
-                    "has_aenter": True,
-                    "has_aexit": True
-                },
-                test_code='''
-import asyncio
-
-# Тест async context manager
-async def test_context_manager():
-    async with DatabaseConnection("postgresql://localhost") as db:
-        result = await db.execute("SELECT 1")
-        assert "Executed" in result
-    
-    # После выхода из контекста должно быть disconnect
-    assert db.connection is None, "Connection should be closed"
-    
-    print("ASYNC_CONTEXT_MANAGER_OK")
-
-asyncio.run(test_context_manager())
-''',
-                test_mode="execute"
-            ),
-
-            # ══════════════════════════════════════════════════════════════
-            # 8. JAVASCRIPT: Промисификация callback API
+            # 8. JAVASCRIPT: Promisify Callbacks (EN)
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="js_promisify_callbacks",
                 language="javascript",
                 mode="refactor",
-                description="Конвертация callbacks в Promises",
+                prompt_language="en",
+                description="Convert callback-based functions to Promises",
                 original_code='''
 function fetchUserData(userId, callback) {
     setTimeout(() => {
@@ -684,21 +528,22 @@ function saveUserData(userData, callback) {
 }
 '''.strip(),
                 user_request="""
-Перепиши функции на Promises:
-1. Переименуй в fetchUserDataAsync и saveUserDataAsync
-2. Убери параметр callback
-3. Возвращай Promise
-4. Используй resolve/reject вместо callback(err, data)
-5. Добавь JSDoc с типами
+Rewrite these functions using Promises:
+1. Rename to fetchUserDataAsync and saveUserDataAsync
+2. Remove the callback parameter
+3. Return a Promise
+4. Use resolve/reject instead of callback(err, data)
+5. Add JSDoc comments with type annotations
 """,
                 expected_changes=[
                     "fetchUserDataAsync",
                     "saveUserDataAsync",
-                    "return new Promise",
-                    "resolve(",
-                    "reject("
+                    "new Promise",
+                    "resolve",
+                    "reject"
                 ],
                 forbidden_patterns=[
+                    ", callback)",
                     "callback("
                 ],
                 structural_requirements={
@@ -706,30 +551,278 @@ function saveUserData(userData, callback) {
                     "has_jsdoc": True
                 },
                 test_code='''
-// Тест промисификации
 async function test() {
-    // Положительный сценарий
     const user = await fetchUserDataAsync(1);
     if (user.id !== 1) throw new Error("Wrong user ID");
     
-    // Негативный сценарий
     try {
         await fetchUserDataAsync(-1);
-        throw new Error("Should reject");
+        throw new Error("Should reject for negative ID");
     } catch (err) {
         if (!err.message.includes("Invalid")) throw err;
     }
     
-    // Save test
     const result = await saveUserDataAsync({ id: 1, name: "Test" });
-    if (!result.success) throw new Error("Save failed");
+    if (!result.success) throw new Error("Save should succeed");
     
     console.log("PROMISIFY_OK");
 }
 
-test().catch(console.error);
+test().catch(err => { console.error(err); process.exit(1); });
 ''',
                 test_mode="execute"
+            ),
+
+            # ══════════════════════════════════════════════════════════════
+            # 9. KOTLIN: Code Review Fixes (EN)
+            # ══════════════════════════════════════════════════════════════
+            CodeTask(
+                task_id="kotlin_code_review_fixes",
+                language="kotlin",
+                mode="agent_edit",
+                prompt_language="en",
+                description="Apply code review fixes",
+                original_code='''
+class PaymentProcessor(
+    private val gateway: PaymentGateway,
+    private val logger: Logger
+) {
+    fun processPayment(amount: Double, cardToken: String): PaymentResult {
+        logger.info("Processing payment: $amount")
+        
+        val response = gateway.charge(amount, cardToken)
+        
+        if (response.success) {
+            logger.info("Payment successful")
+            return PaymentResult.Success(response.transactionId)
+        } else {
+            logger.error("Payment failed: ${response.error}")
+            return PaymentResult.Failure(response.error)
+        }
+    }
+}
+'''.strip(),
+                user_request="""
+Apply these code review comments:
+1. Change amount type from Double to BigDecimal (financial precision!)
+2. Add validation: amount must be > 0
+3. Wrap gateway.charge in try-catch (it can throw exceptions)
+4. Log the transactionId in success case
+5. Make the function suspend (gateway.charge should be suspend)
+""",
+                expected_changes=[
+                    "BigDecimal",
+                    "suspend fun",
+                    "try",
+                    "catch",
+                ],
+                forbidden_patterns=[
+                    "amount: Double",
+                ],
+                structural_requirements={
+                    "suspend_function": True,
+                    "has_validation": True,
+                    "has_try_catch": True
+                },
+                test_mode="structure_only"
+            ),
+
+            # ══════════════════════════════════════════════════════════════
+            # 10. PYTHON: Add Retry Logic (EN)
+            # ══════════════════════════════════════════════════════════════
+            CodeTask(
+                task_id="python_add_retry",
+                language="python",
+                mode="feature_add",
+                prompt_language="en",
+                description="Add retry logic with exponential backoff",
+                original_code='''
+import httpx
+from typing import Any
+
+class ApiClient:
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.client = httpx.AsyncClient()
+    
+    async def get(self, endpoint: str) -> dict[str, Any]:
+        response = await self.client.get(f"{self.base_url}{endpoint}")
+        response.raise_for_status()
+        return response.json()
+    
+    async def post(self, endpoint: str, data: dict) -> dict[str, Any]:
+        response = await self.client.post(f"{self.base_url}{endpoint}", json=data)
+        response.raise_for_status()
+        return response.json()
+'''.strip(),
+                user_request="""
+Add retry logic with exponential backoff:
+1. Create a decorator or helper method for retry logic
+2. Retry on httpx.HTTPStatusError with 5xx status codes
+3. Retry on httpx.ConnectError
+4. Use exponential backoff: start at 1s, multiply by 2, max 3 retries
+5. Add max_retries parameter to __init__ with default value 3
+6. Apply retry to both get() and post() methods
+""",
+                expected_changes=[
+                    "max_retries",
+                    "retry",
+                    "backoff",
+                    "ConnectError",
+                    "sleep",
+                ],
+                structural_requirements={
+                    "has_retry_logic": True,
+                    "has_backoff": True,
+                    "has_max_retries_param": True
+                },
+                external_dependencies=["httpx"],
+                test_code='''
+import sys
+from unittest.mock import MagicMock, AsyncMock
+sys.modules['httpx'] = MagicMock()
+
+import asyncio
+
+# Проверяем структуру
+import inspect
+
+sig = inspect.signature(ApiClient.__init__)
+params = list(sig.parameters.keys())
+assert 'max_retries' in params, f"ApiClient должен принимать max_retries. Params: {params}"
+
+print("RETRY_STRUCTURE_OK")
+''',
+                test_mode="execute"
+            ),
+
+            # ══════════════════════════════════════════════════════════════
+            # 11. KOTLIN: Sealed Class Migration (EN)
+            # ══════════════════════════════════════════════════════════════
+            CodeTask(
+                task_id="kotlin_sealed_class",
+                language="kotlin",
+                mode="refactor",
+                prompt_language="en",
+                description="Convert enum to sealed class hierarchy",
+                original_code='''
+enum class NetworkResult {
+    SUCCESS,
+    ERROR,
+    LOADING
+}
+
+class Repository {
+    fun handleResult(result: NetworkResult, data: Any?, error: String?) {
+        when (result) {
+            NetworkResult.SUCCESS -> println("Data: $data")
+            NetworkResult.ERROR -> println("Error: $error")
+            NetworkResult.LOADING -> println("Loading...")
+        }
+    }
+}
+'''.strip(),
+                user_request="""
+Refactor to use sealed class:
+1. Convert NetworkResult enum to a sealed class
+2. Success should hold data of generic type T
+3. Error should hold an exception and optional message
+4. Loading should be an object (singleton)
+5. Update handleResult to use when expression with smart casts
+6. Make Repository generic with type parameter T
+""",
+                expected_changes=[
+                    "sealed class NetworkResult",
+                    "data class Success",
+                    "data class Error",
+                    "object Loading",
+                    "<T>",
+                ],
+                forbidden_patterns=[
+                    "enum class NetworkResult",
+                ],
+                structural_requirements={
+                    "has_sealed_class": True,
+                    "has_generics": True
+                },
+                test_mode="structure_only"
+            ),
+
+            # ══════════════════════════════════════════════════════════════
+            # 12. PYTHON: Pydantic Model (EN)
+            # ══════════════════════════════════════════════════════════════
+            CodeTask(
+                task_id="python_pydantic_model",
+                language="python",
+                mode="refactor",
+                prompt_language="en",
+                description="Convert dataclass to Pydantic model with validation",
+                original_code='''
+from dataclasses import dataclass
+from typing import Optional
+from datetime import datetime
+
+@dataclass
+class User:
+    id: int
+    email: str
+    name: str
+    age: Optional[int] = None
+    created_at: datetime = None
+    
+    def __post_init__(self):
+        if self.created_at is None:
+            self.created_at = datetime.now()
+'''.strip(),
+                user_request="""
+Convert to Pydantic v2 model with validation:
+1. Use pydantic.BaseModel instead of dataclass
+2. Add email validation using EmailStr
+3. Add age validation: must be >= 0 and <= 150 if provided
+4. Use Field() for default values and validation
+5. Add model_config with str_strip_whitespace = True
+6. created_at should default to current time using default_factory
+""",
+                expected_changes=[
+                    "BaseModel",
+                    "EmailStr",
+                    "Field(",
+                    "model_config",
+                    "default_factory",
+                ],
+                forbidden_patterns=[
+                    "@dataclass",
+                    "__post_init__",
+                ],
+                structural_requirements={
+                    "extends_basemodel": True,
+                    "has_field_validation": True
+                },
+                external_dependencies=["pydantic"],
+                test_code='''
+import sys
+from unittest.mock import MagicMock
+
+# Mock pydantic
+pydantic_mock = MagicMock()
+pydantic_mock.BaseModel = type('BaseModel', (), {})
+pydantic_mock.EmailStr = str
+pydantic_mock.Field = lambda *args, **kwargs: None
+sys.modules['pydantic'] = pydantic_mock
+
+# Проверяем структуру кода
+code = """
+{CODE}
+"""
+
+assert "BaseModel" in code, "Should use BaseModel"
+assert "EmailStr" in code, "Should use EmailStr"
+assert "Field(" in code, "Should use Field()"
+assert "@dataclass" not in code, "Should not use dataclass"
+
+print("PYDANTIC_STRUCTURE_OK")
+''',
+                test_mode="structure_only"  # Структурная проверка без выполнения
             ),
         ]
 
@@ -750,8 +843,47 @@ test().catch(console.error);
         }
 
     def _build_agent_prompt(self, task: CodeTask) -> str:
-        """Промпт в стиле реального code agent."""
+        """Генерация промпта на нужном языке."""
 
+        if task.prompt_language == "en":
+            return self._build_prompt_en(task)
+        else:
+            return self._build_prompt_ru(task)
+
+    def _build_prompt_en(self, task: CodeTask) -> str:
+        """English prompt template."""
+        return f"""You are an AI code assistant. The user provides code and asks for modifications.
+
+**Your task:**
+1. Carefully read the original code
+2. Apply ALL requested changes
+3. Return the COMPLETE updated code (not a diff, not fragments)
+4. The code must compile/work correctly
+
+---
+
+**Original code ({task.language}):**
+
+```{task.language}
+{task.original_code}
+```
+
+---
+
+**User request:**
+
+{task.user_request}
+
+---
+
+**Response requirements:**
+- Output ONLY the updated code in a markdown code block
+- No explanations before or after the code
+- Preserve the original formatting and style where possible
+"""
+
+    def _build_prompt_ru(self, task: CodeTask) -> str:
+        """Russian prompt template."""
         return f"""Ты — AI code assistant. Пользователь предоставляет код и просит внести изменения.
 
 **Твоя задача:**
@@ -789,14 +921,15 @@ test().catch(console.error);
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
         task: CodeTask = expected_output["task"]
 
-        # LEVEL 1: Извлечение и синтаксис
+        # LEVEL 1: Извлечение кода
         code = self._extract_code(llm_output, task.language)
         if not code:
             return {
                 "is_correct": False,
                 "details": {
                     "level": "extraction",
-                    "error": "Код не найден в ответе",
+                    "task_id": task.task_id,
+                    "error": "Code not found in response",
                     "raw_preview": llm_output[:300]
                 }
             }
@@ -808,6 +941,7 @@ test().catch(console.error);
                 "is_correct": False,
                 "details": {
                     "level": "syntax",
+                    "task_id": task.task_id,
                     "error": syntax_check["error"],
                     "code_preview": code[:500]
                 }
@@ -817,21 +951,21 @@ test().catch(console.error);
         errors = []
         warnings = []
 
-        # 2.1: Проверяем expected_changes
+        # Проверяем expected_changes
         for change in task.expected_changes:
             if not self._flexible_search(code, change):
-                errors.append(f"Не найдено ожидаемое изменение: '{change}'")
+                errors.append(f"Expected change not found: '{change}'")
 
-        # 2.2: Проверяем forbidden_patterns
+        # Проверяем forbidden_patterns
         for pattern in task.forbidden_patterns:
             if self._flexible_search(code, pattern):
-                errors.append(f"Найден запрещенный паттерн: '{pattern}'")
+                errors.append(f"Forbidden pattern found: '{pattern}'")
 
-        # 2.3: Структурные требования
-        struct_errors = self._verify_structure(code, task)
-        errors.extend(struct_errors)
+        # Структурные требования
+        struct_result = self._verify_structure(code, task)
+        errors.extend(struct_result["errors"])
+        warnings.extend(struct_result.get("warnings", []))
 
-        # Если структура неверна - сразу fail
         if errors:
             return {
                 "is_correct": False,
@@ -846,11 +980,10 @@ test().catch(console.error);
                 }
             }
 
-        # LEVEL 3: Функциональные тесты (если есть)
-        if task.test_code:
+        # LEVEL 3: Функциональные тесты (если не structure_only)
+        if task.test_mode == "execute" and task.test_code:
             func_result = self._run_functional_test(code, task)
             if not func_result["success"]:
-                # Структура OK, но тест упал
                 return {
                     "is_correct": False,
                     "details": {
@@ -858,10 +991,10 @@ test().catch(console.error);
                         "task_id": task.task_id,
                         "mode": task.mode,
                         "language": task.language,
-                        "errors": [f"Функциональный тест: {func_result['error']}"],
+                        "errors": [f"Functional test failed: {func_result['error']}"],
                         "warnings": warnings,
-                        "structure_ok": True,  # Важно!
-                        "code_preview": "OK (structure)"
+                        "structure_ok": True,
+                        "code_preview": code[:300]
                     }
                 }
 
@@ -880,16 +1013,17 @@ test().catch(console.error);
         }
 
     def _check_syntax(self, code: str, language: str) -> Dict[str, Any]:
-        """Проверка синтаксиса кода."""
+        """Проверка синтаксиса."""
         try:
             if language == "python":
                 compile(code, "<test>", "exec")
             elif language == "kotlin":
-                # Базовая проверка через regex (полная требует kotlinc)
-                if not re.search(r'\bfun\s+\w+|class\s+\w+', code):
-                    return {"valid": False, "error": "No functions or classes found"}
+                # Базовая проверка скобок
+                if code.count('{') != code.count('}'):
+                    return {"valid": False, "error": "Unbalanced braces"}
+                if code.count('(') != code.count(')'):
+                    return {"valid": False, "error": "Unbalanced parentheses"}
             elif language in ("javascript", "typescript"):
-                # Проверяем базовые паттерны
                 if code.count('{') != code.count('}'):
                     return {"valid": False, "error": "Unbalanced braces"}
 
@@ -898,119 +1032,194 @@ test().catch(console.error);
             return {"valid": False, "error": f"Syntax error: {e}"}
 
     def _flexible_search(self, code: str, pattern: str) -> bool:
-        """Гибкий поиск паттерна с учетом вариаций форматирования."""
-        # Нормализуем пробелы
-        normalized_code = re.sub(r'\s+', ' ', code)
-        normalized_pattern = re.sub(r'\s+', ' ', pattern)
-
+        """Гибкий поиск с учетом вариаций форматирования."""
         # Прямой поиск
         if pattern in code:
             return True
 
         # Поиск без учета пробелов
+        normalized_code = re.sub(r'\s+', ' ', code)
+        normalized_pattern = re.sub(r'\s+', ' ', pattern)
         if normalized_pattern in normalized_code:
             return True
 
         # Regex с гибкими пробелами
-        regex_pattern = re.sub(r'\s+', r'\\s*', re.escape(pattern))
-        if re.search(regex_pattern, code):
-            return True
+        try:
+            regex_pattern = re.sub(r'\s+', r'\\s*', re.escape(pattern))
+            if re.search(regex_pattern, code, re.IGNORECASE):
+                return True
+        except re.error:
+            pass
 
         return False
 
-    def _verify_structure(self, code: str, task: CodeTask) -> List[str]:
-        """Проверка структурных требований с расширенной логикой."""
+    def _verify_structure(self, code: str, task: CodeTask) -> Dict[str, Any]:
+        """Расширенная проверка структурных требований."""
         errors = []
+        warnings = []
         reqs = task.structural_requirements
 
         # Проверка классов
         for cls in reqs.get("classes", []):
             if not re.search(rf'\bclass\s+{cls}\b', code):
-                errors.append(f"Не найден класс: {cls}")
+                errors.append(f"Class not found: {cls}")
 
-        # Проверка data class
-        if "data_class" in reqs:
-            cls_name = reqs["data_class"]
-            if not re.search(rf'data\s+class\s+{cls_name}\b', code):
-                errors.append(f"Не найден data class: {cls_name}")
-
-        # Проверка suspend function
-        if reqs.get("suspend_function"):
-            if "suspend fun" not in code:
-                errors.append("Функция должна быть suspend")
-
-        # Проверка frozen dataclass
-        if reqs.get("dataclass_frozen"):
-            if not re.search(r'@dataclass\s*\(\s*frozen\s*=\s*True', code):
-                errors.append("dataclass должен быть frozen=True")
-
-        # Специальная проверка: os.getenv НЕ в CacheService.__init__
-        if reqs.get("no_env_in_cache_init"):
-            # Ищем определение CacheService.__init__
-            init_match = re.search(
-                r'class\s+CacheService.*?def\s+__init__\s*\([^)]*\)\s*:\s*(.*?)(?=\n    def|\nclass|\Z)',
-                code,
-                re.DOTALL
-            )
-            if init_match:
-                init_body = init_match.group(1)
-                if 'os.getenv' in init_body:
-                    errors.append("CacheService.__init__ не должен вызывать os.getenv напрямую")
-
-        # Обязательные элементы
+        # Проверка must_contain_all
         for item in reqs.get("must_contain_all", []):
             if not self._flexible_search(code, item):
-                errors.append(f"Не найден обязательный элемент: {item}")
+                errors.append(f"Required element not found: {item}")
 
-        # Проверка импортов
-        for imp in reqs.get("must_import", []):
-            if imp not in code:
-                errors.append(f"Не найден импорт: {imp}")
+        # Проверка must_contain_any
+        any_items = reqs.get("must_contain_any", [])
+        if any_items:
+            if not any(self._flexible_search(code, item) for item in any_items):
+                errors.append(f"None of required elements found: {any_items}")
 
-        # Проверка async context manager
+        # Data class в Kotlin
+        if "has_data_class" in reqs:
+            cls_name = reqs["has_data_class"]
+            if not re.search(rf'data\s+class\s+{cls_name}\b', code):
+                errors.append(f"Data class not found: {cls_name}")
+
+        # Sealed class
+        if reqs.get("has_sealed_class"):
+            if not re.search(r'sealed\s+class', code):
+                errors.append("Sealed class not found")
+
+        # Generics
+        if reqs.get("has_generics"):
+            if not re.search(r'<\s*T\s*>', code):
+                errors.append("Generic type parameter <T> not found")
+
+        # Suspend function
+        if reqs.get("suspend_function"):
+            if "suspend fun" not in code:
+                errors.append("Function should be suspend")
+
+        # Frozen dataclass
+        if reqs.get("dataclass_frozen"):
+            if not re.search(r'@dataclass\s*\(\s*frozen\s*=\s*True', code):
+                errors.append("Dataclass should be frozen=True")
+
+        # CacheService accepts config
+        if reqs.get("cache_service_accepts_config"):
+            init_match = re.search(
+                r'class\s+CacheService.*?def\s+__init__\s*\(\s*self\s*,\s*(\w+)',
+                code, re.DOTALL
+            )
+            if init_match:
+                param = init_match.group(1)
+                if param not in ["config", "redis_config", "cfg"]:
+                    warnings.append(f"CacheService.__init__ parameter '{param}' - expected 'config'")
+            else:
+                errors.append("CacheService.__init__ should accept config parameter")
+
+        # Async context manager
         if reqs.get("has_aenter"):
-            if "async def __aenter__" not in code:
-                errors.append("Отсутствует async def __aenter__")
+            if not re.search(r'async\s+def\s+__aenter__', code):
+                errors.append("Missing async def __aenter__")
 
         if reqs.get("has_aexit"):
-            if "async def __aexit__" not in code:
-                errors.append("Отсутствует async def __aexit__")
+            if not re.search(r'async\s+def\s+__aexit__', code):
+                errors.append("Missing async def __aexit__")
 
-        # Проверка использования async with
+        # Lock dictionary для race condition fix
+        if reqs.get("has_lock_dict"):
+            patterns = [
+                r'self\._?locks\s*[:\[=]',
+                r'Dict\[.*Lock\]',
+                r'dict\[.*Lock\]',
+                r'\.setdefault\([^,]+,\s*asyncio\.Lock',
+            ]
+            if not any(re.search(p, code) for p in patterns):
+                errors.append("Per-client lock dictionary not found")
+
+        # Uses async with
         if reqs.get("uses_async_with"):
             if "async with" not in code:
-                errors.append("Не используется async with для lock")
+                errors.append("'async with' not used for lock acquisition")
 
-        # Проверка lock per client
-        if reqs.get("lock_per_client"):
-            # Ищем словарь локов
-            if not re.search(r'_locks.*=.*{}|Dict\[.*Lock', code):
-                errors.append("Отсутствует per-client lock (словарь локов)")
-
-        # Проверка validation
+        # Validation check (более гибкая версия)
         if reqs.get("has_validation"):
             validation_patterns = [
-                r'if.*amount.*>.*0',
-                r'if.*amount.*<=.*0',
-                r'require.*amount',
-                r'assert.*amount'
+                r'if\s*\(?\s*amount\s*[<>]=?',
+                r'amount\s*[<>]=?\s*(?:0|BigDecimal)',
+                r'require\s*\(',
+                r'check\s*\(',
+                r'throw.*[Ii]llegal',
+                r'<=\s*(?:BigDecimal\.)?ZERO',
+                r'>\s*(?:BigDecimal\.)?ZERO',
             ]
-            if not any(re.search(p, code) for p in validation_patterns):
-                errors.append("Отсутствует валидация amount")
+            if not any(re.search(p, code, re.IGNORECASE) for p in validation_patterns):
+                errors.append("Amount validation not found")
 
-        # Проверка error handling
-        if reqs.get("has_error_handling"):
+        # Try-catch
+        if reqs.get("has_try_catch"):
             if "try" not in code or "catch" not in code:
-                errors.append("Отсутствует обработка ошибок (try-catch)")
+                errors.append("Try-catch block not found")
 
-        return errors
+        # Flow return type
+        if reqs.get("has_flow_return"):
+            if not re.search(r'Flow\s*<', code):
+                errors.append("Flow<> return type not found")
+
+        # Returns Promise
+        if reqs.get("returns_promise"):
+            if "new Promise" not in code and "Promise(" not in code:
+                errors.append("Should return new Promise")
+
+        # Has JSDoc
+        if reqs.get("has_jsdoc"):
+            if not re.search(r'/\*\*[\s\S]*?\*/', code):
+                warnings.append("JSDoc comments not found")
+
+        # Min interfaces count
+        min_interfaces = reqs.get("min_interfaces", 0)
+        if min_interfaces > 0:
+            interface_count = len(re.findall(r'\binterface\s+\w+', code))
+            if interface_count < min_interfaces:
+                errors.append(f"Expected at least {min_interfaces} interfaces, found {interface_count}")
+
+        # No @ts-nocheck
+        if reqs.get("no_ts_nocheck"):
+            if "@ts-nocheck" in code:
+                errors.append("@ts-nocheck should be removed")
+
+        # Retry logic
+        if reqs.get("has_retry_logic"):
+            retry_patterns = ["retry", "retries", "attempt", "max_retries"]
+            if not any(p in code.lower() for p in retry_patterns):
+                errors.append("Retry logic not found")
+
+        # Backoff
+        if reqs.get("has_backoff"):
+            backoff_patterns = ["backoff", "sleep", "delay", "wait"]
+            if not any(p in code.lower() for p in backoff_patterns):
+                warnings.append("Exponential backoff might be missing")
+
+        # max_retries parameter
+        if reqs.get("has_max_retries_param"):
+            if not re.search(r'max_retries\s*[=:]', code):
+                errors.append("max_retries parameter not found")
+
+        # Extends BaseModel
+        if reqs.get("extends_basemodel"):
+            if not re.search(r'class\s+\w+\s*\(\s*BaseModel\s*\)', code):
+                errors.append("Class should extend BaseModel")
+
+        # Field validation
+        if reqs.get("has_field_validation"):
+            if "Field(" not in code:
+                errors.append("Field() validation not found")
+
+        return {"errors": errors, "warnings": warnings}
 
     # ══════════════════════════════════════════════════════════════════════
-    # ФУНКЦИОНАЛЬНЫЕ ТЕСТЫ С МОКИРОВАНИЕМ
+    # ФУНКЦИОНАЛЬНЫЕ ТЕСТЫ
     # ══════════════════════════════════════════════════════════════════════
 
     def _run_functional_test(self, code: str, task: CodeTask) -> Dict[str, Any]:
-        """Запуск функциональных тестов с автоматическим мокированием."""
+        """Запуск функциональных тестов."""
         lang = task.language
 
         if lang == "python":
@@ -1023,19 +1232,21 @@ test().catch(console.error);
         return {"success": True, "warning": f"No runner for {lang}"}
 
     def _run_python_test(self, code: str, task: CodeTask) -> Dict[str, Any]:
-        """Запуск Python с автоматическим мокированием зависимостей."""
-        # Подготовка моков
+        """Запуск Python с мокированием."""
         mock_setup = ""
         if task.external_dependencies:
-            mock_setup = "import sys\nfrom unittest.mock import MagicMock\n"
+            mock_setup = "import sys\nfrom unittest.mock import MagicMock, AsyncMock\n"
             for dep in task.external_dependencies:
                 mock_setup += f"sys.modules['{dep}'] = MagicMock()\n"
             mock_setup += "\n"
 
-        full_code = f"{mock_setup}{code}\n\n# === TESTS ===\n{task.test_code}"
+        # Заменяем {CODE} в тесте на реальный код (для структурных проверок)
+        test_code = task.test_code.replace("{CODE}", code)
+
+        full_code = f"{mock_setup}{code}\n\n# === TESTS ===\n{test_code}"
 
         try:
-            namespace = {}
+            namespace = {"__name__": "__main__"}
             exec(compile(full_code, "<test>", "exec"), namespace)
             return {"success": True}
         except AssertionError as e:
@@ -1044,7 +1255,7 @@ test().catch(console.error);
             return {"success": False, "error": f"Runtime error: {e}"}
 
     def _run_kotlin_test(self, code: str, task: CodeTask) -> Dict[str, Any]:
-        """Запуск Kotlin тестов."""
+        """Запуск Kotlin."""
         if not task.test_code:
             return {"success": True}
 
@@ -1056,44 +1267,32 @@ test().catch(console.error);
         return {"success": False, "error": result.get("error", "Unknown error")}
 
     def _run_js_test(self, code: str, task: CodeTask) -> Dict[str, Any]:
-        """Запуск JS/TS тестов."""
+        """Запуск JavaScript."""
         if not task.test_code:
             return {"success": True}
 
         full_code = f"{code}\n\n{task.test_code}"
-        suffix = ".ts" if task.language == "typescript" else ".js"
+        suffix = ".mjs"  # ES modules
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=suffix, delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=suffix, delete=False, encoding="utf-8") as f:
             f.write(full_code)
             tmp_path = f.name
 
         try:
-            if task.language == "typescript":
-                # Компиляция TypeScript
-                compile_result = subprocess.run(
-                    ["npx", "tsc", "--noEmit", tmp_path],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
-                if compile_result.returncode != 0:
-                    return {"success": False, "error": f"TS compilation error: {compile_result.stderr[:500]}"}
-
-                # Запуск через ts-node
-                cmd = ["npx", "ts-node", tmp_path]
-            else:
-                cmd = ["node", tmp_path]
-
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                ["node", tmp_path],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
 
             if result.returncode != 0:
-                return {"success": False, "error": result.stderr[:500]}
-
+                return {"success": False, "error": result.stderr[:500] or result.stdout[:500]}
             return {"success": True}
         except subprocess.TimeoutExpired:
             return {"success": False, "error": "Timeout"}
         except FileNotFoundError:
-            return {"success": False, "error": "Node/TS runtime not found"}
+            return {"success": False, "error": "Node.js not found"}
         except Exception as e:
             return {"success": False, "error": str(e)}
         finally:
@@ -1101,33 +1300,38 @@ test().catch(console.error);
                 os.remove(tmp_path)
 
     # ══════════════════════════════════════════════════════════════════════
-    # ИЗВЛЕЧЕНИЕ КОДА (УЛУЧШЕННОЕ)
+    # ИЗВЛЕЧЕНИЕ КОДА
     # ══════════════════════════════════════════════════════════════════════
 
     def _extract_code(self, raw: str, lang: str) -> str:
-        """Извлечение кода с многоступенчатой стратегией."""
-
-        # 1. Удаляем think блоки
+        """Извлечение кода из ответа LLM."""
+        # Удаляем think блоки
         cleaned = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL | re.IGNORECASE)
 
-        # 2. Ищем markdown блоки (приоритетные паттерны)
-        patterns = [
-            rf'```{lang}\s*\n(.*?)```',           # ```python
-            rf'```{lang[:2]}\s*\n(.*?)```',       # ```py
-            r'```\w*\s*\n(.*?)```',               # ```code
-            r'```\s*\n(.*?)```',                  # ```
-        ]
+        # Паттерны для поиска markdown блоков
+        lang_aliases = {
+            "kotlin": ["kotlin", "kt"],
+            "python": ["python", "py"],
+            "javascript": ["javascript", "js"],
+            "typescript": ["typescript", "ts"],
+        }
 
-        for pattern in patterns:
+        aliases = lang_aliases.get(lang, [lang])
+
+        # Пробуем найти блок с конкретным языком
+        for alias in aliases:
+            pattern = rf'```{alias}\s*\n(.*?)```'
             match = re.search(pattern, cleaned, flags=re.DOTALL | re.IGNORECASE)
             if match:
                 code = match.group(1).strip()
-                if len(code) > 50:  # Минимальная длина
+                if len(code) > 30:
                     return self._sanitize_code(code)
 
-        # 3. Fallback: весь текст после очистки
-        fallback = self._sanitize_code(cleaned.strip())
-        if len(fallback) > 50:
-            return fallback
+        # Fallback: любой code block
+        match = re.search(r'```\w*\s*\n(.*?)```', cleaned, flags=re.DOTALL)
+        if match:
+            code = match.group(1).strip()
+            if len(code) > 30:
+                return self._sanitize_code(code)
 
         return ""
