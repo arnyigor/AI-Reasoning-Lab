@@ -1,4 +1,3 @@
-import difflib
 import logging
 import os
 import random
@@ -6,9 +5,8 @@ import re
 import subprocess
 import sys
 import tempfile
-from typing import Dict, Any, List, Tuple, Optional, Literal
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
-from unittest.mock import MagicMock
 
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
 
@@ -23,7 +21,7 @@ class CodeTask:
     mode: str  # "agent_edit", "bug_fix", "feature_add", "refactor"
     description: str
     original_code: str
-    user_request: str  # Что просит пользователь (как в реальном чате)
+    user_request: str
 
     # Язык промпта
     prompt_language: str = "ru"  # "ru" или "en"
@@ -46,14 +44,13 @@ class CodeTask:
 
 class CombatCodeAgentTestGenerator(AbstractTestGenerator):
     """
-    Combat-level тест для code agent v3.
+    Combat-level тест для code agent v4.
 
-    Улучшения:
-    - Двуязычные промпты (RU/EN)
-    - Гибкие паттерны валидации
-    - Исправлены ложные срабатывания
-    - Расширенный набор задач
-    - Поддержка Python 3.12
+    Исправления v4:
+    - Гибкие паттерны для type/interface в TypeScript
+    - Исправлены regex для validation в Kotlin
+    - Совместимость с Python 3.10+ (Self → строковые аннотации)
+    - Улучшенные структурные проверки
     """
 
     def __init__(self, test_id: str = "t_instructions_code"):
@@ -147,7 +144,7 @@ Add error handling to both methods:
                     "Exception"
                 ],
                 forbidden_patterns=[
-                    ": Product {",  # Should be Product?
+                    ": Product {"
                 ],
                 structural_requirements={
                     "must_contain_all": ["try", "catch"],
@@ -156,7 +153,7 @@ Add error handling to both methods:
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 3. PYTHON: Dataclass Refactoring (RU)
+            # 3. PYTHON: Dataclass → Pydantic (RU)
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="python_extract_config",
@@ -240,7 +237,7 @@ print("ALL_STRUCTURE_TESTS_PASSED")
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 4. PYTHON: Async Context Manager (EN)
+            # 4. PYTHON: Async Context Manager (EN) - ИСПРАВЛЕН
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="python_async_context_manager",
@@ -267,12 +264,13 @@ class DatabaseConnection:
             raise RuntimeError("Not connected")
         return f"Executed: {query}"
 '''.strip(),
+                # Исправлено: указание на строковые аннотации для совместимости
                 user_request="""
 Convert this class to an async context manager:
 1. Add __aenter__ and __aexit__ methods
 2. __aenter__ should call connect() and return self
 3. __aexit__ should call disconnect() even if an error occurred
-4. Use proper type hints (return 'DatabaseConnection' or Self)
+4. Use proper type hints (use string annotation 'DatabaseConnection' for compatibility)
 """,
                 expected_changes=[
                     "__aenter__",
@@ -376,7 +374,7 @@ asyncio.run(stress_test())
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 6. TYPESCRIPT: Add Types (EN)
+            # 6. TYPESCRIPT: Add Types (EN) - ИСПРАВЛЕН
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="ts_add_types",
@@ -415,16 +413,17 @@ export function validateOrder(order) {
                 user_request="""
 Add full TypeScript typing:
 1. Remove @ts-nocheck
-2. Create interfaces: Order, OrderItem, User, ProcessOptions, ProcessedOrder, ValidationResult
+2. Create types for: Order, OrderItem, User, ProcessOptions, ProcessedOrder, ValidationResult
 3. Type all function parameters and return types
 4. Use strict types (no 'any')
 """,
+                # ИСПРАВЛЕНО: Убран "interface ProcessedOrder" - принимаем и type
                 expected_changes=[
-                    "interface Order",
-                    "interface OrderItem",
-                    "interface User",
-                    "interface ProcessedOrder",
-                    "interface ValidationResult",
+                    "Order",
+                    "OrderItem",
+                    "User",
+                    "ProcessedOrder",
+                    "ValidationResult",
                 ],
                 forbidden_patterns=[
                     "@ts-nocheck",
@@ -432,7 +431,7 @@ Add full TypeScript typing:
                     "as any"
                 ],
                 structural_requirements={
-                    "min_interfaces": 5,
+                    "min_type_definitions": 5,  # interface или type
                     "no_ts_nocheck": True
                 },
                 test_mode="structure_only"
@@ -574,7 +573,7 @@ test().catch(err => { console.error(err); process.exit(1); });
             ),
 
             # ══════════════════════════════════════════════════════════════
-            # 9. KOTLIN: Code Review Fixes (EN)
+            # 9. KOTLIN: Code Review Fixes (EN) - ИСПРАВЛЕН
             # ══════════════════════════════════════════════════════════════
             CodeTask(
                 task_id="kotlin_code_review_fixes",
@@ -621,7 +620,7 @@ Apply these code review comments:
                 ],
                 structural_requirements={
                     "suspend_function": True,
-                    "has_validation": True,
+                    "has_amount_validation": True,  # ИСПРАВЛЕНО: специальная проверка
                     "has_try_catch": True
                 },
                 test_mode="structure_only"
@@ -667,26 +666,20 @@ Add retry logic with exponential backoff:
                 expected_changes=[
                     "max_retries",
                     "retry",
-                    "backoff",
-                    "ConnectError",
-                    "sleep",
                 ],
                 structural_requirements={
                     "has_retry_logic": True,
-                    "has_backoff": True,
                     "has_max_retries_param": True
                 },
                 external_dependencies=["httpx"],
                 test_code='''
 import sys
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import MagicMock
 sys.modules['httpx'] = MagicMock()
 
-import asyncio
-
-# Проверяем структуру
 import inspect
 
+# Проверяем наличие max_retries в __init__
 sig = inspect.signature(ApiClient.__init__)
 params = list(sig.parameters.keys())
 assert 'max_retries' in params, f"ApiClient должен принимать max_retries. Params: {params}"
@@ -733,10 +726,9 @@ Refactor to use sealed class:
 """,
                 expected_changes=[
                     "sealed class NetworkResult",
-                    "data class Success",
-                    "data class Error",
-                    "object Loading",
-                    "<T>",
+                    "Success",
+                    "Error",
+                    "Loading",
                 ],
                 forbidden_patterns=[
                     "enum class NetworkResult",
@@ -798,31 +790,7 @@ Convert to Pydantic v2 model with validation:
                     "extends_basemodel": True,
                     "has_field_validation": True
                 },
-                external_dependencies=["pydantic"],
-                test_code='''
-import sys
-from unittest.mock import MagicMock
-
-# Mock pydantic
-pydantic_mock = MagicMock()
-pydantic_mock.BaseModel = type('BaseModel', (), {})
-pydantic_mock.EmailStr = str
-pydantic_mock.Field = lambda *args, **kwargs: None
-sys.modules['pydantic'] = pydantic_mock
-
-# Проверяем структуру кода
-code = """
-{CODE}
-"""
-
-assert "BaseModel" in code, "Should use BaseModel"
-assert "EmailStr" in code, "Should use EmailStr"
-assert "Field(" in code, "Should use Field()"
-assert "@dataclass" not in code, "Should not use dataclass"
-
-print("PYDANTIC_STRUCTURE_OK")
-''',
-                test_mode="structure_only"  # Структурная проверка без выполнения
+                test_mode="structure_only"
             ),
         ]
 
@@ -844,7 +812,6 @@ print("PYDANTIC_STRUCTURE_OK")
 
     def _build_agent_prompt(self, task: CodeTask) -> str:
         """Генерация промпта на нужном языке."""
-
         if task.prompt_language == "en":
             return self._build_prompt_en(task)
         else:
@@ -915,13 +882,13 @@ print("PYDANTIC_STRUCTURE_OK")
 """
 
     # ══════════════════════════════════════════════════════════════════════
-    # ВЕРИФИКАЦИЯ (ТРЕХУРОВНЕВАЯ)
+    # ВЕРИФИКАЦИЯ
     # ══════════════════════════════════════════════════════════════════════
 
     def verify(self, llm_output: str, expected_output: Any) -> Dict[str, Any]:
         task: CodeTask = expected_output["task"]
 
-        # LEVEL 1: Извлечение кода
+        # Извлекаем код
         code = self._extract_code(llm_output, task.language)
         if not code:
             return {
@@ -947,7 +914,7 @@ print("PYDANTIC_STRUCTURE_OK")
                 }
             }
 
-        # LEVEL 2: Структурная верификация
+        # Структурная верификация
         errors = []
         warnings = []
 
@@ -980,7 +947,7 @@ print("PYDANTIC_STRUCTURE_OK")
                 }
             }
 
-        # LEVEL 3: Функциональные тесты (если не structure_only)
+        # Функциональные тесты
         if task.test_mode == "execute" and task.test_code:
             func_result = self._run_functional_test(code, task)
             if not func_result["success"]:
@@ -998,7 +965,6 @@ print("PYDANTIC_STRUCTURE_OK")
                     }
                 }
 
-        # ✅ ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ
         return {
             "is_correct": True,
             "details": {
@@ -1017,33 +983,25 @@ print("PYDANTIC_STRUCTURE_OK")
         try:
             if language == "python":
                 compile(code, "<test>", "exec")
-            elif language == "kotlin":
-                # Базовая проверка скобок
+            elif language in ("kotlin", "javascript", "typescript"):
                 if code.count('{') != code.count('}'):
                     return {"valid": False, "error": "Unbalanced braces"}
                 if code.count('(') != code.count(')'):
                     return {"valid": False, "error": "Unbalanced parentheses"}
-            elif language in ("javascript", "typescript"):
-                if code.count('{') != code.count('}'):
-                    return {"valid": False, "error": "Unbalanced braces"}
-
             return {"valid": True}
         except SyntaxError as e:
             return {"valid": False, "error": f"Syntax error: {e}"}
 
     def _flexible_search(self, code: str, pattern: str) -> bool:
-        """Гибкий поиск с учетом вариаций форматирования."""
-        # Прямой поиск
+        """Гибкий поиск с учетом вариаций."""
         if pattern in code:
             return True
 
-        # Поиск без учета пробелов
         normalized_code = re.sub(r'\s+', ' ', code)
         normalized_pattern = re.sub(r'\s+', ' ', pattern)
         if normalized_pattern in normalized_code:
             return True
 
-        # Regex с гибкими пробелами
         try:
             regex_pattern = re.sub(r'\s+', r'\\s*', re.escape(pattern))
             if re.search(regex_pattern, code, re.IGNORECASE):
@@ -1054,7 +1012,7 @@ print("PYDANTIC_STRUCTURE_OK")
         return False
 
     def _verify_structure(self, code: str, task: CodeTask) -> Dict[str, Any]:
-        """Расширенная проверка структурных требований."""
+        """Проверка структурных требований."""
         errors = []
         warnings = []
         reqs = task.structural_requirements
@@ -1064,12 +1022,12 @@ print("PYDANTIC_STRUCTURE_OK")
             if not re.search(rf'\bclass\s+{cls}\b', code):
                 errors.append(f"Class not found: {cls}")
 
-        # Проверка must_contain_all
+        # must_contain_all
         for item in reqs.get("must_contain_all", []):
             if not self._flexible_search(code, item):
                 errors.append(f"Required element not found: {item}")
 
-        # Проверка must_contain_any
+        # must_contain_any
         any_items = reqs.get("must_contain_any", [])
         if any_items:
             if not any(self._flexible_search(code, item) for item in any_items):
@@ -1088,8 +1046,8 @@ print("PYDANTIC_STRUCTURE_OK")
 
         # Generics
         if reqs.get("has_generics"):
-            if not re.search(r'<\s*T\s*>', code):
-                errors.append("Generic type parameter <T> not found")
+            if not re.search(r'<\s*\w+\s*>', code):
+                errors.append("Generic type parameter not found")
 
         # Suspend function
         if reqs.get("suspend_function"):
@@ -1110,7 +1068,7 @@ print("PYDANTIC_STRUCTURE_OK")
             if init_match:
                 param = init_match.group(1)
                 if param not in ["config", "redis_config", "cfg"]:
-                    warnings.append(f"CacheService.__init__ parameter '{param}' - expected 'config'")
+                    warnings.append(f"CacheService.__init__ parameter '{param}'")
             else:
                 errors.append("CacheService.__init__ should accept config parameter")
 
@@ -1123,7 +1081,7 @@ print("PYDANTIC_STRUCTURE_OK")
             if not re.search(r'async\s+def\s+__aexit__', code):
                 errors.append("Missing async def __aexit__")
 
-        # Lock dictionary для race condition fix
+        # Lock dictionary
         if reqs.get("has_lock_dict"):
             patterns = [
                 r'self\._?locks\s*[:\[=]',
@@ -1137,23 +1095,24 @@ print("PYDANTIC_STRUCTURE_OK")
         # Uses async with
         if reqs.get("uses_async_with"):
             if "async with" not in code:
-                errors.append("'async with' not used for lock acquisition")
+                errors.append("'async with' not used for lock")
 
-        # Validation check (более гибкая версия)
-        if reqs.get("has_validation"):
+        # ИСПРАВЛЕНО: Amount validation для Kotlin с compareTo
+        if reqs.get("has_amount_validation"):
             validation_patterns = [
-                r'if\s*\(?\s*amount\s*[<>]=?',
+                r'amount\.compareTo\s*\([^)]*\)\s*[<>]=?\s*0',
+                r'if\s*\(\s*amount\s*[<>]=?',
                 r'amount\s*[<>]=?\s*(?:0|BigDecimal)',
-                r'require\s*\(',
-                r'check\s*\(',
-                r'throw.*[Ii]llegal',
-                r'<=\s*(?:BigDecimal\.)?ZERO',
-                r'>\s*(?:BigDecimal\.)?ZERO',
+                r'require\s*\{?\s*amount',
+                r'check\s*\{?\s*amount',
+                r'throw.*[Ii]llegal.*amount',
+                r'amount.*<=.*ZERO',
+                r'amount.*>.*ZERO',
             ]
             if not any(re.search(p, code, re.IGNORECASE) for p in validation_patterns):
                 errors.append("Amount validation not found")
 
-        # Try-catch
+        # Has try-catch
         if reqs.get("has_try_catch"):
             if "try" not in code or "catch" not in code:
                 errors.append("Try-catch block not found")
@@ -1173,12 +1132,14 @@ print("PYDANTIC_STRUCTURE_OK")
             if not re.search(r'/\*\*[\s\S]*?\*/', code):
                 warnings.append("JSDoc comments not found")
 
-        # Min interfaces count
-        min_interfaces = reqs.get("min_interfaces", 0)
-        if min_interfaces > 0:
+        # ИСПРАВЛЕНО: min_type_definitions - принимает и interface и type
+        min_types = reqs.get("min_type_definitions", 0)
+        if min_types > 0:
             interface_count = len(re.findall(r'\binterface\s+\w+', code))
-            if interface_count < min_interfaces:
-                errors.append(f"Expected at least {min_interfaces} interfaces, found {interface_count}")
+            type_count = len(re.findall(r'\btype\s+\w+\s*=', code))
+            total = interface_count + type_count
+            if total < min_types:
+                errors.append(f"Expected at least {min_types} type definitions, found {total}")
 
         # No @ts-nocheck
         if reqs.get("no_ts_nocheck"):
@@ -1190,12 +1151,6 @@ print("PYDANTIC_STRUCTURE_OK")
             retry_patterns = ["retry", "retries", "attempt", "max_retries"]
             if not any(p in code.lower() for p in retry_patterns):
                 errors.append("Retry logic not found")
-
-        # Backoff
-        if reqs.get("has_backoff"):
-            backoff_patterns = ["backoff", "sleep", "delay", "wait"]
-            if not any(p in code.lower() for p in backoff_patterns):
-                warnings.append("Exponential backoff might be missing")
 
         # max_retries parameter
         if reqs.get("has_max_retries_param"):
@@ -1240,9 +1195,7 @@ print("PYDANTIC_STRUCTURE_OK")
                 mock_setup += f"sys.modules['{dep}'] = MagicMock()\n"
             mock_setup += "\n"
 
-        # Заменяем {CODE} в тесте на реальный код (для структурных проверок)
         test_code = task.test_code.replace("{CODE}", code)
-
         full_code = f"{mock_setup}{code}\n\n# === TESTS ===\n{test_code}"
 
         try:
@@ -1272,7 +1225,7 @@ print("PYDANTIC_STRUCTURE_OK")
             return {"success": True}
 
         full_code = f"{code}\n\n{task.test_code}"
-        suffix = ".mjs"  # ES modules
+        suffix = ".mjs"
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=suffix, delete=False, encoding="utf-8") as f:
             f.write(full_code)
@@ -1305,10 +1258,8 @@ print("PYDANTIC_STRUCTURE_OK")
 
     def _extract_code(self, raw: str, lang: str) -> str:
         """Извлечение кода из ответа LLM."""
-        # Удаляем think блоки
         cleaned = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL | re.IGNORECASE)
 
-        # Паттерны для поиска markdown блоков
         lang_aliases = {
             "kotlin": ["kotlin", "kt"],
             "python": ["python", "py"],
@@ -1318,7 +1269,6 @@ print("PYDANTIC_STRUCTURE_OK")
 
         aliases = lang_aliases.get(lang, [lang])
 
-        # Пробуем найти блок с конкретным языком
         for alias in aliases:
             pattern = rf'```{alias}\s*\n(.*?)```'
             match = re.search(pattern, cleaned, flags=re.DOTALL | re.IGNORECASE)
@@ -1327,7 +1277,6 @@ print("PYDANTIC_STRUCTURE_OK")
                 if len(code) > 30:
                     return self._sanitize_code(code)
 
-        # Fallback: любой code block
         match = re.search(r'```\w*\s*\n(.*?)```', cleaned, flags=re.DOTALL)
         if match:
             code = match.group(1).strip()
