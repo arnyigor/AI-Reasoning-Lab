@@ -1,0 +1,3340 @@
+[
+    {
+        "test_id": "t01_simple_logic_1",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Дмитрий выше Алексей.\n- Алексей выше Елена.\n\nВопрос: Кто из них самый низкий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "We need to answer with only the name, no explanation. The problem: Dmitry > Alexey > Elena. So the lowest is Elena. Answer: Елена. Must be only the name, no extra text. Probably in Russian. So output: Елена.",
+        "llm_response": "Елена",
+        "thinking_log": "We need to answer with only the name, no explanation. The problem: Dmitry > Alexey > Elena. So the lowest is Elena. Answer: Елена. Must be only the name, no extra text. Probably in Russian. So output: Елена.",
+        "parsed_answer": "Елена",
+        "raw_llm_output": "<think>We need to answer with only the name, no explanation. The problem: Dmitry > Alexey > Elena. So the lowest is Elena. Answer: Елена. Must be only the name, no extra text. Probably in Russian. So output: Елена.</think>\nЕлена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Дмитрий",
+                "Алексей"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3056.7775999952573,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Елена"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373527,
+            "id": "gen-1773373527-gSTJiA3GbIqll6bUOqxI",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 59,
+            "prompt_eval_count": 52,
+            "total_duration": 3055490800,
+            "prompt_eval_duration": 1642910400,
+            "eval_duration": 1412580399,
+            "load_duration": 0,
+            "total_latency_ms": 3056.7775999952573,
+            "time_to_first_token_ms": 1642.91,
+            "peak_ram_increment_mb": 1.359375
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t01_simple_logic_2",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена старше Дмитрий.\n- Дмитрий старше Наталья.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "We need to answer only the name, no explanation. The statements: Elena older than Dmitry. Dmitry older than Natalia. So order: Elena > Dmitry > Natalia. Youngest is Natalia. So answer: Наталья. Must be only the name, no extra text. Probably exactly \"Наталья\". Ensure no extra spaces or punctuation.",
+        "llm_response": "Наталья<think>\n Provide just that.",
+        "thinking_log": "We need to answer only the name, no explanation. The statements: Elena older than Dmitry. Dmitry older than Natalia. So order: Elena > Dmitry > Natalia. Youngest is Natalia. So answer: Наталья. Must be only the name, no extra text. Probably exactly \"Наталья\". Ensure no extra spaces or punctuation.",
+        "parsed_answer": "Наталья<think>\n Provide just that.",
+        "raw_llm_output": "<think>We need to answer only the name, no explanation. The statements: Elena older than Dmitry. Dmitry older than Natalia. So order: Elena > Dmitry > Natalia. Youngest is Natalia. So answer: Наталья. Must be only the name, no extra text. Probably exactly \"Наталья\". Ensure no extra spaces or punctuation.</think>\nНаталья<think>\n Provide just that.",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Елена",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1299.3180999983451,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Наталья<think>\n Provide just that."
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373530,
+            "id": "gen-1773373530-qjZDxlTo6HuDZK4VAFrn",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 89,
+            "prompt_eval_count": 53,
+            "total_duration": 1298783599,
+            "prompt_eval_duration": 711750999,
+            "eval_duration": 587032600,
+            "load_duration": 0,
+            "total_latency_ms": 1299.3180999983451,
+            "time_to_first_token_ms": 711.75,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t01_simple_logic_3",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Борис старше Елена.\n- Елена старше Наталья.\n\nВопрос: Кто из них самый старший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "We need to answer with only the name, no explanation. The statements: Boris older than Elena, Elena older than Natalia. So Boris > Elena > Natalia. Oldest is Boris. So answer: Борис. Must be only the name, no extra text. Ensure language: Russian name. So output: Борис.",
+        "llm_response": "Борис",
+        "thinking_log": "We need to answer with only the name, no explanation. The statements: Boris older than Elena, Elena older than Natalia. So Boris > Elena > Natalia. Oldest is Boris. So answer: Борис. Must be only the name, no extra text. Ensure language: Russian name. So output: Борис.",
+        "parsed_answer": "Борис",
+        "raw_llm_output": "<think>We need to answer with only the name, no explanation. The statements: Boris older than Elena, Elena older than Natalia. So Boris > Elena > Natalia. Oldest is Boris. So answer: Борис. Must be only the name, no extra text. Ensure language: Russian name. So output: Борис.</think>\nБорис",
+        "expected_output": {
+            "correct": "Борис",
+            "incorrect": [
+                "Елена",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1284.339199999522,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Борис",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Борис"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373531,
+            "id": "gen-1773373531-00x9nOmfxKWXCco34QQ1",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 74,
+            "prompt_eval_count": 52,
+            "total_duration": 1283756800,
+            "prompt_eval_duration": 701173000,
+            "eval_duration": 582583800,
+            "load_duration": 0,
+            "total_latency_ms": 1284.339199999522,
+            "time_to_first_token_ms": 701.17,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t01_simple_logic_4",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария быстрее Ирина.\n- Дмитрий быстрее Мария.\n\nВопрос: Кто из них самый медленный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "We need to answer with only the name, no explanation. The statements: Maria faster than Irina. Dmitry faster than Maria. So ordering: Dmitry > Maria > Irina (faster means higher speed). Slowest is Irina. So answer: Irina",
+        "llm_response": "Ирина<think>\n. Must be only the name.",
+        "thinking_log": "We need to answer with only the name, no explanation. The statements: Maria faster than Irina. Dmitry faster than Maria. So ordering: Dmitry > Maria > Irina (faster means higher speed). Slowest is Irina. So answer: Irina",
+        "parsed_answer": "Ирина<think>\n. Must be only the name.",
+        "raw_llm_output": "<think>We need to answer with only the name, no explanation. The statements: Maria faster than Irina. Dmitry faster than Maria. So ordering: Dmitry > Maria > Irina (faster means higher speed). Slowest is Irina. So answer: Irina</think>\nИрина<think>\n. Must be only the name.",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Дмитрий",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1199.5279999973718,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Ирина<think>\n. Must be only the name."
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373532,
+            "id": "gen-1773373532-uamViHAhPIfRt0Sqlhyl",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 70,
+            "prompt_eval_count": 53,
+            "total_duration": 1199010099,
+            "prompt_eval_duration": 820596300,
+            "eval_duration": 378413799,
+            "load_duration": 0,
+            "total_latency_ms": 1199.5279999973718,
+            "time_to_first_token_ms": 820.6,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t01_simple_logic_5",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Наталья старше Алексей.\n- Алексей старше Елена.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "We need to answer only the name, no explanation. The statements: Natalia older than Alexey. Alexey older than Elena. So order: Natalia > Alexey > Elena. Youngest is Elena. So answer: Елена. Must be only the name, no extra text. Probably in Russian. So output",
+        "llm_response": "Елена<think>\n: Елена.",
+        "thinking_log": "We need to answer only the name, no explanation. The statements: Natalia older than Alexey. Alexey older than Elena. So order: Natalia > Alexey > Elena. Youngest is Elena. So answer: Елена. Must be only the name, no extra text. Probably in Russian. So output",
+        "parsed_answer": "Елена<think>\n: Елена.",
+        "raw_llm_output": "<think>We need to answer only the name, no explanation. The statements: Natalia older than Alexey. Alexey older than Elena. So order: Natalia > Alexey > Elena. Youngest is Elena. So answer: Елена. Must be only the name, no extra text. Probably in Russian. So output</think>\nЕлена<think>\n: Елена.",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Наталья",
+                "Алексей"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3001.4683000044897,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Елена<think>\n: Елена."
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373534,
+            "id": "gen-1773373534-PwP8BRZNkjrboSjyn4MP",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 75,
+            "prompt_eval_count": 53,
+            "total_duration": 3000932800,
+            "prompt_eval_duration": 2456726900,
+            "eval_duration": 544205899,
+            "load_duration": 0,
+            "total_latency_ms": 3001.4683000044897,
+            "time_to_first_token_ms": 2456.73,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t02_instructions_1",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Текст: 'Товар: Ноутбук. Цена за шт: 57549 руб. Скидка: 20%. На складе: 2 шт.'\nСоздай JSON строго следующей структуры:\n{\n  \"product\": \"...\",\n  \"finance\": {\n    \"base_price\": ...,\n    \"discounted_price\": ... (цена со скидкой),\n    \"total_value\": ... (цена со скидкой * количество)\n  }\n}\nВерни ТОЛЬКО валидный JSON.",
+        "thinking_response": "We need to parse the text: \"Товар: Ноутбук. Цена за шт: 57549 руб. Скидка: 20%. На складе: 2 шт.\"\n\nProduct: \"Ноутбук\". Base price: 57549 (presumably integer). Discount: 20% => discounted_price = base_price * (1 - 0.20) = 57549 * 0.8 = 46039.2. Usually price maybe float. Could be rounded? Not specified. We'll output as number (float). total_value = discounted_price * quantity = 46039.2 * 2 = 92078.4.\n\nReturn JSON with keys product (string), finance object with base_price (number), discounted_price (number), total_value (number). Ensure valid JSON.\n\nThus:\n\n{\n  \"product\": \"Ноутбук\",\n  \"finance\": {\n    \"base_price\": 57549,\n    \"discounted_price\": 46039.2,\n    \"total_value\": 92078.4\n  }\n}\n\nMake sure no trailing commas",
+        "llm_response": "{\n  \"\nproduct\": \"Ноутбук\",\n  \"finance\": {\n    \"base_price\": 57549,\n    \"discounted_price\": 46039.2,\n    \"total_value\": 92078.4\n  }\n}",
+        "thinking_log": "We need to parse the text: \"Товар: Ноутбук. Цена за шт: 57549 руб. Скидка: 20%. На складе: 2 шт.\"\n\nProduct: \"Ноутбук\". Base price: 57549 (presumably integer). Discount: 20% => discounted_price = base_price * (1 - 0.20) = 57549 * 0.8 = 46039.2. Usually price maybe float. Could be rounded? Not specified. We'll output as number (float). total_value = discounted_price * quantity = 46039.2 * 2 = 92078.4.\n\nReturn JSON with keys product (string), finance object with base_price (number), discounted_price (number), total_value (number). Ensure valid JSON.\n\nThus:\n\n{\n  \"product\": \"Ноутбук\",\n  \"finance\": {\n    \"base_price\": 57549,\n    \"discounted_price\": 46039.2,\n    \"total_value\": 92078.4\n  }\n}\n\nMake sure no trailing commas",
+        "parsed_answer": "{\n  \"\nproduct\": \"Ноутбук\",\n  \"finance\": {\n    \"base_price\": 57549,\n    \"discounted_price\": 46039.2,\n    \"total_value\": 92078.4\n  }\n}",
+        "raw_llm_output": "<think>We need to parse the text: \"Товар: Ноутбук. Цена за шт: 57549 руб. Скидка: 20%. На складе: 2 шт.\"\n\nProduct: \"Ноутбук\". Base price: 57549 (presumably integer). Discount: 20% => discounted_price = base_price * (1 - 0.20) = 57549 * 0.8 = 46039.2. Usually price maybe float. Could be rounded? Not specified. We'll output as number (float). total_value = discounted_price * quantity = 46039.2 * 2 = 92078.4.\n\nReturn JSON with keys product (string), finance object with base_price (number), discounted_price (number), total_value (number). Ensure valid JSON.\n\nThus:\n\n{\n  \"product\": \"Ноутбук\",\n  \"finance\": {\n    \"base_price\": 57549,\n    \"discounted_price\": 46039.2,\n    \"total_value\": 92078.4\n  }\n}\n\nMake sure no trailing commas</think>\n{\n  \"\nproduct\": \"Ноутбук\",\n  \"finance\": {\n    \"base_price\": 57549,\n    \"discounted_price\": 46039.2,\n    \"total_value\": 92078.4\n  }\n}",
+        "expected_output": {
+            "type": "json_math",
+            "data": {
+                "product": "Ноутбук",
+                "finance": {
+                    "base_price": 57549,
+                    "discounted_price": 46039.2,
+                    "total_value": 92078.4
+                }
+            }
+        },
+        "is_correct": false,
+        "execution_time_ms": 12576.483400000143,
+        "verification_details": {
+            "task": "json_math",
+            "raw_json": "{\n  \"\nproduct\": \"Ноутбук\",\n  \"finance\": {\n    \"base_price\": 57549,\n    \"discounted_price\": 46039.2,\n    \"total_value\": 92078.4\n  }\n}",
+            "error": "JSON decode failed: Invalid control character at: line 2 column 4 (char 5)"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373537,
+            "id": "gen-1773373537-3Paq4GdEun0P6Fi5YRRg",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 228,
+            "prompt_eval_count": 79,
+            "total_duration": 12575904199,
+            "prompt_eval_duration": 892113299,
+            "eval_duration": 11683790900,
+            "load_duration": 0,
+            "total_latency_ms": 12576.483400000143,
+            "time_to_first_token_ms": 892.11,
+            "peak_ram_increment_mb": 0.01171875
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t02_instructions_2",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Напиши ОДНО короткое предложение (3-5 слов) на тему 'о лете'.\nВАЖНОЕ УСЛОВИЕ: В предложении полностью запрещено использовать букву 'о' (и строчную, и заглавную).\nЕсли слово содержит 'о', замени его синонимом.",
+        "thinking_response": "We need to produce a single short sentence (3-5 words) about summer, in Russian, without using the letter 'о' (both lowercase and uppercase). So we must avoid any 'о' character. Also we cannot use the Cyrillic letter 'о' (U+043E) nor uppercase 'О' (U+041E). So we need to craft a sentence with 3-5 words, each word must not contain the letter 'о' in any position.\n\nWe need to talk about summer: \"лето\" contains 'о', so we cannot use that word. We need synonyms for summer that avoid 'о'. Options: \"жаркое время\" but \"жаркое\" contains 'о' (жаркое). \"тепло\" contains 'о' (тепло). \"солнце\" contains 'о'? Actually \"солнце\" has 'о' after с? Let's see: с о л н ц е: yes contains 'о'. \"июнь\" no 'о' (и ю н ь). \"июль\" no 'о' (и ю л ь). \"август\" no 'о' (а в г у с т). So we can use month names. Also \"праздник\" contains 'о'? п р а з д н и к: no 'о'. \"отдых\" contains 'о' (отдых). So avoid that.\n\nWe need a short sentence 3-5 words, no 'о'. Let's try: \"Июль дарит тепло\". But \"дарит\" contains 'а' and 'и', no 'о'? дарит: д а р и т: no 'о'. \"тепло\" contains 'о' -> not allowed. So need to avoid \"тепло\". Could use \"жара\" (ж а р а) no 'о'. \"жара\" is okay. So \"Июль дарит жара\". But grammar? \"Июль дарит жару\" would be better but \"жару\" contains 'а' and 'у', no 'о'? ж а р у: no 'о'. However \"жару\" is accusative singular of жара, okay. So sentence: \"Июль дарит жару\". Words: Июль (1), дарит (2), жару (3). That's 3 words. Check each for letter 'о': Июль: И ю л ь - no 'о'. дарит: д а р и т - no 'о'. жару: ж а р у - no 'о'. Good. No uppercase 'О' either. So sentence meets constraints. It's about summer (July gives heat). It's short, 3 words. Ensure no hidden 'о' like in \"Июль\" there is no 'о'. Good.\n\nThus answer: \"Июль дарит жа",
+        "llm_response": "Июль дарит жа\nру",
+        "thinking_log": "We need to produce a single short sentence (3-5 words) about summer, in Russian, without using the letter 'о' (both lowercase and uppercase). So we must avoid any 'о' character. Also we cannot use the Cyrillic letter 'о' (U+043E) nor uppercase 'О' (U+041E). So we need to craft a sentence with 3-5 words, each word must not contain the letter 'о' in any position.\n\nWe need to talk about summer: \"лето\" contains 'о', so we cannot use that word. We need synonyms for summer that avoid 'о'. Options: \"жаркое время\" but \"жаркое\" contains 'о' (жаркое). \"тепло\" contains 'о' (тепло). \"солнце\" contains 'о'? Actually \"солнце\" has 'о' after с? Let's see: с о л н ц е: yes contains 'о'. \"июнь\" no 'о' (и ю н ь). \"июль\" no 'о' (и ю л ь). \"август\" no 'о' (а в г у с т). So we can use month names. Also \"праздник\" contains 'о'? п р а з д н и к: no 'о'. \"отдых\" contains 'о' (отдых). So avoid that.\n\nWe need a short sentence 3-5 words, no 'о'. Let's try: \"Июль дарит тепло\". But \"дарит\" contains 'а' and 'и', no 'о'? дарит: д а р и т: no 'о'. \"тепло\" contains 'о' -> not allowed. So need to avoid \"тепло\". Could use \"жара\" (ж а р а) no 'о'. \"жара\" is okay. So \"Июль дарит жара\". But grammar? \"Июль дарит жару\" would be better but \"жару\" contains 'а' and 'у', no 'о'? ж а р у: no 'о'. However \"жару\" is accusative singular of жара, okay. So sentence: \"Июль дарит жару\". Words: Июль (1), дарит (2), жару (3). That's 3 words. Check each for letter 'о': Июль: И ю л ь - no 'о'. дарит: д а р и т - no 'о'. жару: ж а р у - no 'о'. Good. No uppercase 'О' either. So sentence meets constraints. It's about summer (July gives heat). It's short, 3 words. Ensure no hidden 'о' like in \"Июль\" there is no 'о'. Good.\n\nThus answer: \"Июль дарит жа",
+        "parsed_answer": "Июль дарит жа\nру",
+        "raw_llm_output": "<think>We need to produce a single short sentence (3-5 words) about summer, in Russian, without using the letter 'о' (both lowercase and uppercase). So we must avoid any 'о' character. Also we cannot use the Cyrillic letter 'о' (U+043E) nor uppercase 'О' (U+041E). So we need to craft a sentence with 3-5 words, each word must not contain the letter 'о' in any position.\n\nWe need to talk about summer: \"лето\" contains 'о', so we cannot use that word. We need synonyms for summer that avoid 'о'. Options: \"жаркое время\" but \"жаркое\" contains 'о' (жаркое). \"тепло\" contains 'о' (тепло). \"солнце\" contains 'о'? Actually \"солнце\" has 'о' after с? Let's see: с о л н ц е: yes contains 'о'. \"июнь\" no 'о' (и ю н ь). \"июль\" no 'о' (и ю л ь). \"август\" no 'о' (а в г у с т). So we can use month names. Also \"праздник\" contains 'о'? п р а з д н и к: no 'о'. \"отдых\" contains 'о' (отдых). So avoid that.\n\nWe need a short sentence 3-5 words, no 'о'. Let's try: \"Июль дарит тепло\". But \"дарит\" contains 'а' and 'и', no 'о'? дарит: д а р и т: no 'о'. \"тепло\" contains 'о' -> not allowed. So need to avoid \"тепло\". Could use \"жара\" (ж а р а) no 'о'. \"жара\" is okay. So \"Июль дарит жара\". But grammar? \"Июль дарит жару\" would be better but \"жару\" contains 'а' and 'у', no 'о'? ж а р у: no 'о'. However \"жару\" is accusative singular of жара, okay. So sentence: \"Июль дарит жару\". Words: Июль (1), дарит (2), жару (3). That's 3 words. Check each for letter 'о': Июль: И ю л ь - no 'о'. дарит: д а р и т - no 'о'. жару: ж а р у - no 'о'. Good. No uppercase 'О' either. So sentence meets constraints. It's about summer (July gives heat). It's short, 3 words. Ensure no hidden 'о' like in \"Июль\" there is no 'о'. Good.\n\nThus answer: \"Июль дарит жа</think>\nИюль дарит жа\nру",
+        "expected_output": {
+            "type": "negative_constraint",
+            "forbidden": "о"
+        },
+        "is_correct": true,
+        "execution_time_ms": 34853.564500001085,
+        "verification_details": {},
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373549,
+            "id": "gen-1773373549-izMXaHh5iZFMFWz9uvxg",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 445,
+            "prompt_eval_count": 53,
+            "total_duration": 25933976200,
+            "prompt_eval_duration": 7806424700,
+            "eval_duration": 18127551500,
+            "load_duration": 0,
+            "total_latency_ms": 34853.564500001085,
+            "time_to_first_token_ms": 7806.42,
+            "peak_ram_increment_mb": -0.0546875
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t02_instructions_3",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Список: Анна, Ян, Константин, Александр, Ева.\nТвоя задача — отсортировать этот список.\n❗ ВАЖНО: Не переводи слова на другие языки. Работай строго с исходными словами.\nШАГ 1: Для каждого слова напиши его длину (количество всех не уникальных букв).\nШАГ 2: Отсортируй слова по этим правилам:\n   1. Сначала по ДЛИНЕ (от коротких к длинным).\n   2. При равной длине — по АЛФАВИТУ.\nВыведи ТОЛЬКО одну строку в формате: [слово1 -> слово2 -> ...]. Без таблиц, без пояснений, без markdown.",
+        "thinking_response": "We need to sort list: Анна, Ян, Константин, Александр, Ева.\n\nStep 1: compute length (number of letters, not unique). Russian letters: count characters.\n\nАнна: 4 letters (А н н а) => 4\nЯн: 2 letters (Я н) => 2\nКонстантин: let's count: К о н с т а н т и н => that's 10? Let's count: К(1) о2 н3 с4 т5 а6 н7 т8 и9 н10 => 10\nАлександр: А л е к с а н д р => 9? Count: А1 л2 е3 к4 с5 а6 н7 д8 р9 => 9\nЕва: Е в а => 3\n\nNow sort by length ascending, then alphabetically for ties.\n\nLengths:\nЯн:2\nЕва:3\nАнна:4\nАлександр:9\nКонстантин:10\n\nNo ties except maybe none. So order: Ян, Ева, Анна, Александр, Константин.\n\nNow output format: [слово1 -> слово2 -> ...] with spaces? Example: [Ян -> Ева -> Анна -> Александр -> Константин]. Ensure no extra spaces inside brackets? Probably as shown: [слово1 -> слово2 -> ...]. We'll follow that.\n\nThus final answer: [Ян -> Ева -> Анна -> Александр -> Константин].",
+        "llm_response": "[Ян -> Ева -> Анна -> Александр -> Константин]",
+        "thinking_log": "We need to sort list: Анна, Ян, Константин, Александр, Ева.\n\nStep 1: compute length (number of letters, not unique). Russian letters: count characters.\n\nАнна: 4 letters (А н н а) => 4\nЯн: 2 letters (Я н) => 2\nКонстантин: let's count: К о н с т а н т и н => that's 10? Let's count: К(1) о2 н3 с4 т5 а6 н7 т8 и9 н10 => 10\nАлександр: А л е к с а н д р => 9? Count: А1 л2 е3 к4 с5 а6 н7 д8 р9 => 9\nЕва: Е в а => 3\n\nNow sort by length ascending, then alphabetically for ties.\n\nLengths:\nЯн:2\nЕва:3\nАнна:4\nАлександр:9\nКонстантин:10\n\nNo ties except maybe none. So order: Ян, Ева, Анна, Александр, Константин.\n\nNow output format: [слово1 -> слово2 -> ...] with spaces? Example: [Ян -> Ева -> Анна -> Александр -> Константин]. Ensure no extra spaces inside brackets? Probably as shown: [слово1 -> слово2 -> ...]. We'll follow that.\n\nThus final answer: [Ян -> Ева -> Анна -> Александр -> Константин].",
+        "parsed_answer": "[Ян -> Ева -> Анна -> Александр -> Константин]",
+        "raw_llm_output": "<think>We need to sort list: Анна, Ян, Константин, Александр, Ева.\n\nStep 1: compute length (number of letters, not unique). Russian letters: count characters.\n\nАнна: 4 letters (А н н а) => 4\nЯн: 2 letters (Я н) => 2\nКонстантин: let's count: К о н с т а н т и н => that's 10? Let's count: К(1) о2 н3 с4 т5 а6 н7 т8 и9 н10 => 10\nАлександр: А л е к с а н д р => 9? Count: А1 л2 е3 к4 с5 а6 н7 д8 р9 => 9\nЕва: Е в а => 3\n\nNow sort by length ascending, then alphabetically for ties.\n\nLengths:\nЯн:2\nЕва:3\nАнна:4\nАлександр:9\nКонстантин:10\n\nNo ties except maybe none. So order: Ян, Ева, Анна, Александр, Константин.\n\nNow output format: [слово1 -> слово2 -> ...] with spaces? Example: [Ян -> Ева -> Анна -> Александр -> Константин]. Ensure no extra spaces inside brackets? Probably as shown: [слово1 -> слово2 -> ...]. We'll follow that.\n\nThus final answer: [Ян -> Ева -> Анна -> Александр -> Константин].</think>\n[Ян -> Ева -> Анна -> Александр -> Константин]",
+        "expected_output": {
+            "type": "multi_sort",
+            "target": "[Ян -> Ева -> Анна -> Александр -> Константин]",
+            "items": [
+                "Ян",
+                "Ева",
+                "Анна",
+                "Александр",
+                "Константин"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 3614.601200002653,
+        "verification_details": {
+            "task": "multi_sort",
+            "expected_sequence": [
+                "Ян",
+                "Ева",
+                "Анна",
+                "Александр",
+                "Константин"
+            ],
+            "found_sequence": [
+                "Ян",
+                "Ева",
+                "Анна",
+                "Александр",
+                "Константин"
+            ],
+            "cleaned_output": "Ян -> Ева -> Анна -> Александр -> Константин"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373584,
+            "id": "gen-1773373584-EbPzcc3OlAmdPEdJvj1g",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 239,
+            "prompt_eval_count": 120,
+            "total_duration": 3614044299,
+            "prompt_eval_duration": 830366999,
+            "eval_duration": 2783677300,
+            "load_duration": 0,
+            "total_latency_ms": 3614.601200002653,
+            "time_to_first_token_ms": 830.37,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t02_instructions_4",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Список: Оман, Италия, Чад, Россия, США.\nТвоя задача — отсортировать этот список.\n❗ ВАЖНО: Не переводи слова на другие языки. Работай строго с исходными словами.\nШАГ 1: Для каждого слова напиши его длину (количество всех не уникальных букв).\nШАГ 2: Отсортируй слова по этим правилам:\n   1. Сначала по ДЛИНЕ (от коротких к длинным).\n   2. При равной длине — по АЛФАВИТУ.\nВыведи ТОЛЬКО одну строку в формате: [слово1 -> слово2 -> ...]. Без таблиц, без пояснений, без markdown.",
+        "thinking_response": "We need to sort list: Оман, Италия, Чад, Россия, США.\n\nStep 1: compute length (number of characters) for each word, counting all letters (non-unique). Use original words (Cyrillic). Let's compute:\n\n- Оман: letters: О, м, а, н => 4.\n- Италия: И, т, а, л, и, я => 6.\n- Чад: Ч, а, д => 3.\n- Россия: Р, о, с, с, и, я => 6 (note double с counts as two letters).\n- США: С, Ш, А => 3.\n\nNow sort by length ascending, then alphabetically for ties.\n\nLength 3: Чад, США. Alphabetical order: need to compare strings in Cyrillic alphabetical order. Let's list: \"Чад\" vs \"США\". Alphabetical order based on Unicode code points: Cyrillic letters order: А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, П, Р, С, Т, У, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я. So \"С\" (letter С) comes before \"Ч\". So \"США\" < \"Чад\". Actually need to compare first letters: С vs Ч. Since С (U+0421) earlier than Ч (U+0427). So order: США, then Чад.\n\nLength 4: Оман only.\n\nLength 6: Италия, Россия. Alphabetical: compare first letters: И vs Р. И (U+0418) earlier than Р (U+0420). So Италия then Россия.\n\nThus final sorted list: США -> Чад -> Оман -> Италия -> Россия.\n\nOutput format: [США -> Чад -> Оман -> Италия -> Россия].\n\nMake sure no extra spaces? The format: [слово1 -> слово2 -> ...]. We'll follow",
+        "llm_response": "[США\n -> Чад -> Оман -> Италия -> Россия]",
+        "thinking_log": "We need to sort list: Оман, Италия, Чад, Россия, США.\n\nStep 1: compute length (number of characters) for each word, counting all letters (non-unique). Use original words (Cyrillic). Let's compute:\n\n- Оман: letters: О, м, а, н => 4.\n- Италия: И, т, а, л, и, я => 6.\n- Чад: Ч, а, д => 3.\n- Россия: Р, о, с, с, и, я => 6 (note double с counts as two letters).\n- США: С, Ш, А => 3.\n\nNow sort by length ascending, then alphabetically for ties.\n\nLength 3: Чад, США. Alphabetical order: need to compare strings in Cyrillic alphabetical order. Let's list: \"Чад\" vs \"США\". Alphabetical order based on Unicode code points: Cyrillic letters order: А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, П, Р, С, Т, У, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я. So \"С\" (letter С) comes before \"Ч\". So \"США\" < \"Чад\". Actually need to compare first letters: С vs Ч. Since С (U+0421) earlier than Ч (U+0427). So order: США, then Чад.\n\nLength 4: Оман only.\n\nLength 6: Италия, Россия. Alphabetical: compare first letters: И vs Р. И (U+0418) earlier than Р (U+0420). So Италия then Россия.\n\nThus final sorted list: США -> Чад -> Оман -> Италия -> Россия.\n\nOutput format: [США -> Чад -> Оман -> Италия -> Россия].\n\nMake sure no extra spaces? The format: [слово1 -> слово2 -> ...]. We'll follow",
+        "parsed_answer": "[США\n -> Чад -> Оман -> Италия -> Россия]",
+        "raw_llm_output": "<think>We need to sort list: Оман, Италия, Чад, Россия, США.\n\nStep 1: compute length (number of characters) for each word, counting all letters (non-unique). Use original words (Cyrillic). Let's compute:\n\n- Оман: letters: О, м, а, н => 4.\n- Италия: И, т, а, л, и, я => 6.\n- Чад: Ч, а, д => 3.\n- Россия: Р, о, с, с, и, я => 6 (note double с counts as two letters).\n- США: С, Ш, А => 3.\n\nNow sort by length ascending, then alphabetically for ties.\n\nLength 3: Чад, США. Alphabetical order: need to compare strings in Cyrillic alphabetical order. Let's list: \"Чад\" vs \"США\". Alphabetical order based on Unicode code points: Cyrillic letters order: А, Б, В, Г, Д, Е, Ё, Ж, З, И, Й, К, Л, М, Н, О, П, Р, С, Т, У, Ф, Х, Ц, Ч, Ш, Щ, Ъ, Ы, Ь, Э, Ю, Я. So \"С\" (letter С) comes before \"Ч\". So \"США\" < \"Чад\". Actually need to compare first letters: С vs Ч. Since С (U+0421) earlier than Ч (U+0427). So order: США, then Чад.\n\nLength 4: Оман only.\n\nLength 6: Италия, Россия. Alphabetical: compare first letters: И vs Р. И (U+0418) earlier than Р (U+0420). So Италия then Россия.\n\nThus final sorted list: США -> Чад -> Оман -> Италия -> Россия.\n\nOutput format: [США -> Чад -> Оман -> Италия -> Россия].\n\nMake sure no extra spaces? The format: [слово1 -> слово2 -> ...]. We'll follow</think>\n[США\n -> Чад -> Оман -> Италия -> Россия]",
+        "expected_output": {
+            "type": "multi_sort",
+            "target": "[США -> Чад -> Оман -> Италия -> Россия]",
+            "items": [
+                "США",
+                "Чад",
+                "Оман",
+                "Италия",
+                "Россия"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 31176.087899999402,
+        "verification_details": {
+            "task": "multi_sort",
+            "expected_sequence": [
+                "США",
+                "Чад",
+                "Оман",
+                "Италия",
+                "Россия"
+            ],
+            "found_sequence": [
+                "Чад",
+                "Оман",
+                "Италия",
+                "Россия"
+            ],
+            "cleaned_output": "США\n -> Чад -> Оман -> Италия -> Россия"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373588,
+            "id": "gen-1773373588-UMG39dpYD7XKU3S5JiUj",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 341,
+            "prompt_eval_count": 119,
+            "total_duration": 31175536099,
+            "prompt_eval_duration": 767729999,
+            "eval_duration": 30407806099,
+            "load_duration": 0,
+            "total_latency_ms": 31176.087899999402,
+            "time_to_first_token_ms": 767.73,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t02_instructions_5",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t02_instructions",
+        "prompt": "Напиши ОДНО короткое предложение (3-5 слов) на тему 'о лете'.\nВАЖНОЕ УСЛОВИЕ: В предложении полностью запрещено использовать букву 'о' (и строчную, и заглавную).\nЕсли слово содержит 'о', замени его синонимом.",
+        "thinking_response": "We need a short sentence 3-5 words, about summer, in Russian, without using the letter 'o' (both lower and upper). So cannot have 'о' or 'О'. Must avoid any 'о' character.\n\nWe need to produce a sentence 3-5 words, about summer, no 'o'.\n\nWe need to think of words without 'o'. Russian letters: а, б, в, г, д, е, ё, ж, з, и, й, к, л, м, н, п, р, с, т, у, ф, х, ц, ч, ш, щ, ъ, ы, ь, э, ю, я. Also letter 'ё' is allowed (it's not 'о'), but note that 'ё' is distinct. Also 'ю' and 'я' okay.\n\nWe need to avoid 'о' in any word. So we must avoid words containing 'о'. Many common words have 'о': лето (has о), солнце (has о), тепло (о), жара (has а, but also 'о'? жара: ж а р а, no о). Actually жара has no о. Good. \"Жара\" is about summer. Also \"июль\" (июль) has no о. \"август\" has о? а в г у с т: no о. So we can use months.\n\nWe need a sentence 3-5 words, about summer, no 'о'.\n\nPossible: \"Жара в июле\" (Жара в июле). Let's count words: Жара (1), в (2), июле (3). That's 3 words. Check each for 'о': Жара: Ж а р а - no о. в: в - no о. июле: и ю л ь - no о. Good. No 'о'. Also capital letters: Ж is capital, but that's fine, not 'О'. The sentence: \"Жара в июле\". That's about summer. Good.\n\nCheck if any hidden 'о' in \"июле\"? No. So answer: \"Жара в июле\". That's 3 words, no 'о'.\n\nWe must ensure no 'о' anywhere, including punctuation? punctuation doesn't matter. So final answer: \"Жара в июле\".",
+        "llm_response": "Жара в июле",
+        "thinking_log": "We need a short sentence 3-5 words, about summer, in Russian, without using the letter 'o' (both lower and upper). So cannot have 'о' or 'О'. Must avoid any 'о' character.\n\nWe need to produce a sentence 3-5 words, about summer, no 'o'.\n\nWe need to think of words without 'o'. Russian letters: а, б, в, г, д, е, ё, ж, з, и, й, к, л, м, н, п, р, с, т, у, ф, х, ц, ч, ш, щ, ъ, ы, ь, э, ю, я. Also letter 'ё' is allowed (it's not 'о'), but note that 'ё' is distinct. Also 'ю' and 'я' okay.\n\nWe need to avoid 'о' in any word. So we must avoid words containing 'о'. Many common words have 'о': лето (has о), солнце (has о), тепло (о), жара (has а, but also 'о'? жара: ж а р а, no о). Actually жара has no о. Good. \"Жара\" is about summer. Also \"июль\" (июль) has no о. \"август\" has о? а в г у с т: no о. So we can use months.\n\nWe need a sentence 3-5 words, about summer, no 'о'.\n\nPossible: \"Жара в июле\" (Жара в июле). Let's count words: Жара (1), в (2), июле (3). That's 3 words. Check each for 'о': Жара: Ж а р а - no о. в: в - no о. июле: и ю л ь - no о. Good. No 'о'. Also capital letters: Ж is capital, but that's fine, not 'О'. The sentence: \"Жара в июле\". That's about summer. Good.\n\nCheck if any hidden 'о' in \"июле\"? No. So answer: \"Жара в июле\". That's 3 words, no 'о'.\n\nWe must ensure no 'о' anywhere, including punctuation? punctuation doesn't matter. So final answer: \"Жара в июле\".",
+        "parsed_answer": "Жара в июле",
+        "raw_llm_output": "<think>We need a short sentence 3-5 words, about summer, in Russian, without using the letter 'o' (both lower and upper). So cannot have 'о' or 'О'. Must avoid any 'о' character.\n\nWe need to produce a sentence 3-5 words, about summer, no 'o'.\n\nWe need to think of words without 'o'. Russian letters: а, б, в, г, д, е, ё, ж, з, и, й, к, л, м, н, п, р, с, т, у, ф, х, ц, ч, ш, щ, ъ, ы, ь, э, ю, я. Also letter 'ё' is allowed (it's not 'о'), but note that 'ё' is distinct. Also 'ю' and 'я' okay.\n\nWe need to avoid 'о' in any word. So we must avoid words containing 'о'. Many common words have 'о': лето (has о), солнце (has о), тепло (о), жара (has а, but also 'о'? жара: ж а р а, no о). Actually жара has no о. Good. \"Жара\" is about summer. Also \"июль\" (июль) has no о. \"август\" has о? а в г у с т: no о. So we can use months.\n\nWe need a sentence 3-5 words, about summer, no 'о'.\n\nPossible: \"Жара в июле\" (Жара в июле). Let's count words: Жара (1), в (2), июле (3). That's 3 words. Check each for 'о': Жара: Ж а р а - no о. в: в - no о. июле: и ю л ь - no о. Good. No 'о'. Also capital letters: Ж is capital, but that's fine, not 'О'. The sentence: \"Жара в июле\". That's about summer. Good.\n\nCheck if any hidden 'о' in \"июле\"? No. So answer: \"Жара в июле\". That's 3 words, no 'о'.\n\nWe must ensure no 'о' anywhere, including punctuation? punctuation doesn't matter. So final answer: \"Жара в июле\".</think>\nЖара в июле",
+        "expected_output": {
+            "type": "negative_constraint",
+            "forbidden": "о"
+        },
+        "is_correct": true,
+        "execution_time_ms": 11373.74219999765,
+        "verification_details": {},
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373619,
+            "id": "gen-1773373619-yLIJoCibkXLQpMYxGm0y",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 355,
+            "prompt_eval_count": 53,
+            "total_duration": 11373153600,
+            "prompt_eval_duration": 2135629399,
+            "eval_duration": 9237524200,
+            "load_duration": 0,
+            "total_latency_ms": 11373.74219999765,
+            "time_to_first_token_ms": 2135.63,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t03_code_gen_1",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t03_code_gen",
+        "prompt": "Ты — AI-ассистент, который пишет код на Python. Твоя задача — вернуть ТОЛЬКО блок кода, без каких-либо объяснений или рассуждений.\n\n--- ПРИМЕР ЗАПРОСА ---\nНапиши функцию на Python с именем `add`, которая складывает два числа.\n\n--- ПРИМЕР ОТВЕТА ---\n```python\ndef add(a, b):\n    return a + b\n```\n\n--- ТВОЯ ЗАДАЧА ---\nНапиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом(учитывая только буквы, игнорируя регистр, пробелы и пунктуацию).",
+        "thinking_response": "We need to output only code block, no explanations. Provide function is_palindrome(s) that returns True if palindrome ignoring non-letters, case, spaces, punctuation. Use regex or filter str.isalpha. Implementation: clean = ''.join(ch.lower() for ch in s if ch.isalpha()); return clean == clean[::-1]. Provide",
+        "llm_response": "```python\nimport re\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "thinking_log": "We need to output only code block, no explanations. Provide function is_palindrome(s) that returns True if palindrome ignoring non-letters, case, spaces, punctuation. Use regex or filter str.isalpha. Implementation: clean = ''.join(ch.lower() for ch in s if ch.isalpha()); return clean == clean[::-1]. Provide",
+        "parsed_answer": "```python\nimport re\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "raw_llm_output": "<think>We need to output only code block, no explanations. Provide function is_palindrome(s) that returns True if palindrome ignoring non-letters, case, spaces, punctuation. Use regex or filter str.isalpha. Implementation: clean = ''.join(ch.lower() for ch in s if ch.isalpha()); return clean == clean[::-1]. Provide</think>\n```python\nimport re\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == Trueassert is_palindrome('') == True",
+                "assert is_palindrome('!!!') == True",
+                "assert is_palindrome('a') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 24292.409800000314,
+        "verification_details": {
+            "error": "Ошибка выполнения теста",
+            "traceback": "name 're' is not defined"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373631,
+            "id": "gen-1773373631-yiGSqYNH7vVZCM7uV5cL",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 126,
+            "prompt_eval_count": 121,
+            "total_duration": 24291850399,
+            "prompt_eval_duration": 5778133899,
+            "eval_duration": 18513716499,
+            "load_duration": 0,
+            "total_latency_ms": 24292.409800000314,
+            "time_to_first_token_ms": 5778.13,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t03_code_gen_2",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t03_code_gen",
+        "prompt": "Ты — AI-ассистент, который пишет код на Python. Твоя задача — вернуть ТОЛЬКО блок кода, без каких-либо объяснений или рассуждений.\n\n--- ПРИМЕР ЗАПРОСА ---\nНапиши функцию на Python с именем `add`, которая складывает два числа.\n\n--- ПРИМЕР ОТВЕТА ---\n```python\ndef add(a, b):\n    return a + b\n```\n\n--- ТВОЯ ЗАДАЧА ---\nНапиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом(учитывая только буквы, игнорируя регистр, пробелы и пунктуацию).",
+        "thinking_response": "We need to output only the code block, no explanations. Provide function is_palindrome that checks string palindrome ignoring non-letters, case, spaces, punctuation. Should consider only letters (maybe also digits? The prompt says only letters). We'll filter using str.isalpha, lowercasing. Then compare with reversed.\n\nReturn boolean.\n\nWe'll output code block with function definition.\n\nNo extra text.",
+        "llm_response": "```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "thinking_log": "We need to output only the code block, no explanations. Provide function is_palindrome that checks string palindrome ignoring non-letters, case, spaces, punctuation. Should consider only letters (maybe also digits? The prompt says only letters). We'll filter using str.isalpha, lowercasing. Then compare with reversed.\n\nReturn boolean.\n\nWe'll output code block with function definition.\n\nNo extra text.",
+        "parsed_answer": "```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "raw_llm_output": "<think>We need to output only the code block, no explanations. Provide function is_palindrome that checks string palindrome ignoring non-letters, case, spaces, punctuation. Should consider only letters (maybe also digits? The prompt says only letters). We'll filter using str.isalpha, lowercasing. Then compare with reversed.\n\nReturn boolean.\n\nWe'll output code block with function definition.\n\nNo extra text.</think>\n```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == Trueassert is_palindrome('') == True",
+                "assert is_palindrome('!!!') == True",
+                "assert is_palindrome('a') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 1917.9891000021598,
+        "verification_details": {
+            "error": "Ошибка выполнения теста",
+            "traceback": "name 're' is not defined"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373655,
+            "id": "gen-1773373655-fZytmzwBb9YrxbU3Px5r",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 142,
+            "prompt_eval_count": 121,
+            "total_duration": 1917448300,
+            "prompt_eval_duration": 796197600,
+            "eval_duration": 1121250700,
+            "load_duration": 0,
+            "total_latency_ms": 1917.9891000021598,
+            "time_to_first_token_ms": 796.2,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t03_code_gen_3",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t03_code_gen",
+        "prompt": "Ты — AI-ассистент, который пишет код на Python. Твоя задача — вернуть ТОЛЬКО блок кода, без каких-либо объяснений или рассуждений.\n\n--- ПРИМЕР ЗАПРОСА ---\nНапиши функцию на Python с именем `add`, которая складывает два числа.\n\n--- ПРИМЕР ОТВЕТА ---\n```python\ndef add(a, b):\n    return a + b\n```\n\n--- ТВОЯ ЗАДАЧА ---\nНапиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом(учитывая только буквы, игнорируя регистр, пробелы и пунктуацию).",
+        "thinking_response": "We need to output only code block with function is_palindrome that checks palindrome ignoring non-letters, case, spaces, punctuation. So we filter letters using str.isalpha, lower, then compare to reversed. Return bool.\n\nWe must output only code block, no explanations. Use triple backticks with python.\n\nLet's produce:\n\n```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```\n\nAlternatively without regex: filter.\n\nBut we can use regex. Provide code.\n\nMake sure only",
+        "llm_response": "```python\nimport re\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "thinking_log": "We need to output only code block with function is_palindrome that checks palindrome ignoring non-letters, case, spaces, punctuation. So we filter letters using str.isalpha, lower, then compare to reversed. Return bool.\n\nWe must output only code block, no explanations. Use triple backticks with python.\n\nLet's produce:\n\n```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```\n\nAlternatively without regex: filter.\n\nBut we can use regex. Provide code.\n\nMake sure only",
+        "parsed_answer": "```python\nimport re\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "raw_llm_output": "<think>We need to output only code block with function is_palindrome that checks palindrome ignoring non-letters, case, spaces, punctuation. So we filter letters using str.isalpha, lower, then compare to reversed. Return bool.\n\nWe must output only code block, no explanations. Use triple backticks with python.\n\nLet's produce:\n\n```python\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```\n\nAlternatively without regex: filter.\n\nBut we can use regex. Provide code.\n\nMake sure only</think>\n```python\nimport re\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == Trueassert is_palindrome('') == True",
+                "assert is_palindrome('!!!') == True",
+                "assert is_palindrome('a') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 5129.421199999342,
+        "verification_details": {
+            "error": "Ошибка выполнения теста",
+            "traceback": "name 're' is not defined"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373657,
+            "id": "gen-1773373657-oo6U9AIGjDntp78HuITf",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 188,
+            "prompt_eval_count": 121,
+            "total_duration": 5128910500,
+            "prompt_eval_duration": 3010822700,
+            "eval_duration": 2118087800,
+            "load_duration": 0,
+            "total_latency_ms": 5129.421199999342,
+            "time_to_first_token_ms": 3010.82,
+            "peak_ram_increment_mb": -0.01953125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t03_code_gen_4",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t03_code_gen",
+        "prompt": "Ты — AI-ассистент, который пишет код на Python. Твоя задача — вернуть ТОЛЬКО блок кода, без каких-либо объяснений или рассуждений.\n\n--- ПРИМЕР ЗАПРОСА ---\nНапиши функцию на Python с именем `add`, которая складывает два числа.\n\n--- ПРИМЕР ОТВЕТА ---\n```python\ndef add(a, b):\n    return a + b\n```\n\n--- ТВОЯ ЗАДАЧА ---\nНапиши функцию на Python с именем `is_palindrome`, которая проверяет, является ли строка палиндромом(учитывая только буквы, игнорируя регистр, пробелы и пунктуацию).",
+        "thinking_response": "We need to output only a code block with the function is_palindrome that checks palindrome ignoring non-letters, case, spaces, punctuation. Provide only code block, no explanations. Use Python. We'll write function that filters characters using str.isalpha, lower, then compare with reversed. Return bool",
+        "llm_response": "```python\n\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "thinking_log": "We need to output only a code block with the function is_palindrome that checks palindrome ignoring non-letters, case, spaces, punctuation. Provide only code block, no explanations. Use Python. We'll write function that filters characters using str.isalpha, lower, then compare with reversed. Return bool",
+        "parsed_answer": "```python\n\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "raw_llm_output": "<think>We need to output only a code block with the function is_palindrome that checks palindrome ignoring non-letters, case, spaces, punctuation. Provide only code block, no explanations. Use Python. We'll write function that filters characters using str.isalpha, lower, then compare with reversed. Return bool</think>\n```python\n\nimport re\n\ndef is_palindrome(s: str) -> bool:\n    cleaned = re.sub(r'[^A-Za-z]', '', s).lower()\n    return cleaned == cleaned[::-1]\n```",
+        "expected_output": {
+            "function_name": "is_palindrome",
+            "tests": [
+                "assert is_palindrome('radar') == True",
+                "assert is_palindrome('hello') == False",
+                "assert is_palindrome('A man a plan a canal Panama') == Trueassert is_palindrome('') == True",
+                "assert is_palindrome('!!!') == True",
+                "assert is_palindrome('a') == True"
+            ]
+        },
+        "is_correct": false,
+        "execution_time_ms": 1854.9075000046287,
+        "verification_details": {
+            "error": "Ошибка выполнения теста",
+            "traceback": "name 're' is not defined"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373662,
+            "id": "gen-1773373662-D0f09XDJZ5ki1GptUiYG",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 128,
+            "prompt_eval_count": 121,
+            "total_duration": 1854249699,
+            "prompt_eval_duration": 771663899,
+            "eval_duration": 1082585799,
+            "load_duration": 0,
+            "total_latency_ms": 1854.9075000046287,
+            "time_to_first_token_ms": 771.66,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t03_code_gen_5",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t03_code_gen",
+        "prompt": "Ты — AI-ассистент, который пишет код на Python. Твоя задача — вернуть ТОЛЬКО блок кода, без каких-либо объяснений или рассуждений.\n\n--- ПРИМЕР ЗАПРОСА ---\nНапиши функцию на Python с именем `add`, которая складывает два числа.\n\n--- ПРИМЕР ОТВЕТА ---\n```python\ndef add(a, b):\n    return a + b\n```\n\n--- ТВОЯ ЗАДАЧА ---\nНапиши функцию на Python с именем `find_max`, которая находит максимальное значение в списке чисел.",
+        "thinking_response": "We need to output only a code block, no explanations. Provide function find_max that returns max value in list. Should handle empty list? Not specified. Could raise ValueError. Simpler: use built-in",
+        "llm_response": "```python\n\ndef find_max(numbers):\n    if not numbers:\n        raise ValueError(\"Список пуст\")\n    return max(numbers)\n```",
+        "thinking_log": "We need to output only a code block, no explanations. Provide function find_max that returns max value in list. Should handle empty list? Not specified. Could raise ValueError. Simpler: use built-in",
+        "parsed_answer": "```python\n\ndef find_max(numbers):\n    if not numbers:\n        raise ValueError(\"Список пуст\")\n    return max(numbers)\n```",
+        "raw_llm_output": "<think>We need to output only a code block, no explanations. Provide function find_max that returns max value in list. Should handle empty list? Not specified. Could raise ValueError. Simpler: use built-in</think>\n```python\n\ndef find_max(numbers):\n    if not numbers:\n        raise ValueError(\"Список пуст\")\n    return max(numbers)\n```",
+        "expected_output": {
+            "function_name": "find_max",
+            "tests": [
+                "assert find_max([1, 2, 3, 4, 5]) == 5",
+                "assert find_max([-1, -5, 0]) == 0",
+                "assert find_max([10]) == 10"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 1505.942399999185,
+        "verification_details": {
+            "status": "Все тесты пройдены"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373664,
+            "id": "gen-1773373664-8m5Cf9NddCRvdEgF6mhG",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 94,
+            "prompt_eval_count": 104,
+            "total_duration": 1505392899,
+            "prompt_eval_duration": 759527399,
+            "eval_duration": 745865500,
+            "load_duration": 0,
+            "total_latency_ms": 1505.942399999185,
+            "time_to_first_token_ms": 759.53,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t04_data_extraction_1",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t04_data_extraction",
+        "prompt": "Извлеки все email, телефоны и ссылки списком.\n                    ВАЖНО: Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\n                    Текст: Данные системы: Звонить +7 (999) 123-45-67; Факс/Тел: +49 30 123456; Сайт: http://company.org/about; Запасной email: sales@business.com; Зеркало: ftp://files.server.net; Почта: hr@startup.io",
+        "thinking_response": "We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. Likely each item on a new line or separated by spaces? \"список\" means list. Use plain text, maybe each item separated by newline. No special formatting like bullet points or markdown. Use ordinary spaces and hyphens only. So we can output each entry on its own line, using just spaces and hyphens within entries. Ensure no special characters like @? Actually @ is allowed? It's not a space or hyphen, but it's part of email. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should not use special formatting like markdown, bullet points, etc. But we can still include characters like @, ., :, /, etc because they are part of the data. The restriction is about formatting characters like tabs, newlines? Probably they mean we should not use special formatting like markdown code fences, etc. Using newline is okay as it's just line break. But to be safe, we can output a single line with items separated by spaces and hyphens? However hyphens are allowed. Could output like: +7 (999) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io\n\nBut need to ensure we include all emails, phones, links. Phones: +7 (999) 123-45-67 and +49 30 123456. Links: http://company.org/about and ftp://files.server.net. Emails: sales@business.com and hr@startup.io.\n\nThus list: maybe each on new line. I'll output each item separated by a space? The instruction: \"Извлеки все email, телефоны и ссылки списком.\" So a list. Use ordinary spaces and hyphens only, no special formatting. I think newline is okay as it's not special formatting. But to avoid any ambiguity, I'll separate items with a comma and space? Comma is not a space or hyphen, but it's punctuation; maybe allowed? The instruction only restricts using special formatting, not punctuation. Safer to use spaces only. So output: +7 (999) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io\n\nThat's a list separated by spaces. Let",
+        "llm_response": "+7 (9\n99) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io",
+        "thinking_log": "We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. Likely each item on a new line or separated by spaces? \"список\" means list. Use plain text, maybe each item separated by newline. No special formatting like bullet points or markdown. Use ordinary spaces and hyphens only. So we can output each entry on its own line, using just spaces and hyphens within entries. Ensure no special characters like @? Actually @ is allowed? It's not a space or hyphen, but it's part of email. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should not use special formatting like markdown, bullet points, etc. But we can still include characters like @, ., :, /, etc because they are part of the data. The restriction is about formatting characters like tabs, newlines? Probably they mean we should not use special formatting like markdown code fences, etc. Using newline is okay as it's just line break. But to be safe, we can output a single line with items separated by spaces and hyphens? However hyphens are allowed. Could output like: +7 (999) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io\n\nBut need to ensure we include all emails, phones, links. Phones: +7 (999) 123-45-67 and +49 30 123456. Links: http://company.org/about and ftp://files.server.net. Emails: sales@business.com and hr@startup.io.\n\nThus list: maybe each on new line. I'll output each item separated by a space? The instruction: \"Извлеки все email, телефоны и ссылки списком.\" So a list. Use ordinary spaces and hyphens only, no special formatting. I think newline is okay as it's not special formatting. But to avoid any ambiguity, I'll separate items with a comma and space? Comma is not a space or hyphen, but it's punctuation; maybe allowed? The instruction only restricts using special formatting, not punctuation. Safer to use spaces only. So output: +7 (999) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io\n\nThat's a list separated by spaces. Let",
+        "parsed_answer": "+7 (9\n99) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io",
+        "raw_llm_output": "<think>We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. Likely each item on a new line or separated by spaces? \"список\" means list. Use plain text, maybe each item separated by newline. No special formatting like bullet points or markdown. Use ordinary spaces and hyphens only. So we can output each entry on its own line, using just spaces and hyphens within entries. Ensure no special characters like @? Actually @ is allowed? It's not a space or hyphen, but it's part of email. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should not use special formatting like markdown, bullet points, etc. But we can still include characters like @, ., :, /, etc because they are part of the data. The restriction is about formatting characters like tabs, newlines? Probably they mean we should not use special formatting like markdown code fences, etc. Using newline is okay as it's just line break. But to be safe, we can output a single line with items separated by spaces and hyphens? However hyphens are allowed. Could output like: +7 (999) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io\n\nBut need to ensure we include all emails, phones, links. Phones: +7 (999) 123-45-67 and +49 30 123456. Links: http://company.org/about and ftp://files.server.net. Emails: sales@business.com and hr@startup.io.\n\nThus list: maybe each on new line. I'll output each item separated by a space? The instruction: \"Извлеки все email, телефоны и ссылки списком.\" So a list. Use ordinary spaces and hyphens only, no special formatting. I think newline is okay as it's not special formatting. But to avoid any ambiguity, I'll separate items with a comma and space? Comma is not a space or hyphen, but it's punctuation; maybe allowed? The instruction only restricts using special formatting, not punctuation. Safer to use spaces only. So output: +7 (999) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io\n\nThat's a list separated by spaces. Let</think>\n+7 (9\n99) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io",
+        "expected_output": {
+            "emails": "{'hr@startup.io', 'sales@business.com'}",
+            "phones": "{'+7 (999) 123-45-67', '+49 30 123456'}",
+            "urls": "{'ftp://files.server.net', 'http://company.org/about'}",
+            "test_type": "multi_entity_extraction"
+        },
+        "is_correct": true,
+        "execution_time_ms": 18204.808700000285,
+        "verification_details": {
+            "raw_llm_output": "+7 (9\n99) 123-45-67 +49 30 123456 http://company.org/about sales@business.com ftp://files.server.net hr@startup.io",
+            "found_raw": {
+                "emails": [
+                    "hr@startup.io",
+                    "sales@business.com"
+                ],
+                "phones": [
+                    "+49 30 123456",
+                    "9\n99) 123-45-67"
+                ],
+                "amounts": []
+            },
+            "errors": []
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373665,
+            "id": "gen-1773373665-2FZorWRpagAydM4ksV08",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 590,
+            "prompt_eval_count": 94,
+            "total_duration": 18204218200,
+            "prompt_eval_duration": 7912403800,
+            "eval_duration": 10291814399,
+            "load_duration": 0,
+            "total_latency_ms": 18204.808700000285,
+            "time_to_first_token_ms": 7912.4,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t04_data_extraction_2",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t04_data_extraction",
+        "prompt": "Извлеки все email, телефоны и ссылки списком.\n                    ВАЖНО: Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\n                    Текст: Данные системы: Запасной email: hr@startup.io; Сайт: ftp://files.server.net; Факс/Тел: 8 (495) 123-4567; Почта: admin@sys-ops.xyz; Зеркало: http://company.org/about; Звонить +49 30 123456",
+        "thinking_response": "We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. So likely each item on its own line, maybe separated by newline, using spaces and hyphens only. No markdown formatting like backticks or bullet points with special characters? Probably we can output each item prefixed with a hyphen and space, which uses hyphen and space (allowed). Must avoid special formatting like bullet points using Unicode? Hyphen is okay. Use plain text.\n\nExtract emails: hr@startup.io, admin@sys-ops.xyz\n\nPhones: \"8 (495) 123-4567\" and \"+49 30 123456\". Also maybe \"Факс/Тел: 8 (495) 123-4567;\" includes spaces and parentheses, hyphens. Should we keep as is? Use ordinary spaces and hyphens, parentheses are allowed? They are not spaces or hyphens but they are ASCII characters. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should use only ordinary spaces and hyphens, no special formatting like markdown, bullet points with special characters? Probably they want plain text list, each item separated by newline, using spaces and hyphens only (maybe they mean we cannot use tabs or other whitespace). Parentheses and plus sign are okay as they are part of the data. So we output each item.\n\nLinks: ftp://files.server.net, http://company.org/about\n\nThus list:\n\nhr@startup.io\nadmin@sys-ops.xyz\n8 (495) 123-4567\n+49 30 123456\nftp://files.server.net\nhttp://company.org/about\n\nWe need to ensure only spaces and hyphens as formatting; we are using newline separators (which is okay). No bullet points. Provide as plain list.\n\nLet's output",
+        "llm_response": "hr@startup.io\n\nadmin@sys-ops.xyz\n8 (495) 123-4567\n+49 30 123456\nftp://files.server.net\nhttp://company.org/about",
+        "thinking_log": "We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. So likely each item on its own line, maybe separated by newline, using spaces and hyphens only. No markdown formatting like backticks or bullet points with special characters? Probably we can output each item prefixed with a hyphen and space, which uses hyphen and space (allowed). Must avoid special formatting like bullet points using Unicode? Hyphen is okay. Use plain text.\n\nExtract emails: hr@startup.io, admin@sys-ops.xyz\n\nPhones: \"8 (495) 123-4567\" and \"+49 30 123456\". Also maybe \"Факс/Тел: 8 (495) 123-4567;\" includes spaces and parentheses, hyphens. Should we keep as is? Use ordinary spaces and hyphens, parentheses are allowed? They are not spaces or hyphens but they are ASCII characters. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should use only ordinary spaces and hyphens, no special formatting like markdown, bullet points with special characters? Probably they want plain text list, each item separated by newline, using spaces and hyphens only (maybe they mean we cannot use tabs or other whitespace). Parentheses and plus sign are okay as they are part of the data. So we output each item.\n\nLinks: ftp://files.server.net, http://company.org/about\n\nThus list:\n\nhr@startup.io\nadmin@sys-ops.xyz\n8 (495) 123-4567\n+49 30 123456\nftp://files.server.net\nhttp://company.org/about\n\nWe need to ensure only spaces and hyphens as formatting; we are using newline separators (which is okay). No bullet points. Provide as plain list.\n\nLet's output",
+        "parsed_answer": "hr@startup.io\n\nadmin@sys-ops.xyz\n8 (495) 123-4567\n+49 30 123456\nftp://files.server.net\nhttp://company.org/about",
+        "raw_llm_output": "<think>We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. So likely each item on its own line, maybe separated by newline, using spaces and hyphens only. No markdown formatting like backticks or bullet points with special characters? Probably we can output each item prefixed with a hyphen and space, which uses hyphen and space (allowed). Must avoid special formatting like bullet points using Unicode? Hyphen is okay. Use plain text.\n\nExtract emails: hr@startup.io, admin@sys-ops.xyz\n\nPhones: \"8 (495) 123-4567\" and \"+49 30 123456\". Also maybe \"Факс/Тел: 8 (495) 123-4567;\" includes spaces and parentheses, hyphens. Should we keep as is? Use ordinary spaces and hyphens, parentheses are allowed? They are not spaces or hyphens but they are ASCII characters. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should use only ordinary spaces and hyphens, no special formatting like markdown, bullet points with special characters? Probably they want plain text list, each item separated by newline, using spaces and hyphens only (maybe they mean we cannot use tabs or other whitespace). Parentheses and plus sign are okay as they are part of the data. So we output each item.\n\nLinks: ftp://files.server.net, http://company.org/about\n\nThus list:\n\nhr@startup.io\nadmin@sys-ops.xyz\n8 (495) 123-4567\n+49 30 123456\nftp://files.server.net\nhttp://company.org/about\n\nWe need to ensure only spaces and hyphens as formatting; we are using newline separators (which is okay). No bullet points. Provide as plain list.\n\nLet's output</think>\nhr@startup.io\n\nadmin@sys-ops.xyz\n8 (495) 123-4567\n+49 30 123456\nftp://files.server.net\nhttp://company.org/about",
+        "expected_output": {
+            "emails": "{'admin@sys-ops.xyz', 'hr@startup.io'}",
+            "phones": "{'8 (495) 123-4567', '+49 30 123456'}",
+            "urls": "{'ftp://files.server.net', 'http://company.org/about'}",
+            "test_type": "multi_entity_extraction"
+        },
+        "is_correct": true,
+        "execution_time_ms": 7678.990300002624,
+        "verification_details": {
+            "raw_llm_output": "hr@startup.io\n\nadmin@sys-ops.xyz\n8 (495) 123-4567\n+49 30 123456\nftp://files.server.net\nhttp://company.org/about",
+            "found_raw": {
+                "emails": [
+                    "admin@sys-ops.xyz",
+                    "hr@startup.io"
+                ],
+                "phones": [
+                    "8 (495) 123-4567",
+                    "+49 30 123456"
+                ],
+                "amounts": []
+            },
+            "errors": []
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373684,
+            "id": "gen-1773373684-55DAcXSCi8dilqvexyqC",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 461,
+            "prompt_eval_count": 93,
+            "total_duration": 7678402700,
+            "prompt_eval_duration": 3204622500,
+            "eval_duration": 4473780200,
+            "load_duration": 0,
+            "total_latency_ms": 7678.990300002624,
+            "time_to_first_token_ms": 3204.62,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t04_data_extraction_3",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t04_data_extraction",
+        "prompt": "Извлеки телефонный номер для 'hotline'.\nТекст: Телефон директора: 8-800-555-35-35. Горячая линия: +1-202-555-0144.",
+        "thinking_response": "We need to extract phone number for 'hotline' from the given text. The text: \"Телефон директора: 8-800-555-35-35. Горячая линия: +1-202-555-0144.\" So hotline number is +1-202-555-01",
+        "llm_response": "+1-\n202-555-0144",
+        "thinking_log": "We need to extract phone number for 'hotline' from the given text. The text: \"Телефон директора: 8-800-555-35-35. Горячая линия: +1-202-555-0144.\" So hotline number is +1-202-555-01",
+        "parsed_answer": "+1-\n202-555-0144",
+        "raw_llm_output": "<think>We need to extract phone number for 'hotline' from the given text. The text: \"Телефон директора: 8-800-555-35-35. Горячая линия: +1-202-555-0144.\" So hotline number is +1-202-555-01</think>\n+1-\n202-555-0144",
+        "expected_output": {
+            "relevant_phone": "+1-202-555-0144",
+            "context": "hotline",
+            "test_type": "contextual_extraction"
+        },
+        "is_correct": true,
+        "execution_time_ms": 1479.9860999992234,
+        "verification_details": {
+            "raw_llm_output": "+1-\n202-555-0144",
+            "found_raw": {
+                "emails": [],
+                "phones": [
+                    "202-555-0144"
+                ],
+                "amounts": []
+            },
+            "target_phone_found": true
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373691,
+            "id": "gen-1773373691-3zCV4UaNK7bEcEK3FhRV",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 63,
+            "prompt_eval_count": 29,
+            "total_duration": 1479490899,
+            "prompt_eval_duration": 786725300,
+            "eval_duration": 692765599,
+            "load_duration": 0,
+            "total_latency_ms": 1479.9860999992234,
+            "time_to_first_token_ms": 786.73,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t04_data_extraction_4",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t04_data_extraction",
+        "prompt": "Извлеки все email, телефоны и ссылки списком.\n                    ВАЖНО: Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\n                    Текст: Данные системы: Звонить +44 20 7946 0958; Почта: hr@startup.io; Зеркало: https://www.example.com; Факс/Тел: +49 30 123456; Сайт: www.my-site.co.uk; Запасной email: admin@sys-ops.xyz",
+        "thinking_response": "We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. Likely each item on a new line or separated by spaces? They said \"список\" (list). Use only ordinary spaces and hyphens, no special formatting like bullet points with special characters? Probably we can output each item on its own line preceded by a hyphen and space? But hyphen is allowed. They said \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" So we can use hyphen as bullet? That's a hyphen, okay. But we must avoid other characters like colon? Colon is ASCII, allowed? They didn't forbid colon. But maybe they want plain list separated by spaces? Safer: just output each item separated by a space? But they said list, maybe each on new line with a hyphen prefix. Hyphen is allowed. Use only spaces and hyphens, meaning we cannot use other punctuation like commas, periods? Actually they said only ordinary spaces and hyphens (ASCII), without special formatting. That suggests we should not use any other punctuation like colon, semicolon, parentheses, etc. So we need to output items using only spaces and hyphens. That means we cannot use colon after label, cannot use commas, cannot use periods? But periods are part of email and URLs, which we must keep as they are part of the data. The restriction likely applies to formatting characters we add, not the data itself. So we can output each item on its own line, maybe preceded by a hyphen and space. That uses hyphen and space, okay. No other punctuation like colon. So we can do:\n\n- +44 20 7946 0958\n- hr@startup.io\n- https://www.example.com\n- +49 30 123456\n- www.my-site.co.uk\n- admin@sys-ops.xyz\n\nCheck: hyphen and space at start of each line. That's allowed. No other punctuation besides hyphen and space. The lines contain other characters (like @, ., :, /) but those are part of the data, presumably okay. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should not use special formatting like markdown bullet points with asterisks, numbers, etc. Using hyphen is okay. So output as above.\n\nLet's ensure we extracted all: phones: +44 20 7946 0958, +49 30 123456. Emails: hr@startup.io, admin@sys-ops.xyz. Links: https://www.example.com, www.my-site.co.uk. That's six items.\n\nWe'll output each on new line with hy",
+        "llm_response": "- +44\n 20 7946 0958\n- hr@startup.io- https://www.example.com\n- +49 30 123456\n- www.my-site.co.uk\n- admin@sys-ops.xyz",
+        "thinking_log": "We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. Likely each item on a new line or separated by spaces? They said \"список\" (list). Use only ordinary spaces and hyphens, no special formatting like bullet points with special characters? Probably we can output each item on its own line preceded by a hyphen and space? But hyphen is allowed. They said \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" So we can use hyphen as bullet? That's a hyphen, okay. But we must avoid other characters like colon? Colon is ASCII, allowed? They didn't forbid colon. But maybe they want plain list separated by spaces? Safer: just output each item separated by a space? But they said list, maybe each on new line with a hyphen prefix. Hyphen is allowed. Use only spaces and hyphens, meaning we cannot use other punctuation like commas, periods? Actually they said only ordinary spaces and hyphens (ASCII), without special formatting. That suggests we should not use any other punctuation like colon, semicolon, parentheses, etc. So we need to output items using only spaces and hyphens. That means we cannot use colon after label, cannot use commas, cannot use periods? But periods are part of email and URLs, which we must keep as they are part of the data. The restriction likely applies to formatting characters we add, not the data itself. So we can output each item on its own line, maybe preceded by a hyphen and space. That uses hyphen and space, okay. No other punctuation like colon. So we can do:\n\n- +44 20 7946 0958\n- hr@startup.io\n- https://www.example.com\n- +49 30 123456\n- www.my-site.co.uk\n- admin@sys-ops.xyz\n\nCheck: hyphen and space at start of each line. That's allowed. No other punctuation besides hyphen and space. The lines contain other characters (like @, ., :, /) but those are part of the data, presumably okay. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should not use special formatting like markdown bullet points with asterisks, numbers, etc. Using hyphen is okay. So output as above.\n\nLet's ensure we extracted all: phones: +44 20 7946 0958, +49 30 123456. Emails: hr@startup.io, admin@sys-ops.xyz. Links: https://www.example.com, www.my-site.co.uk. That's six items.\n\nWe'll output each on new line with hy",
+        "parsed_answer": "- +44\n 20 7946 0958\n- hr@startup.io- https://www.example.com\n- +49 30 123456\n- www.my-site.co.uk\n- admin@sys-ops.xyz",
+        "raw_llm_output": "<think>We need to extract all email, phones, and links from the given text. Output as a list, using only ordinary spaces and hyphens (ASCII), no special formatting. Likely each item on a new line or separated by spaces? They said \"список\" (list). Use only ordinary spaces and hyphens, no special formatting like bullet points with special characters? Probably we can output each item on its own line preceded by a hyphen and space? But hyphen is allowed. They said \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" So we can use hyphen as bullet? That's a hyphen, okay. But we must avoid other characters like colon? Colon is ASCII, allowed? They didn't forbid colon. But maybe they want plain list separated by spaces? Safer: just output each item separated by a space? But they said list, maybe each on new line with a hyphen prefix. Hyphen is allowed. Use only spaces and hyphens, meaning we cannot use other punctuation like commas, periods? Actually they said only ordinary spaces and hyphens (ASCII), without special formatting. That suggests we should not use any other punctuation like colon, semicolon, parentheses, etc. So we need to output items using only spaces and hyphens. That means we cannot use colon after label, cannot use commas, cannot use periods? But periods are part of email and URLs, which we must keep as they are part of the data. The restriction likely applies to formatting characters we add, not the data itself. So we can output each item on its own line, maybe preceded by a hyphen and space. That uses hyphen and space, okay. No other punctuation like colon. So we can do:\n\n- +44 20 7946 0958\n- hr@startup.io\n- https://www.example.com\n- +49 30 123456\n- www.my-site.co.uk\n- admin@sys-ops.xyz\n\nCheck: hyphen and space at start of each line. That's allowed. No other punctuation besides hyphen and space. The lines contain other characters (like @, ., :, /) but those are part of the data, presumably okay. The instruction: \"Используй только обычные пробелы и дефисы (ASCII), без специального форматирования.\" Means we should not use special formatting like markdown bullet points with asterisks, numbers, etc. Using hyphen is okay. So output as above.\n\nLet's ensure we extracted all: phones: +44 20 7946 0958, +49 30 123456. Emails: hr@startup.io, admin@sys-ops.xyz. Links: https://www.example.com, www.my-site.co.uk. That's six items.\n\nWe'll output each on new line with hy</think>\n- +44\n 20 7946 0958\n- hr@startup.io- https://www.example.com\n- +49 30 123456\n- www.my-site.co.uk\n- admin@sys-ops.xyz",
+        "expected_output": {
+            "emails": "{'admin@sys-ops.xyz', 'hr@startup.io'}",
+            "phones": "{'+49 30 123456', '+44 20 7946 0958'}",
+            "urls": "{'https://www.example.com', 'www.my-site.co.uk'}",
+            "test_type": "multi_entity_extraction"
+        },
+        "is_correct": false,
+        "execution_time_ms": 23151.855600001,
+        "verification_details": {
+            "raw_llm_output": "- +44\n 20 7946 0958\n- hr@startup.io- https://www.example.com\n- +49 30 123456\n- www.my-site.co.uk\n- admin@sys-ops.xyz",
+            "found_raw": {
+                "emails": [
+                    "admin@sys-ops.xyz",
+                    "hr@startup.io"
+                ],
+                "phones": [
+                    "+49 30 123456"
+                ],
+                "amounts": []
+            },
+            "errors": [
+                "Missing phones. Exp: {'4930123456', '2079460958'}, Got: {'4930123456'}"
+            ]
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373693,
+            "id": "gen-1773373693-VYqcmL5aqD12fR66AoJQ",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 652,
+            "prompt_eval_count": 92,
+            "total_duration": 23151223900,
+            "prompt_eval_duration": 8635332999,
+            "eval_duration": 14515890900,
+            "load_duration": 0,
+            "total_latency_ms": 23151.855600001,
+            "time_to_first_token_ms": 8635.33,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t04_data_extraction_5",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t04_data_extraction",
+        "prompt": "Извлеки из документа:\n1. Email\n2. Телефон\n3. Сайт\n4. Адрес\n5. Даты\n6. Суммы\n\nДокумент:\nСвяжитесь с нами\nПишите: hr@startup.io\nЗвоните: +44 20 7946 0958\nЗаходите: https://www.example.com\nНаш адрес: г. Москва, ул. Тверская, д. 12\nДата создания: 11.05.2025\nБюджет: 852139 ₽",
+        "thinking_response": "We need to extract email, phone, website, address, dates, sums from the document. Provide them likely as list. The document is in Russian. Provide each field. Let's parse:\n\nEmail: hr@startup.io\nPhone: +44 20 7946 0958\nWebsite: https://www.example.com\nAddress: г. Москва, ул. Тверская, д. 12\nDate: Дата создания: 11.05.2025 (maybe also other dates? Only one)\nSum: Бюджет: 852139 ₽\n\nWe should output maybe JSON or bullet list. The instruction: \"Извлеки из документа: 1. Email 2. Телефон 3. Сайт 4. Адрес 5. Даты 6. Суммы\". So we can list each.\n\nLet's produce:\n\nEmail: hr@startup.io\nТелефон: +44 20 7946 0958\nСайт: https://www.example.com\nАдрес: г. Москва, ул. Тверская, д. 12\nДаты: 11.05.2025\nСуммы: 852139",
+        "llm_response": "- **\nEmail:** hr@startup.io  \n- **Телефон:** +44 20 7946 0958  \n- **Сайт:** https://www.example.com  \n- **Адрес:** г. Москва, ул. Тверская, д. 12  \n- **Даты:** 11.05.2025  \n- **Суммы:** 852139 ₽",
+        "thinking_log": "We need to extract email, phone, website, address, dates, sums from the document. Provide them likely as list. The document is in Russian. Provide each field. Let's parse:\n\nEmail: hr@startup.io\nPhone: +44 20 7946 0958\nWebsite: https://www.example.com\nAddress: г. Москва, ул. Тверская, д. 12\nDate: Дата создания: 11.05.2025 (maybe also other dates? Only one)\nSum: Бюджет: 852139 ₽\n\nWe should output maybe JSON or bullet list. The instruction: \"Извлеки из документа: 1. Email 2. Телефон 3. Сайт 4. Адрес 5. Даты 6. Суммы\". So we can list each.\n\nLet's produce:\n\nEmail: hr@startup.io\nТелефон: +44 20 7946 0958\nСайт: https://www.example.com\nАдрес: г. Москва, ул. Тверская, д. 12\nДаты: 11.05.2025\nСуммы: 852139",
+        "parsed_answer": "- **\nEmail:** hr@startup.io  \n- **Телефон:** +44 20 7946 0958  \n- **Сайт:** https://www.example.com  \n- **Адрес:** г. Москва, ул. Тверская, д. 12  \n- **Даты:** 11.05.2025  \n- **Суммы:** 852139 ₽",
+        "raw_llm_output": "<think>We need to extract email, phone, website, address, dates, sums from the document. Provide them likely as list. The document is in Russian. Provide each field. Let's parse:\n\nEmail: hr@startup.io\nPhone: +44 20 7946 0958\nWebsite: https://www.example.com\nAddress: г. Москва, ул. Тверская, д. 12\nDate: Дата создания: 11.05.2025 (maybe also other dates? Only one)\nSum: Бюджет: 852139 ₽\n\nWe should output maybe JSON or bullet list. The instruction: \"Извлеки из документа: 1. Email 2. Телефон 3. Сайт 4. Адрес 5. Даты 6. Суммы\". So we can list each.\n\nLet's produce:\n\nEmail: hr@startup.io\nТелефон: +44 20 7946 0958\nСайт: https://www.example.com\nАдрес: г. Москва, ул. Тверская, д. 12\nДаты: 11.05.2025\nСуммы: 852139</think>\n- **\nEmail:** hr@startup.io  \n- **Телефон:** +44 20 7946 0958  \n- **Сайт:** https://www.example.com  \n- **Адрес:** г. Москва, ул. Тверская, д. 12  \n- **Даты:** 11.05.2025  \n- **Суммы:** 852139 ₽",
+        "expected_output": {
+            "email": "hr@startup.io",
+            "phone": "+44 20 7946 0958",
+            "url": "https://www.example.com",
+            "address": "г. Москва, ул. Тверская, д. 12",
+            "dates": [
+                "11.05.2025"
+            ],
+            "amounts": [
+                "852139 ₽"
+            ],
+            "test_type": "structured_document"
+        },
+        "is_correct": true,
+        "execution_time_ms": 4483.9910000009695,
+        "verification_details": {
+            "raw_llm_output": "- \nEmail: hr@startup.io  \n- Телефон: +44 20 7946 0958  \n- Сайт: https://www.example.com  \n- Адрес: г. Москва, ул. Тверская, д. 12  \n- Даты: 11.05.2025  \n- Суммы: 852139 ₽",
+            "found_raw": {
+                "emails": [
+                    "hr@startup.io"
+                ],
+                "phones": [
+                    "+44 20 7946 0958"
+                ],
+                "amounts": [
+                    "852139 ₽"
+                ]
+            },
+            "errors": []
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373716,
+            "id": "gen-1773373716-dVOOsnr3ceHtqnwDggo8",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 238,
+            "prompt_eval_count": 68,
+            "total_duration": 4483502999,
+            "prompt_eval_duration": 959977399,
+            "eval_duration": 3523525600,
+            "load_duration": 0,
+            "total_latency_ms": 4483.9910000009695,
+            "time_to_first_token_ms": 959.98,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t06_mathematics_1",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t06_mathematics",
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: 5 - 7 * 2",
+        "thinking_response": "We need to compute 5 - 7 * 2. Multiplication first: 7*2=14. Then 5-14 =",
+        "llm_response": "-\n9",
+        "thinking_log": "We need to compute 5 - 7 * 2. Multiplication first: 7*2=14. Then 5-14 =",
+        "parsed_answer": "-\n9",
+        "raw_llm_output": "<think>We need to compute 5 - 7 * 2. Multiplication first: 7*2=14. Then 5-14 =</think>\n-\n9",
+        "expected_output": "-9",
+        "is_correct": false,
+        "execution_time_ms": 6098.014499999408,
+        "verification_details": {
+            "exact_match": false,
+            "approximate_match": false,
+            "fraction_match": false,
+            "has_reasoning": false,
+            "expected_value": "-9",
+            "expected_numeric": -9.0,
+            "extracted_numbers": [
+                "9.0"
+            ],
+            "extracted_fractions": [],
+            "tolerance_used": 0.01,
+            "llm_output_snippet": "-\n9",
+            "reason": "Ближайшее число 9.0 (разница 18.0000)"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373721,
+            "id": "gen-1773373721-iA3nLdbdNEZmFgtAAvXT",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 33,
+            "prompt_eval_count": 42,
+            "total_duration": 6097547099,
+            "prompt_eval_duration": 5690844199,
+            "eval_duration": 406702899,
+            "load_duration": 0,
+            "total_latency_ms": 6098.014499999408,
+            "time_to_first_token_ms": 5690.84,
+            "peak_ram_increment_mb": 0.0078125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t06_mathematics_2",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t06_mathematics",
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: 52 - (7 + 9) * 4",
+        "thinking_response": "We need compute: 52 - (7+9)*4. 7+9=16. 16*4=64. 52-64 = -12. Output only number: -12.",
+        "llm_response": "-12",
+        "thinking_log": "We need compute: 52 - (7+9)*4. 7+9=16. 16*4=64. 52-64 = -12. Output only number: -12.",
+        "parsed_answer": "-12",
+        "raw_llm_output": "<think>We need compute: 52 - (7+9)*4. 7+9=16. 16*4=64. 52-64 = -12. Output only number: -12.</think>\n-12",
+        "expected_output": "-12",
+        "is_correct": true,
+        "execution_time_ms": 1141.7992999995477,
+        "verification_details": {
+            "exact_match": true,
+            "approximate_match": true,
+            "fraction_match": false,
+            "has_reasoning": false,
+            "expected_value": "-12",
+            "expected_numeric": -12.0,
+            "extracted_numbers": [
+                "-12.0"
+            ],
+            "extracted_fractions": [],
+            "tolerance_used": 0.01,
+            "llm_output_snippet": "-12",
+            "reason": "Точное совпадение"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373727,
+            "id": "gen-1773373727-vE555Yz6tXZBEFZ1Tdf7",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 28,
+            "prompt_eval_count": 44,
+            "total_duration": 1141273400,
+            "prompt_eval_duration": 786779000,
+            "eval_duration": 354494400,
+            "load_duration": 0,
+            "total_latency_ms": 1141.7992999995477,
+            "time_to_first_token_ms": 786.78,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t06_mathematics_3",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t06_mathematics",
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: (13 + 4) * 3",
+        "thinking_response": "We need to compute (13+4)*3 = 17*3 = 51",
+        "llm_response": "51<think>\n. Output just number.",
+        "thinking_log": "We need to compute (13+4)*3 = 17*3 = 51",
+        "parsed_answer": "51<think>\n. Output just number.",
+        "raw_llm_output": "<think>We need to compute (13+4)*3 = 17*3 = 51</think>\n51<think>\n. Output just number.",
+        "expected_output": "51",
+        "is_correct": true,
+        "execution_time_ms": 1211.3087999969139,
+        "verification_details": {
+            "exact_match": true,
+            "approximate_match": true,
+            "fraction_match": false,
+            "has_reasoning": false,
+            "expected_value": "51",
+            "expected_numeric": 51.0,
+            "extracted_numbers": [
+                "51.0"
+            ],
+            "extracted_fractions": [],
+            "tolerance_used": 0.01,
+            "llm_output_snippet": "51<think>\n. Output just number.",
+            "reason": "Точное совпадение"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373728,
+            "id": "gen-1773373728-JEWCHUEx3Y1UDPyQpgrT",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 23,
+            "prompt_eval_count": 43,
+            "total_duration": 1210771400,
+            "prompt_eval_duration": 1031086700,
+            "eval_duration": 179684700,
+            "load_duration": 0,
+            "total_latency_ms": 1211.3087999969139,
+            "time_to_first_token_ms": 1031.09,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t06_mathematics_4",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t06_mathematics",
+        "prompt": "Вычисли значение следующего математического выражения. Используй правильный порядок операций (скобки, степени, умножение/деление, сложение/вычитание). В ответе укажи ТОЛЬКО финальное число с точностью до 2 знаков после запятой. Примечание: sqrt(x) означает квадратный корень из x.\n\nВыражение: 4 * (7 + 8)",
+        "thinking_response": "We need to compute 4 * (7 + 8) = 4 * 15 = 60. Output only final number with two decimal places: 60.00.",
+        "llm_response": "60.00",
+        "thinking_log": "We need to compute 4 * (7 + 8) = 4 * 15 = 60. Output only final number with two decimal places: 60.00.",
+        "parsed_answer": "60.00",
+        "raw_llm_output": "<think>We need to compute 4 * (7 + 8) = 4 * 15 = 60. Output only final number with two decimal places: 60.00.</think>\n60.00",
+        "expected_output": "60",
+        "is_correct": true,
+        "execution_time_ms": 1056.1247000005096,
+        "verification_details": {
+            "exact_match": false,
+            "approximate_match": true,
+            "fraction_match": false,
+            "has_reasoning": false,
+            "expected_value": "60",
+            "expected_numeric": 60.0,
+            "extracted_numbers": [
+                "60.0"
+            ],
+            "extracted_fractions": [],
+            "tolerance_used": 0.01,
+            "llm_output_snippet": "60.00",
+            "reason": "Приближенное совпадение (допуск ±0.01)"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373729,
+            "id": "gen-1773373729-0GnsJc89k2F1eML0MDXW",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 32,
+            "prompt_eval_count": 77,
+            "total_duration": 1055566800,
+            "prompt_eval_duration": 677917500,
+            "eval_duration": 377649299,
+            "load_duration": 0,
+            "total_latency_ms": 1056.1247000005096,
+            "time_to_first_token_ms": 677.92,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    },
+    {
+        "test_id": "t06_mathematics_5",
+        "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+        "model_details": {
+            "model_name": "nvidia/nemotron-3-super-120b-a12b:free",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t06_mathematics",
+        "prompt": "Вычисли значение следующего арифметического выражения. В ответе укажи ТОЛЬКО финальное число, без каких-либо дополнительных слов или объяснений.\n\nВыражение: 4 * 8 - 3",
+        "thinking_response": "We need to compute 4 * 8 - 3 = 32 - 3 = 29. Output just the number.",
+        "llm_response": "29",
+        "thinking_log": "We need to compute 4 * 8 - 3 = 32 - 3 = 29. Output just the number.",
+        "parsed_answer": "29",
+        "raw_llm_output": "<think>We need to compute 4 * 8 - 3 = 32 - 3 = 29. Output just the number.</think>\n29",
+        "expected_output": "29",
+        "is_correct": true,
+        "execution_time_ms": 3089.149899999029,
+        "verification_details": {
+            "exact_match": true,
+            "approximate_match": true,
+            "fraction_match": false,
+            "has_reasoning": false,
+            "expected_value": "29",
+            "expected_numeric": 29.0,
+            "extracted_numbers": [
+                "29.0"
+            ],
+            "extracted_fractions": [],
+            "tolerance_used": 0.01,
+            "llm_output_snippet": "29",
+            "reason": "Точное совпадение"
+        },
+        "performance_metrics": {
+            "model": "nvidia/nemotron-3-super-120b-a12b-20230311:free",
+            "created": 1773373730,
+            "id": "gen-1773373730-e6FbZuEzXIhbvid9evll",
+            "object": "chat.completion.chunk",
+            "provider": "Nvidia",
+            "native_finish_reason": "stop",
+            "eval_count": 23,
+            "prompt_eval_count": 42,
+            "total_duration": 3088624899,
+            "prompt_eval_duration": 2743845099,
+            "eval_duration": 344779799,
+            "load_duration": 0,
+            "total_latency_ms": 3089.149899999029,
+            "time_to_first_token_ms": 2743.85,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 80.27,
+                "used_ram_gb": 23.66,
+                "ram_percentage": 22.8,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.0
+            },
+            "gpus": [
+                {
+                    "vendor": "Unknown",
+                    "name": "DriverVersion",
+                    "index": 0,
+                    "driver_version": "Name",
+                    "type": "integrated"
+                },
+                {
+                    "vendor": "Unknown",
+                    "name": "32.0.15.9174",
+                    "index": 1,
+                    "driver_version": "NVIDIA GeForce RTX 5070 Ti",
+                    "type": "discrete",
+                    "memory_total_gb": 4.0
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 123.08,
+                "disk_used_gb": 808.42
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "import_failed",
+                "tensorflow": "import_failed",
+                "transformers": "import_failed",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "entry_level",
+        "benchmark_timestamp": 1773373735.6173542
+    }
+]

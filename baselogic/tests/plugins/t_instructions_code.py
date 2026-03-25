@@ -5,7 +5,7 @@ import random
 import re
 import subprocess
 import tempfile
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 # Предполагается, что базовый класс импортируется из вашего фреймворка
 from baselogic.tests.abstract_test_generator import AbstractTestGenerator
@@ -14,206 +14,198 @@ log = logging.getLogger(__name__)
 
 class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
     """
-    Универсальный генератор тестов на написание кода.
-    Динамически выбирает:
-    1. Язык программирования (Python, Kotlin, JS, Java, HTML)
-    2. Режим проверки:
-       - strict_copy: Точное посимвольное копирование кода.
-       - plan_following: Написание кода по плану (проверка AST/структуры/чек-листу).
-       - functional: Написание кода по описанию с запуском юнит-тестов (игнорирует формат).
+    Продвинутый генератор тестов на работу с кодом (Combat Level).
+
+    Покрывает сценарии:
+    1. diff_apply: Механическое применение Unified Diff (патчей).
+    2. semantic_refactor: Глубокий рефакторинг кода по ТЗ с сохранением функциональности.
+    3. strict_copy: Точное копирование.
     """
 
-    # Режимы, доступные для функционального выполнения (где мы можем реально запустить код)
-    EXECUTABLE_LANGUAGES = ["python", "kotlin", "javascript"]
+    EXECUTABLE_LANGUAGES = ["python", "kotlin", "javascript", "java"]
 
-    def __init__(self, test_id: str = "dynamic_code_write"):
+    def __init__(self, test_id: str = "combat_code_write"):
         super().__init__(test_id)
         self.templates = self._init_templates()
 
     def _init_templates(self) -> List[Dict[str, Any]]:
-        """
-        База усложненных сценариев.
-        Требуют алгоритмического мышления, понимания краевых случаев и точного следования плану.
-        """
         return [
             # ------------------------------------------------------------------
-            # 1. PYTHON: Рекурсивное "сплющивание" словаря (Алгоритмическая сложность)
+            # 1. PYTHON: Рефакторинг "Спагетти-кода" в ООП (Semantic Refactor)
             # ------------------------------------------------------------------
             {
                 "language": "python",
-                "task_name": "flatten_nested_dict",
-                "plan": [
-                    "Создать функцию `flatten_dict(d, parent_key='', sep='.')`",
-                    "Инициализировать пустой словарь для результата",
-                    "Пройтись по всем ключам и значениям входного словаря",
-                    "Сформировать новый ключ, соединив parent_key и текущий ключ через sep (если parent_key не пуст)",
-                    "Если значение — это словарь, рекурсивно вызвать flatten_dict и обновить результат",
-                    "Иначе — записать значение в результат по новому ключу",
-                    "Вернуть плоский словарь"
+                "task_name": "refactor_legacy_to_oop",
+                "mode": "semantic_refactor",
+                "description": "Рефакторинг процедурного кода с глобальным состоянием в чистый класс.",
+                "legacy_code": (
+                    "# Legacy code: Global state, no error handling\n"
+                    "db_connection = None\n\n"
+                    "def init_db(conn_str):\n"
+                    "    global db_connection\n"
+                    "    db_connection = conn_str\n\n"
+                    "def get_user(user_id):\n"
+                    "    # Simulate DB lookup\n"
+                    "    if not db_connection:\n"
+                    "        raise Exception('DB not initialized')\n"
+                    "    return {'id': user_id, 'name': 'User_' + str(user_id)}\n\n"
+                    "def update_user(user_id, new_name):\n"
+                    "    user = get_user(user_id)\n"
+                    "    user['name'] = new_name\n"
+                    "    # In real code, would update DB\n"
+                    "    return user"
+                ),
+                "refactor_plan": [
+                    "Создать класс `UserService`.",
+                    "Инициализировать `db_connection` в `__init__` (убрать глобальную переменную).",
+                    "Метод `get_user` должен возвращать копию словаря, чтобы избежать мутаций.",
+                    "Добавить валидацию `user_id` (должен быть int > 0).",
+                    "Метод `update_user` должен принимать `user_id` и `new_name`."
                 ],
-                "structural_checks": {
-                    "functions": ["flatten_dict"],
-                    "keywords": ["parent_key", "sep", "items()", "isinstance", "dict"]
+                "constraints": {
+                    "forbidden_patterns": ["global ", "db_connection = "], # Запрет глобалов
+                    "required_classes": ["UserService"]
                 },
                 "tests": [
-                    # Тест 1: Базовая вложенность
-                    "assert flatten_dict({'a': 1, 'b': {'c': 2, 'd': {'e': 3}}}) == {'a': 1, 'b.c': 2, 'b.d.e': 3}",
-                    # Тест 2: Пустой словарь
-                    "assert flatten_dict({}) == {}",
-                    # Тест 3: Кастомный разделитель
-                    "assert flatten_dict({'x': {'y': 42}}, sep='_') == {'x_y': 42}"
-                ],
-                "expected_code": (
-                    "def flatten_dict(d, parent_key='', sep='.'):\n"
-                    "    items = {}\n"
-                    "    for k, v in d.items():\n"
-                    "        new_key = f'{parent_key}{sep}{k}' if parent_key else k\n"
-                    "        if isinstance(v, dict):\n"
-                    "            items.update(flatten_dict(v, new_key, sep=sep))\n"
-                    "        else:\n"
-                    "            items[new_key] = v\n"
-                    "    return items"
-                )
+                    "svc = UserService('sqlite://memory')\n"
+                    "assert svc.get_user(1) == {'id': 1, 'name': 'User_1'}",
+
+                    "svc = UserService('sqlite://memory')\n"
+                    "user = svc.update_user(1, 'Alice')\n"
+                    "assert user['name'] == 'Alice'",
+
+                    "import copy\n"
+                    "svc = UserService('sqlite://memory')\n"
+                    "u1 = svc.get_user(2)\n"
+                    "u1['hack'] = True\n"
+                    "u2 = svc.get_user(2)\n"
+                    "assert 'hack' not in u2, 'Mutation protection failed'",
+
+                    "try:\n"
+                    "    UserService('sqlite://memory').get_user(-5)\n"
+                    "    assert False, 'Should validate id'\n"
+                    "except ValueError: pass"
+                ]
             },
 
             # ------------------------------------------------------------------
-            # 2. JAVASCRIPT: Агрегация данных (Бизнес-логика, Map/Reduce)
-            # ------------------------------------------------------------------
-            {
-                "language": "javascript",
-                "task_name": "sales_aggregator",
-                "plan": [
-                    "Создать функцию `aggregateSales(transactions)`",
-                    "Убедиться, что на вход передан массив. Если нет — вернуть пустой объект {}",
-                    "Отфильтровать транзакции: оставить только те, у которых `status` равен 'completed'",
-                    "Сгруппировать оставшиеся транзакции по `department`",
-                    "Для каждого департамента вычислить сумму `amount`",
-                    "Вернуть объект вида { departmentName: totalAmount }"
-                ],
-                "structural_checks": {
-                    "functions": ["aggregateSales"],
-                    "keywords": ["Array.isArray", "filter", "reduce", "completed", "amount"]
-                },
-                "tests": [
-                    # Тест 1: Нормальные данные + игнорирование pending
-                    "const data = [{department: 'IT', amount: 100, status: 'completed'}, {department: 'IT', amount: 50, status: 'pending'}, {department: 'HR', amount: 200, status: 'completed'}];\n"
-                    "const res = aggregateSales(data);\n"
-                    "if (res['IT'] !== 100 || res['HR'] !== 200) throw new Error('Aggregation failed');",
-                    # Тест 2: Пустой массив
-                    "if (Object.keys(aggregateSales([])).length !== 0) throw new Error('Empty array failed');",
-                    # Тест 3: Не массив
-                    "if (Object.keys(aggregateSales(null)).length !== 0) throw new Error('Null handling failed');"
-                ],
-                "expected_code": (
-                    "function aggregateSales(transactions) {\n"
-                    "    if (!Array.isArray(transactions)) return {};\n"
-                    "    return transactions\n"
-                    "        .filter(t => t.status === 'completed')\n"
-                    "        .reduce((acc, t) => {\n"
-                    "            const dept = t.dept || t.department;\n"
-                    "            acc[dept] = (acc[dept] || 0) + t.amount;\n"
-                    "            return acc;\n"
-                    "        }, {});\n"
-                    "}"
-                )
-            },
-
-            # ------------------------------------------------------------------
-            # 3. KOTLIN: ООП, Инкапсуляция и Исключения (Архитектурная логика)
+            # 2. KOTLIN: Точное применение патча (Diff Apply)
             # ------------------------------------------------------------------
             {
                 "language": "kotlin",
-                "task_name": "bank_account_oop",
-                "plan": [
-                    "Создать класс `BankAccount` с приватным свойством `balance: Double` (по умолчанию 0.0)",
-                    "Добавить метод `deposit(amount: Double)`: увеличивает баланс. Если amount <= 0, выбросить `IllegalArgumentException`",
-                    "Добавить метод `withdraw(amount: Double)`: уменьшает баланс. Если amount > баланса, выбросить `IllegalStateException`",
-                    "Добавить метод `getBalance(): Double` для получения текущего остатка"
-                ],
-                "structural_checks": {
-                    "classes": ["BankAccount"],
-                    "methods": ["deposit", "withdraw", "getBalance"],
-                    "keywords": ["private var", "Double", "IllegalArgumentException", "IllegalStateException"]
-                },
-                "tests": [
-                    # Тест 1: Успешное пополнение и снятие
-                    "val acc = BankAccount()\nacc.deposit(100.0)\nacc.withdraw(40.0)\nassert(acc.getBalance() == 60.0) { \"Math failed\" }",
-                    # Тест 2: Ошибка при депозите <= 0
-                    "try { BankAccount().deposit(-10.0); assert(false) { \"Should throw\" } } catch(e: IllegalArgumentException) {}",
-                    # Тест 3: Ошибка при овердрафте
-                    "try { BankAccount().withdraw(10.0); assert(false) { \"Should throw\" } } catch(e: IllegalStateException) {}"
-                ],
-                "expected_code": (
-                    "class BankAccount(private var balance: Double = 0.0) {\n"
-                    "    fun deposit(amount: Double) {\n"
-                    "        if (amount <= 0) throw IllegalArgumentException(\"Amount must be positive\")\n"
-                    "        balance += amount\n"
+                "task_name": "apply_security_patch",
+                "mode": "diff_apply",
+                "description": "Применение патча безопасности к Data Class.",
+                "original_code": (
+                    "package com.example.dto\n\n"
+                    "data class UserRequest(\n"
+                    "    val username: String,\n"
+                    "    val email: String,\n"
+                    "    val role: String\n"
+                    ") {\n"
+                    "    fun toUser(): User {\n"
+                    "        return User(username, email, role)\n"
                     "    }\n"
-                    "    fun withdraw(amount: Double) {\n"
-                    "        if (amount > balance) throw IllegalStateException(\"Insufficient funds\")\n"
-                    "        balance -= amount\n"
-                    "    }\n"
-                    "    fun getBalance(): Double = balance\n"
                     "}"
-                )
+                ),
+                # Патч добавляет валидацию и меняет поле role на default
+                "unified_diff": (
+                    "--- a/UserRequest.kt\n"
+                    "+++ b/UserRequest.kt\n"
+                    "@@ -1,10 +1,15 @@\n"
+                    " package com.example.dto\n\n"
+                    " data class UserRequest(\n"
+                    "     val username: String,\n"
+                    "     val email: String,\n"
+                    "-    val role: String\n"
+                    "+    val role: String = \"GUEST\"\n"
+                    " ) {\n"
+                    "     fun toUser(): User {\n"
+                    "+        if (username.length < 3) throw IllegalArgumentException(\"Short name\")\n"
+                    "         return User(username, email, role)\n"
+                    "     }\n"
+                    " }"
+                ),
+                # Ожидаемый результат после применения патча
+                "expected_code": (
+                    "package com.example.dto\n\n"
+                    "data class UserRequest(\n"
+                    "    val username: String,\n"
+                    "    val email: String,\n"
+                    "    val role: String = \"GUEST\"\n"
+                    ") {\n"
+                    "    fun toUser(): User {\n"
+                    "        if (username.length < 3) throw IllegalArgumentException(\"Short name\")\n"
+                    "        return User(username, email, role)\n"
+                    "    }\n"
+                    "}"
+                ),
+                "tests": [] # Проверка идет по strict match результата
             },
 
             # ------------------------------------------------------------------
-            # 4. HTML: Доступность (A11y) и Regex валидация
+            # 3. JAVASCRIPT: Асинхронный рефакторинг (Callback Hell -> Async/Await)
             # ------------------------------------------------------------------
             {
-                "language": "html",
-                "task_name": "advanced_a11y_form",
-                "plan": [
-                    "Создать `<form>` с id `secureForm`",
-                    "Добавить `<fieldset>` с тегом `<legend>` (текст 'Оплата')",
-                    "Добавить `<input type=\"text\">` с id `cardNumber` и атрибутом `aria-label=\"Номер карты\"`",
-                    "Добавить к input регулярное выражение (атрибут pattern) для проверки ровно 16 цифр: `\\d{16}`",
-                    "Добавить `<select>` с id `currency` и двумя `<option>` (USD и EUR)",
-                    "Добавить `<button type=\"submit\">`Оплатить`</button>`"
+                "language": "javascript",
+                "task_name": "promisify_legacy_code",
+                "mode": "semantic_refactor",
+                "description": "Конвертация колбеков в async/await с обработкой ошибок.",
+                "legacy_code": (
+                    "const fs = require('fs');\n\n"
+                    "function readConfig(path, callback) {\n"
+                    "    fs.readFile(path, 'utf8', (err, data) => {\n"
+                    "        if (err) {\n"
+                    "            callback(err, null);\n"
+                    "        } else {\n"
+                    "            try {\n"
+                    "                const config = JSON.parse(data);\n"
+                    "                callback(null, config);\n"
+                    "            } catch (e) {\n"
+                    "                callback(e, null);\n"
+                    "            }\n"
+                    "        }\n"
+                    "    });\n"
+                    "}"
+                ),
+                "refactor_plan": [
+                    "Переписать функцию `readConfig` как `async function readConfigAsync(path)`.",
+                    "Использовать `fs.promises` вместо колбеков.",
+                    "Добавить обработку ошибок через try/catch.",
+                    "Вернуть распарсенный JSON."
                 ],
                 "structural_checks": {
-                    "keywords": [
-                        "<form", "secureForm", "<fieldset", "<legend",
-                        "aria-label", "pattern=\"\\d{16}\"", "<select", "<option", "USD", "EUR"
-                    ]
+                    # Теперь проверяем наличие промисов гибче:
+                    # Либо "fs.promises" в коде, либо "promises" импортирован
+                    "keywords": ["async function", "await", "promises", "try {", "catch"],
+                    "functions": ["readConfigAsync"]
                 },
-                "tests": [], # Не выполняем, проверяем план и структуру
-                "expected_code": (
-                    "<form id=\"secureForm\">\n"
-                    "    <fieldset>\n"
-                    "        <legend>Оплата</legend>\n"
-                    "        <input type=\"text\" id=\"cardNumber\" aria-label=\"Номер карты\" pattern=\"\\d{16}\" required>\n"
-                    "        <select id=\"currency\">\n"
-                    "            <option value=\"USD\">USD</option>\n"
-                    "            <option value=\"EUR\">EUR</option>\n"
-                    "        </select>\n"
-                    "        <button type=\"submit\">Оплатить</button>\n"
-                    "    </fieldset>\n"
-                    "</form>"
-                )
-            },
-
-            # ------------------------------------------------------------------
-            # 5. PYTHON: "Ловушка перфекциониста" (Для режима strict_copy)
-            # ------------------------------------------------------------------
-            {
-                "language": "python",
-                "task_name": "strict_copy_trap",
-                "plan": [], # Этот шаблон заточен под режим strict_copy
-                "structural_checks": {},
+                # Тесты запускаются в Node.js среде (нужен мок fs)
                 "tests": [
-                    "assert ugly_math(2, 3) == 13"
-                ],
-                # Код специально написан не по PEP8 (разные отступы, комментарии в странных местах, лишние скобки).
-                # Умные модели часто пытаются "починить" форматирование. Мы проверяем, умеют ли они слушать команду "копируй строго".
-                "expected_code": (
-                    "def ugly_math( a,b ):\n"
-                    "  # some weird comment\n"
-                    "    res = ( a * 2 )+   (b * 3)\n"
-                    "    return   res\n"
-                    "print(ugly_math( 2, 3 ))"
-                )
+                    "// Mocking fs for test\n"
+                    "const fs = require('fs');\n"
+                    "const fsPromises = fs.promises;\n"
+                    "const originalReadFile = fsPromises.readFile;\n"
+                    "fsPromises.readFile = (path, enc) => {\n"
+                    "    return new Promise((res, rej) => {\n"
+                    "        if (path === 'good.json') res('{\"ok\": true}');\n"
+                    "        else rej(new Error('File not found'));\n"
+                    "    });\n"
+                    "};\n\n"
+                    "// Test\n"
+                    "async function run() {\n"
+                    "    const data = await readConfigAsync('good.json');\n"
+                    "    if (data.ok !== true) throw new Error('Parse failed');\n"
+                    "    try {\n"
+                    "        await readConfigAsync('bad.json');\n"
+                    "        throw new Error('Should throw');\n"
+                    "    } catch(e) {\n"
+                    "        if (e.message !== 'File not found') throw e;\n"
+                    "    }\n"
+                    "    console.log('SUCCESS_ALL_TESTS');\n"
+                    "}\n"
+                    "run();"
+                ]
             }
         ]
 
@@ -223,14 +215,11 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
         task = random.choice(self.templates)
         language = task["language"]
 
-        # ЕСЛИ ЭТО ЛОВУШКА ДЛЯ КОПИРОВАНИЯ - ЖЕСТКО ЗАДАЕМ РЕЖИМ
-        if task["task_name"] == "strict_copy_trap":
-            mode = "strict_copy"
+        # Режим может быть жестко задан в шаблоне (diff_apply) или выбран случайно
+        if "mode" in task:
+            mode = task["mode"]
         else:
-            available_modes = ["strict_copy", "plan_following"]
-            if language in self.EXECUTABLE_LANGUAGES and len(task["tests"]) > 0:
-                available_modes.append("functional")
-            mode = random.choice(available_modes)
+            mode = random.choice(["semantic_refactor", "functional"])
 
         prompt = self._build_prompt(task, mode)
 
@@ -246,29 +235,31 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
 
     def _build_prompt(self, task: Dict[str, Any], mode: str) -> str:
         lang = task["language"]
-        base = f"Ты опытный разработчик. Напиши код на {lang.capitalize()}.\n"
-        base += "Верни ТОЛЬКО код в markdown-блоке. Без рассуждений, введений и пояснений.\n\n"
 
-        if mode == "strict_copy":
-            return base + (
-                "Твоя задача — скопировать этот код СТРОГО СИМВОЛ В СИМВОЛ (включая все отступы и названия):\n\n"
-                f"```{lang}\n{task['expected_code']}\n```"
+        if mode == "diff_apply":
+            return (
+                f"Ты — система автоматического патчинга. Твоя задача — ТОЧНО применить Unified Diff к коду.\n"
+                f"Верни ИТОГОВЫЙ КОД целиком. Не объясняй ничего.\n\n"
+                f"Файл: {lang}\n"
+                f"```{lang}\n{task['original_code']}\n```\n\n"
+                f"Патч для применения:\n"
+                f"```diff\n{task['unified_diff']}\n```\n\n"
+                f"Выведи только итоговый код в markdown блоке."
             )
-        elif mode == "plan_following":
-            plan_str = "\n".join(f"{i+1}. {step}" for i, step in enumerate(task["plan"]))
-            return base + (
-                "Твоя задача — написать код строго по следующему плану:\n"
+
+        elif mode == "semantic_refactor":
+            plan_str = "\n".join(f"- {step}" for step in task["refactor_plan"])
+            return (
+                f"Задача: {task['description']}.\n"
+                f"Язык: {lang}.\n\n"
+                f"Legacy код:\n"
+                f"```{lang}\n{task['legacy_code']}\n```\n\n"
+                f"Требования к рефакторингу:\n"
                 f"{plan_str}\n\n"
-                "Соблюдай точные имена из плана."
+                f"Важно: Код должен остаться рабочим. Выведи только обновленный код."
             )
-        elif mode == "functional":
-            plan_str = "\n".join(f"- {step}" for step in task["plan"])
-            return base + (
-                "Твоя задача — написать рабочий алгоритм.\n"
-                f"Требования к логике:\n{plan_str}\n\n"
-                "Твой код будет запущен и протестирован автоматическими юнит-тестами. "
-                "Точное форматирование не важно, главное — чтобы код работал без ошибок и возвращал верный результат."
-            )
+
+        return "Неподдерживаемый режим."
 
     # ==================== ФАЗА 2: ВЕРИФИКАЦИЯ ====================
 
@@ -280,37 +271,39 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
         lang = expected_output["language"]
         task = expected_output["task"]
 
-        # 1. Извлекаем код
         code = self._extract_code(llm_output, lang)
         if not code:
             return {"is_correct": False, "details": {"error": "Блок кода не найден", "raw_output": llm_output[:200]}}
 
-        # 2. Делегируем проверку в зависимости от режима
         try:
-            if mode == "strict_copy":
-                return self._verify_strict(code, task["expected_code"])
-            elif mode == "plan_following":
-                return self._verify_plan(code, task["structural_checks"])
-            elif mode == "functional":
+            if mode == "diff_apply":
+                return self._verify_diff_apply(code, task)
+            elif mode == "semantic_refactor":
+                struct_res = self._verify_plan(code, task.get("constraints", task.get("structural_checks", {})))
+                if not struct_res["is_correct"]:
+                    return struct_res
                 return self._verify_functional(code, lang, task["tests"])
-        except Exception as e:
-            return {"is_correct": False, "details": {"error": f"Ошибка верификации: {str(e)}"}}
+            elif mode == "strict_copy":
+                return self._verify_strict(code, task["expected_code"])
 
-    # --- МЕТОДЫ ИЗВЛЕЧЕНИЯ КОДА ---
+        except Exception as e:
+            log.exception("Verification error")
+            return {"is_correct": False, "details": {"error": f"Critical error: {str(e)}"}}
+
+    # --- МЕТОДЫ ИЗВЛЕЧЕНИЯ КОДА (ВОССТАНОВЛЕНО) ---
 
     def _extract_code(self, raw: str, lang: str) -> str:
         """Извлекает код, спасая его от агрессивной базовой очистки Markdown."""
 
-        # Для Kotlin оставляем вашу логику
+        # Для Kotlin оставляем специфичную логику
         if lang == "kotlin":
             success, code, _ = self._extract_kotlin_code(raw)
             return code if success else ""
 
-        # 1. Удаляем <think> блоки, чтобы не захватить код из размышлений модели
-        text_no_think = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL | re.IGNORECASE)
+        # 1. Удаляем  холимы блоки (thoughts)
+        text_no_think = re.sub(r' холимы.*? холимы>', '', raw, flags=re.DOTALL | re.IGNORECASE)
 
-        # 2. Ищем код в Markdown-блоках ДО применения базовой очистки!
-        # Регулярка захватывает ```python, ```javascript, ```js и т.д.
+        # 2. Ищем код в Markdown-блоках ДО применения базовой очистки
         pattern = r"```[a-zA-Z]*\n(.*?)```"
         match = re.search(pattern, text_no_think, flags=re.DOTALL | re.IGNORECASE)
 
@@ -325,10 +318,30 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
 
         return cleaned.strip()
 
+    def _extract_kotlin_code(self, raw: str) -> Tuple[bool, str, str]:
+        """
+        Специфичное извлечение Kotlin кода.
+        Возвращает кортеж (success, code, error_message).
+        """
+        # Сначала пробуем стандартный markdown
+        pattern = r"```(?:kotlin|kt)\s*\n(.*?)```"
+        match = re.search(pattern, raw, re.DOTALL | re.IGNORECASE)
+        if match:
+            return True, match.group(1).strip(), ""
+
+        # Если нет блока, пробуем найти код по признакам Kotlin
+        # (упрощенная логика, можно расширить)
+        if "fun main" in raw or "class " in raw:
+            # Пробуем очистить просто текст
+            cleaned = self._cleanup_llm_response(raw)
+            return True, cleaned, ""
+
+        return False, "", "Kotlin code block not found"
+
     # --- МЕТОДЫ ПРОВЕРОК ---
 
     def _verify_strict(self, actual_code: str, expected_code: str) -> Dict[str, Any]:
-        """Режим 1: Строгое сравнение строк (с нормализацией пробелов в конце строк)."""
+        """Режим 1: Строгое сравнение строк."""
         def normalize(c: str) -> str:
             return "\n".join(line.rstrip() for line in c.splitlines() if line.strip())
 
@@ -340,43 +353,73 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
 
         if not is_correct:
             diff = list(difflib.unified_diff(exp.splitlines(), act.splitlines(), lineterm=""))
-            details["diff"] = "\n".join(diff[:20]) # Ограничиваем размер диффа
+            details["diff"] = "\n".join(diff[:20])
 
         return {"is_correct": is_correct, "details": details}
 
-    def _verify_plan(self, code: str, checks: Dict[str, Any]) -> Dict[str, Any]:
-        """Режим 2: Проверка по чек-листу (структурный анализ / Regex)."""
-        missing = []
+    def _verify_diff_apply(self, actual_code: str, task: Dict[str, Any]) -> Dict[str, Any]:
+        """Проверка применения патча."""
+        expected = task["expected_code"]
 
-        # Проверяем функции
-        for func in checks.get("functions", []):
-            if not re.search(rf"\b{func}\b", code):
-                missing.append(f"Функция/Метод '{func}'")
+        def normalize(c: str) -> str:
+            return "\n".join(line.rstrip() for line in c.strip().splitlines())
 
-        # Проверяем классы
-        for cls in checks.get("classes", []):
-            if not re.search(rf"\bclass\s+{cls}\b", code):
-                missing.append(f"Класс '{cls}'")
+        act_norm = normalize(actual_code)
+        exp_norm = normalize(expected)
 
-        # Проверяем ключевые слова
-        for kw in checks.get("keywords", []):
-            if kw not in code:
-                missing.append(f"Ключевой элемент '{kw}'")
+        if act_norm == exp_norm:
+            return {"is_correct": True, "details": {"mode": "diff_apply", "match": "exact"}}
 
-        is_correct = len(missing) == 0
+        diff = list(difflib.unified_diff(exp_norm.splitlines(), act_norm.splitlines(), lineterm=""))
         return {
-            "is_correct": is_correct,
+            "is_correct": False,
             "details": {
-                "mode": "plan_following",
-                "missing_elements": missing,
-                "found_all": is_correct
+                "mode": "diff_apply",
+                "error": "Result code differs from expected patch result",
+                "diff_preview": "\n".join(diff[:30])
             }
+        }
+
+    def _verify_plan(self, code: str, checks: Dict[str, Any]) -> Dict[str, Any]:
+        """Расширенная проверка структуры с поддержкой forbidden_patterns."""
+        errors = []
+
+        # 1. Проверка обязательных элементов
+        for key in checks.get("keywords", []):
+            # Если ключевое слово - это точка (например, fs.promises), ищем как есть
+            # Если слово простое, добавляем границы слова \b (для Python/JS)
+            if "." in key or "(" in key:
+                if key not in code:
+                    errors.append(f"Не найден обязательный элемент: '{key}'")
+            else:
+                # Используем регулярку для поиска целых слов (чтобы 'db' не находилось в 'db_conn')
+                if not re.search(rf"\b{re.escape(key)}\b", code):
+                    errors.append(f"Не найден обязательный элемент: '{key}'")
+
+        # 2. Проверка запрещенных паттернов
+        for pattern in checks.get("forbidden_patterns", []):
+            # ВАЖНО: Используем поиск целых слов или более строгие регулярки
+            # Добавляем \b вокруг паттерна, чтобы 'db_connection = ' не срабатывало на '_db_connection = '
+            # Исключение: если паттерн содержит спецсимволы, берем как есть
+            if re.search(rf"\b{pattern}\b", code):
+                errors.append(f"Найден запрещенный паттерн (Legacy): '{pattern}'")
+
+        # 3. Проверка классов (оставляем как есть)
+        for cls in checks.get("required_classes", []):
+            if not re.search(rf"\bclass\s+{cls}\b", code):
+                errors.append(f"Не найден класс: {cls}")
+
+        return {
+            "is_correct": len(errors) == 0,
+            "details": {"errors": errors}
         }
 
     # --- ФУНКЦИОНАЛЬНОЕ ВЫПОЛНЕНИЕ КОДА ---
 
     def _verify_functional(self, code: str, lang: str, tests: List[str]) -> Dict[str, Any]:
-        """Режим 3: Реальный запуск кода с тестами."""
+        if not tests:
+            return {"is_correct": True, "details": {"warning": "Тесты отсутствуют"}}
+
         if lang == "python":
             return self._run_python(code, tests)
         elif lang == "kotlin":
@@ -384,21 +427,17 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
         elif lang == "javascript":
             return self._run_javascript(code, tests)
 
-        return {"is_correct": False, "details": {"error": f"Функциональные тесты для {lang} не поддержаны"}}
+        return {"is_correct": False, "details": {"error": f"Runner for {lang} not implemented"}}
 
     def _run_python(self, code: str, tests: List[str]) -> Dict[str, Any]:
-        """Запускает Python-код через exec() с единым скоупом."""
-        scope = {}  # <- Один словарь для globals и locals!
+        scope = {}
         try:
-            # Запускаем код модели
             exec(code, scope)
         except Exception as e:
             return {"is_correct": False, "details": {"mode": "functional", "error": f"Синтаксическая ошибка: {e}"}}
 
-        # Запускаем тесты
         for test in tests:
             try:
-                # ВАЖНО: передаем scope один раз (он будет работать и как globals, и как locals)
                 exec(test, scope)
             except AssertionError:
                 return {"is_correct": False,
@@ -410,12 +449,10 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
         return {"is_correct": True, "details": {"mode": "functional", "status": "Все тесты пройдены"}}
 
     def _run_kotlin(self, code: str, tests: List[str]) -> Dict[str, Any]:
-        """Запускает Kotlin через ваш JVMRunner."""
-        # Оборачиваем тесты в функцию main, если модель ее не написала
         test_block = "\n".join(tests)
         full_code = f"{code}\n\nfun main() {{\n{test_block}\nprintln(\"SUCCESS_ALL_TESTS\")\n}}"
 
-        # Используем ваш метод из базового класса!
+        # Используем метод базового класса
         result = self.execute_kotlin_code(full_code)
 
         if not result.get("success"):
@@ -431,7 +468,6 @@ class CodeWriteDynamicTestGenerator(AbstractTestGenerator):
             return {"is_correct": False, "details": {"mode": "functional", "error": "Assertion Failed", "output": output}}
 
     def _run_javascript(self, code: str, tests: List[str]) -> Dict[str, Any]:
-        """Запускает JS через встроенный Node.js."""
         test_block = "\n".join(tests)
         full_code = f"{code}\n\n// Tests\n{test_block}\nconsole.log('SUCCESS_ALL_TESTS');"
 
