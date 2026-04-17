@@ -1,0 +1,1272 @@
+[
+    {
+        "test_id": "t01_simple_logic_1",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Григорий выше Дмитрий.\n- Ирина выше Григорий.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Grigory is taller than Dmitry (Григорий > Дмитрий).\n        2.  Irina is taller than Grigory (Ирина > Григорий).\n    *   Question: Who is the tallest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Grigory > Dmitry.\n    *   From condition 2: Irina > Grigory.\n    *   Combining them: Irina > Grigory > Dmitry.\n    *   Therefore, Irina is the tallest.\n\n3.  **Format the Output:**\n    *   The user requested ONLY the name (in Russian, matching the input).\n    *   Name: Ирина.\n\n4.  **Final Check:**\n    *   Does it contain explanations? No.\n    *   Is it just the name? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** \"Ирина\"\n\n6.  **Output Generation.**",
+        "llm_response": "Ирина",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Grigory is taller than Dmitry (Григорий > Дмитрий).\n        2.  Irina is taller than Grigory (Ирина > Григорий).\n    *   Question: Who is the tallest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Grigory > Dmitry.\n    *   From condition 2: Irina > Grigory.\n    *   Combining them: Irina > Grigory > Dmitry.\n    *   Therefore, Irina is the tallest.\n\n3.  **Format the Output:**\n    *   The user requested ONLY the name (in Russian, matching the input).\n    *   Name: Ирина.\n\n4.  **Final Check:**\n    *   Does it contain explanations? No.\n    *   Is it just the name? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** \"Ирина\"\n\n6.  **Output Generation.**",
+        "parsed_answer": "Ирина",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Grigory is taller than Dmitry (Григорий > Дмитрий).\n        2.  Irina is taller than Grigory (Ирина > Григорий).\n    *   Question: Who is the tallest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Grigory > Dmitry.\n    *   From condition 2: Irina > Grigory.\n    *   Combining them: Irina > Grigory > Dmitry.\n    *   Therefore, Irina is the tallest.\n\n3.  **Format the Output:**\n    *   The user requested ONLY the name (in Russian, matching the input).\n    *   Name: Ирина.\n\n4.  **Final Check:**\n    *   Does it contain explanations? No.\n    *   Is it just the name? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** \"Ирина\"\n\n6.  **Output Generation.**</think>\nИрина",
+        "expected_output": {
+            "correct": "Ирина",
+            "incorrect": [
+                "Григорий",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 6771.561399975326,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Ирина",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Ирина"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278129,
+            "id": "chatcmpl-anfea18kyobfs2rna9bltn",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 231,
+            "prompt_eval_count": 53,
+            "total_duration": 6770412100,
+            "prompt_eval_duration": 1015904399,
+            "eval_duration": 5754507700,
+            "load_duration": 0,
+            "total_latency_ms": 6771.561399975326,
+            "time_to_first_token_ms": 1015.9,
+            "peak_ram_increment_mb": 0.265625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278136.7190037
+    },
+    {
+        "test_id": "t01_simple_logic_2",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор быстрее Григорий.\n- Наталья быстрее Виктор.\n\nВопрос: Кто из них самый быстрый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Victor is faster than Grigory (Виктор быстрее Григорий).\n        2.  Natalia is faster than Victor (Наталья быстрее Виктор).\n    *   Question: Who is the fastest?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Condition 1: V > G (V = Victor, G = Grigory) in terms of speed.\n    *   Condition 2: N > V (N = Natalia, V = Victor) in terms of speed.\n    *   Chain: N > V > G.\n    *   Conclusion: Natalia is the fastest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Наталья\".\n    *   Exclusions: No punctuation (unless part of the name), no periods, no explanations like \"The answer is...\".\n\n4.  **Final Check:**\n    *   Does it meet the \"ONLY name\" constraint? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Draft Answer:** Наталья\n\n6.  **Refine for strict adherence:** Just the word.\n\nAnswer: Наталья",
+        "llm_response": "Наталья",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Victor is faster than Grigory (Виктор быстрее Григорий).\n        2.  Natalia is faster than Victor (Наталья быстрее Виктор).\n    *   Question: Who is the fastest?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Condition 1: V > G (V = Victor, G = Grigory) in terms of speed.\n    *   Condition 2: N > V (N = Natalia, V = Victor) in terms of speed.\n    *   Chain: N > V > G.\n    *   Conclusion: Natalia is the fastest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Наталья\".\n    *   Exclusions: No punctuation (unless part of the name), no periods, no explanations like \"The answer is...\".\n\n4.  **Final Check:**\n    *   Does it meet the \"ONLY name\" constraint? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Draft Answer:** Наталья\n\n6.  **Refine for strict adherence:** Just the word.\n\nAnswer: Наталья",
+        "parsed_answer": "Наталья",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Victor is faster than Grigory (Виктор быстрее Григорий).\n        2.  Natalia is faster than Victor (Наталья быстрее Виктор).\n    *   Question: Who is the fastest?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Condition 1: V > G (V = Victor, G = Grigory) in terms of speed.\n    *   Condition 2: N > V (N = Natalia, V = Victor) in terms of speed.\n    *   Chain: N > V > G.\n    *   Conclusion: Natalia is the fastest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Наталья\".\n    *   Exclusions: No punctuation (unless part of the name), no periods, no explanations like \"The answer is...\".\n\n4.  **Final Check:**\n    *   Does it meet the \"ONLY name\" constraint? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Draft Answer:** Наталья\n\n6.  **Refine for strict adherence:** Just the word.\n\nAnswer: Наталья</think>\nНаталья",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Виктор",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 7489.824399992358,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Наталья"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278136,
+            "id": "chatcmpl-xm09gumpjckj9aekkmxjg",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 276,
+            "prompt_eval_count": 54,
+            "total_duration": 7489190099,
+            "prompt_eval_duration": 892669799,
+            "eval_duration": 6596520300,
+            "load_duration": 0,
+            "total_latency_ms": 7489.824399992358,
+            "time_to_first_token_ms": 892.67,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278144.2504451
+    },
+    {
+        "test_id": "t01_simple_logic_3",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария сильнее Дмитрий.\n- Жанна сильнее Мария.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Maria is stronger than Dmitry (Мария > Дмитрий).\n        2.  Zhanna is stronger than Maria (Жанна > Мария).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Maria > Dmitry.\n    *   From condition 2: Zhanna > Maria.\n    *   Combining them: Zhanna > Maria > Dmitry.\n    *   Therefore, Zhanna is the strongest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Жанна\".\n    *   No punctuation, no extra words, no explanations.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\" (ONLY name)? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** Жанна.cw",
+        "llm_response": "Жанна",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Maria is stronger than Dmitry (Мария > Дмитрий).\n        2.  Zhanna is stronger than Maria (Жанна > Мария).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Maria > Dmitry.\n    *   From condition 2: Zhanna > Maria.\n    *   Combining them: Zhanna > Maria > Dmitry.\n    *   Therefore, Zhanna is the strongest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Жанна\".\n    *   No punctuation, no extra words, no explanations.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\" (ONLY name)? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** Жанна.cw",
+        "parsed_answer": "Жанна",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Maria is stronger than Dmitry (Мария > Дмитрий).\n        2.  Zhanna is stronger than Maria (Жанна > Мария).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Maria > Dmitry.\n    *   From condition 2: Zhanna > Maria.\n    *   Combining them: Zhanna > Maria > Dmitry.\n    *   Therefore, Zhanna is the strongest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Жанна\".\n    *   No punctuation, no extra words, no explanations.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\" (ONLY name)? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** Жанна.cw</think>\nЖанна",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Мария",
+                "Дмитрий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 6380.822999984957,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанна"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278144,
+            "id": "chatcmpl-s1bzpsjbbk1kjex2uufpdi",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 239,
+            "prompt_eval_count": 53,
+            "total_duration": 6380079000,
+            "prompt_eval_duration": 808198900,
+            "eval_duration": 5571880100,
+            "load_duration": 0,
+            "total_latency_ms": 6380.822999984957,
+            "time_to_first_token_ms": 808.2,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278150.6752903
+    },
+    {
+        "test_id": "t01_simple_logic_4",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Алексей выше Григорий.\n- Мария выше Алексей.\n\nВопрос: Кто из них самый высокий?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Alexey is taller than Grigory (Алексей выше Григорий).\n        2.  Maria is taller than Alexey (Мария выше Алексей).\n    *   Question: Who is the tallest?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Let $H$ denote height.\n    *   Condition 1: $H(\\text{Alexey}) > H(\\text{Grigory})$.\n    *   Condition 2: $H(\\text{Maria}) > H(\\text{Alexey})$.\n    *   Chain: $H(\\text{Maria}) > H(\\text{Alexey}) > H(\\text{Grigory})$.\n    *   Conclusion: Maria is the tallest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Мария\".\n    *   Exclusions: No punctuation (unless part of the name), no periods, no explanations like \"The answer is...\".\n\n4.  **Final Check:**\n    *   Does it meet the \"ONLY name\" constraint? Yes.\n    *   Is the logic correct? Yes.\n    *   Is the language correct? Yes.\n\n5.  **Draft Answer:** Мария\n\n6.  **Refine:** Just \"Мария\".\n\n7.  **Final Output Generation:** Мария",
+        "llm_response": "Мария",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Alexey is taller than Grigory (Алексей выше Григорий).\n        2.  Maria is taller than Alexey (Мария выше Алексей).\n    *   Question: Who is the tallest?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Let $H$ denote height.\n    *   Condition 1: $H(\\text{Alexey}) > H(\\text{Grigory})$.\n    *   Condition 2: $H(\\text{Maria}) > H(\\text{Alexey})$.\n    *   Chain: $H(\\text{Maria}) > H(\\text{Alexey}) > H(\\text{Grigory})$.\n    *   Conclusion: Maria is the tallest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Мария\".\n    *   Exclusions: No punctuation (unless part of the name), no periods, no explanations like \"The answer is...\".\n\n4.  **Final Check:**\n    *   Does it meet the \"ONLY name\" constraint? Yes.\n    *   Is the logic correct? Yes.\n    *   Is the language correct? Yes.\n\n5.  **Draft Answer:** Мария\n\n6.  **Refine:** Just \"Мария\".\n\n7.  **Final Output Generation:** Мария",
+        "parsed_answer": "Мария",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Alexey is taller than Grigory (Алексей выше Григорий).\n        2.  Maria is taller than Alexey (Мария выше Алексей).\n    *   Question: Who is the tallest?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Let $H$ denote height.\n    *   Condition 1: $H(\\text{Alexey}) > H(\\text{Grigory})$.\n    *   Condition 2: $H(\\text{Maria}) > H(\\text{Alexey})$.\n    *   Chain: $H(\\text{Maria}) > H(\\text{Alexey}) > H(\\text{Grigory})$.\n    *   Conclusion: Maria is the tallest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Мария\".\n    *   Exclusions: No punctuation (unless part of the name), no periods, no explanations like \"The answer is...\".\n\n4.  **Final Check:**\n    *   Does it meet the \"ONLY name\" constraint? Yes.\n    *   Is the logic correct? Yes.\n    *   Is the language correct? Yes.\n\n5.  **Draft Answer:** Мария\n\n6.  **Refine:** Just \"Мария\".\n\n7.  **Final Output Generation:** Мария</think>\nМария",
+        "expected_output": {
+            "correct": "Мария",
+            "incorrect": [
+                "Алексей",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 8418.957600020804,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Мария",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Мария"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278150,
+            "id": "chatcmpl-kejtsbjvx3hhwocx62utfc",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 295,
+            "prompt_eval_count": 52,
+            "total_duration": 8418393300,
+            "prompt_eval_duration": 810708700,
+            "eval_duration": 7607684599,
+            "load_duration": 0,
+            "total_latency_ms": 8418.957600020804,
+            "time_to_first_token_ms": 810.71,
+            "peak_ram_increment_mb": 0.03125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278159.1337655
+    },
+    {
+        "test_id": "t01_simple_logic_5",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Ирина сильнее Григорий.\n- Григорий сильнее Жанна.\n\nВопрос: Кто из них самый слабый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Irina is stronger than Grigory (Ирина > Григорий).\n        2.  Grigory is stronger than Zhanna (Григорий > Жанна).\n    *   Question: Who is the weakest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Irina > Grigory.\n    *   From condition 2: Grigory > Zhanna.\n    *   Combining them: Irina > Grigory > Zhanna.\n    *   The weakest person is the one at the bottom of the strength hierarchy.\n    *   That is Zhanna (Жанна).\n\n3.  **Format Check:**\n    *   Must be ONLY the name.\n    *   Language: Russian (matching the prompt).\n    *   Name: Жанна.\n\n4.  **Final Output Construction:**\n    *   \"Жанна\"\n\n5.  **Review against constraints:**\n    *   Only name? Yes.\n    *   No explanations? Yes.\n    *   Correct answer? Yes.\n\n6.  **Final Decision:** Жанна.cw",
+        "llm_response": "Жанна",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Irina is stronger than Grigory (Ирина > Григорий).\n        2.  Grigory is stronger than Zhanna (Григорий > Жанна).\n    *   Question: Who is the weakest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Irina > Grigory.\n    *   From condition 2: Grigory > Zhanna.\n    *   Combining them: Irina > Grigory > Zhanna.\n    *   The weakest person is the one at the bottom of the strength hierarchy.\n    *   That is Zhanna (Жанна).\n\n3.  **Format Check:**\n    *   Must be ONLY the name.\n    *   Language: Russian (matching the prompt).\n    *   Name: Жанна.\n\n4.  **Final Output Construction:**\n    *   \"Жанна\"\n\n5.  **Review against constraints:**\n    *   Only name? Yes.\n    *   No explanations? Yes.\n    *   Correct answer? Yes.\n\n6.  **Final Decision:** Жанна.cw",
+        "parsed_answer": "Жанна",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Irina is stronger than Grigory (Ирина > Григорий).\n        2.  Grigory is stronger than Zhanna (Григорий > Жанна).\n    *   Question: Who is the weakest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Irina > Grigory.\n    *   From condition 2: Grigory > Zhanna.\n    *   Combining them: Irina > Grigory > Zhanna.\n    *   The weakest person is the one at the bottom of the strength hierarchy.\n    *   That is Zhanna (Жанна).\n\n3.  **Format Check:**\n    *   Must be ONLY the name.\n    *   Language: Russian (matching the prompt).\n    *   Name: Жанна.\n\n4.  **Final Output Construction:**\n    *   \"Жанна\"\n\n5.  **Review against constraints:**\n    *   Only name? Yes.\n    *   No explanations? Yes.\n    *   Correct answer? Yes.\n\n6.  **Final Decision:** Жанна.cw</think>\nЖанна",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Ирина",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 7370.726199995261,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанна"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278159,
+            "id": "chatcmpl-03s1wsjgbv0ex8hgngig64c",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 250,
+            "prompt_eval_count": 53,
+            "total_duration": 7370118100,
+            "prompt_eval_duration": 805217000,
+            "eval_duration": 6564901100,
+            "load_duration": 0,
+            "total_latency_ms": 7370.726199995261,
+            "time_to_first_token_ms": 805.22,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278166.550326
+    },
+    {
+        "test_id": "t01_simple_logic_6",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Борис старше Григорий.\n- Григорий старше Наталья.\n\nВопрос: Кто из них самый младший?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Boris is older than Grigory (Борис > Григорий).\n        2.  Grigory is older than Natalia (Григорий > Наталья).\n    *   Question: Who is the youngest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Boris > Grigory (in age).\n    *   From condition 2: Grigory > Natalia (in age).\n    *   Combining them: Boris > Grigory > Natalia.\n    *   Therefore, Natalia is the youngest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Наталья\".\n    *   Constraint Check: No punctuation at the end? Usually, a single word is fine. The prompt says \"ТОЛЬКО имя\" (ONLY name).\n\n4.  **Final Decision:** Наталья.\n\n5.  **Review against constraints:**\n    *   Only name? Yes.\n    *   No explanations? Yes.\n    *   Correct answer? Yes.\n\n6.  **Construct Final Output:** Наталья.cw",
+        "llm_response": "Наталья",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Boris is older than Grigory (Борис > Григорий).\n        2.  Grigory is older than Natalia (Григорий > Наталья).\n    *   Question: Who is the youngest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Boris > Grigory (in age).\n    *   From condition 2: Grigory > Natalia (in age).\n    *   Combining them: Boris > Grigory > Natalia.\n    *   Therefore, Natalia is the youngest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Наталья\".\n    *   Constraint Check: No punctuation at the end? Usually, a single word is fine. The prompt says \"ТОЛЬКО имя\" (ONLY name).\n\n4.  **Final Decision:** Наталья.\n\n5.  **Review against constraints:**\n    *   Only name? Yes.\n    *   No explanations? Yes.\n    *   Correct answer? Yes.\n\n6.  **Construct Final Output:** Наталья.cw",
+        "parsed_answer": "Наталья",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Boris is older than Grigory (Борис > Григорий).\n        2.  Grigory is older than Natalia (Григорий > Наталья).\n    *   Question: Who is the youngest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Boris > Grigory (in age).\n    *   From condition 2: Grigory > Natalia (in age).\n    *   Combining them: Boris > Grigory > Natalia.\n    *   Therefore, Natalia is the youngest.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Наталья\".\n    *   Constraint Check: No punctuation at the end? Usually, a single word is fine. The prompt says \"ТОЛЬКО имя\" (ONLY name).\n\n4.  **Final Decision:** Наталья.\n\n5.  **Review against constraints:**\n    *   Only name? Yes.\n    *   No explanations? Yes.\n    *   Correct answer? Yes.\n\n6.  **Construct Final Output:** Наталья.cw</think>\nНаталья",
+        "expected_output": {
+            "correct": "Наталья",
+            "incorrect": [
+                "Борис",
+                "Григорий"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 7203.964999993332,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Наталья",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Наталья"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278166,
+            "id": "chatcmpl-fvfbzp12ii926d8gu9iwlw",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 267,
+            "prompt_eval_count": 54,
+            "total_duration": 7203384699,
+            "prompt_eval_duration": 823019400,
+            "eval_duration": 6380365299,
+            "load_duration": 0,
+            "total_latency_ms": 7203.964999993332,
+            "time_to_first_token_ms": 823.02,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278173.8056645
+    },
+    {
+        "test_id": "t01_simple_logic_7",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Мария быстрее Виктор.\n- Виктор быстрее Дмитрий.\n\nВопрос: Кто из них самый медленный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Maria is faster than Viktor (Maria > Viktor in speed).\n        2.  Viktor is faster than Dmitry (Viktor > Dmitry in speed).\n    *   Question: Who is the slowest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Speed order: Maria > Viktor > Dmitry.\n    *   Fastest: Maria.\n    *   Middle: Viktor.\n    *   Slowest: Dmitry.\n\n3.  **Formulate the Answer:**\n    *   Target name: Дмитрий (Dmitry).\n    *   Constraint check: Only the name, no extra text.\n\n4.  **Final Output Generation:**\n    *   \"Дмитрий\"\n\n5.  **Review against constraints:**\n    *   Is it only the name? Yes.\n    *   Are there explanations? No.\n    *   Is it in Russian (matching the prompt)? Yes.\n\n6.  **Final Decision:** Дмитрий.cw",
+        "llm_response": "Дмитрий",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Maria is faster than Viktor (Maria > Viktor in speed).\n        2.  Viktor is faster than Dmitry (Viktor > Dmitry in speed).\n    *   Question: Who is the slowest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Speed order: Maria > Viktor > Dmitry.\n    *   Fastest: Maria.\n    *   Middle: Viktor.\n    *   Slowest: Dmitry.\n\n3.  **Formulate the Answer:**\n    *   Target name: Дмитрий (Dmitry).\n    *   Constraint check: Only the name, no extra text.\n\n4.  **Final Output Generation:**\n    *   \"Дмитрий\"\n\n5.  **Review against constraints:**\n    *   Is it only the name? Yes.\n    *   Are there explanations? No.\n    *   Is it in Russian (matching the prompt)? Yes.\n\n6.  **Final Decision:** Дмитрий.cw",
+        "parsed_answer": "Дмитрий",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Maria is faster than Viktor (Maria > Viktor in speed).\n        2.  Viktor is faster than Dmitry (Viktor > Dmitry in speed).\n    *   Question: Who is the slowest?\n    *   Constraint: The answer must contain ONLY the name, no explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Speed order: Maria > Viktor > Dmitry.\n    *   Fastest: Maria.\n    *   Middle: Viktor.\n    *   Slowest: Dmitry.\n\n3.  **Formulate the Answer:**\n    *   Target name: Дмитрий (Dmitry).\n    *   Constraint check: Only the name, no extra text.\n\n4.  **Final Output Generation:**\n    *   \"Дмитрий\"\n\n5.  **Review against constraints:**\n    *   Is it only the name? Yes.\n    *   Are there explanations? No.\n    *   Is it in Russian (matching the prompt)? Yes.\n\n6.  **Final Decision:** Дмитрий.cw</think>\nДмитрий",
+        "expected_output": {
+            "correct": "Дмитрий",
+            "incorrect": [
+                "Мария",
+                "Виктор"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 6419.9365000240505,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Дмитрий",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Дмитрий"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278173,
+            "id": "chatcmpl-123bdgxjl4ar81q9qtmijwv",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 232,
+            "prompt_eval_count": 54,
+            "total_duration": 6419252699,
+            "prompt_eval_duration": 803233699,
+            "eval_duration": 5616019000,
+            "load_duration": 0,
+            "total_latency_ms": 6419.9365000240505,
+            "time_to_first_token_ms": 803.23,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278180.2737968
+    },
+    {
+        "test_id": "t01_simple_logic_8",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Виктор сильнее Жанна.\n- Елена сильнее Виктор.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Victor is stronger than Jeanne (Виктор сильнее Жанна).\n        2.  Elena is stronger than Victor (Елена сильнее Виктор).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Let $S(X)$ denote the strength of person X.\n    *   Condition 1: $S(\\text{Victor}) > S(\\text{Jeanne})$.\n    *   Condition 2: $S(\\text{Elena}) > S(\\text{Victor})$.\n    *   Transitive property: If $A > B$ and $B > C$, then $A > C$.\n    *   Combining conditions: $S(\\text{Elena}) > S(\\text{Victor}) > S(\\text{Jeanne})$.\n    *   Therefore, Elena is the strongest.\n\n3.  **Format the Output:**\n    *   The user requested ONLY the name.\n    *   Language: Russian (based on the prompt).\n    *   Name: Елена (Elena).\n\n4.  **Final Check:**\n    *   Does it contain explanations? No.\n    *   Is it just the name? Yes.\n    *   Is the logic correct? Yes, Elena > Victor > Jeanne.\n\n5.  **Construct Final String:** \"Елена\"\n\n6.  **Refine for constraints:** The prompt says \"ТОЛЬКО имя\" (ONLY name). So no punctuation like periods unless part of the name (usually not needed), but keeping it clean is best. Just \"Елена\".\n\n    Wait, checking gender agreement in conditions:\n    - Виктор сильнее Жанна (Victor stronger than Jeanne) -> Grammatically slightly off (\"Жанной\" would be better), but meaning is clear.\n    - Елена сильнее Виктор (Elena stronger than Victor) -> Grammatically slightly off (\"Виктора\" would be better), but meaning is clear.\n    - Logic holds regardless of grammar quirks.\n\n    Result: Елена.cw",
+        "llm_response": "Елена",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Victor is stronger than Jeanne (Виктор сильнее Жанна).\n        2.  Elena is stronger than Victor (Елена сильнее Виктор).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Let $S(X)$ denote the strength of person X.\n    *   Condition 1: $S(\\text{Victor}) > S(\\text{Jeanne})$.\n    *   Condition 2: $S(\\text{Elena}) > S(\\text{Victor})$.\n    *   Transitive property: If $A > B$ and $B > C$, then $A > C$.\n    *   Combining conditions: $S(\\text{Elena}) > S(\\text{Victor}) > S(\\text{Jeanne})$.\n    *   Therefore, Elena is the strongest.\n\n3.  **Format the Output:**\n    *   The user requested ONLY the name.\n    *   Language: Russian (based on the prompt).\n    *   Name: Елена (Elena).\n\n4.  **Final Check:**\n    *   Does it contain explanations? No.\n    *   Is it just the name? Yes.\n    *   Is the logic correct? Yes, Elena > Victor > Jeanne.\n\n5.  **Construct Final String:** \"Елена\"\n\n6.  **Refine for constraints:** The prompt says \"ТОЛЬКО имя\" (ONLY name). So no punctuation like periods unless part of the name (usually not needed), but keeping it clean is best. Just \"Елена\".\n\n    Wait, checking gender agreement in conditions:\n    - Виктор сильнее Жанна (Victor stronger than Jeanne) -> Grammatically slightly off (\"Жанной\" would be better), but meaning is clear.\n    - Елена сильнее Виктор (Elena stronger than Victor) -> Grammatically slightly off (\"Виктора\" would be better), but meaning is clear.\n    - Logic holds regardless of grammar quirks.\n\n    Result: Елена.cw",
+        "parsed_answer": "Елена",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Victor is stronger than Jeanne (Виктор сильнее Жанна).\n        2.  Elena is stronger than Victor (Елена сильнее Виктор).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Analyze the Logic:**\n    *   Let $S(X)$ denote the strength of person X.\n    *   Condition 1: $S(\\text{Victor}) > S(\\text{Jeanne})$.\n    *   Condition 2: $S(\\text{Elena}) > S(\\text{Victor})$.\n    *   Transitive property: If $A > B$ and $B > C$, then $A > C$.\n    *   Combining conditions: $S(\\text{Elena}) > S(\\text{Victor}) > S(\\text{Jeanne})$.\n    *   Therefore, Elena is the strongest.\n\n3.  **Format the Output:**\n    *   The user requested ONLY the name.\n    *   Language: Russian (based on the prompt).\n    *   Name: Елена (Elena).\n\n4.  **Final Check:**\n    *   Does it contain explanations? No.\n    *   Is it just the name? Yes.\n    *   Is the logic correct? Yes, Elena > Victor > Jeanne.\n\n5.  **Construct Final String:** \"Елена\"\n\n6.  **Refine for constraints:** The prompt says \"ТОЛЬКО имя\" (ONLY name). So no punctuation like periods unless part of the name (usually not needed), but keeping it clean is best. Just \"Елена\".\n\n    Wait, checking gender agreement in conditions:\n    - Виктор сильнее Жанна (Victor stronger than Jeanne) -> Grammatically slightly off (\"Жанной\" would be better), but meaning is clear.\n    - Елена сильнее Виктор (Elena stronger than Victor) -> Grammatically slightly off (\"Виктора\" would be better), but meaning is clear.\n    - Logic holds regardless of grammar quirks.\n\n    Result: Елена.cw</think>\nЕлена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Виктор",
+                "Жанна"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 12020.738199993502,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Елена"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278180,
+            "id": "chatcmpl-mnwpd0652qkanan8mhs8ur",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 439,
+            "prompt_eval_count": 53,
+            "total_duration": 12019997700,
+            "prompt_eval_duration": 829435800,
+            "eval_duration": 11190561899,
+            "load_duration": 0,
+            "total_latency_ms": 12020.738199993502,
+            "time_to_first_token_ms": 829.44,
+            "peak_ram_increment_mb": -0.05078125
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278192.3376539
+    },
+    {
+        "test_id": "t01_simple_logic_9",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Елена сильнее Борис.\n- Борис сильнее Мария.\n\nВопрос: Кто из них самый сильный?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical problem.\n    *   Conditions:\n        1.  Elena is stronger than Boris (Елена сильнее Борис).\n        2.  Boris is stronger than Maria (Борис сильнее Мария).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Elena > Boris.\n    *   From condition 2: Boris > Maria.\n    *   Transitive property: If A > B and B > C, then A > C.\n    *   Therefore: Elena > Boris > Maria.\n    *   The strongest is Elena.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Елена\".\n    *   No punctuation, no extra words, no explanations.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\" (ONLY name)? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** Елена.cw",
+        "llm_response": "Елена",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical problem.\n    *   Conditions:\n        1.  Elena is stronger than Boris (Елена сильнее Борис).\n        2.  Boris is stronger than Maria (Борис сильнее Мария).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Elena > Boris.\n    *   From condition 2: Boris > Maria.\n    *   Transitive property: If A > B and B > C, then A > C.\n    *   Therefore: Elena > Boris > Maria.\n    *   The strongest is Elena.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Елена\".\n    *   No punctuation, no extra words, no explanations.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\" (ONLY name)? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** Елена.cw",
+        "parsed_answer": "Елена",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical problem.\n    *   Conditions:\n        1.  Elena is stronger than Boris (Елена сильнее Борис).\n        2.  Boris is stronger than Maria (Борис сильнее Мария).\n    *   Question: Who is the strongest among them?\n    *   Constraint: The answer must contain ONLY the name, without any explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Elena > Boris.\n    *   From condition 2: Boris > Maria.\n    *   Transitive property: If A > B and B > C, then A > C.\n    *   Therefore: Elena > Boris > Maria.\n    *   The strongest is Elena.\n\n3.  **Format the Output:**\n    *   Language: Russian (matching the prompt).\n    *   Content: Only the name \"Елена\".\n    *   No punctuation, no extra words, no explanations.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\" (ONLY name)? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** Елена.cw</think>\nЕлена",
+        "expected_output": {
+            "correct": "Елена",
+            "incorrect": [
+                "Борис",
+                "Мария"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 7055.6036999914795,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Елена",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Елена"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278192,
+            "id": "chatcmpl-yczm1eqzjlfir1pbrsgrr",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 251,
+            "prompt_eval_count": 52,
+            "total_duration": 7054846499,
+            "prompt_eval_duration": 965455900,
+            "eval_duration": 6089390599,
+            "load_duration": 0,
+            "total_latency_ms": 7055.6036999914795,
+            "time_to_first_token_ms": 965.46,
+            "peak_ram_increment_mb": 0.00390625
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278199.462064
+    },
+    {
+        "test_id": "t01_simple_logic_10",
+        "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+        "model_details": {
+            "model_name": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "provider": "OpenAICompatibleClient"
+        },
+        "category": "t01_simple_logic",
+        "prompt": "Реши простую логическую задачу.\n\nУсловия:\n- Жанна быстрее Алексей.\n- Алексей быстрее Наталья.\n\nВопрос: Кто из них самый быстрый?\n\nТвой ответ должен содержать ТОЛЬКО имя, без каких-либо объяснений или рассуждений.",
+        "thinking_response": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Zhanna is faster than Alexey (Жанна > Алексей).\n        2.  Alexey is faster than Natalia (Алексей > Наталья).\n    *   Question: Who is the fastest?\n    *   Constraint: The answer must contain ONLY the name, with no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Zhanna > Alexey.\n    *   From condition 2: Alexey > Natalia.\n    *   Combining them: Zhanna > Alexey > Natalia.\n    *   Therefore, Zhanna is the fastest.\n\n3.  **Format the Output:**\n    *   Name in Russian (as per the input names).\n    *   No extra text, punctuation (except maybe a period if strictly necessary, but \"ONLY name\" suggests just the word), no explanations.\n    *   Target name: Жанна.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\"? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** \"Жанна\"\n\n6.  **Refinement:** The prompt asks for \"ONLY name\". I should output just \"Жанна\".\n\n7.  **Final Output Generation:** Жанна.cw",
+        "llm_response": "Жанна",
+        "thinking_log": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Zhanna is faster than Alexey (Жанна > Алексей).\n        2.  Alexey is faster than Natalia (Алексей > Наталья).\n    *   Question: Who is the fastest?\n    *   Constraint: The answer must contain ONLY the name, with no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Zhanna > Alexey.\n    *   From condition 2: Alexey > Natalia.\n    *   Combining them: Zhanna > Alexey > Natalia.\n    *   Therefore, Zhanna is the fastest.\n\n3.  **Format the Output:**\n    *   Name in Russian (as per the input names).\n    *   No extra text, punctuation (except maybe a period if strictly necessary, but \"ONLY name\" suggests just the word), no explanations.\n    *   Target name: Жанна.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\"? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** \"Жанна\"\n\n6.  **Refinement:** The prompt asks for \"ONLY name\". I should output just \"Жанна\".\n\n7.  **Final Output Generation:** Жанна.cw",
+        "parsed_answer": "Жанна",
+        "raw_llm_output": "<think>Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Solve a simple logical puzzle.\n    *   Conditions:\n        1.  Zhanna is faster than Alexey (Жанна > Алексей).\n        2.  Alexey is faster than Natalia (Алексей > Наталья).\n    *   Question: Who is the fastest?\n    *   Constraint: The answer must contain ONLY the name, with no explanations or reasoning.\n\n2.  **Logical Deduction:**\n    *   From condition 1: Zhanna > Alexey.\n    *   From condition 2: Alexey > Natalia.\n    *   Combining them: Zhanna > Alexey > Natalia.\n    *   Therefore, Zhanna is the fastest.\n\n3.  **Format the Output:**\n    *   Name in Russian (as per the input names).\n    *   No extra text, punctuation (except maybe a period if strictly necessary, but \"ONLY name\" suggests just the word), no explanations.\n    *   Target name: Жанна.\n\n4.  **Final Check:**\n    *   Does it meet the constraint \"ТОЛЬКО имя\"? Yes.\n    *   Is the logic correct? Yes.\n\n5.  **Construct Final String:** \"Жанна\"\n\n6.  **Refinement:** The prompt asks for \"ONLY name\". I should output just \"Жанна\".\n\n7.  **Final Output Generation:** Жанна.cw</think>\nЖанна",
+        "expected_output": {
+            "correct": "Жанна",
+            "incorrect": [
+                "Алексей",
+                "Наталья"
+            ]
+        },
+        "is_correct": true,
+        "execution_time_ms": 7951.260699948762,
+        "verification_details": {
+            "reason": "OK",
+            "expected_name": "Жанна",
+            "found_correct_in_cleaned": true,
+            "found_incorrect_in_cleaned": false,
+            "incorrect_names_found": [],
+            "cleaned_output_snippet": "Жанна"
+        },
+        "performance_metrics": {
+            "model": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "created": 1776278199,
+            "id": "chatcmpl-b7rkz8gyo520fu3z30xaf",
+            "object": "chat.completion.chunk",
+            "system_fingerprint": "qwen3.5-35b-a3b-uncensored-hauhaucs-aggressive",
+            "eval_count": 282,
+            "prompt_eval_count": 54,
+            "total_duration": 7950585799,
+            "prompt_eval_duration": 915717999,
+            "eval_duration": 7034867800,
+            "load_duration": 0,
+            "total_latency_ms": 7951.260699948762,
+            "time_to_first_token_ms": 915.72,
+            "peak_ram_increment_mb": 0.0
+        },
+        "system_info": {
+            "os": {
+                "platform": "Windows",
+                "platform_release": "10",
+                "platform_version": "10.0.19045",
+                "architecture": "AMD64",
+                "hostname": "DESKTOP-BMN5EOL",
+                "processor": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "windows_edition": "Professional",
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "cpu": {
+                "physical_cores": 16,
+                "logical_cores": 32,
+                "processor_name": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD",
+                "max_frequency_mhz": 3401.0,
+                "current_frequency_mhz": 3401.0,
+                "cpu_model": "AMD Ryzen 9 5950X 16-Core Processor"
+            },
+            "memory": {
+                "total_ram_gb": 103.93,
+                "available_ram_gb": 58.1,
+                "used_ram_gb": 45.83,
+                "ram_percentage": 44.1,
+                "total_swap_gb": 15.0,
+                "swap_percentage": 0.5
+            },
+            "gpus": [
+                {
+                    "vendor": "NVIDIA",
+                    "name": "NVIDIA GeForce RTX 5070 Ti",
+                    "index": 0,
+                    "memory_total_gb": 15.92,
+                    "memory_used_gb": 15.28,
+                    "memory_free_gb": 0.64,
+                    "type": "discrete",
+                    "driver_version": "591.74",
+                    "temperature_c": 44
+                }
+            ],
+            "windows_details": {
+                "windows_version": [
+                    "10",
+                    "10.0.19045",
+                    "SP0",
+                    "Multiprocessor Free"
+                ]
+            },
+            "system": {
+                "python_version": "3.10.8",
+                "python_implementation": "CPython",
+                "python_executable": "C:\\Program Files\\Python310\\python.exe",
+                "disk_total_gb": 931.5,
+                "disk_free_gb": 137.52,
+                "disk_used_gb": 793.97
+            },
+            "environment": {
+                "pandas": "2.3.1",
+                "numpy": "2.2.6",
+                "requests": "2.32.4",
+                "psutil": "7.0.0",
+                "json": "2.0.9",
+                "os": "built-in",
+                "sys": "built-in",
+                "torch": "2.11.0+cpu\n\u001b[0m",
+                "tensorflow": "import_failed",
+                "transformers": "5.3.0\n\u001b[0m",
+                "ollama": "import_failed",
+                "pynvml": "import_failed"
+            }
+        },
+        "hardware_tier": "mid_range",
+        "benchmark_timestamp": 1776278207.4632683
+    }
+]
